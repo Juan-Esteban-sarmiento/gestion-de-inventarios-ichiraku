@@ -1,5 +1,12 @@
+@font-face {
+  font-family: 'njnaruto';
+  src: url('../fonts/njnaruto.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 body {
-      font-family: 'Arial', sans-serif;
+      font-family: 'njnaruto';
       background: url('../image/background.png') repeat;
       display: flex;
       justify-content: center;
@@ -7,21 +14,23 @@ body {
     }
 
     .title{
+      font-size: 22px;
       margin-left: 590px;
       color: white;
       background: black;
-      border: 5px solid red;
+      border-right: 2px solid red;
+      border-left: 2px solid red ;
       display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: column;
       flex-wrap: nowrap;
       margin-top: -100px;
-      margin-bottom: -300px;
+      margin-bottom: -308px;
+      padding: 20px;
     }
 
     .container {
-      display: flex;
       width: 80%;
       max-width: 1000px;
       position: relative;
@@ -32,8 +41,8 @@ body {
     .left img {
       position: absolute;
       top: 50px;
-      left: -150px;
-      width: 80%;
+      left: 70px;
+      width: 50%;
       z-index: 10;
       object-fit: cover;
       margin-top: -20px;
@@ -43,10 +52,8 @@ body {
       background: #111;
       color: #fff;
       padding: 50px;
-      position: relative;
       border-radius: 2%;
       border: 2px solid red;
-      height: 70%;
     }
 
     .right h1 {
@@ -57,6 +64,7 @@ body {
     }
 
     .form-group {
+      
       margin-bottom: 15px;
     }
 
@@ -98,6 +106,16 @@ body {
 
     .checkbox input {
       margin-right: 8px;
+      
+      }
+    .checkbox input[type="checkbox"] {
+      accent-color: red;
+    }
+
+    #branch-group select {
+      border: 2px solid red;
+      background-color: black;
+      color: white;
     }
 
     .btn {
@@ -117,8 +135,9 @@ body {
 
     .naruto {
       position: absolute;
-      right: -60px;
-      width: 65%;
+      right: -150px;
+      width: 50%;
+      bottom: -175px;
     }
 
     .logo {
