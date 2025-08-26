@@ -1,0 +1,269 @@
+@font-face {
+  font-family: 'njnaruto';
+  src: url('../fonts/njnaruto.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+      font-family: 'njnaruto';
+      background: url('../image/fondo.png') repeat;
+      display: flex;
+      justify-content: center;
+      height: 67vh;
+    }
+
+    .title{
+    color: white;              /* color del texto */
+    font-size: 30px;            /* tamaño de letra opcional */
+    font-weight: bold;           /* opcional, negrita */
+    text-align: center;          /* centrar el texto */
+    background: none;            /* quitar fondo negro */
+    border: none;                /* quitar bordes rojo */
+    position: relative;
+    left: 90px;
+    }
+
+    .container {
+    width: 1320px;               /* ancho inicial */
+    height: 700px;              /* alto inicial */
+    border: 2px solid red;      /* contorno rojo */
+    border-radius: 15px;        /* bordes redondeados */
+    position: fixed;            /* permite posicionamiento relativo a la ventana */
+    top: 55%;                  
+    left: 59%;                 
+    transform: translate(-50%, -50%); /* centra exactamente */
+    padding: 10px;              /* opcional, espacio interno */
+    background-color: #000000;     /* opcional, color de fondo */
+    }
+
+    .container2 {
+    width: 350px;       
+    height: 100vh;       
+    position: fixed;     
+    top: 0;              
+    left: 0;             
+    margin-top: 0;      
+    background-color: #000000; 
+    border: 2px solid red;
+    }
+
+    .container3 {
+    width: 600px;               
+    height: 600px;
+    border: 2px solid red;     
+    border-radius: 15px;
+    position: fixed;            
+    top: 7%;                  
+    left: 3%; 
+    padding: 10px;              /* opcional, espacio interno */
+    background-color: #000000;
+    }
+
+    .logo img {
+    width: 550px;
+    position: absolute;     /* permite moverlo libremente */
+    top: 60px;              /* posición inicial vertical */
+    left: 700px;             /* posición inicial horizontal */
+    height: auto;           /* mantiene proporción */
+    resize: both;           /* permite cambiar tamaño arrastrando */
+    overflow: auto;         /* necesario para resize */
+    cursor: move;           /* indica que se puede mover */
+    transition: all 0.2s ease; /* transición suave */
+    }
+
+    .logo2 img {
+    width: 110px;          /* ancho de la casita */
+    display: block;
+    position: fixed;
+    top: -10%;                  
+    left: -34%;
+    margin: 20px auto;     /* centra la casita */
+    }
+
+    .casita {
+    width: 11px;          /* ancho de la casita */
+    font-size: 13px;
+    font-weight: bold;           /* opcional, negrita */
+    display: block;
+    position: fixed;
+    top: -5%;                  
+    left: -27%;
+    }
+
+    .logo3 img {
+    width: 55px;          /* ancho de la casita */
+    display: block;
+    position: fixed;
+    top: 3%;                  
+    left: -32%;
+    margin: 20px auto;     /* centra la casita */
+    }
+
+    .folder {
+    width: 11px;          /* ancho de la casita */
+    font-size: 13px;
+    font-weight: bold;           /* opcional, negrita */
+    display: block;
+    position: fixed;
+    top: 5%;                  
+    left: -27%;
+    }
+
+    .logo4 img {
+    width: 50px;          
+    display: block;
+    position: fixed;
+    top: 12%;                  
+    left: -32%;
+    margin: 20px auto;     
+    }
+
+    .base {
+    width: 11px;          
+    font-size: 13px;
+    font-weight: bold;           
+    display: block;
+    position: fixed;
+    top: 15%;                  
+    left: -27%;
+    }
+
+    .logo5 img {
+    width: 50px;          
+    display: block;
+    position: fixed;
+    top: 21%;                  
+    left: -32%;
+    margin: 20px auto;     
+    }
+
+    .grafica {
+    width: 11px;          
+    font-size: 13px;
+    font-weight: bold;           
+    display: block;
+    position: fixed;
+    top: 24%;                  
+    left: -27%;
+    }
+
+   .logo6 img {
+    width: 53px;          
+    display: block;
+    position: fixed;
+    top: 33%;                  
+    left: -32%;
+    margin: 20px auto;     
+    }
+
+    .personas {
+    width: 11px;          
+    font-size: 13px;
+    font-weight: bold;           
+    display: block;
+    position: fixed;
+    top: 33%;                  
+    left: -27%;
+    }
+
+    .logo7 img {
+    width: 53px;          
+    display: block;
+    position: fixed;
+    top: 43%;                  
+    left: -32%;
+    margin: 20px auto;     
+    }
+
+    .campana {
+    width: 11px;          
+    font-size: 13px;
+    font-weight: bold;           
+    display: block;
+    position: fixed;
+    top: 45%;                  
+    left: -27%;
+    }
+
+    .logo8 img {
+    width: 53px;          
+    display: block;
+    position: fixed;
+    top: 65%;                  
+    left: -32%;
+    margin: 20px auto;     
+    }
+
+    .corazon {
+    width: 11px;          
+    font-size: 13px;
+    font-weight: bold;           
+    display: block;
+    position: fixed;
+    top: 67%;                  
+    left: -27%;
+    }
+
+    .linearoja {
+    height: 3px;             /* grosor */
+    background-color: rgb(255, 0, 0);   /* color rojo */
+    width: 19%;             /* ancho total */
+    position: fixed;
+    top: 60%;                  
+    left: -30%;
+    }
+
+    .btn {
+    width: 200px;                /* ancho inicial */
+    height: 50px;                /* alto inicial */
+    background-color: red;       /* color de fondo */
+    color: white;                /* color del texto */
+    border: none;
+    border-radius: 5px;          /* bordes redondeados */
+    font-size: 16px;
+    cursor: grab;                /* indica que se puede arrastrar */
+    position: absolute;          /* para mover libremente */
+    top: 140px;                  /* posición inicial */
+    left: 40px;                 /* posición inicial */
+    transition: all 0.2s ease;  /* transición suave al cambiar tamaño o color */
+    }
+
+    .texto1 {
+    color: white;              
+    font-size: 12px;            
+    font-weight: bold;           
+    text-align: center;          
+    background: none;            
+    border: none;                
+    position: relative;
+    position: absolute;          
+    top: 1px;                
+    left: 30px;  
+    }
+
+    .texto2 {
+    color: white;              
+    font-size: 12px;            
+    font-weight: bold;           
+    text-align: center;          
+    background: none;            
+    border: none;                
+    position: relative;
+    position: absolute;          
+    top: 1px;                
+    left: 500px;  
+    }
+
+    .texto3 {
+    color: white;              
+    font-size: 12px;            
+    font-weight: bold;           
+    text-align: center;          
+    background: none;            
+    border: none;                
+    position: relative;
+    position: absolute;          
+    top: 40px;                
+    left: -500px;  
+    }

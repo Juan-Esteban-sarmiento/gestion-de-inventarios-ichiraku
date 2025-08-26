@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
-# Ruta principal -> login
+"""# Ruta principal -> login
 @app.route('/')
 def index():
     return redirect(url_for('login'))
@@ -20,5 +20,20 @@ def login():
         else:
             return "Usuario o contraseña incorrectos"
     return render_template("login.html")
+if __name__ == '__main__':
+    app.run(debug=True)"""
+
+#Ruta principal -> Administrador Inicio
+@app.route('/')
+def index():
+    return redirect(url_for('Ad_Inicio'))
+
+# Vista Administrador Inicio
+@app.route('/Ad_Inicio', methods=['GET', 'POST'])
+def Ad_Inicio():
+    if request.method == 'POST':
+        return "Acción de administrador ejecutada"
+    return render_template("Ad_Inicio.html")
+
 if __name__ == '__main__':
     app.run(debug=True)
