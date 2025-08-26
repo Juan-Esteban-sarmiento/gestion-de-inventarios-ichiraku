@@ -1,39 +1,75 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, jsonify, render_template, request, redirect, url_for, session
+from flask import make_response
+from db import get_db_connection
 
 app = Flask(__name__)
+app.secret_key = '123456789'  
 
-"""# Ruta principal -> login
 @app.route('/')
 def index():
     return redirect(url_for('login'))
 
-# Vista login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        usuario = request.form['usuario']
-        password = request.form['password']
+        data = request.get_json()
+        usuario = data.get('id')
+        password = data.get('password')
+        role = data.get('role')
+        branch = data.get('branch')
 
-        # Ejemplo simple de validación
-        if usuario == "admin" and password == "1234":
-            return "Bienvenido, has iniciado sesión correctamente"
-        else:
-            return "Usuario o contraseña incorrectos"
+        if role == "Administrador":
+            ADMIN_USER = "admin"
+            ADMIN_PASS = "admin123"
+            if usuario == ADMIN_USER and password == ADMIN_PASS:
+                session['logged_in'] = True
+                session['role'] = 'Administrador'
+                return jsonify({"success": True, "redirect": url_for('Ad_Inicio')})
+            else:
+                return jsonify({"success": False, "msg": "Usuario o contraseña de administrador incorrectos"})
+
+        elif role == "Empleado":
+            if not branch:
+                return jsonify({"success": False, "msg": "Por favor selecciona una sucursal."})
+            conn = get_db_connection()
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute(
+                "SELECT * FROM empleados WHERE Cedula=%s AND Contrasena=%s",
+                (usuario, password)
+            )
+            user = cursor.fetchone()
+            cursor.close()
+            conn.close()
+
+            if user:
+                session['logged_in'] = True
+                session['role'] = 'Empleado'
+                # Aquí puedes poner un redirect diferente si lo necesitas
+                return jsonify({"success": True, "msg": "Bienvenido, has iniciado sesión correctamente"})
+            else:
+                return jsonify({"success": False, "msg": "Usuario o contraseña incorrectos"})
+
     return render_template("login.html")
-if __name__ == '__main__':
-    app.run(debug=True)"""
 
-#Ruta principal -> Administrador Inicio
-@app.route('/')
-def index():
-    return redirect(url_for('Ad_Inicio'))
-
-# Vista Administrador Inicio
 @app.route('/Ad_Inicio', methods=['GET', 'POST'])
 def Ad_Inicio():
+    if not session.get('logged_in') or session.get('role') != 'Administrador':
+        return redirect(url_for('login'))
+    response = make_response(render_template("Ad_Inicio.html"))
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '-1'
+    return response
     if request.method == 'POST':
         return "Acción de administrador ejecutada"
     return render_template("Ad_Inicio.html")
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

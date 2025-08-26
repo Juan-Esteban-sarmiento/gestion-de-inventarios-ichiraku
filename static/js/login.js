@@ -1,18 +1,22 @@
 function login(event) {
-    event.preventDefault(); // evita que el form recargue la página
+    if (event) event.preventDefault();
 
     const id = document.getElementById("id").value;
     const password = document.getElementById("password").value;
     const role = document.getElementById("role").value;
-    const branch = document.getElementById("branch").value;
+    let branch = "";
 
-    if (!id || !password || role === "" || role === "-- Selecciona --") {
+    if (!id || !password || !role || role === "-- Selecciona --") {
         alert("Por favor completa todos los campos.");
         return false;
     }
-    if (role === "Empleado" && !branch) {
-        alert("Por favor selecciona una sucursal.");
-        return false;
+
+    if (role === "Empleado") {
+        branch = document.getElementById("branch").value;
+        if (!branch) {
+            alert("Por favor selecciona una sucursal.");
+            return false;
+        }
     }
 
     fetch("/login", {
@@ -23,15 +27,19 @@ function login(event) {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            alert(data.msg);
-            window.location.href = "/";
+            alert(data.msg || "Inicio de sesión exitoso");
+            if (data.redirect) {
+                window.location.href = data.redirect;
+            } else {
+                window.location.href = "/";
+            }
         } else {
             alert(data.msg);
         }
     })
     .catch(err => console.error(err));
 
-    return false; // evita que el form haga submit normal
+    return false;
 }
 
 function toggleBranch() {
