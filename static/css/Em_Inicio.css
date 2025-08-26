@@ -1,0 +1,348 @@
+@font-face {
+  font-family: 'njnaruto';
+  src: url('../fonts/njnaruto.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+      font-family: 'njnaruto';
+      background: url('../image/fondo.png') repeat;
+      display: flex;
+      justify-content: center;
+      height: 67vh;
+    }
+
+    .title{
+    color: white;              /* color del texto */
+    font-size: 30px;            /* tamaño de letra opcional */
+    font-weight: bold;           /* opcional, negrita */
+    text-align: center;          /* centrar el texto */
+    background: none;            /* quitar fondo negro */
+    border: none;                /* quitar bordes rojo */
+    position: relative;
+    left: 90px;
+    }
+
+    .container {
+    width: 1320px;               /* ancho inicial */
+    height: 700px;              /* alto inicial */
+    border: 2px solid red;      /* contorno rojo */
+    border-radius: 15px;        /* bordes redondeados */
+    position: fixed;            /* permite posicionamiento relativo a la ventana */
+    top: 55%;                  
+    left: 59%;                 
+    transform: translate(-50%, -50%); /* centra exactamente */
+    padding: 10px;              /* opcional, espacio interno */
+    background-color: #000000;     /* opcional, color de fondo */
+    }
+
+    .container2 {
+    width: 350px;       
+    height: 100vh;       
+    position: fixed;     
+    top: 0;              
+    left: 0;             
+    margin-top: 0;      
+    background-color: #000000; 
+    border: 2px solid red;
+    }
+
+    .container3 {
+    width: 600px;               
+    height: 600px;
+    border: 2px solid red;     
+    border-radius: 15px;
+    position: fixed;            
+    top: 7%;                  
+    left: 3%; 
+    padding: 10px;              /* opcional, espacio interno */
+    background-color: #000000;
+    }
+
+    .logo img {
+    width: 550px;
+    position: absolute;     /* permite moverlo libremente */
+    top: 60px;              /* posición inicial vertical */
+    left: 700px;             /* posición inicial horizontal */
+    height: auto;           /* mantiene proporción */
+    resize: both;           /* permite cambiar tamaño arrastrando */
+    overflow: auto;         /* necesario para resize */
+    cursor: move;           /* indica que se puede mover */
+    transition: all 0.2s ease; /* transición suave */
+    }
+
+    .logo2 img {
+    width: 58px;          /* ancho de la casita */
+    height: auto;
+    display: block;
+    position: fixed;
+    top: -8%;                  
+    left: -32%;
+    margin: 20px auto;     /* centra la casita */
+    margin-bottom: 5px;
+    }
+
+    .casita {
+    width: 11px;          /* ancho de la casita */
+    font-size: 13px;
+    font-weight: bold;           /* opcional, negrita */
+    display: block;
+    position: fixed;
+    margin: 0;
+    top: -5%;                  
+    left: -27%;
+    }
+
+    .logo3 img {
+    width: 55px;          /* ancho de la casita */
+    display: block;
+    position: fixed;
+    top: 8%;                  
+    left: -32%;
+    margin: 20px auto;     /* centra la casita */
+    }
+
+    .caja {
+    width: 11px;          /* ancho de la casita */
+    font-size: 13px;
+    font-weight: bold;           /* opcional, negrita */
+    display: block;
+    position: fixed;
+    top: 9%;                  
+    left: -27%;
+    }
+
+    .logo4 img {
+    width: 50px;          
+    display: block;
+    position: fixed;
+    top: 25%;                  
+    left: -32%;
+    margin: 20px auto;     
+    }
+
+    .carrito_super {
+    width: 11px;          
+    font-size: 13px;
+    font-weight: bold;           
+    display: block;
+    position: fixed;
+    top: 25%;                  
+    left: -27%;
+    }
+
+    .logo5 img {
+    width: 50px;          
+    display: block;
+    position: fixed;
+    top: 41%;                  
+    left: -32%;
+    margin: 20px auto;     
+    }
+
+    .reloj {
+    width: 11px;          
+    font-size: 13px;
+    font-weight: bold;           
+    display: block;
+    position: fixed;
+    top: 41%;                  
+    left: -27%;
+    }
+
+    .logo6 img {
+    width: 53px;          
+    display: block;
+    position: fixed;
+    top: 65%;                  
+    left: -32%;
+    margin: 20px auto;     
+    }
+
+    .corazon {
+    width: 11px;          
+    font-size: 13px;
+    font-weight: bold;           
+    display: block;
+    position: fixed;
+    top: 67%;                  
+    left: -27%;
+    }
+
+    .linearoja {
+    height: 3px;             /* grosor */
+    background-color: rgb(255, 0, 0);   /* color rojo */
+    width: 19%;             /* ancho total */
+    position: fixed;
+    top: 60%;                  
+    left: -30%;
+    }
+
+    .btn {
+    width: 200px;                
+    height: 50px;                
+    background-color: red;       
+    color: white;                
+    border: 2px solid transparent;  /* borde para efecto hover */
+    border-radius: 12px;            /* bordes redondeados tipo estiloboton */
+    font-size: 16px;
+    font-family: 'Arial', sans-serif; /* misma tipografía que los otros botones */
+    font-weight: bold;               /* opcional, para coincidir con estiloboton */
+    cursor: pointer;                 
+    position: absolute;              
+    top: 140px;                      
+    left: 40px;                      
+    padding: 10px 20px;             /* para que el contenido quede centrado */
+    transition: border 0.3s, box-shadow 0.3s, background-color 0.3s;
+    }
+
+    .btn:hover {
+    border: 2px solid white;  
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7); /* efecto de iluminación */
+    background-color: #ff4d4d;  /* opcional: fondo un poco más claro al pasar cursor */
+    }
+
+    .texto1 {
+    color: white;              
+    font-size: 12px;            
+    font-weight: bold;           
+    text-align: center;          
+    background: none;            
+    border: none;                
+    position: relative;
+    position: absolute;          
+    top: 1px;                
+    left: 30px;  
+    }
+
+    .texto2 {
+    color: white;              
+    font-size: 12px;            
+    font-weight: bold;           
+    text-align: center;          
+    background: none;            
+    border: none;                
+    position: relative;
+    position: absolute;          
+    top: 1px;                
+    left: 500px;  
+    }
+
+    .texto3 {
+    color: white;              
+    font-size: 12px;            
+    font-weight: bold;           
+    text-align: center;          
+    background: none;            
+    border: none;                
+    position: relative;
+    position: absolute;          
+    top: 40px;                
+    left: -500px;  
+    }
+
+    .estiloboton1 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 34px 130px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     /* permite moverlo libremente */
+    top: -47px;              /* posición inicial vertical */
+    left: -440px;
+    }
+
+    .estiloboton1:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .estiloboton2 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 36px 130px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     /* permite moverlo libremente */
+    top: 70px;              /* posición inicial vertical */
+    left: -440px;
+    }
+
+    .estiloboton2:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .estiloboton3 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 36px 130px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     /* permite moverlo libremente */
+    top: 185px;              /* posición inicial vertical */
+    left: -440px;
+    }
+
+    .estiloboton3:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .estiloboton4 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 36px 130px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     /* permite moverlo libremente */
+    top: 300px;              /* posición inicial vertical */
+    left: -440px;
+    }
+
+    .estiloboton4:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .estiloboton5 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 36px 130px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     
+    top: 477px;              
+    left: -440px;
+    }
+
+    .estiloboton5:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }

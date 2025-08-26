@@ -4,6 +4,13 @@ from db import get_db_connection
 
 app = Flask(__name__)
 app.secret_key = '123456789'  
+from flask import Flask, jsonify, render_template, request, redirect, url_for, session
+from flask import make_response
+from db import get_db_connection
+
+app = Flask(__name__)
+app.secret_key = '123456789'  
+
 
 @app.route('/')
 def index():
@@ -44,7 +51,8 @@ def login():
             if user:
                 session['logged_in'] = True
                 session['role'] = 'Empleado'
-                return jsonify({"success": True, "redirect": url_for('Em_inico')})
+                # Aquí puedes poner un redirect diferente si lo necesitas
+                return jsonify({"success": True, "msg": "Bienvenido, has iniciado sesión correctamente"})
             else:
                 return jsonify({"success": False, "msg": "Usuario o contraseña incorrectos"})
 
@@ -59,21 +67,36 @@ def Ad_Inicio():
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '-1'
     return response
+    if request.method == 'POST':
+        return "Acción de administrador ejecutada"
+    return render_template("Ad_Inicio.html")
 
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('login'))
 
-@app.route('/Em_inico')
-def Em_inico():
-    if not session.get('logged_in') or session.get('role') != 'Empleado':
-        return redirect(url_for('login'))
-    response = make_response(render_template("Em_Inicio.html"))  # <-- Usa el nombre correcto aquí
-    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '-1'
-    return response
+if __name__ == '__main__':
+    app.run(debug=True)
+
+#EMPLEADO INICIO
+@app.route('/')
+def index():
+    return redirect(url_for('Em_Inicio'))
+
+# Vista login
+@app.route('/Em_Inicio', methods=['GET', 'POST'])
+def Em_Inicio():
+    if request.method == 'POST':
+        usuario = request.form['usuario']
+        password = request.form['password']
+
+        # Ejemplo simple de validación
+        if usuario == "admin" and password == "1234":
+            return "✅ Bienvenido, has iniciado sesión correctamente"
+        else:
+            return "❌ Usuario o contraseña incorrectos"
+    return render_template("Em_Inicio.html")
 
 if __name__ == '__main__':
     app.run(debug=True)
