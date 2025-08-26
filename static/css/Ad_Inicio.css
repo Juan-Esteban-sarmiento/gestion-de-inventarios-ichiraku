@@ -73,12 +73,14 @@ body {
     }
 
     .logo2 img {
-    width: 110px;          /* ancho de la casita */
+    width: 58px;          /* ancho de la casita */
+    height: auto;
     display: block;
     position: fixed;
-    top: -10%;                  
-    left: -34%;
+    top: -8%;                  
+    left: -32%;
     margin: 20px auto;     /* centra la casita */
+    margin-bottom: 5px;
     }
 
     .casita {
@@ -87,6 +89,7 @@ body {
     font-weight: bold;           /* opcional, negrita */
     display: block;
     position: fixed;
+    margin: 0;
     top: -5%;                  
     left: -27%;
     }
@@ -266,4 +269,25 @@ body {
     position: absolute;          
     top: 40px;                
     left: -500px;  
+    }
+
+    .estiloboton1 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 40px 150px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     /* permite moverlo libremente */
+    top: -50px;              /* posición inicial vertical */
+    left: -459px;
+    }
+
+    .estiloboton1:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
     }
