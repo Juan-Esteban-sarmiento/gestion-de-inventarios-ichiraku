@@ -117,7 +117,7 @@ body {
     width: 50px;          
     display: block;
     position: fixed;
-    top: 12%;                  
+    top: 13%;                  
     left: -32%;
     margin: 20px auto;     
     }
@@ -136,7 +136,7 @@ body {
     width: 50px;          
     display: block;
     position: fixed;
-    top: 21%;                  
+    top: 24%;                  
     left: -32%;
     margin: 20px auto;     
     }
@@ -147,7 +147,7 @@ body {
     font-weight: bold;           
     display: block;
     position: fixed;
-    top: 24%;                  
+    top: 27%;                  
     left: -27%;
     }
 
@@ -155,7 +155,7 @@ body {
     width: 53px;          
     display: block;
     position: fixed;
-    top: 33%;                  
+    top: 35%;                  
     left: -32%;
     margin: 20px auto;     
     }
@@ -166,7 +166,7 @@ body {
     font-weight: bold;           
     display: block;
     position: fixed;
-    top: 33%;                  
+    top: 35%;                  
     left: -27%;
     }
 
@@ -174,7 +174,7 @@ body {
     width: 53px;          
     display: block;
     position: fixed;
-    top: 43%;                  
+    top: 46%;                  
     left: -32%;
     margin: 20px auto;     
     }
@@ -185,7 +185,7 @@ body {
     font-weight: bold;           
     display: block;
     position: fixed;
-    top: 45%;                  
+    top: 48%;                  
     left: -27%;
     }
 
@@ -218,18 +218,27 @@ body {
     }
 
     .btn {
-    width: 200px;                /* ancho inicial */
-    height: 50px;                /* alto inicial */
-    background-color: red;       /* color de fondo */
-    color: white;                /* color del texto */
-    border: none;
-    border-radius: 5px;          /* bordes redondeados */
+    width: 200px;                
+    height: 50px;                
+    background-color: red;       
+    color: white;                
+    border: 2px solid transparent;  /* borde para efecto hover */
+    border-radius: 12px;            /* bordes redondeados tipo estiloboton */
     font-size: 16px;
-    cursor: grab;                /* indica que se puede arrastrar */
-    position: absolute;          /* para mover libremente */
-    top: 140px;                  /* posición inicial */
-    left: 40px;                 /* posición inicial */
-    transition: all 0.2s ease;  /* transición suave al cambiar tamaño o color */
+    font-family: 'Arial', sans-serif; /* misma tipografía que los otros botones */
+    font-weight: bold;               /* opcional, para coincidir con estiloboton */
+    cursor: pointer;                 
+    position: absolute;              
+    top: 140px;                      
+    left: 40px;                      
+    padding: 10px 20px;             /* para que el contenido quede centrado */
+    transition: border 0.3s, box-shadow 0.3s, background-color 0.3s;
+    }
+
+    .btn:hover {
+    border: 2px solid white;  
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7); /* efecto de iluminación */
+    background-color: #ff4d4d;  /* opcional: fondo un poco más claro al pasar cursor */
     }
 
     .texto1 {
@@ -280,14 +289,140 @@ body {
     background-color: #000000;
     color: white;
     border: 2px solid transparent;
-    padding: 40px 150px;
+    padding: 34px 130px;
     transition: border 0.3s, box-shadow 0.3s;
     position: absolute;     /* permite moverlo libremente */
-    top: -50px;              /* posición inicial vertical */
-    left: -459px;
+    top: -47px;              /* posición inicial vertical */
+    left: -440px;
     }
 
     .estiloboton1:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .estiloboton2 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 36px 130px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     /* permite moverlo libremente */
+    top: 26px;              /* posición inicial vertical */
+    left: -440px;
+    }
+
+    .estiloboton2:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .estiloboton3 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 36px 130px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     /* permite moverlo libremente */
+    top: 104px;              /* posición inicial vertical */
+    left: -440px;
+    }
+
+    .estiloboton3:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .estiloboton4 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 36px 130px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     /* permite moverlo libremente */
+    top: 183px;              /* posición inicial vertical */
+    left: -440px;
+    }
+
+    .estiloboton4:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .estiloboton5 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 36px 130px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     /* permite moverlo libremente */
+    top: 260px;              /* posición inicial vertical */
+    left: -440px;
+    }
+
+    .estiloboton5:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .estiloboton6 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 36px 130px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     /* permite moverlo libremente */
+    top: 338px;              /* posición inicial vertical */
+    left: -440px;
+    }
+
+    .estiloboton6:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .estiloboton7 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 36px 130px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     
+    top: 477px;              
+    left: -440px;
+    }
+
+    .estiloboton7:hover {
     border: 2px solid white;
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
     }
