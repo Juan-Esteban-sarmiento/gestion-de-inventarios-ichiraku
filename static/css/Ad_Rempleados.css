@@ -1,0 +1,613 @@
+@font-face {
+  font-family: 'njnaruto';
+  src: url('../fonts/njnaruto.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+      font-family: 'njnaruto';
+      background: url('../image/fondo.png') repeat;
+      display: flex;
+      justify-content: center;
+      height: 67vh;
+    }
+
+    .title{
+    color: white;              /* color del texto */
+    font-size: 30px;            /* tamaño de letra opcional */
+    font-weight: bold;           /* opcional, negrita */
+    text-align: center;          /* centrar el texto */
+    background: none;            /* quitar fondo negro */
+    border: none;                /* quitar bordes rojo */
+    position: relative;
+    left: 90px;
+    }
+
+    .container {
+    width: 350px;               /* ancho inicial */
+    height: 700px;              /* alto inicial */
+    border: 2px solid red;      /* contorno rojo */
+    border-radius: 15px;        /* bordes redondeados */
+    position: fixed;            /* permite posicionamiento relativo a la ventana */
+    top: 56%;                  
+    left: 80%;                 
+    transform: translate(-50%, -50%); /* centra exactamente */
+    padding: 10px;              /* opcional, espacio interno */
+    background-color: #000000;     /* opcional, color de fondo */
+    }
+
+    .container2 {
+    width: 350px;       
+    height: 100vh;       
+    position: fixed;     
+    top: 0;              
+    left: 0;             
+    margin-top: 0;      
+    background-color: #000000; 
+    border: 2px solid red;
+    }
+
+    .container3 {
+    width: 680px;               
+    height: 650px;
+    border: 2px solid red;     
+    border-radius: 15px;
+    position: fixed;            
+    top: -1%;                  
+    left: -230%; 
+    padding: 10px;              /* opcional, espacio interno */
+    background-color: #000000;
+    }
+
+    .logo img {
+    width: 80px;
+    height: 80px;
+    position: absolute;     /* permite moverlo libremente */
+    top: -135px;              /* posición inicial vertical */
+    left: -1230px;             /* posición inicial horizontal */
+    resize: both;           /* permite cambiar tamaño arrastrando */
+    overflow: auto;         /* necesario para resize */
+    cursor: move;           /* indica que se puede mover */
+    transition: all 0.2s ease; /* transición suave */
+    border-radius: 50%;      /* crea el círculo */
+    object-fit: cover;
+    border: 4px solid white;  
+    }
+
+    .logo2 img {
+    width: 58px;          /* ancho de la casita */
+    height: auto;
+    display: block;
+    position: fixed;
+    top: -8%;                  
+    left: -350%;
+    margin: 20px auto;     /* centra la casita */
+    margin-bottom: 5px;
+    }
+
+    .casita {
+    width: 11px;          /* ancho de la casita */
+    font-size: 13px;
+    font-weight: bold;           /* opcional, negrita */
+    display: block;
+    position: fixed;
+    margin: 0;
+    top: -5%;                  
+    left: -333%;
+    }
+
+    .logo3 img {
+    width: 55px;          /* ancho de la casita */
+    display: block;
+    position: fixed;
+    top: 3%;                  
+    left: -350%;
+    margin: 20px auto;     /* centra la casita */
+    }
+
+    .folder {
+    width: 11px;          /* ancho de la casita */
+    font-size: 13px;
+    font-weight: bold;           /* opcional, negrita */
+    display: block;
+    position: fixed;
+    top: 5%;                  
+    left: -333%;
+    }
+
+    .logo4 img {
+    width: 50px;          
+    display: block;
+    position: fixed;
+    top: 13%;                  
+    left: -350%;
+    margin: 20px auto;     
+    }
+
+    .base {
+    width: 11px;          
+    font-size: 13px;
+    font-weight: bold;           
+    display: block;
+    position: fixed;
+    top: 15%;                  
+    left: -333%;
+    }
+
+    .logo5 img {
+    width: 50px;          
+    display: block;
+    position: fixed;
+    top: 24%;                  
+    left: -350%;
+    margin: 20px auto;     
+    }
+
+    .grafica {
+    width: 11px;          
+    font-size: 13px;
+    font-weight: bold;           
+    display: block;
+    position: fixed;
+    top: 27%;                  
+    left: -333%;
+    }
+
+   .logo6 img {
+    width: 53px;          
+    display: block;
+    position: fixed;
+    top: 35%;                  
+    left: -350%;
+    margin: 20px auto;     
+    }
+
+    .personas {
+    width: 11px;          
+    font-size: 13px;
+    font-weight: bold;           
+    display: block;
+    position: fixed;
+    top: 35%;                  
+    left: -333%;
+    }
+
+    .logo7 img {
+    width: 53px;          
+    display: block;
+    position: fixed;
+    top: 46%;                  
+    left: -350%;
+    margin: 20px auto;     
+    }
+
+    .campana {
+    width: 11px;          
+    font-size: 13px;
+    font-weight: bold;           
+    display: block;
+    position: fixed;
+    top: 48%;                  
+    left: -333%;
+    }
+
+    .logo8 img {
+    width: 53px;          
+    display: block;
+    position: fixed;
+    top: 65%;                  
+    left: -350%;
+    margin: 20px auto;     
+    }
+
+    .corazon {
+    width: 11px;          
+    font-size: 13px;
+    font-weight: bold;           
+    display: block;
+    position: fixed;
+    top: 67%;                  
+    left: -333%;
+    }
+
+    .linearoja {
+    height: 3px;             /* grosor */
+    background-color: rgb(255, 0, 0);   /* color rojo */
+    width: 70%;             /* ancho total */
+    position: fixed;
+    top: 60%;                  
+    left: -350%;
+    }
+
+    .btn {
+    width: 200px;                
+    height: 50px;                
+    background-color: red;       
+    color: white;                
+    border: 2px solid transparent;  /* borde para efecto hover */
+    border-radius: 12px;            /* bordes redondeados tipo estiloboton */
+    font-size: 16px;
+    font-family: 'Arial', sans-serif; /* misma tipografía que los otros botones */
+    font-weight: bold;               /* opcional, para coincidir con estiloboton */
+    cursor: pointer;                 
+    position: absolute;              
+    top: 560px;                      
+    left: -1250px;                      
+    padding: 10px 20px;             /* para que el contenido quede centrado */
+    transition: border 0.3s, box-shadow 0.3s, background-color 0.3s;
+    }
+
+    .btn:hover {
+    border: 2px solid white;  
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7); /* efecto de iluminación */
+    background-color: #ff4d4d;  /* opcional: fondo un poco más claro al pasar cursor */
+    }
+
+    .texto1 {
+    color: white;              
+    font-size: 12px;            
+    font-weight: bold;           
+    text-align: center;          
+    background: none;            
+    border: none;                
+    position: relative;
+    position: absolute;          
+    top: 1px;                
+    left: 30px;  
+    }
+
+    .texto2 {
+    color: white;              
+    font-size: 12px;            
+    font-weight: bold;           
+    text-align: center;          
+    background: none;            
+    border: none;                
+    position: relative;
+    position: absolute;          
+    top: 100px;                
+    left: 10px;  
+    }
+
+    .texto3 {
+    color: white;              
+    font-size: 12px;            
+    font-weight: bold;           
+    text-align: center;          
+    background: none;            
+    border: none;                
+    position: relative;
+    position: absolute;          
+    top: 120px;                
+    left: 10px;  
+    }
+
+    .texto4 {
+    color: white;              
+    font-size: 12px;            
+    font-weight: bold;           
+    text-align: center;          
+    background: none;            
+    border: none;                
+    position: relative;
+    position: absolute;          
+    top: 130px;                
+    left: 5px;  
+    }
+
+    .texto5 {
+    color: white;              
+    font-size: 12px;            
+    font-weight: bold;           
+    text-align: center;          
+    background: none;            
+    border: none;                
+    position: relative;
+    position: absolute;          
+    top: 130px;                
+    left: -30px;  
+    }
+
+    .estiloboton1 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 34px 130px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     /* permite moverlo libremente */
+    top: -47px;              /* posición inicial vertical */
+    left: -1300px;
+    }
+
+    .estiloboton1:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .estiloboton2 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 36px 130px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     /* permite moverlo libremente */
+    top: 26px;              /* posición inicial vertical */
+    left: -1300px;
+    }
+
+    .estiloboton2:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .estiloboton3 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 36px 130px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     /* permite moverlo libremente */
+    top: 104px;              /* posición inicial vertical */
+    left: -1300px;
+    }
+
+    .estiloboton3:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .estiloboton4 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 36px 130px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     /* permite moverlo libremente */
+    top: 183px;              /* posición inicial vertical */
+    left: -1300px;
+    }
+
+    .estiloboton4:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .estiloboton5 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 36px 130px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     /* permite moverlo libremente */
+    top: 260px;              /* posición inicial vertical */
+    left: -1300px;
+    }
+
+    .estiloboton5:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .estiloboton6 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 36px 130px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     /* permite moverlo libremente */
+    top: 338px;              /* posición inicial vertical */
+    left: -1300px;
+    }
+
+    .estiloboton6:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .estiloboton7 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 36px 130px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     
+    top: 477px;              
+    left: -1300px;
+    }
+
+    .estiloboton7:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .mas {
+    width: 11px;          /* ancho de la casita */
+    font-size: 13px;
+    font-weight: bold;           /* opcional, negrita */
+    display: block;
+    position: fixed;
+    margin: 0;
+    top: 5%;                  
+    left: -90%;
+    }
+
+    .logo9 img {
+    width: 50px;          /* ancho de la casita */
+    display: block;
+    position: fixed;
+    top: 3%;                  
+    left: -110%;
+    margin: 20px auto;     /* centra la casita */
+    }
+
+    .estiloboton8 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 36px 130px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     
+    top: -450px;              
+    left: 400px;
+    }
+
+    .estiloboton8:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .container4 {
+    width: 150px;               
+    height: 150px;
+    border: 2px solid red;     
+    border-radius: 15px;
+    position: fixed;            
+    top: 15%;                  
+    left: -105%; 
+    padding: 10px;              /* opcional, espacio interno */
+    background-color: #000000;
+    }
+
+    .logo10 img {
+    width: 50px;          /* ancho de la casita */
+    display: block;
+    position: fixed;
+    top: 40%;                  
+    left: -100%;
+    margin: 20px auto;     /* centra la casita */
+    }
+
+    .estiloboton9 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 40px 40px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     
+    top: 180px;              
+    left: 0px;
+    }
+
+    .estiloboton9:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .logo11 img {
+    width: 40px;          /* ancho de la casita */
+    display: block;
+    position: fixed;
+    top: 40%;                  
+    left: -75%;
+    margin: 20px auto;     /* centra la casita */
+    }
+
+    .estiloboton10 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 40px 40px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     
+    top: 180px;              
+    left: 85px;
+    }
+
+    .estiloboton10:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .texto6 {
+    color: white;              
+    font-size: 10px;            
+    font-weight: bold;           
+    text-align: center;          
+    background: none;            
+    border: none;                
+    position: relative;
+    position: absolute;          
+    top: 1px;                
+    left: 85px;  
+    }
+
+    .logo12 img {
+    width: 60px;        /* ancho de la casita */
+    display: block;
+    position: fixed;
+    top: 6%;                  
+    left: 73%;
+    margin: 20px auto;     /* centra la casita */
+    }
+
+    .estiloboton11 {
+    display: inline-flex;
+    flex-direction: column;      /* columna: casita arriba, texto abajo */
+    align-items: center;          /* centra horizontalmente */
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #000000;
+    color: white;
+    border: 2px solid transparent;
+    padding: 35px 35px;
+    transition: border 0.3s, box-shadow 0.3s;
+    position: absolute;     
+    top: -50px;              
+    left: 650px;
+    }
+
+    .estiloboton11:hover {
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }

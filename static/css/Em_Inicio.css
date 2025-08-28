@@ -265,17 +265,16 @@ body {
 
     .estiloboton2 {
     display: inline-flex;
-    flex-direction: column;      /* columna: casita arriba, texto abajo */
-    align-items: center;          /* centra horizontalmente */
-    border-radius: 12px;
+    flex-direction: column;      
+    align-items: center;          
     cursor: pointer;
     background-color: #000000;
     color: white;
     border: 2px solid transparent;
     padding: 36px 130px;
     transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     /* permite moverlo libremente */
-    top: 70px;              /* posición inicial vertical */
+    position: absolute;     
+    top: 70px;             
     left: -440px;
     }
 
@@ -286,8 +285,8 @@ body {
 
     .estiloboton3 {
     display: inline-flex;
-    flex-direction: column;      /* columna: casita arriba, texto abajo */
-    align-items: center;          /* centra horizontalmente */
+    flex-direction: column;      
+    align-items: center;          
     border-radius: 12px;
     cursor: pointer;
     background-color: #000000;
@@ -295,8 +294,8 @@ body {
     border: 2px solid transparent;
     padding: 36px 130px;
     transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     /* permite moverlo libremente */
-    top: 185px;              /* posición inicial vertical */
+    position: absolute;     
+    top: 185px;              
     left: -440px;
     }
 
@@ -307,8 +306,8 @@ body {
 
     .estiloboton4 {
     display: inline-flex;
-    flex-direction: column;      /* columna: casita arriba, texto abajo */
-    align-items: center;          /* centra horizontalmente */
+    flex-direction: column;      
+    align-items: center;          
     border-radius: 12px;
     cursor: pointer;
     background-color: #000000;
@@ -316,8 +315,8 @@ body {
     border: 2px solid transparent;
     padding: 36px 130px;
     transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     /* permite moverlo libremente */
-    top: 300px;              /* posición inicial vertical */
+    position: absolute;     
+    top: 300px;              
     left: -440px;
     }
 
@@ -328,8 +327,8 @@ body {
 
     .estiloboton5 {
     display: inline-flex;
-    flex-direction: column;      /* columna: casita arriba, texto abajo */
-    align-items: center;          /* centra horizontalmente */
+    flex-direction: column;      
+    align-items: center;          
     border-radius: 12px;
     cursor: pointer;
     background-color: #000000;
