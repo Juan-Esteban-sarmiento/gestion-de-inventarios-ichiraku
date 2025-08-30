@@ -99,9 +99,9 @@ def Em_Inicio():
     return render_template("Em_Inicio.html")
 
 if __name__ == '__main__':
-    app.run(debug=True)"""
+    app.run(debug=True)
 
-#EMPLEADO INICIO
+#Administrador Registro Empleados
 @app.route('/')
 def index():
     return redirect(url_for('Ad_Rempleados'))
@@ -119,6 +119,28 @@ def Ad_Rempleados():
         else:
             return "❌ Usuario o contraseña incorrectos"
     return render_template("Ad_Rempleados.html")
+
+if __name__ == '__main__':
+    app.run(debug=True)"""
+
+#Administrador Registro Productos
+@app.route('/')
+def index():
+    return redirect(url_for('Ad_Rproductos'))
+
+# Vista login
+@app.route('/Ad_Rproductos', methods=['GET', 'POST'])
+def Ad_Rproductos():
+    if request.method == 'POST':
+        usuario = request.form['usuario']
+        password = request.form['password']
+
+        # Ejemplo simple de validación
+        if usuario == "admin" and password == "1234":
+            return "✅ Bienvenido, has iniciado sesión correctamente"
+        else:
+            return "❌ Usuario o contraseña incorrectos"
+    return render_template("Ad_Rproductos.html")
 
 if __name__ == '__main__':
     app.run(debug=True)
