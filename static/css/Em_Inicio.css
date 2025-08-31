@@ -14,27 +14,27 @@ body {
     }
 
     .title{
-    color: white;              /* color del texto */
-    font-size: 30px;            /* tamaño de letra opcional */
-    font-weight: bold;           /* opcional, negrita */
-    text-align: center;          /* centrar el texto */
-    background: none;            /* quitar fondo negro */
-    border: none;                /* quitar bordes rojo */
+    color: white;              
+    font-size: 30px;            
+    font-weight: bold;           
+    text-align: center;          
+    background: none;            
+    border: none;                
     position: relative;
     left: 90px;
     }
 
     .container {
-    width: 1320px;               /* ancho inicial */
-    height: 700px;              /* alto inicial */
-    border: 2px solid red;      /* contorno rojo */
-    border-radius: 15px;        /* bordes redondeados */
-    position: fixed;            /* permite posicionamiento relativo a la ventana */
+    width: 1320px;               
+    height: 700px;             
+    border: 2px solid red;      
+    border-radius: 15px;        
+    position: fixed;            
     top: 55%;                  
     left: 59%;                 
-    transform: translate(-50%, -50%); /* centra exactamente */
-    padding: 10px;              /* opcional, espacio interno */
-    background-color: #000000;     /* opcional, color de fondo */
+    transform: translate(-50%, -50%); 
+    padding: 10px;             
+    background-color: #000000;     
     }
 
     .container2 {
@@ -56,37 +56,37 @@ body {
     position: fixed;            
     top: 7%;                  
     left: 3%; 
-    padding: 10px;              /* opcional, espacio interno */
+    padding: 10px;              
     background-color: #000000;
     }
 
     .logo img {
     width: 550px;
-    position: absolute;     /* permite moverlo libremente */
-    top: 60px;              /* posición inicial vertical */
-    left: 700px;             /* posición inicial horizontal */
-    height: auto;           /* mantiene proporción */
-    resize: both;           /* permite cambiar tamaño arrastrando */
-    overflow: auto;         /* necesario para resize */
-    cursor: move;           /* indica que se puede mover */
-    transition: all 0.2s ease; /* transición suave */
+    position: absolute;     
+    top: 60px;              
+    left: 700px;             
+    height: auto;          
+    resize: both;          
+    overflow: auto;         
+    cursor: move;           
+    transition: all 0.2s ease; 
     }
 
     .logo2 img {
-    width: 58px;          /* ancho de la casita */
+    width: 58px;          
     height: auto;
     display: block;
     position: fixed;
     top: -8%;                  
     left: -32%;
-    margin: 20px auto;     /* centra la casita */
+    margin: 20px auto;     
     margin-bottom: 5px;
     }
 
     .casita {
-    width: 11px;          /* ancho de la casita */
+    width: 11px;          
     font-size: 13px;
-    font-weight: bold;           /* opcional, negrita */
+    font-weight: bold;           
     display: block;
     position: fixed;
     margin: 0;
@@ -95,18 +95,18 @@ body {
     }
 
     .logo3 img {
-    width: 55px;          /* ancho de la casita */
+    width: 55px;          
     display: block;
     position: fixed;
     top: 8%;                  
     left: -32%;
-    margin: 20px auto;     /* centra la casita */
+    margin: 20px auto;     
     }
 
     .caja {
-    width: 11px;          /* ancho de la casita */
+    width: 11px;          
     font-size: 13px;
-    font-weight: bold;           /* opcional, negrita */
+    font-weight: bold;           
     display: block;
     position: fixed;
     top: 9%;                  
@@ -171,9 +171,9 @@ body {
     }
 
     .linearoja {
-    height: 3px;             /* grosor */
-    background-color: rgb(255, 0, 0);   /* color rojo */
-    width: 19%;             /* ancho total */
+    height: 3px;             
+    background-color: rgb(255, 0, 0);   
+    width: 19%;             
     position: fixed;
     top: 60%;                  
     left: -30%;
@@ -184,23 +184,23 @@ body {
     height: 50px;                
     background-color: red;       
     color: white;                
-    border: 2px solid transparent;  /* borde para efecto hover */
-    border-radius: 12px;            /* bordes redondeados tipo estiloboton */
+    border: 2px solid transparent;  
+    border-radius: 12px;            
     font-size: 16px;
-    font-family: 'Arial', sans-serif; /* misma tipografía que los otros botones */
-    font-weight: bold;               /* opcional, para coincidir con estiloboton */
+    font-family: 'Arial', sans-serif; 
+    font-weight: bold;               
     cursor: pointer;                 
     position: absolute;              
     top: 140px;                      
     left: 40px;                      
-    padding: 10px 20px;             /* para que el contenido quede centrado */
+    padding: 10px 20px;             
     transition: border 0.3s, box-shadow 0.3s, background-color 0.3s;
     }
 
     .btn:hover {
     border: 2px solid white;  
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7); /* efecto de iluminación */
-    background-color: #ff4d4d;  /* opcional: fondo un poco más claro al pasar cursor */
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7); 
+    background-color: #ff4d4d;  
     }
 
     .texto1 {
@@ -244,8 +244,8 @@ body {
 
     .estiloboton1 {
     display: inline-flex;
-    flex-direction: column;      /* columna: casita arriba, texto abajo */
-    align-items: center;          /* centra horizontalmente */
+    flex-direction: column;      
+    align-items: center;          
     border-radius: 12px;
     cursor: pointer;
     background-color: #000000;
@@ -253,8 +253,8 @@ body {
     border: 2px solid transparent;
     padding: 34px 130px;
     transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     /* permite moverlo libremente */
-    top: -47px;              /* posición inicial vertical */
+    position: absolute;     
+    top: -47px;              
     left: -440px;
     }
 

@@ -509,18 +509,18 @@ body {
     }
 
     .logo10 img {
-    width: 50px;          /* ancho de la casita */
+    width: 50px;          
     display: block;
     position: fixed;
     top: 453px;                  
     left: 998px;
-    margin: 20px auto;     /* centra la casita */
+    margin: 20px auto;     
     }
 
     .estiloboton9 {
     display: inline-flex;
-    flex-direction: column;      /* columna: casita arriba, texto abajo */
-    align-items: center;          /* centra horizontalmente */
+    flex-direction: column;      
+    align-items: center;          
     border-radius: 12px;
     cursor: pointer;
     background-color: #000000;
@@ -539,18 +539,18 @@ body {
     }
 
     .logo11 img {
-    width: 40px;          /* ancho de la casita */
+    width: 40px;          
     display: block;
     position: fixed;
     top: 453px;                  
     left: 1090px;
-    margin: 20px auto;     /* centra la casita */
+    margin: 20px auto;     
     }
 
     .estiloboton10 {
     display: inline-flex;
-    flex-direction: column;      /* columna: casita arriba, texto abajo */
-    align-items: center;          /* centra horizontalmente */
+    flex-direction: column;      
+    align-items: center;          
     border-radius: 12px;
     cursor: pointer;
     background-color: #000000;
@@ -569,28 +569,28 @@ body {
     }
 
     .logo12 img {
-    width: 60px;        /* ancho de la casita */
+    width: 30px;        
     display: block;
     position: fixed;
-    top: 6%;                  
-    left: 73%;
-    margin: 20px auto;     /* centra la casita */
+    top: 55px;                  
+    left: 300px;
+    margin: 20px auto;     
     }
 
     .estiloboton11 {
     display: inline-flex;
-    flex-direction: column;      /* columna: casita arriba, texto abajo */
-    align-items: center;          /* centra horizontalmente */
+    flex-direction: column;      
+    align-items: center;          
     border-radius: 12px;
     cursor: pointer;
     background-color: #000000;
     color: white;
     border: 2px solid transparent;
-    padding: 35px 35px;
+    padding: 20px 20px;
     transition: border 0.3s, box-shadow 0.3s;
     position: absolute;     
-    top: 60px;              
-    left: 260px;
+    top: 68px;              
+    left: 294px;
     }
 
     .estiloboton11:hover {
@@ -610,3 +610,75 @@ body {
     top: 1px;                
     left: 85px;  
     }
+
+    .campo-texto input {
+    width: 290px;              
+    padding: 10px 10px;        
+    background: black;         
+    border: 2px solid red;     
+    border-radius: 8px;        
+    color: white;              
+    font-size: 16px;           
+    outline: none;             
+    position: absolute;              
+    top: 170px;                      
+    left:40px; 
+    }
+
+    .campo-texto2 input {
+    width: 290px;              
+    padding: 10px 10px;        
+    background: black;         
+    border: 2px solid red;     
+    border-radius: 8px;        
+    color: white;              
+    font-size: 16px;           
+    outline: none;             
+    position: absolute;              
+    top: 300px;                      
+    left:40px; 
+    }
+
+    .campo-texto3 input {
+    width: 290px;              
+    padding: 10px 10px;        
+    background: black;         
+    border: 2px solid red;     
+    border-radius: 8px;        
+    color: white;              
+    font-size: 16px;           
+    outline: none;             
+    position: absolute;              
+    top: 440px;                      
+    left:40px; 
+    }
+
+    .campo-texto4 input {
+    width: 290px;              
+    padding: 10px 10px;        
+    background: black;         
+    border: 2px solid red;     
+    border-radius: 8px;        
+    color: white;              
+    font-size: 16px;           
+    outline: none;             
+    position: absolute;              
+    top: 570px;                      
+    left:40px; 
+    }
+
+    .campo-texto5 input {
+    width: 215px;              
+    padding: 10px 10px;        
+    background: black;         
+    border: 2px solid red;     
+    border-radius: 8px;        
+    color: white;              
+    font-size: 16px;           
+    outline: none;             
+    position: absolute;              
+    top: 70px;                      
+    left:40px; 
+    }
+
+    

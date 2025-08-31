@@ -25,13 +25,13 @@ body {
     }
 
     .container {
-    width: 350px;               
-    height: 700px;              
+    width: 1300px;               
+    height: 100px;              
     border: 2px solid red;      
-    border-radius: 15px;        
+    border-radius: 20px;        
     position: fixed;            
-    top: 56%;                  
-    left: 80%;                 
+    top: 25%;                  
+    left: 60%;                 
     transform: translate(-50%, -50%); 
     padding: 10px;              
     background-color: #000000;     
@@ -56,18 +56,6 @@ body {
     position: fixed;            
     top: 18%;                  
     left: 27%; 
-    padding: 10px;              
-    background-color: #000000;
-    }
-
-    .container4 {
-    width: 150px;               
-    height: 150px;
-    border: 2px solid red;     
-    border-radius: 15px;
-    position: fixed;            
-    top: 29%;                  
-    left: 51%; 
     padding: 10px;              
     background-color: #000000;
     }
@@ -403,6 +391,62 @@ body {
     background-color: #ff4d4d;  
     }
 
+    .campo-texto input {
+    width: 250px;              
+    padding: 10px 10px;        
+    background: black;         
+    border: 2px solid red;     
+    border-radius: 8px;        
+    color: white;              
+    font-size: 16px;           
+    outline: none;             
+    position: absolute;              
+    top: 60px;                      
+    left:50px; 
+    }
+
+    .campo-texto2 input {
+    width: 250px;              
+    padding: 10px 10px;        
+    background: black;         
+    border: 2px solid red;     
+    border-radius: 8px;        
+    color: white;              
+    font-size: 16px;           
+    outline: none;             
+    position: absolute;              
+    top: 60px;                      
+    left:360px; 
+    }
+
+    .campo-texto3 input {
+    width: 250px;              
+    padding: 10px 10px;        
+    background: black;         
+    border: 2px solid red;     
+    border-radius: 8px;        
+    color: white;              
+    font-size: 16px;          
+    outline: none;             
+    position: absolute;              
+    top: 60px;                      
+    left: 690px; 
+    }
+
+    .campo-texto4 input {
+    width: 250px;              
+    padding: 10px 10px;        
+    background: black;         
+    border: 2px solid red;    
+    border-radius: 8px;        
+    color: white;              
+    font-size: 16px;           
+    outline: none;             
+    position: absolute;              
+    top: 60px;                      
+    left: 1000px;
+    }
+
     .texto1 {
     color: white;              
     font-size: 12px;            
@@ -412,8 +456,8 @@ body {
     border: none;                
     position: relative;
     position: absolute;          
-    top: 1px;                
-    left: 30px;  
+    top: 5px;                
+    left: 150px;  
     }
 
     .texto2 {
@@ -424,8 +468,8 @@ body {
     border: none;                
     position: relative;
     position: absolute;          
-    top: 100px;                
-    left: 40px;  
+    top: 5px;                
+    left: 410px;  
     }
 
     .texto3 {
@@ -437,8 +481,8 @@ body {
     border: none;                
     position: relative;
     position: absolute;          
-    top: 230px;                
-    left: 40px;  
+    top: 5px;                
+    left: 755px;  
     }
 
     .texto4 {
@@ -450,57 +494,46 @@ body {
     border: none;                
     position: relative;
     position: absolute;          
-    top: 370px;                
-    left: 40px;  
+    top: 5px;                
+    left: 1090px;  
     }
 
-    .texto5 {
-    color: white;              
-    font-size: 12px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 500px;                
-    left: 40px;  
+    .logo9 img {
+    width: 58px;          
+    height: auto;
+    display: block;
+    position: fixed;
+    top:800px;                  
+    left: 1000px;
+    margin: 20px auto;     
+    margin-bottom: 5px;
     }
 
-    .mas {
+    .descargar {
     width: 11px;          
-    font-size: 13px;
+    font-size: 20px;
     font-weight: bold;           
     display: block;
     position: fixed;
     margin: 0;
-    top:200px;                  
-    left: 1049px;
-    }
-
-    .logo9 img {
-    width: 50px;          
-    display: block;
-    position: fixed;
-    top: 185px;                  
-    left: 980px;
-    margin: 20px auto;     
+    top: 800px;                  
+    left: 1080px;
     }
 
     .estiloboton8 {
     display: inline-flex;
     flex-direction: column;      
     align-items: center;          
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
     background-color: #000000;
     color: white;
     border: 2px solid transparent;
-    padding: 36px 110px;
+    padding: 40px 160px;
     transition: border 0.3s, box-shadow 0.3s;
     position: absolute;     
-    top: 18px;              
-    left: 445px;
+    top: 800px;              
+    left: 270px;
     }
 
     .estiloboton8:hover {
@@ -508,175 +541,7 @@ body {
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
     }
 
-    .logo10 img {
-    width: 50px;          
-    display: block;
-    position: fixed;
-    top: 453px;                  
-    left: 998px;
-    margin: 20px auto;     
-    }
+    
 
-    .estiloboton9 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 40px 40px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 180px;              
-    left: 0px;
-    }
 
-    .estiloboton9:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
-
-    .logo11 img {
-    width: 40px;          
-    display: block;
-    position: fixed;
-    top: 453px;                  
-    left: 1090px;
-    margin: 20px auto;     
-    }
-
-    .estiloboton10 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 40px 40px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 180px;              
-    left: 85px;
-    }
-
-    .estiloboton10:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
-
-    .logo12 img {
-    width: 30px;        
-    display: block;
-    position: fixed;
-    top: 55px;                  
-    left: 300px;
-    margin: 20px auto;     
-    }
-
-    .estiloboton11 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 20px 20px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 68px;              
-    left: 294px;
-    }
-
-    .estiloboton11:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
-
-    .texto6 {
-    color: white;              
-    font-size: 10px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 1px;                
-    left: 85px;  
-    }
-
-    .campo-texto input {
-    width: 290px;              
-    padding: 10px 10px;        
-    background: black;         
-    border: 2px solid red;     
-    border-radius: 8px;        
-    color: white;              
-    font-size: 16px;           
-    outline: none;             
-    position: absolute;              
-    top: 170px;                      
-    left:40px; 
-    }
-
-    .campo-texto2 input {
-    width: 290px;              
-    padding: 10px 10px;        
-    background: black;         
-    border: 2px solid red;     
-    border-radius: 8px;        
-    color: white;              
-    font-size: 16px;           
-    outline: none;             
-    position: absolute;              
-    top: 300px;                      
-    left:40px; 
-    }
-
-    .campo-texto3 input {
-    width: 290px;              
-    padding: 10px 10px;        
-    background: black;         
-    border: 2px solid red;     
-    border-radius: 8px;        
-    color: white;              
-    font-size: 16px;           
-    outline: none;             
-    position: absolute;              
-    top: 440px;                      
-    left:40px; 
-    }
-
-    .campo-texto4 input {
-    width: 290px;              
-    padding: 10px 10px;        
-    background: black;         
-    border: 2px solid red;     
-    border-radius: 8px;        
-    color: white;              
-    font-size: 16px;           
-    outline: none;             
-    position: absolute;              
-    top: 570px;                      
-    left:40px; 
-    }
-
-    .campo-texto5 input {
-    width: 215px;              
-    padding: 10px 10px;        
-    background: black;         
-    border: 2px solid red;     
-    border-radius: 8px;        
-    color: white;              
-    font-size: 16px;           
-    outline: none;             
-    position: absolute;              
-    top: 70px;                      
-    left:40px; 
-    }
+    
