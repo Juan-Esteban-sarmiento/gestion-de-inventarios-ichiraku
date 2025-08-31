@@ -50,7 +50,7 @@ body {
 
     .container3 {
     width: 680px;               
-    height: 650px;
+    height: 540px;
     border: 2px solid red;     
     border-radius: 15px;
     position: fixed;            
@@ -454,19 +454,6 @@ body {
     left: 40px;  
     }
 
-    .texto5 {
-    color: white;              
-    font-size: 12px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 500px;                
-    left: 40px;  
-    }
-
     .mas {
     width: 11px;          
     font-size: 13px;
@@ -499,8 +486,8 @@ body {
     padding: 36px 110px;
     transition: border 0.3s, box-shadow 0.3s;
     position: absolute;     
-    top: 18px;              
-    left: 445px;
+    top: 19px;              
+    left: 450px;
     }
 
     .estiloboton8:hover {
@@ -654,20 +641,6 @@ body {
     }
 
     .campo-texto4 input {
-    width: 290px;              
-    padding: 10px 10px;        
-    background: black;         
-    border: 2px solid red;     
-    border-radius: 8px;        
-    color: white;              
-    font-size: 16px;           
-    outline: none;             
-    position: absolute;              
-    top: 570px;                      
-    left:40px; 
-    }
-
-    .campo-texto5 input {
     width: 215px;              
     padding: 10px 10px;        
     background: black;         
@@ -680,3 +653,5 @@ body {
     top: 70px;                      
     left:40px; 
     }
+
+    

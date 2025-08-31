@@ -1,20 +1,35 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Rempleados.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Dinformes.css') }}">
 </head>
     <div class="title">
         <h1>administrator panel</h1>
 <body>
 <div class="container"> 
-    <div class="texto6">
-         <h1>list employments</h1>
+    <div class="texto1">
+        <h1>date</h1>
     </div>
-    <div class="campo-texto5">
-        <input type="text" placeholder="Look for ... ">
+    <div class="campo-texto">
+        <input type="text" placeholder="DATE ... ">
     </div>
-    <div class="logo12 estiloboton11" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/lupa.png') }}" alt="lupa">
+    <div class="texto2">
+        <h1>Name product</h1>
+    </div>
+    <div class="campo-texto2">
+        <input type="text" placeholder="NAME PRODUCT ... ">
+    </div>
+    <div class="texto3">
+        <h1>local name</h1>
+    </div>
+    <div class="campo-texto3">
+        <input type="text" placeholder="LOCAL NAME ... ">
+    </div>
+    <div class="texto4">
+        <h1>search</h1>
+    </div>
+    <div class="campo-texto4">
+        <input type="text" placeholder="SEARCH ... ">
     </div>
 </div>
 
@@ -67,52 +82,12 @@
     </div>
     <button type="button" class="btn" onclick="window.location.href='/logout'">LOG OUT</button>
 </div>
-
-<div class="container3"> 
-    <div class="container4"> 
-    </div>
-        <div class="texto1">
-            <h1>Register employments</h1>
-        </div>
-        <div class="texto2">
-            <h1>Name employment</h1>
-        </div>
-        <div class="campo-texto">
-        <input type="text" placeholder="Name Employment ... ">
-        </div>
-        <div class="texto3">
-            <h1>ID</h1>
-        </div>
-        <div class="campo-texto2">
-        <input type="text" placeholder="ID ... ">
-        </div>
-        <div class="texto4">
-            <h1>password</h1> 
-        </div>
-        <div class="campo-texto3">
-        <input type="text" placeholder="Password ... ">
-        </div>
-        <div class="texto5">
-            <h1>Contact Number</h1>
-        </div>
-        <div class="campo-texto4">
-        <input type="text" placeholder="Contact Number ... ">
-        </div>
-    <div class="logo9 estiloboton8" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/mas.png') }}" alt="mas">
-        <div class="mas"> 
-            <h1>Register</h1>
+<div class="logo9 estiloboton8" onclick="homeClick()">  
+        <img src="{{ url_for('static', filename='image/descargar.png') }}" alt="descargar">
+        <div class="descargar"> 
+            <h1>DONWLOAD</h1>
         </div>
     </div>
-    <div class="container4">
-    <div class="logo10 estiloboton9" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/subir.png') }}" alt="subir">
-    </div>
-    <div class="logo11 estiloboton10" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/basura.png') }}" alt="basura">
-    </div>
-</div>
-
 </body>
 <script>
     window.addEventListener('pageshow', function(event) {

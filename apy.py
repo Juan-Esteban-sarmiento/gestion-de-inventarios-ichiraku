@@ -12,7 +12,7 @@ app = Flask(__name__)
 app.secret_key = '123456789'  
 
 
-"""@app.route('/')
+@app.route('/')
 def index():
     return redirect(url_for('login'))
 
@@ -121,7 +121,7 @@ def Ad_Rempleados():
     return render_template("Ad_Rempleados.html")
 
 if __name__ == '__main__':
-    app.run(debug=True)"""
+    app.run(debug=True)
 
 #Administrador Registro Productos
 @app.route('/')
@@ -141,6 +141,50 @@ def Ad_Rproductos():
         else:
             return "❌ Usuario o contraseña incorrectos"
     return render_template("Ad_Rproductos.html")
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+#Administrador Descargar Informes
+@app.route('/')
+def index():
+    return redirect(url_for('Ad_Dinformes'))
+
+# Vista login
+@app.route('/Ad_Dinformes', methods=['GET', 'POST'])
+def Ad_Dinformes():
+    if request.method == 'POST':
+        usuario = request.form['usuario']
+        password = request.form['password']
+
+        # Ejemplo simple de validación
+        if usuario == "admin" and password == "1234":
+            return "✅ Bienvenido, has iniciado sesión correctamente"
+        else:
+            return "❌ Usuario o contraseña incorrectos"
+    return render_template("Ad_Dinformes.html")
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+# Administrador Registro de locales
+@app.route('/')
+def index():
+    return redirect(url_for('Ad_Rlocales'))
+
+# Vista login
+@app.route('/Ad_Rlocales', methods=['GET', 'POST'])
+def Ad_Rlocales():
+    if request.method == 'POST':
+        usuario = request.form['usuario']
+        password = request.form['password']
+
+        # Ejemplo simple de validación
+        if usuario == "admin" and password == "1234":
+            return "✅ Bienvenido, has iniciado sesión correctamente"
+        else:
+            return "❌ Usuario o contraseña incorrectos"
+    return render_template("Ad_Rlocales.html")
 
 if __name__ == '__main__':
     app.run(debug=True)
