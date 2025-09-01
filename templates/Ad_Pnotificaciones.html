@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Pnotificaciones.css') }}">
+</head>
+    <div class="title">
+        <h1>administrator panel</h1>
+<body>
+
+<div class="container"> 
+    <div class="texto1">
+        <h1>Date</h1>
+    </div>
+    <div class="campo-texto">
+        <input type="text" placeholder="Date ... ">
+    </div>
+    <div class="texto2">
+        <h1>Search</h1>
+    </div>
+    <div class="campo-texto2">
+        <input type="text" placeholder="Search ... ">
+    </div>
+    <img class="naruto" src="{{ url_for('static', filename='image/person 1.png') }}" alt="Naruto">
+    <div class="logo12 estiloboton8" onclick="homeClick()">  
+        <img src="{{ url_for('static', filename='image/lupa.png') }}" alt="lupa">
+    </div>
+    <div class="container3">
+    </div>
+</div>
+
+<div class="container2"> 
+    <div class="logo">
+        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
+    </div> 
+    <div class="logo2 estiloboton1" onclick="homeClick()">
+        <img src="{{ url_for('static', filename='image/casita.png') }}" alt="casita">
+        <div class="casita"> 
+            <h1>Home</h1>
+        </div>   
+    </div>
+    <div class="logo3 estiloboton2" onclick="homeClick()">  
+        <img src="{{ url_for('static', filename='image/folder.png') }}" alt="folder">
+        <div class="folder"> 
+            <h1>Employments</h1>
+        </div> 
+    </div>
+    <div class="logo4 estiloboton3" onclick="homeClick()">  
+        <img src="{{ url_for('static', filename='image/base.png') }}" alt="base">
+        <div class="base"> 
+            <h1>Products</h1>
+        </div>  
+    </div>
+    <div class="logo5 estiloboton4" onclick="homeClick()">  
+        <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="grafica">
+        <div class="grafica"> 
+            <h1>Information</h1>
+        </div>
+    </div>
+    <div class="logo6 estiloboton5" onclick="homeClick()">  
+        <img src="{{ url_for('static', filename='image/personas.png') }}" alt="personas">
+        <div class="personas"> 
+            <h1>Points sale</h1>
+        </div>
+    </div>
+    <div class="logo7 estiloboton6" onclick="homeClick()">  
+        <img src="{{ url_for('static', filename='image/campana.png') }}" alt="campana">
+        <div class="campana"> 
+            <h1>Notification</h1>
+        </div>
+    </div>
+    <div class="linearoja"> </div>
+    <div class="logo8 estiloboton7" onclick="homeClick()">  
+        <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="corazon">
+        <div class="corazon"> 
+            <h1>Account</h1>
+        </div>
+    </div>
+    <button type="button" class="btn" onclick="window.location.href='/logout'">LOG OUT</button>
+</div>
+
+</body>
+<script>
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+</script>
+</html>
