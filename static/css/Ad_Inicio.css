@@ -1,428 +1,138 @@
+/* --- Fuentes y base --- */
 @font-face {
   font-family: 'njnaruto';
   src: url('../fonts/njnaruto.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
 }
 
 body {
-      font-family: 'njnaruto';
-      background: url('../image/fondo.png') repeat;
-      display: flex;
-      justify-content: center;
-      height: 67vh;
-    }
+  margin: 0;
+  font-family: 'njnaruto', sans-serif;
+  background: url('../image/fondo.png') repeat;
+  display: flex;
+  min-height: 100vh;
+  color: white;
+}
 
-    .title{
-    color: white;              
-    font-size: 30px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    left: 90px;
-    }
+.layout {
+  display: flex;
+  width: 100%;
+}
 
-    .container {
-    width: 1320px;               
-    height: 700px;              
-    border: 2px solid red;      
-    border-radius: 15px;        
-    position: fixed;            
-    top: 55%;                  
-    left: 59%;                 
-    transform: translate(-50%, -50%); 
-    padding: 10px;              
-    background-color: #000000;     
-    }
+/* --- Menu lateral --- */
+.sidebar {
+  width: 250px;
+  background-color: black;
+  border-right: 2px solid red;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 10px;
+}
 
-    .container2 {
-    width: 350px;       
-    height: 100vh;       
-    position: fixed;     
-    top: 0;              
-    left: 0;             
-    margin-top: 0;      
-    background-color: #000000; 
-    border: 2px solid red;
-    }
+.sidebar .logo img {
+  width: 120px;
+  margin-bottom: 30px;
+}
 
-    .container3 {
-    width: 600px;               
-    height: 600px;
-    border: 2px solid red;     
-    border-radius: 15px;
-    position: fixed;            
-    top: 7%;                  
-    left: 3%; 
-    padding: 10px;              
-    background-color: #000000;
-    }
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
 
-    .logo img {
-    width: 550px;
-    position: absolute;     
-    top: 60px;              
-    left: 700px;             
-    height: auto;           
-    resize: both;           
-    overflow: auto;         
-    cursor: move;           
-    transition: all 0.2s ease; 
-    }
+.menu-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 16px;
+  width: 100%;
+}
 
-    .logo2 img {
-    width: 58px;          
-    height: auto;
-    display: block;
-    position: fixed;
-    top: -8%;                  
-    left: -32%;
-    margin: 20px auto;     
-    margin-bottom: 5px;
-    }
+.menu-button img {
+  width: 28px;
+}
 
-    .casita {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    margin: 0;
-    top: -5%;                  
-    left: -27%;
-    }
+.menu-button:hover,
+.menu-button.active {
+  border: 2px solid white;
+  box-shadow: 0 0 10px rgba(255,255,255,0.6);
+}
+.menu-button img {
+  width: 28px;
+  height: auto;
+}
 
-    .logo3 img {
-    width: 55px;          
-    display: block;
-    position: fixed;
-    top: 3%;                  
-    left: -32%;
-    margin: 20px auto;     
-    }
+.menu-button span {
+  margin-top: 5px;
+  font-size: 14px;
+}
 
-    .folder {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    top: 5%;                  
-    left: -27%;
-    }
+.logout-btn {
+  margin-top: auto;
+  margin-bottom: 20px;
+  padding: 10px 20px;
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
 
-    .logo4 img {
-    width: 50px;          
-    display: block;
-    position: fixed;
-    top: 13%;                  
-    left: -32%;
-    margin: 20px auto;     
-    }
+.logout-btn:hover {
+  background-color: #ff4d4d;
+  box-shadow: 0 0 10px red;
+}
 
-    .base {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    top: 15%;                  
-    left: -27%;
-    }
+.main-content {
+  flex: 1;
+  padding: 40px;
+  position: relative;
+}
 
-    .logo5 img {
-    width: 50px;          
-    display: block;
-    position: fixed;
-    top: 24%;                  
-    left: -32%;
-    margin: 20px auto;     
-    }
+.welcome-title {
+  text-align: center;
+  font-size: 36px;
+  margin-bottom: 30px;
+}
 
-    .grafica {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    top: 27%;                  
-    left: -27%;
-    }
+.notification-box {
+  background-color: #000;
+  border: 2px solid red;
+  border-radius: 15px;
+  padding: 20px;
+  width: 450px;
+  max-width: 90%;
+}
 
-   .logo6 img {
-    width: 53px;          
-    display: block;
-    position: fixed;
-    top: 35%;                  
-    left: -32%;
-    margin: 20px auto;     
-    }
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 20px;
+}
 
-    .personas {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    top: 35%;                  
-    left: -27%;
-    }
+.notification-body {
+  margin-top: 20px;
+  font-size: 16px;
+}
 
-    .logo7 img {
-    width: 53px;          
-    display: block;
-    position: fixed;
-    top: 46%;                  
-    left: -32%;
-    margin: 20px auto;     
-    }
+.logo-main {
+  position: absolute;
+  right: 50px;
+  top: 150px;
+}
 
-    .campana {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    top: 48%;                  
-    left: -27%;
-    }
-
-    .logo8 img {
-    width: 53px;          
-    display: block;
-    position: fixed;
-    top: 65%;                  
-    left: -32%;
-    margin: 20px auto;     
-    }
-
-    .corazon {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    top: 67%;                  
-    left: -27%;
-    }
-
-    .linearoja {
-    height: 3px;             
-    background-color: rgb(255, 0, 0);   
-    width: 19%;             
-    position: fixed;
-    top: 60%;                  
-    left: -30%;
-    }
-
-    .btn {
-    width: 200px;                
-    height: 50px;                
-    background-color: red;       
-    color: white;                
-    border: 2px solid transparent;  
-    border-radius: 12px;            
-    font-size: 16px;
-    font-family: 'Arial', sans-serif; 
-    font-weight: bold;               
-    cursor: pointer;                 
-    position: absolute;              
-    top: 140px;                      
-    left: 40px;                      
-    padding: 10px 20px;             
-    transition: border 0.3s, box-shadow 0.3s, background-color 0.3s;
-    }
-
-    .btn:hover {
-    border: 2px solid white;  
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7); 
-    background-color: #ff4d4d;  
-    }
-
-    .texto1 {
-    color: white;              
-    font-size: 12px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 1px;                
-    left: 30px;  
-    }
-
-    .texto2 {
-    color: white;              
-    font-size: 12px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 1px;                
-    left: 500px;  
-    }
-
-    .texto3 {
-    color: white;              
-    font-size: 12px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 40px;                
-    left: -500px;  
-    }
-
-    .estiloboton1 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 34px 130px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: -47px;              
-    left: -440px;
-    }
-
-    .estiloboton1:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
-
-    .estiloboton2 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 36px 130px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 26px;              
-    left: -440px;
-    }
-
-    .estiloboton2:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
-
-    .estiloboton3 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 36px 130px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 104px;              
-    left: -440px;
-    }
-
-    .estiloboton3:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
-
-    .estiloboton4 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 36px 130px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 183px;              
-    left: -440px;
-    }
-
-    .estiloboton4:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
-
-    .estiloboton5 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;         
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 36px 130px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 260px;              
-    left: -440px;
-    }
-
-    .estiloboton5:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
-
-    .estiloboton6 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 36px 130px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 338px;              
-    left: -440px;
-    }
-
-    .estiloboton6:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
-
-    .estiloboton7 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 36px 130px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 477px;              
-    left: -440px;
-    }
-
-    .estiloboton7:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
+.logo-main img {
+  width: 500px;
+  height: 450px;
+}

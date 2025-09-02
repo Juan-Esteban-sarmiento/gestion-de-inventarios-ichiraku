@@ -7,7 +7,7 @@ CREATE TABLE `detalle_pedido` (
   `Id_Producto` int NOT NULL,
   `Fecha_Pedido` date DEFAULT NULL,
   `Cantidad` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE `empleados` (
   `Cedula` int NOT NULL,
@@ -15,12 +15,12 @@ CREATE TABLE `empleados` (
   `Numero_contacto` int DEFAULT NULL,
   `Contrasena` varchar(100) NOT NULL,
   `Foto` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE `informe` (
   `Id_Informe` int NOT NULL,
   `Id_Inf_Pedido` int DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE `inventario` (
   `Id_Inventario` int NOT NULL,
@@ -29,27 +29,27 @@ CREATE TABLE `inventario` (
   `Cantidad` int NOT NULL,
   `Fecha_caducidad` date DEFAULT NULL,
   `Fecha_ingreso` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE `locales` (
   `Id_Local` int NOT NULL,
   `Nombre` varchar(100) NOT NULL,
   `Direccion` varchar(255) DEFAULT NULL,
   `Foto` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE `notificaciones` (
   `Id_Notificaciones` int NOT NULL,
   `Id_Inventario` int DEFAULT NULL,
   `Mensaje` varchar(255) DEFAULT NULL,
   `Fecha` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE `pedido` (
   `Id_Pedido` int NOT NULL,
   `Id_Inventario` int DEFAULT NULL,
   `Cedula` int DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE `productos` (
   `Id_Producto` int NOT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE `productos` (
   `Categoria` varchar(100) DEFAULT NULL,
   `Unidad` varchar(50) DEFAULT NULL,
   `Foto` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 ALTER TABLE `detalle_pedido`
   ADD PRIMARY KEY (`Id_Pedido`,`Id_Producto`),
