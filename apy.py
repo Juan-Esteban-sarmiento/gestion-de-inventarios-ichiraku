@@ -154,6 +154,31 @@ def Em_Inicio():
     response.headers['Expires'] = '-1'
     return response
 
+@app.route('/Ad_Rempleados', methods=['GET', 'POST'])
+def Ad_Rempleados():
+    return render_template("Ad_Rempleados.html")
+
+@app.route('/Ad_Rproductos', methods=['GET', 'POST'])
+def Ad_Rproductos():
+    return render_template("Ad_Rproductos.html")
+
+@app.route('/Ad_Dinformes', methods=['GET', 'POST'])
+def Ad_Dinformes():
+    return render_template("Ad_Dinformes.html")
+
+@app.route('/Ad_Rlocales', methods=['GET', 'POST'])
+def Ad_Rlocales():
+    return render_template("Ad_Rlocales.html")
+
+@app.route('/Ad_Pnotificaciones', methods=['GET', 'POST'])
+def Ad_Pnotificaciones():
+    return render_template("Ad_Pnotificaciones.html")
+
+@app.route('/Ad_Ceditar', methods=['GET', 'POST'])
+def Ad_Ceditar():
+    return render_template("Ad_Ceditar.html")
+
+
 #configuracion de cierre de sesion
 
 @app.route('/logout')
@@ -162,161 +187,4 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-<<<<<<< HEAD
-=======
-    app.run(debug=True)
-
-#EMPLEADO INICIO
-@app.route('/')
-def index():
-    return redirect(url_for('Em_Inicio'))
-
-# Vista login
-@app.route('/Em_Inicio', methods=['GET', 'POST'])
-def Em_Inicio():
-    if request.method == 'POST':
-        usuario = request.form['usuario']
-        password = request.form['password']
-
-        # Ejemplo simple de validación
-        if usuario == "admin" and password == "1234":
-            return "✅ Bienvenido, has iniciado sesión correctamente"
-        else:
-            return "❌ Usuario o contraseña incorrectos"
-    return render_template("Em_Inicio.html")
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
-#Administrador Registro Empleados
-@app.route('/')
-def index():
-    return redirect(url_for('Ad_Rempleados'))
-
-# Vista login
-@app.route('/Ad_Rempleados', methods=['GET', 'POST'])
-def Ad_Rempleados():
-    if request.method == 'POST':
-        usuario = request.form['usuario']
-        password = request.form['password']
-
-        # Ejemplo simple de validación
-        if usuario == "admin" and password == "1234":
-            return "✅ Bienvenido, has iniciado sesión correctamente"
-        else:
-            return "❌ Usuario o contraseña incorrectos"
-    return render_template("Ad_Rempleados.html")
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
-#Administrador Registro Productos
-@app.route('/')
-def index():
-    return redirect(url_for('Ad_Rproductos'))
-
-# Vista login
-@app.route('/Ad_Rproductos', methods=['GET', 'POST'])
-def Ad_Rproductos():
-    if request.method == 'POST':
-        usuario = request.form['usuario']
-        password = request.form['password']
-
-        # Ejemplo simple de validación
-        if usuario == "admin" and password == "1234":
-            return "✅ Bienvenido, has iniciado sesión correctamente"
-        else:
-            return "❌ Usuario o contraseña incorrectos"
-    return render_template("Ad_Rproductos.html")
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
-#Administrador Descargar Informes
-@app.route('/')
-def index():
-    return redirect(url_for('Ad_Dinformes'))
-
-# Vista login
-@app.route('/Ad_Dinformes', methods=['GET', 'POST'])
-def Ad_Dinformes():
-    if request.method == 'POST':
-        usuario = request.form['usuario']
-        password = request.form['password']
-
-        # Ejemplo simple de validación
-        if usuario == "admin" and password == "1234":
-            return "✅ Bienvenido, has iniciado sesión correctamente"
-        else:
-            return "❌ Usuario o contraseña incorrectos"
-    return render_template("Ad_Dinformes.html")
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
-# Administrador Registro de locales
-@app.route('/')
-def index():
-    return redirect(url_for('Ad_Rlocales'))
-
-# Vista login
-@app.route('/Ad_Rlocales', methods=['GET', 'POST'])
-def Ad_Rlocales():
-    if request.method == 'POST':
-        usuario = request.form['usuario']
-        password = request.form['password']
-
-        # Ejemplo simple de validación
-        if usuario == "admin" and password == "1234":
-            return "✅ Bienvenido, has iniciado sesión correctamente"
-        else:
-            return "❌ Usuario o contraseña incorrectos"
-    return render_template("Ad_Rlocales.html")
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
-# Administrador panel notificaciones
-@app.route('/')
-def index():
-    return redirect(url_for('Ad_Pnotificaciones'))
-
-# Vista login
-@app.route('/Ad_Pnotificaciones', methods=['GET', 'POST'])
-def Ad_Pnotificaciones():
-    if request.method == 'POST':
-        usuario = request.form['usuario']
-        password = request.form['password']
-
-        # Ejemplo simple de validación
-        if usuario == "admin" and password == "1234":
-            return "✅ Bienvenido, has iniciado sesión correctamente"
-        else:
-            return "❌ Usuario o contraseña incorrectos"
-    return render_template("Ad_Pnotificaciones.html")
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
-# Administrador cuenta editar
-@app.route('/')
-def index():
-    return redirect(url_for('Ad_Ceditar'))
-
-# Vista login
-@app.route('/Ad_Ceditar', methods=['GET', 'POST'])
-def Ad_Ceditar():
-    if request.method == 'POST':
-        usuario = request.form['usuario']
-        password = request.form['password']
-
-        # Ejemplo simple de validación
-        if usuario == "admin" and password == "1234":
-            return "✅ Bienvenido, has iniciado sesión correctamente"
-        else:
-            return "❌ Usuario o contraseña incorrectos"
-    return render_template("Ad_Ceditar.html")
-
-if __name__ == '__main__':
->>>>>>> 5d73856224571430728bedbedc683153a6a0019a
-    app.run(debug=True)
+app.run(debug=True)
