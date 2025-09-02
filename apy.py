@@ -6,10 +6,6 @@ app.secret_key = '123456789'
 
 #redirecion inicial de logueo
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 5d73856224571430728bedbedc683153a6a0019a
 @app.route('/')
 def index():
     return redirect(url_for('login'))
