@@ -12,7 +12,7 @@ app = Flask(__name__)
 app.secret_key = '123456789'  
 
 
-"""@app.route('/')
+@app.route('/')
 def index():
     return redirect(url_for('login'))
 
@@ -187,7 +187,7 @@ def Ad_Rlocales():
     return render_template("Ad_Rlocales.html")
 
 if __name__ == '__main__':
-    app.run(debug=True)"""
+    app.run(debug=True)
 
 # Administrador panel notificaciones
 @app.route('/')
@@ -207,6 +207,28 @@ def Ad_Pnotificaciones():
         else:
             return "❌ Usuario o contraseña incorrectos"
     return render_template("Ad_Pnotificaciones.html")
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+# Administrador cuenta editar
+@app.route('/')
+def index():
+    return redirect(url_for('Ad_Ceditar'))
+
+# Vista login
+@app.route('/Ad_Ceditar', methods=['GET', 'POST'])
+def Ad_Ceditar():
+    if request.method == 'POST':
+        usuario = request.form['usuario']
+        password = request.form['password']
+
+        # Ejemplo simple de validación
+        if usuario == "admin" and password == "1234":
+            return "✅ Bienvenido, has iniciado sesión correctamente"
+        else:
+            return "❌ Usuario o contraseña incorrectos"
+    return render_template("Ad_Ceditar.html")
 
 if __name__ == '__main__':
     app.run(debug=True)
