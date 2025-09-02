@@ -1,75 +1,73 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta charset="UTF-8">
+  <title>Ichiraku Ramen - Admin</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Inicio.css') }}">
 </head>
-    <div class="title">
-        <h1>Bienvenido</h1>
 <body>
-    <div class="container2">  
-    <div class="container"> 
-    <div class="logo">
-        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
-    </div>
-    <div class="logo2 estiloboton1" onclick="homeClick()">
-        <img src="{{ url_for('static', filename='image/casita.png') }}" alt="casita">
-        <div class="casita"> 
-            <h1>Home</h1>
-        </div>   
-    </div> 
-    <div class="logo3 estiloboton2" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/folder.png') }}" alt="folder">
-        <div class="folder"> 
-            <h1>Employments</h1>
-        </div> 
-    </div>
-    <div class="logo4 estiloboton3" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/base.png') }}" alt="base">
-        <div class="base"> 
-            <h1>Products</h1>
-        </div>  
-    </div>
-    <div class="logo5 estiloboton4" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="grafica">
-        <div class="grafica"> 
-            <h1>Information</h1>
-        </div>
-    </div>
-    <div class="logo6 estiloboton5" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/personas.png') }}" alt="personas">
-        <div class="personas"> 
-            <h1>Points sale</h1>
-        </div>
-    </div>
-    <div class="logo7 estiloboton6" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/campana.png') }}" alt="campana">
-        <div class="campana"> 
-            <h1>Notification</h1>
-        </div>
-    </div>
-    <div class="logo8 estiloboton7" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="corazon">
-        <div class="corazon"> 
-            <h1>Account</h1>
-        </div>
-    </div>
-        <div class="container3">
-        <div class="texto1">
-            <h1>Resent notifications</h1>
-        <div class="texto2">
-            <h1>More</h1>
-        <div class="texto3">
-            <h1>today</h1>
-    </div>
-    <div class="linearoja"> 
-        <button type="button" class="btn" onclick="window.location.href='/logout'">LOG OUT</button>
-</body>
 
-<script>
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted) {
-            window.location.reload();
-        }
-    });
-</script>
+  <div class="sidebar">
+    <div class="logo">
+      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
+    </div>
+
+    <div class="menu-button" onclick="window.location.href='{{ url_for('Ad_Inicio') }}'">
+      <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Home">
+      <span>Home</span>
+    </div>
+
+    <div class="menu-button" onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'">
+      <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados">
+      <span>Employees</span>
+    </div>
+
+    <div class="menu-button" onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'">
+      <img src="{{ url_for('static', filename='image/base.png') }}" alt="Products">
+      <span>Products</span>
+    </div>
+
+    <div class="menu-button" onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'">
+      <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reports">
+      <span>Reports</span>
+    </div>
+
+    <div class="menu-button" onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'">
+      <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales">
+      <span>Points Sale</span>
+    </div>
+
+    <div class="menu-button" onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'">
+      <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notifications">
+      <span>Notifications</span>
+    </div>
+
+    <div class="menu-button" onclick="homeClick()">
+      <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Account">
+      <span>Account</span>
+    </div>
+
+    <button class="logout-btn" onclick="window.location.href='/logout'">LOG OUT</button>
+  </div>
+
+  <main class="main-content">
+    <h1 class="welcome-title">Bienvenido</h1>
+
+    <section class="notification-box">
+      <div class="notification-header">
+        <h2>Recent Notifications</h2>
+        <span>More</span>
+      </div>
+      <div class="notification-body">
+        <p>Today</p>
+        <!-- Aquí puedes insertar notificaciones dinámicamente -->
+      </div>
+    </section>
+
+    <div class="logo-main">
+      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Ramen">
+    </div>
+  </main>
+
+</body>
 </html>

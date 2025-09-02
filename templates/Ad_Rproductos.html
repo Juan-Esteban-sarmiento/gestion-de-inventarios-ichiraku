@@ -22,37 +22,37 @@
     <div class="logo">
         <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
     </div> 
-    <div class="logo2 estiloboton1" onclick="homeClick()">
+    <div class="logo2 estiloboton1" onclick="window.location.href='{{ url_for('Ad_Inicio') }}'">
         <img src="{{ url_for('static', filename='image/casita.png') }}" alt="casita">
         <div class="casita"> 
             <h1>Home</h1>
         </div>   
     </div>
-    <div class="logo3 estiloboton2" onclick="homeClick()">  
+    <div class="logo3 estiloboton2" onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'">  
         <img src="{{ url_for('static', filename='image/folder.png') }}" alt="folder">
         <div class="folder"> 
             <h1>Employments</h1>
         </div> 
     </div>
-    <div class="logo4 estiloboton3" onclick="homeClick()">  
+    <div class="logo4 estiloboton3" onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'">  
         <img src="{{ url_for('static', filename='image/base.png') }}" alt="base">
         <div class="base"> 
             <h1>Products</h1>
         </div>  
     </div>
-    <div class="logo5 estiloboton4" onclick="homeClick()">  
+    <div class="logo5 estiloboton4" onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'">  
         <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="grafica">
         <div class="grafica"> 
             <h1>Information</h1>
         </div>
     </div>
-    <div class="logo6 estiloboton5" onclick="homeClick()">  
+    <div class="logo6 estiloboton5" onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'">  
         <img src="{{ url_for('static', filename='image/personas.png') }}" alt="personas">
         <div class="personas"> 
             <h1>Points sale</h1>
         </div>
     </div>
-    <div class="logo7 estiloboton6" onclick="homeClick()">  
+    <div class="logo7 estiloboton6" onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'">  
         <img src="{{ url_for('static', filename='image/campana.png') }}" alt="campana">
         <div class="campana"> 
             <h1>Notification</h1>

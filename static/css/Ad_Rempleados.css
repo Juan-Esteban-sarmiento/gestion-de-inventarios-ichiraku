@@ -1,682 +1,293 @@
 @font-face {
   font-family: 'njnaruto';
   src: url('../fonts/njnaruto.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
 }
 
 body {
-      font-family: 'njnaruto';
-      background: url('../image/fondo.png') repeat;
-      display: flex;
-      justify-content: center;
-      height: 67vh;
-    }
+  margin: 0;
+  font-family: 'njnaruto', sans-serif;
+  background: url('../image/fondo.png') repeat;
+  display: flex;
+  min-height: 100vh;
+  color: white;
+}
 
-    .title{
-    color: white;              
-    font-size: 30px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    left: 90px;
-    }
+.layout {
+  display: flex;
+  width: 100%;
+}
 
-    .container {
-    width: 350px;               
-    height: 700px;              
-    border: 2px solid red;      
-    border-radius: 15px;        
-    position: fixed;            
-    top: 56%;                  
-    left: 80%;                 
-    transform: translate(-50%, -50%); 
-    padding: 10px;              
-    background-color: #000000;     
-    }
+/* --- Menu--- */
+.sidebar {
+  width: 250px;
+  background-color: black;
+  border-right: 2px solid red;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 10px;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+}
 
-    .container2 {
-    width: 350px;       
-    height: 100vh;       
-    position: fixed;     
-    top: 0%;              
-    left: 0%;             
-    margin-top: 0;      
-    background-color: #000000; 
-    border: 2px solid red;
-    }
+.sidebar .logo img {
+  width: 120px;
+  margin-bottom: 30px;
+}
 
-    .container3 {
-    width: 680px;               
-    height: 650px;
-    border: 2px solid red;     
-    border-radius: 15px;
-    position: fixed;            
-    top: 18%;                  
-    left: 27%; 
-    padding: 10px;              
-    background-color: #000000;
-    }
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+}
 
-    .container4 {
-    width: 150px;               
-    height: 150px;
-    border: 2px solid red;     
-    border-radius: 15px;
-    position: fixed;            
-    top: 29%;                  
-    left: 51%; 
-    padding: 10px;              
-    background-color: #000000;
-    }
+.menu-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 16px;
+}
 
-    .logo img {
-    width: 80px;
-    height: 80px;
-    position: absolute;     
-    top: 30px;              
-    left: 120px;             
-    resize: both;           
-    overflow: auto;         
-    cursor: move;           
-    transition: all 0.2s ease; 
-    border-radius: 50%;      
-    object-fit: cover;
-    border: 4px solid white;  
-    }
+.menu-button img {
+  width: 28px;
+}
 
-    .logo2 img {
-    width: 58px;          
-    height: auto;
-    display: block;
-    position: fixed;
-    top: 120px;                  
-    left: 50px;
-    margin: 20px auto;     
-    margin-bottom: 5px;
-    }
+.menu-button:hover, .menu-button.active {
+  border: 2px solid white;
+  box-shadow: 0 0 10px rgba(255,255,255,0.6);
+}
 
-    .casita {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    margin: 0;
-    top: 140px;                  
-    left: 120px;
-    }
+/* --- Footer Menu --- */
+.sidebar-footer {
+  margin-top: auto;
+}
 
-    .estiloboton1 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 34px 130px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 130px;              
-    left: 40px;
-    }
+.logout-btn {
+  padding: 10px 20px;
+  background-color: red;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
 
-    .estiloboton1:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
+.logout-btn:hover {
+  background-color: #ff4d4d;
+  box-shadow: 0 0 10px red;
+}
 
-    .logo3 img {
-    width: 55px;          
-    display: block;
-    position: fixed;
-    top: 202px;                  
-    left: 50px;
-    margin: 20px auto;     
-    }
+/* --- Main Content --- */
+.content {
+  margin-left: 250px;
+  padding: 30px;
+  flex: 1;
+}
 
-    .folder {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    top: 215px;                  
-    left: 120px;
-    }
+.title {
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 30px;
+}
 
-    .estiloboton2 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 36px 130px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 204px;              
-    left: 40px;
-    }
+/* --- Search Bar --- */
+.search-bar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+  gap: 10px;
+}
 
-    .estiloboton2:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
+.search-bar input {
+  padding: 10px;
+  border: 2px solid red;
+  border-radius: 8px;
+  background: black;
+  color: white;
+  font-size: 16px;
+  width: 250px;
+}
 
-     .logo4 img {
-    width: 50px;          
-    display: block;
-    position: fixed;
-    top: 281px;                  
-    left: 57px;
-    margin: 20px auto;     
-    }
+.search-btn {
+  background: red;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
 
-    .base {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    top: 295px;                  
-    left: 120px;
-    }
+.search-btn img {
+  width: 20px;
+}
 
-    .estiloboton3 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 36px 130px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 283px;              
-    left: 40px;
-    }
+/* --- Formulario --- */
 
-    .estiloboton3:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
+.form-card h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
 
-    .logo5 img {
-    width: 50px;          
-    display: block;
-    position: fixed;
-    top: 350px;                  
-    left: 50px;
-    margin: 20px auto;     
-    }
+.form-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
 
-    .grafica {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    top: 370px;                  
-    left: 110px;
-    }
+.form-card input {
+  padding: 10px;
+  border: 2px solid red;
+  border-radius: 8px;
+  background: black;
+  color: white;
+  font-size: 16px;
+}
 
-    .estiloboton4 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 36px 130px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 360px;              
-    left: 40px;
-    }
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
 
-    .estiloboton4:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
+.btn {
+  background: red;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  color: white;
+  transition: 0.3s;
+}
 
-    .logo6 img {
-    width: 53px;          
-    display: block;
-    position: fixed;
-    top: 425px;                  
-    left: 47px;
-    margin: 20px auto;     
-    }
+.btn:hover {
+  background: #ff4d4d;
+}
 
-    .personas {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    top: 430px;                  
-    left: 110px;
-    }
+.btn.secondary {
+  background: gray;
+}
 
-    .estiloboton5 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 36px 130px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 435px;              
-    left: 40px;
-    }
+.btn.secondary:hover {
+  background: #666;
+}
 
-    .estiloboton5:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
+.employee-container {
+  display: flex;
+  gap: 30px;
+  align-items: stretch;
+}
 
-    .logo7 img {
-    width: 53px;          
-    display: block;
-    position: fixed;
-    top: 500px;                  
-    left: 50px;
-    margin: 20px auto;     
-    }
+/* --- register --- */
+.register-box {
+  flex: 2; 
+  background-color: black;
+  border: 2px solid red;
+  border-radius: 15px;
+  padding: 25px;
+  color: white;
+  min-height: 500px; 
+  display: flex;
+  flex-direction: column;
+}
 
-    .campana {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    top: 520px;                  
-    left: 110px;
-    }
+/* --- search --- */
+.search-box {
+  flex: 1;
+  background-color: black;
+  border: 2px solid red;
+  border-radius: 15px;
+  padding: 25px;
+  color: white;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+}
 
-    .estiloboton6 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 36px 130px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 510px;              
-    left: 40px;
-    }
+/* --- titles --- */
+.register-box h2,
+.search-box h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 22px;
+  border-bottom: 2px solid red;
+  padding-bottom: 10px;
+}
 
-    .estiloboton6:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
+/* --- Inputs --- */
+.register-box input,
+.search-box input {
+  width: 90%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 2px solid red;
+  border-radius: 8px;
+  background: black;
+  color: white;
+  font-size: 16px;
+  display : flex;
+}
 
-    .logo8 img {
-    width: 53px;          
-    display: block;
-    position: fixed;
-    top: 695px;                  
-    left: 55px;
-    margin: 20px auto;     
-    }
+/* --- Botones --- */
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
 
-    .corazon {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    top: 710px;                  
-    left: 110px;
-    }
+.btn,
+.btn-register,
+.btn-clear {
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+  border: none;
+}
 
-    .estiloboton7 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 36px 130px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 700px;              
-    left: 40px;
-    }
+.btn,
+.btn-register {
+  background-color: red;
+  color: white;
+}
 
-    .estiloboton7:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
+.btn:hover,
+.btn-register:hover {
+  background-color: #ff4d4d;
+}
 
-    .linearoja {
-    height: 3px;             
-    background-color: rgb(255, 0, 0);   
-    width: 280px;             
-    position: fixed;
-    top: 650px;                  
-    left: 39px;
-    }
+.btn-clear {
+  background-color: gray;
+  color: white;
+}
 
-    .btn {
-    width: 200px;                
-    height: 50px;                
-    background-color: red;       
-    color: white;                
-    border: 2px solid transparent;  
-    border-radius: 12px;            
-    font-size: 16px;
-    font-family: 'Arial', sans-serif; 
-    font-weight: bold;              
-    cursor: pointer;                 
-    position: absolute;              
-    top: 785px;                      
-    left: 95px;                      
-    padding: 10px 20px;             
-    transition: border 0.3s, box-shadow 0.3s, background-color 0.3s;
-    }
+.btn-clear:hover {
+  background-color: #666;
+}
 
-    .btn:hover {
-    border: 2px solid white;  
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7); 
-    background-color: #ff4d4d;  
-    }
+/* --- Resultados --- */
+.result-box {
+  margin-top: 20px;
+  padding: 15px;
+  border: 2px dashed red;
+  border-radius: 10px;
+  text-align: center;
+  flex: 1;
+}
 
-    .texto1 {
-    color: white;              
-    font-size: 12px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 1px;                
-    left: 30px;  
-    }
-
-    .texto2 {
-    color: white;              
-    font-size: 12px;            
-    font-weight: bold;                   
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 100px;                
-    left: 40px;  
-    }
-
-    .texto3 {
-    color: white;              
-    font-size: 12px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 230px;                
-    left: 40px;  
-    }
-
-    .texto4 {
-    color: white;              
-    font-size: 12px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 370px;                
-    left: 40px;  
-    }
-
-    .texto5 {
-    color: white;              
-    font-size: 12px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 500px;                
-    left: 40px;  
-    }
-
-    .mas {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    margin: 0;
-    top:200px;                  
-    left: 1049px;
-    }
-
-    .logo9 img {
-    width: 50px;          
-    display: block;
-    position: fixed;
-    top: 185px;                  
-    left: 980px;
-    margin: 20px auto;     
-    }
-
-    .estiloboton8 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 10px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 36px 110px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 18px;              
-    left: 445px;
-    }
-
-    .estiloboton8:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
-
-    .logo10 img {
-    width: 50px;          
-    display: block;
-    position: fixed;
-    top: 453px;                  
-    left: 998px;
-    margin: 20px auto;     
-    }
-
-    .estiloboton9 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 40px 40px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 180px;              
-    left: 0px;
-    }
-
-    .estiloboton9:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
-
-    .logo11 img {
-    width: 40px;          
-    display: block;
-    position: fixed;
-    top: 453px;                  
-    left: 1090px;
-    margin: 20px auto;     
-    }
-
-    .estiloboton10 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 40px 40px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 180px;              
-    left: 85px;
-    }
-
-    .estiloboton10:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
-
-    .logo12 img {
-    width: 30px;        
-    display: block;
-    position: fixed;
-    top: 55px;                  
-    left: 300px;
-    margin: 20px auto;     
-    }
-
-    .estiloboton11 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 20px 20px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 68px;              
-    left: 294px;
-    }
-
-    .estiloboton11:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
-
-    .texto6 {
-    color: white;              
-    font-size: 10px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 1px;                
-    left: 85px;  
-    }
-
-    .campo-texto input {
-    width: 290px;              
-    padding: 10px 10px;        
-    background: black;         
-    border: 2px solid red;     
-    border-radius: 8px;        
-    color: white;              
-    font-size: 16px;           
-    outline: none;             
-    position: absolute;              
-    top: 170px;                      
-    left:40px; 
-    }
-
-    .campo-texto2 input {
-    width: 290px;              
-    padding: 10px 10px;        
-    background: black;         
-    border: 2px solid red;     
-    border-radius: 8px;        
-    color: white;              
-    font-size: 16px;           
-    outline: none;             
-    position: absolute;              
-    top: 300px;                      
-    left:40px; 
-    }
-
-    .campo-texto3 input {
-    width: 290px;              
-    padding: 10px 10px;        
-    background: black;         
-    border: 2px solid red;     
-    border-radius: 8px;        
-    color: white;              
-    font-size: 16px;           
-    outline: none;             
-    position: absolute;              
-    top: 440px;                      
-    left:40px; 
-    }
-
-    .campo-texto4 input {
-    width: 290px;              
-    padding: 10px 10px;        
-    background: black;         
-    border: 2px solid red;     
-    border-radius: 8px;        
-    color: white;              
-    font-size: 16px;           
-    outline: none;             
-    position: absolute;              
-    top: 570px;                      
-    left:40px; 
-    }
-
-    .campo-texto5 input {
-    width: 215px;              
-    padding: 10px 10px;        
-    background: black;         
-    border: 2px solid red;     
-    border-radius: 8px;        
-    color: white;              
-    font-size: 16px;           
-    outline: none;             
-    position: absolute;              
-    top: 70px;                      
-    left:40px; 
-    }
+.result-box img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}

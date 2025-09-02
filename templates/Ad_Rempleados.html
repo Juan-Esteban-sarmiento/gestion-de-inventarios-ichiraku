@@ -3,122 +3,96 @@
 <head>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Rempleados.css') }}">
 </head>
-    <div class="title">
-        <h1>administrator panel</h1>
 <body>
-<div class="container"> 
-    <div class="texto6">
-         <h1>list employments</h1>
-    </div>
-    <div class="campo-texto5">
-        <input type="text" placeholder="Look for ... ">
-    </div>
-    <div class="logo12 estiloboton11" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/lupa.png') }}" alt="lupa">
-    </div>
-</div>
-
-<div class="container2"> 
-    <div class="logo">
+  <div class="layout">
+    
+    <!-- Menu -->
+    <aside class="sidebar">
+      <div class="logo">
         <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
-    </div> 
-    <div class="logo2 estiloboton1" onclick="homeClick()">
-        <img src="{{ url_for('static', filename='image/casita.png') }}" alt="casita">
-        <div class="casita"> 
-            <h1>Home</h1>
-        </div>   
-    </div>
-    <div class="logo3 estiloboton2" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/folder.png') }}" alt="folder">
-        <div class="folder"> 
-            <h1>Employments</h1>
-        </div> 
-    </div>
-    <div class="logo4 estiloboton3" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/base.png') }}" alt="base">
-        <div class="base"> 
-            <h1>Products</h1>
-        </div>  
-    </div>
-    <div class="logo5 estiloboton4" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="grafica">
-        <div class="grafica"> 
-            <h1>Information</h1>
-        </div>
-    </div>
-    <div class="logo6 estiloboton5" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/personas.png') }}" alt="personas">
-        <div class="personas"> 
-            <h1>Points sale</h1>
-        </div>
-    </div>
-    <div class="logo7 estiloboton6" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/campana.png') }}" alt="campana">
-        <div class="campana"> 
-            <h1>Notification</h1>
-        </div>
-    </div>
-    <div class="linearoja"> </div>
-    <div class="logo8 estiloboton7" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="corazon">
-        <div class="corazon"> 
-            <h1>Account</h1>
-        </div>
-    </div>
-    <button type="button" class="btn" onclick="window.location.href='/logout'">LOG OUT</button>
-</div>
+      </div>
 
-<div class="container3"> 
-    <div class="container4"> 
-    </div>
-        <div class="texto1">
-            <h1>Register employments</h1>
-        </div>
-        <div class="texto2">
-            <h1>Name employment</h1>
-        </div>
-        <div class="campo-texto">
-        <input type="text" placeholder="Name Employment ... ">
-        </div>
-        <div class="texto3">
-            <h1>ID</h1>
-        </div>
-        <div class="campo-texto2">
-        <input type="text" placeholder="ID ... ">
-        </div>
-        <div class="texto4">
-            <h1>password</h1> 
-        </div>
-        <div class="campo-texto3">
-        <input type="text" placeholder="Password ... ">
-        </div>
-        <div class="texto5">
-            <h1>Contact Number</h1>
-        </div>
-        <div class="campo-texto4">
-        <input type="text" placeholder="Contact Number ... ">
-        </div>
-    <div class="logo9 estiloboton8" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/mas.png') }}" alt="mas">
-        <div class="mas"> 
-            <h1>Register</h1>
-        </div>
-    </div>
-    <div class="container4">
-    <div class="logo10 estiloboton9" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/subir.png') }}" alt="subir">
-    </div>
-    <div class="logo11 estiloboton10" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/basura.png') }}" alt="basura">
-    </div>
-</div>
+      <nav class="menu">
+        <button onclick="window.location.href='{{ url_for('Ad_Inicio') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Home"> Home
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button active">
+          <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Employees
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Products
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reports
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Puntos de Venta"> Points Sale
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notifications
+        </button>
+      </nav>
 
+      <div class="sidebar-footer">
+        <button onclick="window.location.href='/logout'" class="logout-btn">LOG OUT</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+  <h1 class="title">Administrator Panel</h1>
+
+  <div class="employee-container">
+
+    <!-- Caja izquierda: formulario -->
+    <section class="register-box">
+      <h2>Register Employees</h2>
+      <form id="registerForm">
+        <label>Name</label>
+        <input type="text" id="nombre" placeholder="Name ...">
+
+        <label>ID</label>
+        <input type="text" id="cedula" placeholder="ID ...">
+
+        <label>Password</label>
+        <input type="password" id="contrasena" placeholder="Password ...">
+
+        <label>Contact Number</label>
+        <input type="text" id="contacto" placeholder="Contact Number ...">
+
+        <div class="form-actions">
+          <button type="submit" class="btn">Register</button>
+          <button type="reset" class="btn secondary">Clear</button>
+        </div>
+      </form>
+    </section>
+
+<!-- Caja derecha: búsqueda -->
+<section class="search-box">
+  <h2>List Employees</h2>
+  
+  <!-- Input de búsqueda -->
+  <label for="buscarEmpleado" class="sr-only">Buscar empleado</label>
+  <input 
+    type="text" 
+    id="buscarEmpleado" 
+    placeholder="Search by Name or ID..."
+    autocomplete="off"
+  >
+
+  <!-- Resultados -->
+  <div id="resultEmpleado" class="result-box">
+    <p>No se ha realizado ninguna búsqueda</p>
+  </div>
+</section>
+
+
+  </div>
+  <div id="registerMsg" style="color: green; margin-top: 10px;"></div>
+
+</main>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/Rempleados.js') }}"></script>
 </body>
-<script>
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted) {
-            window.location.reload();
-        }
-    });
-</script>
 </html>
