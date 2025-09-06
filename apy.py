@@ -118,9 +118,6 @@ def buscar_empleado():
     else:
         return jsonify({"success": False, "msg": "Empleado no encontrado"})
 
-
-
-
 @app.route('/Ad_Rproductos', methods=['GET', 'POST'])
 def Ad_Rproductos():
     return render_template("Ad_Rproductos.html")
@@ -150,26 +147,6 @@ def Em_Inicio():
     response.headers['Expires'] = '-1'
     return response
 
-@app.route('/Ad_Rempleados', methods=['GET', 'POST'])
-def Ad_Rempleados():
-    return render_template("Ad_Rempleados.html")
-
-@app.route('/Ad_Rproductos', methods=['GET', 'POST'])
-def Ad_Rproductos():
-    return render_template("Ad_Rproductos.html")
-
-@app.route('/Ad_Dinformes', methods=['GET', 'POST'])
-def Ad_Dinformes():
-    return render_template("Ad_Dinformes.html")
-
-@app.route('/Ad_Rlocales', methods=['GET', 'POST'])
-def Ad_Rlocales():
-    return render_template("Ad_Rlocales.html")
-
-@app.route('/Ad_Pnotificaciones', methods=['GET', 'POST'])
-def Ad_Pnotificaciones():
-    return render_template("Ad_Pnotificaciones.html")
-
 @app.route('/Ad_Ceditar', methods=['GET', 'POST'])
 def Ad_Ceditar():
     return render_template("Ad_Ceditar.html")
@@ -183,4 +160,4 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-app.run(debug=True)
+    app.run(debug=True)
