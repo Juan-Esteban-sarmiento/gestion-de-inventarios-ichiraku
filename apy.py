@@ -147,11 +147,14 @@ def Em_Inicio():
     response.headers['Expires'] = '-1'
     return response
 
+<<<<<<< HEAD
 @app.route('/Ad_Ceditar', methods=['GET', 'POST'])
 def Ad_Ceditar():
     return render_template("Ad_Ceditar.html")
 
 
+=======
+>>>>>>> e034c6eb84f918ebbc63ab5ca0016309ae842980
 #configuracion de cierre de sesion
 
 @app.route('/logout')
