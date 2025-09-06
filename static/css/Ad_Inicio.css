@@ -94,9 +94,16 @@ body {
 }
 
 .main-content {
-  flex: 1;
   padding: 40px;
   position: relative;
+}
+
+.welcome-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 40px;
 }
 
 .welcome-title {
@@ -128,11 +135,14 @@ body {
 
 .logo-main {
   position: absolute;
-  right: 50px;
+  left: 750px;
   top: 150px;
 }
 
 .logo-main img {
-  width: 500px;
-  height: 450px;
+  width: 500px;        
+  max-width: 500px;    
+  height: auto;       
 }
+
+
