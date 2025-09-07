@@ -4,49 +4,34 @@
   <meta charset="UTF-8">
   <title>Ichiraku Ramen - Admin</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Inicio.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
 </head>
 <body>
-
   <div class="sidebar">
     <div class="logo">
       <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
     </div>
 
-    <div class="menu-button" onclick="window.location.href='{{ url_for('Ad_Inicio') }}'">
-      <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Home">
-      <span>Home</span>
-    </div>
-
-    <div class="menu-button" onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'">
-      <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados">
-      <span>Employees</span>
-    </div>
-
-    <div class="menu-button" onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'">
-      <img src="{{ url_for('static', filename='image/base.png') }}" alt="Products">
-      <span>Products</span>
-    </div>
-
-    <div class="menu-button" onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'">
-      <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reports">
-      <span>Reports</span>
-    </div>
-
-    <div class="menu-button" onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'">
-      <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales">
-      <span>Points Sale</span>
-    </div>
-
-    <div class="menu-button" onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'">
-      <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notifications">
-      <span>Notifications</span>
-    </div>
-
-    <div class="menu-button" onclick="homeClick()">
-      <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Account">
-      <span>Account</span>
-    </div>
-
+    <nav class="menu">
+        <button onclick="window.location.href='{{ url_for('Ad_Inicio') }}'" class="menu-button active">
+          <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Home"> Home
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Employees
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Products
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reports
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Puntos de Venta"> Points Sale
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notifications
+        </button>
+      </nav>
     <button class="logout-btn" onclick="window.location.href='/logout'">LOG OUT</button>
   </div>
 

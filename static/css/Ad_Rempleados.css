@@ -40,15 +40,15 @@ body {
 .menu {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 10px;
   width: 100%;
 }
 
 .menu-button {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
+  gap: 25px;
+  padding: 25px;
   background: none;
   border: 2px solid transparent;
   border-radius: 10px;
@@ -56,15 +56,22 @@ body {
   cursor: pointer;
   transition: 0.3s;
   font-size: 16px;
+  width: 100%;
 }
 
-.menu-button img {
-  width: 28px;
-}
-
-.menu-button:hover, .menu-button.active {
+.menu-button:hover,
+.menu-button.active {
   border: 2px solid white;
   box-shadow: 0 0 10px rgba(255,255,255,0.6);
+}
+.menu-button img {
+  width: 40px;
+  height: auto;
+}
+
+.menu-button span {
+  margin-top: 5px;
+  font-size: 14px;
 }
 
 /* --- Footer Menu --- */
@@ -96,7 +103,7 @@ body {
 
 .title {
   text-align: center;
-  font-size: 32px;
+  font-size: 65px;
   margin-bottom: 30px;
 }
 
