@@ -5,338 +5,219 @@
   font-style: normal;
 }
 
-body {
-      font-family: 'njnaruto';
-      background: url('../image/fondo.png') repeat;
-      display: flex;
-      justify-content: center;
-      height: 67vh;
-    }
+.layout {
+  display: flex;
+  width: 100%;
+}
+/* --- Main Content --- */
+.content {
+  margin-left: 10px;
+  padding: 30px;
+  flex: 1;
+}
 
-    .title{
-    color: white;              
-    font-size: 30px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    left: 90px;
-    }
+.title {
+  text-align: center;
+  font-size: 65px;
+  margin-bottom: 30px;
+}
 
-    .container {
-    width: 350px;               
-    height: 700px;              
-    border: 2px solid red;      
-    border-radius: 15px;        
-    position: fixed;            
-    top: 56%;                  
-    left: 80%;                 
-    transform: translate(-50%, -50%); 
-    padding: 10px;              
-    background-color: #000000;     
-    }
+/* --- Search Bar --- */
+.search-bar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+  gap: 10px;
+}
 
-    .container3 {
-    width: 680px;               
-    height: 650px;
-    border: 2px solid red;     
-    border-radius: 15px;
-    position: fixed;            
-    top: 18%;                  
-    left: 27%; 
-    padding: 10px;              
-    background-color: #000000;
-    }
+.search-bar input {
+  padding: 10px;
+  border: 2px solid red;
+  border-radius: 8px;
+  background: black;
+  color: white;
+  font-size: 16px;
+  width: 250px;
+}
 
-    .container4 {
-    width: 150px;               
-    height: 150px;
-    border: 2px solid red;     
-    border-radius: 15px;
-    position: fixed;            
-    top: 29%;                  
-    left: 51%; 
-    padding: 10px;              
-    background-color: #000000;
-    }
+.search-btn {
+  background: red;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
 
-    .texto1 {
-    color: white;              
-    font-size: 12px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 1px;                
-    left: 30px;  
-    }
+.search-btn img {
+  width: 20px;
+}
 
-    .texto2 {
-    color: white;              
-    font-size: 12px;            
-    font-weight: bold;                   
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 100px;                
-    left: 40px;  
-    }
+/* --- Formulario --- */
 
-    .texto3 {
-    color: white;              
-    font-size: 12px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 230px;                
-    left: 40px;  
-    }
+.form-card h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
 
-    .texto4 {
-    color: white;              
-    font-size: 12px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 370px;                
-    left: 40px;  
-    }
+.form-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
 
-    .texto5 {
-    color: white;              
-    font-size: 12px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 500px;                
-    left: 40px;  
-    }
+.form-card input {
+  padding: 10px;
+  border: 2px solid red;
+  border-radius: 8px;
+  background: black;
+  color: white;
+  font-size: 16px;
+}
 
-    .mas {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    margin: 0;
-    top:200px;                  
-    left: 1049px;
-    }
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
 
-    .logo9 img {
-    width: 50px;          
-    display: block;
-    position: fixed;
-    top: 185px;                  
-    left: 980px;
-    margin: 20px auto;     
-    }
+.icon {
+  width: 60px;
+  height: 60px;
+  vertical-align: middle;
+  margin-right: 8px;
+}
 
-    .estiloboton8 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 10px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 36px 110px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 19px;              
-    left: 450px;
-    }
+.btn {
+  background: rgb(0, 0, 0);
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  color: rgb(0, 0, 0);
+  transition: 0.3s;
+}
 
-    .estiloboton8:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
+.btn:hover {
+  background: #ffffff;
+  color: #000000;
+}
 
-    .logo10 img {
-    width: 50px;          
-    display: block;
-    position: fixed;
-    top: 453px;                  
-    left: 998px;
-    margin: 20px auto;     
-    }
+.btn.secondary {
+  background: rgb(0, 0, 0);
+}
 
-    .estiloboton9 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 40px 40px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 180px;              
-    left: 0px;
-    }
+.btn.secondary:hover {
+  background: #ffffff;
+  color: #000000;
+}
 
-    .estiloboton9:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
+.btn.danger {
+  background: rgb(0, 0, 0);
+}
 
-    .logo11 img {
-    width: 40px;          
-    display: block;
-    position: fixed;
-    top: 453px;                  
-    left: 1090px;
-    margin: 20px auto;     
-    }
+.btn.danger:hover {
+  background: #ffffff;
+  color: #000000;
+}
 
-    .estiloboton10 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 40px 40px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 180px;              
-    left: 85px;
-    }
+.product-container {
+  display: flex;
+  gap: 30px;
+  align-items: stretch;
+}
 
-    .estiloboton10:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
+.register-box {
+  flex: 2; 
+  background-color: black;
+  border: 2px solid red;
+  border-radius: 15px;
+  padding: 25px;
+  color: white;
+  min-height: 500px; 
+  display: flex;
+  flex-direction: column;
+  }
 
-    .logo12 img {
-    width: 30px;        
-    display: block;
-    position: fixed;
-    top: 55px;                  
-    left: 300px;
-    margin: 20px auto;     
-    }
+/* --- search --- */
+.search-box {
+  flex: 1;
+  background-color: black;
+  border: 2px solid red;
+  border-radius: 15px;
+  padding: 25px;
+  color: white;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+}
 
-    .estiloboton11 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 20px 20px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 68px;              
-    left: 294px;
-    }
+/* --- titles --- */
+.register-box h2,
+.search-box h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 22px;
+  border-bottom: 2px solid red;
+  padding-bottom: 10px;
+}
 
-    .estiloboton11:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
+/* --- Inputs --- */
+.register-box input,
+.search-box input {
+  width: 90%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 2px solid red;
+  border-radius: 8px;
+  background: black;
+  color: white;
+  font-size: 16px;
+  display : flex;
+}
 
-    .texto6 {
-    color: white;              
-    font-size: 10px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 1px;                
-    left: 85px;  
-    }
+/* --- Botones --- */
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
 
-    .campo-texto input {
-    width: 290px;              
-    padding: 10px 10px;        
-    background: black;         
-    border: 2px solid red;     
-    border-radius: 8px;        
-    color: white;              
-    font-size: 16px;           
-    outline: none;             
-    position: absolute;              
-    top: 170px;                      
-    left:40px; 
-    }
+.btn,
+.btn-register,
+.btn-clear {
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+  border: none;
+}
 
-    .campo-texto2 input {
-    width: 290px;              
-    padding: 10px 10px;        
-    background: black;         
-    border: 2px solid red;     
-    border-radius: 8px;        
-    color: white;              
-    font-size: 16px;           
-    outline: none;             
-    position: absolute;              
-    top: 300px;                      
-    left:40px; 
-    }
+.btn,
+.btn-register {
+  background-color: transparent;
+  color: white;
+}
 
-    .campo-texto3 input {
-    width: 290px;              
-    padding: 10px 10px;        
-    background: black;         
-    border: 2px solid red;     
-    border-radius: 8px;        
-    color: white;              
-    font-size: 16px;           
-    outline: none;             
-    position: absolute;              
-    top: 440px;                      
-    left:40px; 
-    }
+.btn:hover,
+.btn-register:hover {
+  background-color: #f8f8f8;
+  color: #000000;
+}
 
-    .campo-texto4 input {
-    width: 290px;              
-    padding: 10px 10px;        
-    background: black;         
-    border: 2px solid red;     
-    border-radius: 8px;        
-    color: white;              
-    font-size: 16px;           
-    outline: none;             
-    position: absolute;              
-    top: 570px;                      
-    left:40px; 
-    }
+/* --- Resultados --- */
+.result-box {
+  margin-top: 20px;
+  padding: 15px;
+  border: 2px dashed red;
+  border-radius: 10px;
+  text-align: center;
+  flex: 1;
+}
 
-    .campo-texto5 input {
-    width: 215px;              
-    padding: 10px 10px;        
-    background: black;         
-    border: 2px solid red;     
-    border-radius: 8px;        
-    color: white;              
-    font-size: 16px;           
-    outline: none;             
-    position: absolute;              
-    top: 70px;                      
-    left:40px; 
-    }
-
+.result-box img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
     

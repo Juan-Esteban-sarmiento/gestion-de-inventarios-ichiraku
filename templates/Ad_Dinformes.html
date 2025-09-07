@@ -2,92 +2,71 @@
 <html lang="es">
 <head>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Dinformes.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
 </head>
-    <div class="title">
-        <h1>administrator panel</h1>
 <body>
-<div class="container"> 
-    <div class="texto1">
-        <h1>date</h1>
-    </div>
-    <div class="campo-texto">
-        <input type="text" placeholder="DATE ... ">
-    </div>
-    <div class="texto2">
-        <h1>Name product</h1>
-    </div>
-    <div class="campo-texto2">
-        <input type="text" placeholder="NAME PRODUCT ... ">
-    </div>
-    <div class="texto3">
-        <h1>local name</h1>
-    </div>
-    <div class="campo-texto3">
-        <input type="text" placeholder="LOCAL NAME ... ">
-    </div>
-    <div class="texto4">
-        <h1>search</h1>
-    </div>
-    <div class="campo-texto4">
-        <input type="text" placeholder="SEARCH ... ">
-    </div>
-</div>
+    <div class="layout">
+            <div class="sidebar">
+                <div class="logo">
+                <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
+                </div>
 
-<div class="container2"> 
-    <div class="logo">
-        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
-    </div> 
-    <div class="logo2 estiloboton1" onclick="window.location.href='{{ url_for('Ad_Inicio') }}'">
-        <img src="{{ url_for('static', filename='image/casita.png') }}" alt="casita">
-        <div class="casita"> 
-            <h1>Home</h1>
-        </div>   
-    </div>
-    <div class="logo3 estiloboton2" onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'">  
-        <img src="{{ url_for('static', filename='image/folder.png') }}" alt="folder">
-        <div class="folder"> 
-            <h1>Employments</h1>
-        </div> 
-    </div>
-    <div class="logo4 estiloboton3" onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'">  
-        <img src="{{ url_for('static', filename='image/base.png') }}" alt="base">
-        <div class="base"> 
-            <h1>Products</h1>
-        </div>  
-    </div>
-    <div class="logo5 estiloboton4" onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'">  
-        <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="grafica">
-        <div class="grafica"> 
-            <h1>Information</h1>
+            <nav class="menu">
+                <button onclick="window.location.href='{{ url_for('Ad_Inicio') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Home"> Home
+                </button>
+                <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Employees
+                </button>
+                <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Products
+                </button>
+                <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button active">
+                <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reports
+                </button>
+                <button onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Puntos de Venta"> Points Sale
+                </button>
+                <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notifications
+                </button>
+                <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> user
+                </button>
+            </nav>
+            <button class="logout-btn" onclick="window.location.href='/logout'">LOG OUT</button>
         </div>
+
+        <main class="content">
+            <h1 class="title">Administrator Panel</h1>
+
+            <!-- Caja de búsqueda -->
+            <div class="search-box">
+                <form id="searchForm">
+                    <input type="text" id="date" placeholder="DATE ...">
+                    <input type="text" id="productName" placeholder="NAME PRODUCT ...">
+                    <input type="text" id="localName" placeholder="LOCAL NAME ...">
+                    <input type="text" id="search" placeholder="SEARCH ...">
+                </form>
+            </div>
+
+            <!-- Resultados -->
+                <div id="resultEmpleado" class="result-box">
+                <p>No se ha realizado ninguna busqueda</p>
+                </div>
+            </section>
+        </main>
     </div>
-    <div class="logo6 estiloboton5" onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'">  
-        <img src="{{ url_for('static', filename='image/personas.png') }}" alt="personas">
-        <div class="personas"> 
-            <h1>Points sale</h1>
-        </div>
+
+    <div class="download-container">
+        <button  class="download-button">
+            <img src="{{ url_for('static', filename='image/descargar.png') }}" alt="Editar"> Download
+        </button>
     </div>
-    <div class="logo7 estiloboton6" onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'">  
-        <img src="{{ url_for('static', filename='image/campana.png') }}" alt="campana">
-        <div class="campana"> 
-            <h1>Notification</h1>
-        </div>
-    </div>
-    <div class="linearoja"> </div>
-    <div class="logo8 estiloboton7" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="corazon">
-        <div class="corazon"> 
-            <h1>Account</h1>
-        </div>
-    </div>
-    <button type="button" class="btn" onclick="window.location.href='/logout'">LOG OUT</button>
-</div>
-<div class="logo9 estiloboton8" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/descargar.png') }}" alt="descargar">
-        <div class="descargar"> 
-            <h1>DONWLOAD</h1>
-        </div>
-    </div>
+
+
+    
+
 </body>
 <script>
     window.addEventListener('pageshow', function(event) {

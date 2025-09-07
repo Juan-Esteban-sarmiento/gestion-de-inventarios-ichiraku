@@ -6,32 +6,21 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Rproductos.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
 </head>
-    <body>
-<div class="container"> 
-    <div class="texto6">
-         <h1>list point of sale</h1>
-    </div>
-    <div class="campo-texto5">
-        <input type="text" placeholder="Look for ... ">
-    </div>
-    <div class="logo12 estiloboton11" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/lupa.png') }}" alt="lupa">
-    </div>
-</div>
+  <body>
 
-<div class="sidebar">
-    <div class="logo">
-      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
-    </div>
+  <div class="sidebar">
+      <div class="logo">
+        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
+      </div>
 
     <nav class="menu">
-        <button onclick="window.location.href='{{ url_for('Ad_Inicio') }}'" class="menu-button active">
+        <button onclick="window.location.href='{{ url_for('Ad_Inicio') }}'" class="menu-button">
           <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Home"> Home
         </button>
         <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
           <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Employees
         </button>
-        <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
+        <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button active">
           <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Products
         </button>
         <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button">
@@ -43,53 +32,80 @@
         <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
           <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notifications
         </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> user
+        </button>
       </nav>
     <button class="logout-btn" onclick="window.location.href='/logout'">LOG OUT</button>
   </div>
 
-<div class="container3"> 
-    <div class="container4"> 
+<!-- Main Content -->
+<main class="content">
+  <h1 class="title">Administrator Panel</h1>
+
+  <div class="product-container">
+
+    <!-- Caja izquierda: formulario -->
+    <section class="register-box">
+      <h2>Register Product</h2>
+      <form id="registerProductForm">
+
+        <label for="nombreProducto">Name Product</label>
+        <input type="text" id="nombreProducto" placeholder="Name Product ..." required>
+
+        <label for="categoriaProducto">Product Category</label>
+        <input type="text" id="categoriaProducto" placeholder="Product Category ..." required>
+
+        <label for="unidadProducto">Unit</label>
+        <input type="text" id="unidadProducto" placeholder="Unit ..." required>
+
+        <label for="serialProducto">Product Serial</label>
+        <input type="text" id="serialProducto" placeholder="Product Serial ..." required>
+
+        <div class="form-actions">
+          <button type="submit" class="btn">
+            <img class="icon" src="{{ url_for('static', filename='image/mas.png') }}" alt="mas" />
+            Register
+          </button>
+
+          <button type="button" class="btn secondary" onclick="uploadClick()">
+            <img class="icon" src="{{ url_for('static', filename='image/subir.png') }}" alt="subir" />
+            Upload
+          </button>
+
+          <button type="button" class="btn danger" onclick="deleteClick()">
+            <img class="icon" src="{{ url_for('static', filename='image/basura.png') }}" alt="basura" />
+            Delete
+          </button>
+        </div>
+
+      </form>
+    </section>
+
+  <!-- Caja derecha: búsqueda -->
+  <section class="search-box">
+    <h2>List Point of Sale</h2>
+    
+    <!-- Input de búsqueda -->
+    <label for="buscarEmpleado" class="sr-only">LIST POINT OF SALE</label>
+    <input
+      type="text"
+      id="buscarEmpleado"
+      placeholder="Search by Name or Serial"
+      autocomplete="off"
+    >
+
+    <!-- Resultados -->
+    <div id="resultEmpleado" class="result-box">
+      <p>No se ha realizado ninguna búsqueda</p>
     </div>
-        <div class="texto1">
-            <h1>Register Product</h1>
-        </div>
-        <div class="texto2">
-            <h1>Name product</h1>
-        </div>
-        <div class="campo-texto">
-        <input type="text" placeholder="Name Product ... ">
-        </div>
-        <div class="texto3">
-            <h1>Product category</h1>
-        </div>
-        <div class="campo-texto2">
-        <input type="text" placeholder="Product Category ... ">
-        </div>
-        <div class="texto4">
-            <h1>unit</h1> 
-        </div>
-        <div class="campo-texto3">
-        <input type="text" placeholder="Unit ... ">
-        </div>
-        <div class="texto5">
-            <h1>Product serial</h1>   
-        </div>
-        <div class="campo-texto4">
-        <input type="text" placeholder="Product Serial ... ">
-        </div>
-    <div class="logo9 estiloboton8" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/mas.png') }}" alt="mas">
-        <div class="mas"> 
-            <h1>Register</h1>
-        </div>
+  </section>
+
+
     </div>
-    <div class="container4">
-    <div class="logo10 estiloboton9" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/subir.png') }}" alt="subir">
-    </div>
-    <div class="logo11 estiloboton10" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/basura.png') }}" alt="basura">
-    </div>
+    <div id="registerMsg" style="color: green; margin-top: 10px;"></div>
+
+  </main>
 </div>
 
 </body>
