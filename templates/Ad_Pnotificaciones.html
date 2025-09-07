@@ -2,88 +2,93 @@
 <html lang="es">
 <head>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Pnotificaciones.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Menu.css') }}">
 </head>
-    <div class="title">
-        <h1>administrator panel</h1>
 <body>
 
-<div class="container"> 
-    <div class="texto1">
-        <h1>Date</h1>
-    </div>
-    <div class="campo-texto">
-        <input type="text" placeholder="Date ... ">
-    </div>
-    <div class="texto2">
-        <h1>Search</h1>
-    </div>
-    <div class="campo-texto2">
-        <input type="text" placeholder="Search ... ">
-    </div>
-    <img class="naruto" src="{{ url_for('static', filename='image/person 1.png') }}" alt="Naruto">
-    <div class="logo12 estiloboton8" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/lupa.png') }}" alt="lupa">
-    </div>
-    <div class="container3">
-    </div>
-</div>
-
-<div class="container2"> 
-    <div class="logo">
+  <!-- Sidebar -->
+  <div class="sidebar">
+      <div class="logo">
         <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
-    </div> 
-    <div class="logo2 estiloboton1" onclick="window.location.href='{{ url_for('Ad_Inicio') }}'">
-        <img src="{{ url_for('static', filename='image/casita.png') }}" alt="casita">
-        <div class="casita"> 
-            <h1>Home</h1>
-        </div>   
-    </div>
-    <div class="logo3 estiloboton2" onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'">  
-        <img src="{{ url_for('static', filename='image/folder.png') }}" alt="folder">
-        <div class="folder"> 
-            <h1>Employments</h1>
-        </div> 
-    </div>
-    <div class="logo4 estiloboton3" onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'">  
-        <img src="{{ url_for('static', filename='image/base.png') }}" alt="base">
-        <div class="base"> 
-            <h1>Products</h1>
-        </div>  
-    </div>
-    <div class="logo5 estiloboton4" onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'">  
-        <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="grafica">
-        <div class="grafica"> 
-            <h1>Information</h1>
+      </div>
+
+      <nav class="menu">
+          <button onclick="window.location.href='{{ url_for('Ad_Inicio') }}'" class="menu-button">
+            <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Home"> Home
+          </button>
+          <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
+            <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Employees
+          </button>
+          <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
+            <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Products
+          </button>
+          <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button">
+            <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reports
+          </button>
+          <button onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'" class="menu-button">
+            <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Puntos de Venta"> Points Sale
+          </button>
+          <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button active">
+            <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notifications
+          </button>
+          <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
+            <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> User
+          </button>
+        </nav>
+      <button class="logout-btn" onclick="window.location.href='/logout'">LOG OUT</button>
+  </div>
+
+  <!-- Main Content -->
+  <main class="main-content">
+      <div class="welcome-box">
+        <h1 class="welcome-title">Administrator Panel</h1>
+      </div>
+
+        <!-- Contenedor de notificaciones -->
+        <div class="notification-container">
+
+            <!-- Caja única para filtros y notificaciones -->
+            <section class="search-box">
+                <h2>List Notifications</h2>
+
+                <!-- Barra de filtros (fecha + búsqueda) -->
+                <div class="filters">
+                    <input type="date" class="filter-input">
+                    <input type="text" class="filter-input" placeholder="Search ...">
+                </div>
+
+                <!-- Listado dinámico desde la base de datos -->
+                <div class="notifications-list">
+                    {% for noti in notificaciones %}
+                    <div class="notification-item">
+                        <!-- Icono izquierda -->
+                        <img src="{{ url_for('static', filename='image/campana.png') }}" 
+                            class="icon-left" alt="Bell">
+
+                        <!-- Texto -->
+                        <span class="notification-text">
+                            {{ noti.mensaje }} <br>
+                            <small>{{ noti.fecha }}</small>
+                        </span>
+
+                        <!-- Icono derecha según estado -->
+                        {% if noti.estado == 'leido' %}
+                        <img src="{{ url_for('static', filename='image/check.png') }}" 
+                            class="icon-right" alt="Check">
+                        {% else %}
+                        <img src="{{ url_for('static', filename='image/x.png') }}" 
+                            class="icon-right" alt="No leído">
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <p style="text-align:center; color:white;">No hay notificaciones disponibles</p>
+                    {% endfor %}
+                </div>
+            </section>
+
         </div>
-    </div>
-    <div class="logo6 estiloboton5" onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'">  
-        <img src="{{ url_for('static', filename='image/personas.png') }}" alt="personas">
-        <div class="personas"> 
-            <h1>Points sale</h1>
-        </div>
-    </div>
-    <div class="logo7 estiloboton6" onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'">  
-        <img src="{{ url_for('static', filename='image/campana.png') }}" alt="campana">
-        <div class="campana"> 
-            <h1>Notification</h1>
-        </div>
-    </div>
-    <div class="linearoja"> </div>
-    <div class="logo8 estiloboton7" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="corazon">
-        <div class="corazon"> 
-            <h1>Account</h1>
-        </div>
-    </div>
-    <button type="button" class="btn" onclick="window.location.href='/logout'">LOG OUT</button>
-</div>
+      </div>
+  </main>
 
 </body>
-<script>
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted) {
-            window.location.reload();
-        }
-    });
-</script>
 </html>

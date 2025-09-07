@@ -2,110 +2,93 @@
 <html lang="es">
 <head>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Ceditar.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
 </head>
-    <div class="title">
-        <h1>administrator panel</h1>
 <body>
 
-<div class="container"> 
-    <div class="container3">
-        <div class="texto1">
-        <h1>Name</h1>
-    </div>
-    <div class="campo-texto">
-        <input type="text" placeholder="Name ... ">
-    </div>
-    <div class="texto2">
-        <h1>ID</h1>
-    </div>
-    <div class="campo-texto2">
-        <input type="text" placeholder="ID ... ">
-    </div>
-    <div class="texto3">
-        <h1>Password</h1>
-    </div>
-    <div class="campo-texto3">
-        <input type="text" placeholder="Password ... ">
-    </div>
-    <div class="texto4">
-        <h1>Contat number</h1>
-    </div>
-    <div class="campo-texto4">
-        <input type="text" placeholder="Contat number ... ">
-    </div>
-    <div class="estiloboton8" onclick="homeClick()">
-        <div class="Confirmacion"> 
-            <h1>Confirmation</h1>
-        </div>   
-    </div>
-    <img class="naruto" src="{{ url_for('static', filename='image/person 1.png') }}" alt="Naruto">
-    <div class="logo10 estiloboton9" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/subir.png') }}" alt="subir">
-    </div>
-    <div class="logo11 estiloboton10" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/basura.png') }}" alt="basura">
-    </div>
-    </div>
-    <div class="container4">
-    </div>
-</div>
+  <div class="layout">
+      <div class="sidebar">
+          <div class="logo">
+            <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
+          </div>
 
-<div class="container2"> 
-    <div class="logo">
-        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
-    </div> 
-    <div class="logo2 estiloboton1" onclick="homeClick()">
-        <img src="{{ url_for('static', filename='image/casita.png') }}" alt="casita">
-        <div class="casita"> 
-            <h1>Home</h1>
-        </div>   
-    </div>
-    <div class="logo3 estiloboton2" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/folder.png') }}" alt="folder">
-        <div class="folder"> 
-            <h1>Employments</h1>
-        </div> 
-    </div>
-    <div class="logo4 estiloboton3" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/base.png') }}" alt="base">
-        <div class="base"> 
-            <h1>Products</h1>
-        </div>  
-    </div>
-    <div class="logo5 estiloboton4" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="grafica">
-        <div class="grafica"> 
-            <h1>Information</h1>
-        </div>
-    </div>
-    <div class="logo6 estiloboton5" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/personas.png') }}" alt="personas">
-        <div class="personas"> 
-            <h1>Points sale</h1>
-        </div>
-    </div>
-    <div class="logo7 estiloboton6" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/campana.png') }}" alt="campana">
-        <div class="campana"> 
-            <h1>Notification</h1>
-        </div>
-    </div>
-    <div class="linearoja"> </div>
-    <div class="logo8 estiloboton7" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="corazon">
-        <div class="corazon"> 
-            <h1>Account</h1>
-        </div>
-    </div>
-    <button type="button" class="btn" onclick="window.location.href='/logout'">LOG OUT</button>
-</div>
+          <nav class="menu">
+              <button onclick="window.location.href='{{ url_for('Ad_Inicio') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Home"> Home
+              </button>
+              <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Employees
+              </button>
+              <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Products
+              </button>
+              <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reports
+              </button>
+              <button onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Puntos de Venta"> Points Sale
+              </button>
+              <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notifications
+              </button>
+              <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button active">
+                <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> User
+              </button>
+          </nav>
+          <button class="logout-btn" onclick="window.location.href='/logout'">LOG OUT</button>
+      </div>
+
+      <main class="main-content">
+          <div class="welcome-box">
+              <h1 class="welcome-title">Administrator Panel</h1>
+          </div>
+
+          <div class="form-container">
+              <!-- Formulario -->
+              <form action="{{ url_for('Ad_Ceditar') }}" method="POST" class="edit-form">
+                  <label for="name">Name:</label>
+                  <input type="text" id="name" name="name" value="{{ user.name }}" required>
+
+                  <label for="id">ID:</label>
+                  <input type="text" id="id" name="id" value="{{ user.id }}" readonly>
+
+                  <label for="password">Password:</label>
+                  <input type="password" id="password" name="password" placeholder="********">
+
+                  <div class="form-links">
+                    <a href="#">Change Password</a>
+                    <a href="#">Recover Password</a>
+                  </div>
+
+                  <label for="contact">Contact Number:</label>
+                  <input type="text" id="contact" name="contact" value="{{ user.contact }}">
+
+                  <div class="form-links">
+                    <a href="#">Change Contact Number</a>
+                  </div>
+
+                  <button type="submit" class="submit-btn">Confirm</button>
+              </form>
+
+              <!-- Foto -->
+              <div class="profile-section">
+                  <img src="{{ user.photo_url if user.photo_url else url_for('static', filename='image/default.png') }}"
+                       alt="Foto de usuario"
+                       onerror="this.onerror=null; this.src='{{ url_for('static', filename='image/default-user.png') }}';">
+
+                  <button class="profile-btn">Upload/Change Photo</button>
+                  <button class="profile-btn delete">Delete Photo</button>
+              </div>
+          </div>
+      </main>
+  </div>
 
 </body>
 <script>
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted) {
-            window.location.reload();
-        }
-    });
+  window.addEventListener('pageshow', function(event) {
+      if (event.persisted) {
+          window.location.reload();
+      }
+  });
 </script>
 </html>
