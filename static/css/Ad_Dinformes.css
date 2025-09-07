@@ -1,547 +1,125 @@
 @font-face {
   font-family: 'njnaruto';
   src: url('../fonts/njnaruto.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
 }
 
 body {
-      font-family: 'njnaruto';
-      background: url('../image/fondo.png') repeat;
-      display: flex;
-      justify-content: center;
-      height: 67vh;
-    }
+  margin: 0;
+  font-family: 'njnaruto', sans-serif;
+  background: url('../image/fondo.png') repeat;
+  min-height: 100vh;
+  color: white;
+}
 
-    .title{
-    color: white;              
-    font-size: 30px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    left: 90px;
-    }
+.layout {
+  display: flex;
+  width: 100%;
+}
 
-    .container {
-    width: 1300px;               
-    height: 100px;              
-    border: 2px solid red;      
-    border-radius: 20px;        
-    position: fixed;            
-    top: 25%;                  
-    left: 60%;                 
-    transform: translate(-50%, -50%); 
-    padding: 10px;              
-    background-color: #000000;     
-    }
+/* --- Main Content --- */
+.content {
+  margin-left: 10px;
+  padding: 30px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
 
-    .container2 {
-    width: 350px;       
-    height: 100vh;       
-    position: fixed;     
-    top: 0%;              
-    left: 0%;             
-    margin-top: 0;      
-    background-color: #000000; 
-    border: 2px solid red;
-    }
+.title {
+  text-align: center;
+  font-size: 65px;
+  margin-bottom: 30px;
+}
 
-    .container3 {
-    width: 680px;               
-    height: 650px;
-    border: 2px solid red;     
-    border-radius: 15px;
-    position: fixed;            
-    top: 18%;                  
-    left: 27%; 
-    padding: 10px;              
-    background-color: #000000;
-    }
+.search-box {
+  display: flex;
+  justify-content: space-around;
+  align-items: 20px;
+  background: black;
+  border: 2px solid #e63900;
+  border-radius: 12px;
+  padding: 10px;
+  gap: 50px;
+  display: flex;
+}
 
-    .logo img {
-    width: 80px;
-    height: 80px;
-    position: absolute;     
-    top: 30px;              
-    left: 120px;             
-    resize: both;           
-    overflow: auto;         
-    cursor: move;           
-    transition: all 0.2s ease; 
-    border-radius: 50%;      
-    object-fit: cover;
-    border: 4px solid white;  
-    }
+.search-box input {
+  background: black;
+  color: white;
+  font-weight: bold;
+  text-transform: uppercase;
+  border: 2px solid #e63900;
+  border-radius: 6px;
+  padding: 10px 20px;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+  font-family: 'njnaruto';
+  src: url('../fonts/njnaruto.ttf') format('truetype');
+  margin-right: 40px;
+  width: 250px; 
+}
 
-    .logo2 img {
-    width: 58px;          
-    height: auto;
-    display: block;
-    position: fixed;
-    top: 120px;                  
-    left: 50px;
-    margin: 20px auto;     
-    margin-bottom: 5px;
-    }
+.search-box input::placeholder {
+  color: white;
+  font-weight: bold;
+}
 
-    .casita {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    margin: 0;
-    top: 140px;                  
-    left: 120px;
-    }
+.search-box input:focus {
+  outline: none;
+  border-color: white;
+}
 
-    .estiloboton1 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 34px 130px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 130px;              
-    left: 40px;
-    }
+/* --- Resultados --- */
+.result-box {
+  background-color: black;
+  margin-top: 20px;
+  padding: 15px;
+  border: 2px dashed red;
+  border-radius: 10px;
+  text-align: center;
+}
 
-    .estiloboton1:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
+.result-box img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
 
-    .logo3 img {
-    width: 55px;          
-    display: block;
-    position: fixed;
-    top: 202px;                  
-    left: 50px;
-    margin: 20px auto;     
-    }
+.download-container { 
+  position: absolute;
+  bottom: 20px; 
+  left: 57%;  
+  transform: translateX(-50%);
+  z-index: 9999;
+  position: absolute;
+}
 
-    .folder {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    top: 215px;                  
-    left: 120px;
-    }
+.download-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 15px;
+  background: black;
+  color: #e63900; 
+  font-size: 24px;
+  font-weight: bold;
+  border: 2px solid #e63900;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: 'njnaruto';
+  src: url('../fonts/njnaruto.ttf') format('truetype');
+  
+}
 
-    .estiloboton2 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 36px 130px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 204px;              
-    left: 40px;
-    }
+.download-button img {
+  width: 28px;
+  height: 28px;
+}
 
-    .estiloboton2:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
-
-     .logo4 img {
-    width: 50px;          
-    display: block;
-    position: fixed;
-    top: 281px;                  
-    left: 57px;
-    margin: 20px auto;     
-    }
-
-    .base {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    top: 295px;                  
-    left: 120px;
-    }
-
-    .estiloboton3 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 36px 130px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 283px;              
-    left: 40px;
-    }
-
-    .estiloboton3:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
-
-    .logo5 img {
-    width: 50px;          
-    display: block;
-    position: fixed;
-    top: 350px;                  
-    left: 50px;
-    margin: 20px auto;     
-    }
-
-    .grafica {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    top: 370px;                  
-    left: 110px;
-    }
-
-    .estiloboton4 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 36px 130px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 360px;              
-    left: 40px;
-    }
-
-    .estiloboton4:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
-
-    .logo6 img {
-    width: 53px;          
-    display: block;
-    position: fixed;
-    top: 425px;                  
-    left: 47px;
-    margin: 20px auto;     
-    }
-
-    .personas {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    top: 430px;                  
-    left: 110px;
-    }
-
-    .estiloboton5 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 36px 130px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 435px;              
-    left: 40px;
-    }
-
-    .estiloboton5:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
-
-    .logo7 img {
-    width: 53px;          
-    display: block;
-    position: fixed;
-    top: 500px;                  
-    left: 50px;
-    margin: 20px auto;     
-    }
-
-    .campana {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    top: 520px;                  
-    left: 110px;
-    }
-
-    .estiloboton6 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 36px 130px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 510px;              
-    left: 40px;
-    }
-
-    .estiloboton6:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
-
-    .logo8 img {
-    width: 53px;          
-    display: block;
-    position: fixed;
-    top: 695px;                  
-    left: 55px;
-    margin: 20px auto;     
-    }
-
-    .corazon {
-    width: 11px;          
-    font-size: 13px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    top: 710px;                  
-    left: 110px;
-    }
-
-    .estiloboton7 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 36px 130px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 700px;              
-    left: 40px;
-    }
-
-    .estiloboton7:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
-
-    .linearoja {
-    height: 3px;             
-    background-color: rgb(255, 0, 0);   
-    width: 280px;             
-    position: fixed;
-    top: 650px;                  
-    left: 39px;
-    }
-
-    .btn {
-    width: 200px;                
-    height: 50px;                
-    background-color: red;       
-    color: white;                
-    border: 2px solid transparent;  
-    border-radius: 12px;            
-    font-size: 16px;
-    font-family: 'Arial', sans-serif; 
-    font-weight: bold;              
-    cursor: pointer;                 
-    position: absolute;              
-    top: 785px;                      
-    left: 95px;                      
-    padding: 10px 20px;             
-    transition: border 0.3s, box-shadow 0.3s, background-color 0.3s;
-    }
-
-    .btn:hover {
-    border: 2px solid white;  
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7); 
-    background-color: #ff4d4d;  
-    }
-
-    .campo-texto input {
-    width: 250px;              
-    padding: 10px 10px;        
-    background: black;         
-    border: 2px solid red;     
-    border-radius: 8px;        
-    color: white;              
-    font-size: 16px;           
-    outline: none;             
-    position: absolute;              
-    top: 60px;                      
-    left:50px; 
-    }
-
-    .campo-texto2 input {
-    width: 250px;              
-    padding: 10px 10px;        
-    background: black;         
-    border: 2px solid red;     
-    border-radius: 8px;        
-    color: white;              
-    font-size: 16px;           
-    outline: none;             
-    position: absolute;              
-    top: 60px;                      
-    left:360px; 
-    }
-
-    .campo-texto3 input {
-    width: 250px;              
-    padding: 10px 10px;        
-    background: black;         
-    border: 2px solid red;     
-    border-radius: 8px;        
-    color: white;              
-    font-size: 16px;          
-    outline: none;             
-    position: absolute;              
-    top: 60px;                      
-    left: 690px; 
-    }
-
-    .campo-texto4 input {
-    width: 250px;              
-    padding: 10px 10px;        
-    background: black;         
-    border: 2px solid red;    
-    border-radius: 8px;        
-    color: white;              
-    font-size: 16px;           
-    outline: none;             
-    position: absolute;              
-    top: 60px;                      
-    left: 1000px;
-    }
-
-    .texto1 {
-    color: white;              
-    font-size: 12px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 5px;                
-    left: 150px;  
-    }
-
-    .texto2 {
-    color: white;              
-    font-size: 12px;            
-    font-weight: bold;                   
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 5px;                
-    left: 410px;  
-    }
-
-    .texto3 {
-    color: white;              
-    font-size: 12px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 5px;                
-    left: 755px;  
-    }
-
-    .texto4 {
-    color: white;              
-    font-size: 12px;            
-    font-weight: bold;           
-    text-align: center;          
-    background: none;            
-    border: none;                
-    position: relative;
-    position: absolute;          
-    top: 5px;                
-    left: 1090px;  
-    }
-
-    .logo9 img {
-    width: 58px;          
-    height: auto;
-    display: block;
-    position: fixed;
-    top:800px;                  
-    left: 1000px;
-    margin: 20px auto;     
-    margin-bottom: 5px;
-    }
-
-    .descargar {
-    width: 11px;          
-    font-size: 20px;
-    font-weight: bold;           
-    display: block;
-    position: fixed;
-    margin: 0;
-    top: 800px;                  
-    left: 1080px;
-    }
-
-    .estiloboton8 {
-    display: inline-flex;
-    flex-direction: column;      
-    align-items: center;          
-    border-radius: 12px;
-    cursor: pointer;
-    background-color: #000000;
-    color: white;
-    border: 2px solid transparent;
-    padding: 40px 160px;
-    transition: border 0.3s, box-shadow 0.3s;
-    position: absolute;     
-    top: 800px;              
-    left: 270px;
-    }
-
-    .estiloboton8:hover {
-    border: 2px solid white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-    }
-
-    
-
-
-    
+.download-button:hover {
+  background: #111;
+  border-color: white;
+  color: white;
+}
