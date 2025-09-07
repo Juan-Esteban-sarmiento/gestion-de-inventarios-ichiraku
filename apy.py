@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request, redirect, url_for, session, make_response
+from flask import Flask, flash, jsonify, render_template, request, redirect, url_for, session, make_response
 from db import get_db_connection
 
 app = Flask(__name__)
@@ -149,7 +149,26 @@ def Em_Inicio():
 
 @app.route('/Ad_Ceditar', methods=['GET', 'POST'])
 def Ad_Ceditar():
-    return render_template("Ad_Ceditar.html")
+    if not session.get('logged_in') or session.get('role') != 'Administrador':
+        return redirect(url_for('login'))
+
+    # Datos quemados
+    ADMIN_USER = "admin"
+    ADMIN_EMAIL = "admin@ichiraku.com"
+    ADMIN_PASS = "admin123"
+
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+
+        # ❌ Aquí no se guarda en BD, solo se muestra un flash
+        flash("Los datos del administrador son fijos y no se pueden actualizar en la base de datos.", "info")
+        return redirect(url_for('Ad_Ceditar'))
+
+    # Pasar los datos fijos a la vista
+    user = {"username": ADMIN_USER, "email": ADMIN_EMAIL}
+    return render_template("Ad_Ceditar.html", user=user)
 
 
 #configuracion de cierre de sesion
