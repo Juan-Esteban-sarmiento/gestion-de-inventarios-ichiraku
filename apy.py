@@ -1,5 +1,5 @@
 from flask import Flask, flash, jsonify, render_template, request, redirect, url_for, session, make_response
-from db import get_db_connection
+from db import add_empleado, get_db_connection
 
 app = Flask(__name__)
 app.secret_key = '123456789'
@@ -81,17 +81,10 @@ def registrar_empleado():
         return jsonify({"success": False, "msg": "Todos los campos son obligatorios."})
 
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO empleados (Cedula, Nombre, Numero_contacto, Contrasena, Foto) VALUES (%s, %s, %s, %s, %s)",
-            (cedula, nombre, contacto, contrasena, None)
-        )
-        conn.commit()
-        cursor.close()
-        conn.close()
+        add_empleado(cedula, nombre, contacto, contrasena, None)
         return jsonify({"success": True, "msg": "Empleado registrado correctamente."})
     except Exception as e:
+        print("Error al registrar:", e)  # 👈 ver en consola qué pasó
         return jsonify({"success": False, "msg": f"Error al registrar: {str(e)}"})
 
  #busqueda de empleado
@@ -162,7 +155,7 @@ def Ad_Ceditar():
         email = request.form['email']
         password = request.form['password']
 
-        # ❌ Aquí no se guarda en BD, solo se muestra un flash
+        # Aquí no se guarda en BD, solo se muestra un flash
         flash("Los datos del administrador son fijos y no se pueden actualizar en la base de datos.", "info")
         return redirect(url_for('Ad_Ceditar'))
 
