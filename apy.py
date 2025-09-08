@@ -6,6 +6,7 @@ app.secret_key = '123456789'
 
 #redirecion inicial de logueo
 
+
 @app.route('/')
 def index():
     return redirect(url_for('login'))
@@ -178,3 +179,4 @@ def logout():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
