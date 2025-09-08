@@ -53,11 +53,5 @@
         <button type="button" class="btn" onclick="window.location.href='/logout'">LOG OUT</button>
 </body>
 
-<script>
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted) {
-            window.location.reload();
-        }
-    });
-</script>
+<script src="{{ url_for('static', filename='js/login.js') }}"></script>
 </html>

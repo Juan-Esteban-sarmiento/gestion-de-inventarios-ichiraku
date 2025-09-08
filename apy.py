@@ -47,9 +47,14 @@ def login():
             if user:
                 session['logged_in'] = True
                 session['role'] = 'Empleado'
-                return jsonify({"success": True, "msg": "Bienvenido, has iniciado sesión correctamente"})
+                return jsonify({
+                    "success": True,
+                    "msg": "Bienvenido, has iniciado sesión correctamente",
+                    "redirect": url_for('Em_Inicio')
+                })
             else:
                 return jsonify({"success": False, "msg": "Usuario o contraseña incorrectos"})
+
 
     return render_template("login.html")
 
