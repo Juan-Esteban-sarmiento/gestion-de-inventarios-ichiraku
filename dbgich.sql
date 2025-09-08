@@ -2,6 +2,9 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'admin';
+FLUSH PRIVILEGES;
+
 CREATE TABLE `detalle_pedido` (
   `Id_Pedido` int NOT NULL,
   `Id_Producto` int NOT NULL,
