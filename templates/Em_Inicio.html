@@ -1,57 +1,57 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta charset="UTF-8">
+  <title>Ichiraku Ramen - Admin</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_Inicio.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
 </head>
-    <div class="title">
-        <h1>Bienvenido</h1>
 <body>
-    <div class="container2">  
-    <div class="container"> 
+  <div class="sidebar">
     <div class="logo">
-        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
+      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
     </div>
-    <div class="logo2 estiloboton1" onclick="homeClick()">
-        <img src="{{ url_for('static', filename='image/casita.png') }}" alt="casita">
-        <div class="casita"> 
-            <h1>Home</h1>
-        </div>   
-    </div> 
-    <div class="logo3 estiloboton2" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/caja.png') }}" alt="caja">
-        <div class="caja"> 
-            <h1>Receive orders</h1>
-        </div> 
-    </div>
-    <div class="logo4 estiloboton3" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="carrito_super">
-        <div class="carrito_super"> 
-            <h1>Place orders</h1>
-        </div>  
-    </div>
-    <div class="logo5 estiloboton4" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="reloj">
-        <div class="reloj"> 
-            <h1>Order History</h1>
-        </div>
-    </div>
-    <div class="logo6 estiloboton5" onclick="homeClick()">  
-        <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="corazon">
-        <div class="corazon"> 
-            <h1>Account</h1>
-        </div>
-    </div>
-        <div class="container3">
-        <div class="texto1">
-            <h1>Resent notifications</h1>
-        <div class="texto2">
-            <h1>More</h1>
-        <div class="texto3">
-            <h1>today</h1>
-    </div>
-    <div class="linearoja"> 
-        <button type="button" class="btn" onclick="window.location.href='/logout'">LOG OUT</button>
-</body>
 
-<script src="{{ url_for('static', filename='js/login.js') }}"></script>
+    <nav class="menu">
+        <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button active">
+          <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Home"> Home
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Receive orders"> Receive orders
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Place orders"> Place orders
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Order History"> Order History
+        </button>
+        <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> user
+        </button>
+      </nav>
+    <button class="logout-btn" onclick="window.location.href='/logout'">LOG OUT</button>
+  </div>
+
+  <main class="content">
+    <div class="box-welcome">
+      <h1 class="welcome-title">Bienvenido</h1>
+    </div>
+    
+
+    <section class="notification-box">
+      <div class="notification-header">
+        <h2>Recent Notifications</h2>
+        <span>More</span>
+      </div>
+      <div class="notification-body">
+        <p>Today</p>
+      </div>
+    </section>
+
+    <div class="logo-main">
+      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Ramen">
+    </div>
+  </main>
+
+</body>
 </html>

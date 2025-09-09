@@ -3,7 +3,7 @@
       src: url('../fonts/njnaruto.ttf') format('truetype');
     }
 
-    .form-container {
+  .form-container {
   background-color: black;
   border: 2px solid red;
   border-radius: 15px;
