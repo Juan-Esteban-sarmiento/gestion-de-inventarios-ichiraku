@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_Ceditar.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
+</head>
+<body>
+
+  <div class="layout">
+      <div class="sidebar">
+          <div class="logo">
+            <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
+          </div>
+
+          <nav class="menu">
+              <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button active">
+          <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Home"> Home
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Receive orders"> Receive orders
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Place orders"> Place orders
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Order History"> Order History
+        </button>
+        <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> user
+        </button>
+              </button>
+          </nav>
+          <button class="logout-btn" onclick="window.location.href='/logout'">LOG OUT</button>
+      </div>
+
+      <main class="main-content">
+          <div class="welcome-box">
+              <h1 class="welcome-title">Administrator Panel</h1>
+          </div>
+
+          <div class="form-container">
+              <!-- Formulario -->
+              <form method="POST" class="edit-form">
+                  <label for="name">Name:</label>
+                  <input type="text" id="name" name="name" value="{{ user.name }}" required>
+
+                  <label for="id">ID:</label>
+                  <input type="text" id="id" name="id" value="{{ user.id }}" readonly>
+
+                  <label for="password">Password:</label>
+                  <input type="password" id="password" name="password" placeholder="********">
+
+                  <div class="form-links">
+                    <a href="#">Change Password</a>
+                    <a href="#">Recover Password</a>
+                  </div>
+
+                  <label for="contact">Contact Number:</label>
+                  <input type="text" id="contact" name="contact" value="{{ user.contact }}">
+
+                  <div class="form-links">
+                    <a href="#">Change Contact Number</a>
+                  </div>
+
+                  <button type="submit" class="submit-btn">Confirm</button>
+                </form>
+
+
+              <!-- Foto -->
+              <div class="profile-section">
+                  <img src="{{ user.photo_url if user.photo_url else url_for('static', filename='image/default.png') }}"
+                       alt="Foto de usuario"
+                       onerror="this.onerror=null; this.src='{{ url_for('static', filename='image/default-user.png') }}';">
+
+                  <button class="profile-btn">Upload/Change Photo</button>
+                  <button class="profile-btn delete">Delete Photo</button>
+              </div>
+          </div>
+      </main>
+  </div>
+
+</body>
+<script>
+  window.addEventListener('pageshow', function(event) {
+      if (event.persisted) {
+          window.location.reload();
+      }
+  });
+</script>
+</html>

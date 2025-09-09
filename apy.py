@@ -47,6 +47,7 @@ def login():
 
             if user:
                 session['logged_in'] = True
+                session["cedula"] = user["Cedula"]
                 session['role'] = 'Empleado'
                 return jsonify({
                     "success": True,
@@ -90,7 +91,7 @@ def registrar_empleado():
         add_empleado(cedula, nombre, contacto, contrasena, None)
         return jsonify({"success": True, "msg": "Empleado registrado correctamente."})
     except Exception as e:
-        print("Error al registrar:", e)  # 👈 ver en consola qué pasó
+        print("Error al registrar:", e) 
         return jsonify({"success": False, "msg": f"Error al registrar: {str(e)}"})
 
  #busqueda de empleado
@@ -133,19 +134,6 @@ def Ad_Rlocales():
 def Ad_Pnotificaciones():
     return render_template("Ad_Pnotificaciones.html")
 
-
-#rutas de empleado con control de sesión y caché deshabilitada
-
-@app.route('/Em_Inicio', methods=['GET', 'POST'])
-def Em_Inicio():
-    if not session.get('logged_in') or session.get('role') != 'Empleado':
-        return redirect(url_for('login'))
-    response = make_response(render_template("Em_Inicio.html"))
-    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '-1'
-    return response
-
 @app.route('/Ad_Ceditar', methods=['GET', 'POST'])
 def Ad_Ceditar():
     if not session.get('logged_in') or session.get('role') != 'Administrador':
@@ -170,6 +158,58 @@ def Ad_Ceditar():
     return render_template("Ad_Ceditar.html", user=user)
 
 
+#rutas de empleado con control de sesión y caché deshabilitada
+
+@app.route('/Em_Inicio', methods=['GET', 'POST'])
+def Em_Inicio():
+    if not session.get('logged_in') or session.get('role') != 'Empleado':
+        return redirect(url_for('login'))
+    response = make_response(render_template("Em_Inicio.html"))
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '-1'
+    return response
+
+
+@app.route("/Em_Ceditar", methods=["GET", "POST"])
+def Em_Ceditar():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    cedula=session.get("cedula")
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Consultar el empleado por cédula
+    cursor.execute("SELECT * FROM empleados WHERE Cedula = %s", (cedula,))
+    empleado = cursor.fetchone()
+
+    if not empleado:
+        conn.close()
+        flash("Empleado no encontrado", "error")
+        return redirect(url_for("Em_Inicio"))
+
+    if request.method == "POST":
+        nombre = request.form["Nombre"]
+        numero_contacto = request.form["Numero_contacto"]
+        contrasena = request.form["Contrasena"]
+        foto = request.form["Foto"]
+
+        cursor.execute("""
+            UPDATE empleados
+            SET Nombre = %s, Numero_contacto = %s, Contrasena = %s, Foto = %s
+            WHERE Cedula = %s
+        """, (nombre, numero_contacto, contrasena, foto, cedula))
+        conn.commit()
+        conn.close()
+
+        flash("Empleado actualizado con éxito", "success")
+        return redirect(url_for("Em_Inicio"))
+
+    conn.close()
+    return render_template("Em_Ceditar.html", user=empleado)
+
 #configuracion de cierre de sesion
 
 @app.route('/logout')
@@ -179,4 +219,3 @@ def logout():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
