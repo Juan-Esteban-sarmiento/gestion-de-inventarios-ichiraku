@@ -217,5 +217,19 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
+#Apartao para que el empleado revice las ordenes
+@app.route('/Em_Rordenes', methods=['GET', 'POST'])
+def Em_Rordenes():
+    return render_template("Em_Rordenes.html")
+
+@app.route('/Em_Rpedido', methods=['GET', 'POST'])
+def Em_Rpedido():
+    return render_template("Em_Rpedido.html")
+
+@app.route('/Em_Hordenes', methods=['GET', 'POST'])
+def Em_Hordenes():
+    return render_template("Em_Hordenes.html")
+
 if __name__ == '__main__':
     app.run(debug=True)
+
