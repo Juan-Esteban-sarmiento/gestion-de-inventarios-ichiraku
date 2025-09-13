@@ -39,36 +39,17 @@
   font-size: 16px;
 }
 
-.form-links {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 10px;
-}
-
-.form-links a {
-  color: gray;
-  font-size: 14px;
-  text-decoration: none;
-}
-
-.form-links a:hover {
-  text-decoration: underline;
-}
-
-.submit-btn {
-  background: red;
-  border: none;
-  padding: 12px 20px;
+/* Ajustes para inputs de solo lectura */
+.readonly-input {
+  background: #111;
+  color: #bbb;
+  border: 2px solid red;
   border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  color: white;
-  transition: 0.3s;
+  padding: 10px;
+  font-size: 16px;
+  cursor: not-allowed;
 }
 
-.submit-btn:hover {
-  background: #ff4d4d;
-}
 
 .profile-section {
   flex: 1;
@@ -111,3 +92,5 @@
 .profile-btn.delete:hover {
   background: #666;
 }
+
+
