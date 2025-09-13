@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_Rordenes.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
+</head>
+<body>
+  <div class="sidebar">
+    <div class="logo">
+      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
+    </div>
+    <nav class="menu">
+        <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Home"> Home
+        </button>
+        <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button active">
+          <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Receive orders"> Receive orders
+        </button>
+        <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Place orders"> Place orders
+        </button>
+        <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Order History"> Order History
+        </button>
+        <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> user
+        </button>
+      </nav>
+    <button class="logout-btn" onclick="window.location.href='/logout'">LOG OUT</button>
+  </div>
+
+  <main class="content">
+    <div class="box-welcome">
+      <h1 class="welcome-title">Employee panel</h1>
+    </div>
+
+    <div class="employee-container">
+
+      <!-- Caja izquierda: formulario -->
+      <section class="register-box">
+        <h2>Employee panel</h2>
+        <form id="registerForm">
+          <label>Name Product</label>
+          <input type="text" id="" placeholder="Name Product ...">
+
+          <label>Expiration Date</label>
+          <input type="date" id="expirationDate" name="expirationDate" min="2025-01-01" max="2130-12-31">
+  
+          <label>Amount Product</label>
+          <input type="password" id="" placeholder="Amount Product ...">
+
+          <label>Product category</label>
+          <input type="text" id="" placeholder="Contact Number ...">
+
+          <div class="form-actions">
+            <button type="submit" class="btn">Confirmation</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Caja derecha: búsqueda -->
+      <section class="search-box">
+        <form id="searchForm">
+          <div class="search-row">
+            <input type="text" placeholder="Product category...">
+            <input type="text" placeholder="Expiration Date...">
+            <input type="text" placeholder="Name Product...">
+            <input type="text" placeholder="Amount ...">
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+  </main>
+</body>
+</html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_Inicio.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_Hordenes.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
 </head>
 <body>
@@ -9,9 +9,8 @@
     <div class="logo">
       <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
     </div>
-
     <nav class="menu">
-        <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button active">
+        <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button">
           <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Home"> Home
         </button>
         <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button">
@@ -20,7 +19,7 @@
         <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button">
           <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Place orders"> Place orders
         </button>
-        <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button">
+        <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button active">
           <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Order History"> Order History
         </button>
         <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
@@ -32,24 +31,9 @@
 
   <main class="content">
     <div class="box-welcome">
-      <h1 class="welcome-title">Bienvenido</h1>
-    </div>
-    
-
-    <section class="notification-box">
-      <div class="notification-header">
-        <h2>Recent Notifications</h2>
-        <span>More</span>
-      </div>
-      <div class="notification-body">
-        <p>Today</p>
-      </div>
-    </section>
-
-    <div class="logo-main">
-      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Ramen">
+      <h1 class="welcome-title">Employee panel</h1>
     </div>
   </main>
-
+  
 </body>
 </html>

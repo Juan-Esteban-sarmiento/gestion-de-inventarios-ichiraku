@@ -1,0 +1,156 @@
+@font-face {
+  font-family: 'njnaruto';
+  src: url('../fonts/njnaruto.ttf') format('truetype');
+}
+
+/* --- titles --- */
+.content {
+  padding: 40px;
+  position: relative;
+}
+
+.box-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0px;
+  margin-bottom: 20px;
+  position: relative;
+  margin-left: 500px;
+}
+
+/* --- contenedores --- */
+
+/* --- Search Bar --- */
+.search-bar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+  gap: 10px;
+}
+
+.search-bar input {
+  padding: 10px;
+  border: 2px solid red;
+  border-radius: 8px;
+  background: black;
+  color: white;
+  font-size: 16px;
+  width: 250px;
+}
+
+.search-btn {
+  background: red;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.search-btn img {
+  width: 20px;
+}
+
+/* --- Formulario --- */
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.btn {
+  background: red;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  color: white;
+  transition: 0.3s;
+}
+
+.btn:hover {
+  background: #ff4d4d;
+}
+
+.employee-container {
+  display: flex;
+  gap: 30px;
+  align-items: stretch;
+  margin-left: 200px;
+}
+
+/* --- register --- */
+.register-box {
+  flex: 2; 
+  background-color: black;
+  border: 2px solid red;
+  border-radius: 15px;
+  padding: 25px;
+  color: white;
+  min-height: 500px; 
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* --- search --- */
+.search-box {
+  flex: 1;
+  background-color: black;
+  border: 2px solid red;
+  border-radius: 15px;
+  padding: 25px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* --- Inputs --- */
+.register-box input,
+.search-box input {
+  width: 90%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 2px solid red;
+  border-radius: 8px;
+  background: black;
+  color: white;
+  font-size: 16px;
+  display : flex;
+}
+
+.search-row {
+  display: flex;
+  gap: 10px; /* espacio entre los inputs */
+  margin-bottom: 20px;
+}
+
+.search-row input {
+  flex: 1;
+  min-width: 150px;   /* ancho mínimo más grande */
+  padding: 14px 18px; /* más espacio interno */
+  border: 2px solid red;
+  border-radius: 8px;
+  background: black;
+  color: white;
+  font-size: 16px;    /* texto más grande */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
