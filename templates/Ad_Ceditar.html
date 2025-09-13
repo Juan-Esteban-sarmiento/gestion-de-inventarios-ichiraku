@@ -44,31 +44,16 @@
           </div>
 
           <div class="form-container">
-              <!-- Formulario -->
-              <form action="{{ url_for('Ad_Ceditar') }}" method="POST" class="edit-form">
-                  <label for="name">Name:</label>
-                  <input type="text" id="name" name="name" value="{{ user.name }}" required>
+            <div class="edit-form">
+              <label for="id">ID:</label>
+              <input type="text" id="id" value="{{ user.Cedula }}" readonly class="readonly-input">
 
-                  <label for="id">ID:</label>
-                  <input type="text" id="id" name="id" value="{{ user.id }}" readonly>
+              <label for="Nombre">Nombre:</label>
+              <input type="text" id="Nombre" value="{{ user.Nombre }}" readonly class="readonly-input">
 
-                  <label for="password">Password:</label>
-                  <input type="password" id="password" name="password" placeholder="********">
-
-                  <div class="form-links">
-                    <a href="#">Change Password</a>
-                    <a href="#">Recover Password</a>
-                  </div>
-
-                  <label for="contact">Contact Number:</label>
-                  <input type="text" id="contact" name="contact" value="{{ user.contact }}">
-
-                  <div class="form-links">
-                    <a href="#">Change Contact Number</a>
-                  </div>
-
-                  <button type="submit" class="submit-btn">Confirm</button>
-              </form>
+              <label for="Contrasena">Contraseña:</label>
+              <input type="text" id="Contrasena" value="{{ user.Contrasena }}" readonly class="readonly-input">
+            </div>
 
               <!-- Foto -->
               <div class="profile-section">

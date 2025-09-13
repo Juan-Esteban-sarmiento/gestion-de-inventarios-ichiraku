@@ -4,6 +4,12 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_Ceditar.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
 </head>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_Ceditar.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
+</head>
 <body>
 
   <div class="layout">
@@ -13,21 +19,20 @@
           </div>
 
           <nav class="menu">
-              <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button active">
-          <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Home"> Home
-        </button>
-        <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Receive orders"> Receive orders
-        </button>
-        <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Place orders"> Place orders
-        </button>
-        <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Order History"> Order History
-        </button>
-        <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> user
-        </button>
+              <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button ">
+                <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Home"> Home
+              </button>
+              <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Receive orders"> Receive orders
+              </button>
+              <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Place orders"> Place orders
+              </button>
+              <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Order History"> Order History
+              </button>
+              <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button active">
+                <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> user
               </button>
           </nav>
           <button class="logout-btn" onclick="window.location.href='/logout'">LOG OUT</button>
@@ -40,30 +45,21 @@
 
           <div class="form-container">
               <!-- Formulario -->
-              <form method="POST" class="edit-form">
-                  <label for="name">Name:</label>
-                  <input type="text" id="name" name="name" value="{{ user.name }}" required>
-
+              <form method="POST" class="edit-form" id="editarForm">
                   <label for="id">ID:</label>
-                  <input type="text" id="id" name="id" value="{{ user.id }}" readonly>
+                  <input type="text" id="id" name="id" value="{{ user.Cedula }}" readonly>
 
-                  <label for="password">Password:</label>
-                  <input type="password" id="password" name="password" placeholder="********">
+                  <label for="Nombre">Nombre:</label>
+                  <input type="text" id="Nombre" name="Nombre" value="{{ user.Nombre }}" required>
 
-                  <div class="form-links">
-                    <a href="#">Change Password</a>
-                    <a href="#">Recover Password</a>
-                  </div>
+                  <label for="Contrasena">Contrasea:</label>
+                  <input type="text" id="Contrasena" name="Contrasena" value="{{ user.Contrasena }}" required>
 
-                  <label for="contact">Contact Number:</label>
-                  <input type="text" id="contact" name="contact" value="{{ user.contact }}">
+                  <label for="Numero_contacto">Número de contacto:</label>
+                  <input type="text" id="Numero_contacto" name="Numero_contacto" value="{{ user.Numero_contacto }}" required>
 
-                  <div class="form-links">
-                    <a href="#">Change Contact Number</a>
-                  </div>
-
-                  <button type="submit" class="submit-btn">Confirm</button>
-                </form>
+                  <button type="submit" class="submit-btn">Confirmar</button>
+              </form>
 
 
               <!-- Foto -->
@@ -79,12 +75,25 @@
       </main>
   </div>
 
+  <!-- Modal -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <p id="modal-text"></p>
+      <button onclick="cerrarModal()">Aceptar</button>
+    </div>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <script>
+        window.onload = () => {
+          mostrarModal("{{ messages[0][1] }}", "{{ messages[0][0] }}");
+        };
+      </script>
+    {% endif %}
+  {% endwith %}
+
 </body>
-<script>
-  window.addEventListener('pageshow', function(event) {
-      if (event.persisted) {
-          window.location.reload();
-      }
-  });
-</script>
+
+<script src="{{ url_for('static', filename='js/Ceditar_EM.js') }}"></script>
 </html>

@@ -134,29 +134,19 @@ def Ad_Rlocales():
 def Ad_Pnotificaciones():
     return render_template("Ad_Pnotificaciones.html")
 
-@app.route('/Ad_Ceditar', methods=['GET', 'POST'])
+@app.route('/Ad_Ceditar', methods=['GET'])
 def Ad_Ceditar():
     if not session.get('logged_in') or session.get('role') != 'Administrador':
         return redirect(url_for('login'))
 
-    # Datos quemados
-    ADMIN_USER = "admin"
-    ADMIN_EMAIL = "admin@ichiraku.com"
-    ADMIN_PASS = "admin123"
+    # Datos fijos del administrador
+    user = {
+        "Cedula": "0001",
+        "Nombre": "admin",
+        "Contrasena": "admin123"
+    }
 
-    if request.method == 'POST':
-        username = request.form['username']
-        email = request.form['email']
-        password = request.form['password']
-
-        # Aquí no se guarda en BD, solo se muestra un flash
-        flash("Los datos del administrador son fijos y no se pueden actualizar en la base de datos.", "info")
-        return redirect(url_for('Ad_Ceditar'))
-
-    # Pasar los datos fijos a la vista
-    user = {"username": ADMIN_USER, "email": ADMIN_EMAIL}
     return render_template("Ad_Ceditar.html", user=user)
-
 
 #rutas de empleado con control de sesión y caché deshabilitada
 
@@ -174,41 +164,56 @@ def Em_Inicio():
 @app.route("/Em_Ceditar", methods=["GET", "POST"])
 def Em_Ceditar():
     if not session.get('logged_in'):
+        if request.is_json:
+            return jsonify({"success": False, "msg": "Sesión expirada, inicia sesión de nuevo"}), 401
         return redirect(url_for('login'))
-    
-    cedula=session.get("cedula")
 
+    cedula = session.get("cedula")
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # Consultar el empleado por cédula
     cursor.execute("SELECT * FROM empleados WHERE Cedula = %s", (cedula,))
     empleado = cursor.fetchone()
 
     if not empleado:
+        cursor.close()
         conn.close()
-        flash("Empleado no encontrado", "error")
+        if request.is_json:
+            return jsonify({"success": False, "msg": "Empleado no encontrado"}), 404
         return redirect(url_for("Em_Inicio"))
 
-    if request.method == "POST":
-        nombre = request.form["Nombre"]
-        numero_contacto = request.form["Numero_contacto"]
-        contrasena = request.form["Contrasena"]
-        foto = request.form["Foto"]
+    # 🚀 POST (AJAX JSON)
+    if request.method == "POST" and request.is_json:
+        try:
+            data = request.get_json()
+            nombre = data.get("Nombre")
+            numero_contacto = data.get("Numero_contacto")
+            contrasena = data.get("Contrasena")
 
-        cursor.execute("""
-            UPDATE empleados
-            SET Nombre = %s, Numero_contacto = %s, Contrasena = %s, Foto = %s
-            WHERE Cedula = %s
-        """, (nombre, numero_contacto, contrasena, foto, cedula))
-        conn.commit()
-        conn.close()
+            cursor.execute("""
+                UPDATE empleados
+                SET Nombre = %s, Numero_contacto = %s, Contrasena = %s
+                WHERE Cedula = %s
+            """, (nombre, numero_contacto, contrasena, cedula))
+            conn.commit()
 
-        flash("Empleado actualizado con éxito", "success")
-        return redirect(url_for("Em_Inicio"))
+            respuesta = {"success": True, "msg": "Usuario actualizado correctamente"}
+            print("🔎 Enviando JSON:", respuesta)  # 👈 Log de lo que se manda
+            return jsonify(respuesta), 200
 
+        except Exception as e:
+            print("❌ Error en update:", e)
+            return jsonify({"success": False, "msg": "Error en servidor"}), 500
+
+        finally:
+            cursor.close()
+            conn.close()
+
+    # 🚀 GET normal
+    cursor.close()
     conn.close()
     return render_template("Em_Ceditar.html", user=empleado)
+
 
 #configuracion de cierre de sesion
 
