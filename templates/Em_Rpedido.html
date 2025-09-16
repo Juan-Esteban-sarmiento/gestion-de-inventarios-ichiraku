@@ -29,11 +29,33 @@
     <button class="logout-btn" onclick="window.location.href='/logout'">LOG OUT</button>
   </div>
 
-  <main class="content">
-    <div class="box-welcome">
-      <h1 class="welcome-title">Employee panel</h1>
-    </div>
-  </main>
   
+  <main class="content">
+  <div class="box-welcome">
+    <h1 class="welcome-title">Employee Panel</h1>
+  </div>
+
+  <div class="order-panel">
+    <div class="order-header">
+      <span>Product Category</span>
+      <span>Expiration Date</span>
+      <span>Name Product</span>
+      <span>Amount</span>
+    </div>
+
+    <div class="order-row">
+      <input type="checkbox">
+      <input type="text" placeholder="Category">
+      <input type="date">
+      <input type="text" placeholder="Product name">
+      <input type="number" placeholder="Amount">
+    </div>
+
+    <div class="inner-box"></div>
+
+    <button class="confirm-btn">CONFIRMATION</button>
+  </div>
+</main>
+
 </body>
 </html>
