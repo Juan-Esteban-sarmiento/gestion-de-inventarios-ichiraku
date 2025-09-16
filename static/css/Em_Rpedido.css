@@ -8,6 +8,23 @@
   position: relative;
 }
 
+.welcome-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.welcome-title {
+  position: absolute;   /* se posiciona libremente */
+  top: 0px;           /* distancia desde arriba */
+  left: 0px;          /* distancia desde la izquierda */
+  white-space: nowrap;
+  color: white;
+  font-family: 'njnaruto', sans-serif;
+}
+
 .box-welcome {
   display: flex;
   flex-direction: column;
@@ -16,4 +33,72 @@
   margin-bottom: 20px;
   position: relative;
   margin-left: 500px;
+}
+
+.order-panel {
+  background-color: black;
+  border: 2px solid red;
+  padding: 20px;          /* espacio interno */
+  margin-left: 80px;      /* separación hacia la derecha */
+  width: 1400px;           /* 👉 puedes cambiar ancho */
+  height: 600px;          /* 👉 puedes cambiar alto */
+  position: absolute;   /* se posiciona libremente */
+  top: 200px;           /* distancia desde arriba */
+  left: 50px;
+  border-radius: 10px;
+  color: white;
+  font-family: 'njnaruto', sans-serif;
+}
+
+.order-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 50px;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: red;
+}
+
+.order-row {
+  display: grid;
+  grid-template-columns: 50px 1fr 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.order-row input {
+  padding: 5px;
+  border: 1px solid red;
+  border-radius: 5px;
+  background: #000000;
+  color: white;
+}
+
+.inner-box {
+  background-color: #000000;
+  border: 2px solid red;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  width: 1360px;   /* 👉 cambia ancho */
+  height: 450px;  /* 👉 cambia alto */
+}
+
+.confirm-btn {
+  display: block;
+  margin: 0 auto;
+  padding: 10px 20px;
+  border: 2px solid red;
+  background-color: black;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'njnaruto', sans-serif;
+  transition: 0.3s;
+}
+
+.confirm-btn:hover {
+  background-color: red;
+  color: black;
 }
