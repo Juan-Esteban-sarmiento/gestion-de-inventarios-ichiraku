@@ -137,6 +137,26 @@
   font-size: 16px;    /* texto más grande */
 }
 
+/* Estilo general del input de fecha */
+input[type="date"] {
+  width: 90%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 2spx solid red;
+  border-radius: 8px;
+  background: black;
+  color: white;
+  font-size: 16px;
+  display: flex;
+}
+
+/* Cambiar color del ícono del calendario en navegadores WebKit (Chrome, Edge, Safari) */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) sepia(0) saturate(5) hue-rotate(0deg);
+  cursor: pointer;
+}
+
+
 
 
 
