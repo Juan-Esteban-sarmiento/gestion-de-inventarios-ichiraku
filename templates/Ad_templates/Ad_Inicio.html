@@ -2,9 +2,9 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Ichiraku Ramen - Panel de Inicio</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Inicio.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
+  <title>Ichiraku Ramen - Panel de inicio</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Inicio.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
 </head>
 <body>
   <div class="sidebar">
@@ -17,7 +17,7 @@
           <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
         </button>
         <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Empleados
+          <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Personal"> Personal
         </button>
         <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
           <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
@@ -29,27 +29,27 @@
           <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> Locales
         </button>
         <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notificaciones
+          <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Avisos"> Avisos
         </button>
         <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
           <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Usuario"> Usuario
         </button>
       </nav>
-    <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
+  <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
   </div>
 
   <main class="content">
     <div class="box-welcome">
-      <h1 class="welcome-title">Bienvenido</h1>
+  <h1 class="welcome-title">Bienvenido</h1>
     </div>
     
     <section class="notification-box">
       <div class="notification-header">
-        <h2>Notificaciones recientes</h2>
-        <span>Mas</span>
+  <h2>Avisos recientes</h2>
+  <span>Mas</span>
       </div>
       <div class="notification-body">
-        <p>Hoy</p>
+  <p>Hoy</p>
       </div>
     </section>
 

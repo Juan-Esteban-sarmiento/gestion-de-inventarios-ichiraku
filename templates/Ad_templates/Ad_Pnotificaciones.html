@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Pnotificaciones.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Menu.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Pnotificaciones.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/Menu.css') }}">
   <meta charset="UTF-8">
-  <title>Ichiraku Ramen - Administrador de Avisos</title>
+  <title>Ichiraku Ramen - Administrador de avisos</title>
 </head>
 <body>
 
@@ -19,7 +19,7 @@
             <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
-            <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Empleados
+            <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Personal"> Personal
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
             <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
@@ -31,19 +31,19 @@
             <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> locales
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button active">
-            <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notificaciones
+            <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Avisos"> Avisos
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
             <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Usuario"> Usuario
           </button>
         </nav>
-      <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
+  <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
   </div>
 
   <!-- Contenido principal -->
   <main class="main-content">
       <div class="welcome-box">
-        <h1 class="welcome-title">Panel de administrador</h1>
+  <h1 class="welcome-title">Panel de administrador</h1>
       </div>
 
         <!-- Contenedor de avisos -->
@@ -51,7 +51,7 @@
 
             <!-- Caja unica para filtros y avisos -->
             <section class="search-box">
-                <h2>Lista de notificaciones</h2>
+                <h2>Lista de avisos</h2>
 
                 <!-- Barra de filtros (fecha + busqueda) -->
                 <div class="filters">

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_Hordenes.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Hordenes.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
 </head>
 <body>
   <div class="sidebar">
@@ -11,44 +11,44 @@
     </div>
     <nav class="menu">
         <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Home"> Home
+          <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
         </button>
         <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Receive orders"> Receive orders
+          <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Recibir pedidos"> Recibir pedidos
         </button>
         <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Place orders"> Place orders
+          <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Realizar pedidos"> Realizar pedidos
         </button>
         <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button active">
-          <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Order History"> Order History
+          <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Historial pedidos"> Historial pedidos
         </button>
         <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> user
+          <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> usuario
         </button>
       </nav>
-    <button class="logout-btn" onclick="window.location.href='/logout'">LOG OUT</button>
+  <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
   </div>
 
   <main class="content">
     <div class="box-welcome">
-      <h1 class="welcome-title">Employee panel</h1>
+  <h1 class="welcome-title">Panel de empleado</h1>
     </div>
 
     <div class="order-panel">
     <div class="order-header">
-      <span>Date</span>
-      <span>Product Category</span>
-      <span>Expiration Date</span>
-      <span>Name Product</span>
-      <span>Amount</span>
+  <span>Fecha</span>
+  <span>Categoria producto</span>
+  <span>Fecha vencimiento</span>
+  <span>Nombre producto</span>
+  <span>Cantidad</span>
     </div>
 
     <div class="order-row">
-      <input type="date">
-      <input type="text" placeholder="Category">
-      <input type="date">
-      <input type="text" placeholder="Product name">
-      <input type="number" placeholder="Amount">
+  <input type="date">
+  <input type="text" placeholder="Categoria">
+  <input type="date">
+  <input type="text" placeholder="Nombre producto">
+  <input type="number" placeholder="Cantidad">
     </div>
     
   </main>

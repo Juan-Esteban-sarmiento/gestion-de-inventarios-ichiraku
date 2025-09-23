@@ -1,6 +1,6 @@
 @font-face {
   font-family: 'njnaruto';
-  src: url('../fonts/njnaruto.ttf') format('truetype');
+  src: url('../../fonts/njnaruto.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
@@ -102,7 +102,7 @@
   color: #000000;
 }
 
-.local-container {
+.product-container {
   display: flex;
   gap: 30px;
   align-items: stretch;
@@ -193,14 +193,69 @@
   padding: 15px;
   border: 2px dashed red;
   border-radius: 10px;
-  text-align: center;
+  text-align: left;
   flex: 1;
+  max-height: 350px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-.result-box img {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  margin-bottom: 10px;
+/* Hacemos que la caja tenga scroll */
+#resultProducto {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+/* Scrollbar general */
+#resultProducto::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Fondo del scrollbar */
+#resultProducto::-webkit-scrollbar-track {
+  background: #1e1e1e;
+  border-radius: 10px;
+}
+
+/* Parte que se mueve (thumb) */
+#resultProducto::-webkit-scrollbar-thumb {
+  background: #e60000;
+  border-radius: 10px;
+  border: 2px solid #1e1e1e;
+}
+
+/* Hover sobre el thumb */
+#resultProducto::-webkit-scrollbar-thumb:hover {
+  background: #ff3333;
+}
+
+/* Tarjeta de cada producto */
+.producto-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 10px;
+  border-bottom: 1px solid red;
+}
+
+.producto-actions {
+  margin-left: auto;
+}
+
+.producto-actions button {
+  background: red;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.producto-actions button:hover {
+  background: darkred;
 }
     

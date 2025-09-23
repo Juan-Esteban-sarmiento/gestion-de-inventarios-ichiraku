@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_Ceditar.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Ceditar.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
 </head>
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_Ceditar.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Ceditar.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
 </head>
 <body>
 
@@ -21,28 +21,28 @@
           <nav class="menu">
 
               <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Home"> Home
+          <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
         </button>
         <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Receive orders"> Receive orders
+          <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Recibir pedidos"> Recibir pedidos
         </button>
         <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Place orders"> Place orders
+          <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Realizar pedidos"> Realizar pedidos
         </button>
         <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Order History"> Order History
+          <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Historial pedidos"> Historial pedidos
         </button>
         <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button active">
-          <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> user
+          <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> usuario
         </button>
               </button>
           </nav>
-          <button class="logout-btn" onclick="window.location.href='/logout'">LOG OUT</button>
+          <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
       </div>
 
       <main class="main-content">
           <div class="welcome-box">
-              <h1 class="welcome-title">  Employee panel  </h1>
+              <h1 class="welcome-title">Panel de empleado</h1>
           </div>
 
           <div class="form-container">
@@ -54,10 +54,10 @@
                   <label for="Nombre">Nombre:</label>
                   <input type="text" id="Nombre" name="Nombre" value="{{ user.Nombre }}" required>
 
-                  <label for="Contrasena">Contrasea:</label>
+                  <label for="Contrasena">Clave:</label>
                   <input type="text" id="Contrasena" name="Contrasena" value="{{ user.Contrasena }}" required>
 
-                  <label for="Numero_contacto">Número de contacto:</label>
+                  <label for="Numero_contacto">Numero de contacto:</label>
                   <input type="text" id="Numero_contacto" name="Numero_contacto" value="{{ user.Numero_contacto }}" required>
 
                   <button type="submit" class="submit-btn">Confirmar</button>
@@ -66,12 +66,12 @@
 
               <!-- Foto -->
               <div class="profile-section">
-                  <img src="{{ user.photo_url if user.photo_url else url_for('static', filename='image/default.png') }}"
-                       alt="Foto de usuario"
-                       onerror="this.onerror=null; this.src='{{ url_for('static', filename='image/default-user.png') }}';">
+         <img src="{{ user.photo_url if user.photo_url else url_for('static', filename='image/default.png') }}"
+           alt="Foto de usuario"
+           onerror="this.onerror=null; this.src='{{ url_for('static', filename='image/default-user.png') }}';">
 
-                  <button class="profile-btn">Upload/Change Photo</button>
-                  <button class="profile-btn delete">Delete Photo</button>
+                  <button class="profile-btn">Subir/Cambiar foto</button>
+                  <button class="profile-btn delete">Eliminar foto</button>
               </div>
           </div>
       </main>
@@ -97,5 +97,5 @@
 
 </body>
 
-<script src="{{ url_for('static', filename='js/Ceditar_EM.js') }}"></script>
+<script src="{{ url_for('static', filename='js/Em_js/Ceditar_EM.js') }}"></script>
 </html>

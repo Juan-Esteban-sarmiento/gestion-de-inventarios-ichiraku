@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Ceditar.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Ceditar.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
   <meta charset="UTF-8">
-  <title>Ichiraku Ramen - Administrador de Usuario</title>
+  <title>Ichiraku Ramen - Administrador de usuario</title>
 </head>
 <body>
 
@@ -19,7 +19,7 @@
                 <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
               </button>
               <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
-                <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Empleados
+                <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Personal"> Personal
               </button>
               <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
                 <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
@@ -31,7 +31,7 @@
                 <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> locales
               </button>
               <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
-                <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notificaciones
+                <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Avisos"> Avisos
               </button>
               <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button active">
                 <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> Usuario
@@ -42,40 +42,56 @@
 
       <main class="main-content">
           <div class="welcome-box">
-              <h1 class="welcome-title">Panel de Administrador</h1>
+              <h1 class="welcome-title">Panel de administrador</h1>
           </div>
 
-          <div class="form-container">
-            <div class="edit-form">
-              <label for="id">ID:</label>
-              <input type="text" id="id" value="{{ user.Cedula }}" readonly class="readonly-input">
+      <div class="form-container">
+        <!-- Formulario editable -->
+        <form method="POST" class="edit-form" id="editarForm">
+          <label for="id">ID:</label>
+          <input type="text" id="id" name="id" value="{{ user.Cedula }}" readonly>
 
-              <label for="Nombre">Nombre:</label>
-              <input type="text" id="Nombre" value="{{ user.Nombre }}" readonly class="readonly-input">
+          <label for="Nombre">Nombre:</label>
+          <input type="text" id="Nombre" name="Nombre" value="{{ user.Nombre }}" required>
 
-              <label for="Clave">Clave:</label>
-              <input type="text" id="Clave" value="{{ user.Contrasena }}" readonly class="readonly-input">
-            </div>
+          <label for="Contrasena">Clave:</label>
+          <input type="text" id="Contrasena" name="Contrasena" value="{{ user.Contrasena }}" required>
 
-              <!-- Foto -->
-              <div class="profile-section">
-                  <img src="{{ user.photo_url if user.photo_url else url_for('static', filename='image/default.png') }}"
-                       alt="Foto de usuario"
-                       onerror="this.onerror=null; this.src='{{ url_for('static', filename='image/default-user.png') }}';">
+          <button type="submit" class="submit-btn">Confirmar</button>
+        </form>
 
-                  <button class="profile-btn">Subir/Cambiar Foto</button>
-                  <button class="profile-btn delete">Eliminar Foto</button>
-              </div>
-          </div>
+        <!-- Foto -->
+        <div class="profile-section">
+          <img src="{{ user.photo_url if user.photo_url else url_for('static', filename='image/default.png') }}"
+             alt="Foto de usuario"
+             onerror="this.onerror=null; this.src='{{ url_for('static', filename='image/default-user.png') }}';">
+
+          <button class="profile-btn">Subir/Cambiar foto</button>
+          <button class="profile-btn delete">Eliminar foto</button>
+        </div>
+      </div>
       </main>
   </div>
 
+
+  <!-- Modal -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <p id="modal-text"></p>
+      <button onclick="cerrarModal()">Aceptar</button>
+    </div>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <script>
+        window.onload = () => {
+          mostrarModal("{{ messages[0][1] }}", "{{ messages[0][0] }}");
+        };
+      </script>
+    {% endif %}
+  {% endwith %}
+
 </body>
-<script>
-  window.addEventListener('pageshow', function(event) {
-      if (event.persisted) {
-          window.location.reload();
-      }
-  });
-</script>
+<script src="{{ url_for('static', filename='js/Ad_js/Ceditar_AD.js') }}"></script>
 </html>

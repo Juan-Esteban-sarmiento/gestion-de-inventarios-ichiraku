@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Dinformes.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Dinformes.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
   <meta charset="UTF-8">
-  <title>Ichiraku Ramen - Administrador de Informes</title>
+    <title>Ichiraku Ramen - Administrador de reportes</title>
 </head>
 <body>
     <div class="layout">
@@ -18,7 +18,7 @@
                     <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
                 </button>
                 <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
-                    <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Empleados
+                    <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Personal"> Personal
                 </button>
                 <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
                     <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
@@ -30,7 +30,7 @@
                     <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> Locales
                 </button>
                 <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
-                    <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notificaciones
+                    <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Avisos"> Avisos
                 </button>
                 <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
                     <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Usuario"> Usuario
@@ -41,16 +41,16 @@
 
         <main class="main-content">
             <div class="welcome-box">
-                <h1 class="welcome-title">Panel de Administrador</h1>
+                <h1 class="welcome-title">Panel de administrador</h1>
             </div>
 
             <!-- Caja de busqueda -->
             <div class="search-box">
                 <form id="searchForm">
-                    <input type="text" id="date" placeholder="FECHA ...">
-                    <input type="text" id="productName" placeholder="NOMBRE PRODUCTO ...">
-                    <input type="text" id="localName" placeholder="NOMBRE LOCAL ...">
-                    <input type="text" id="search" placeholder="BUSCAR ...">
+                    <input type="text" id="date" placeholder="Fecha ...">
+                    <input type="text" id="productName" placeholder="Nombre producto ...">
+                    <input type="text" id="localName" placeholder="Nombre local ...">
+                    <input type="text" id="search" placeholder="Buscar ...">
                 </form>
             </div>
 
