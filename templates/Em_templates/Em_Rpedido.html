@@ -6,67 +6,47 @@
 </head>
 <body>
   <div class="sidebar">
-    <div class="logo">
-      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
-    </div>
-    <nav class="menu">
-        <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
-        </button>
-        <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Recibir pedidos"> Recibir pedidos
-        </button>
-        <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button active">
-          <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Realizar pedidos"> Realizar pedidos
-        </button>
-        <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Historial pedidos"> Historial pedidos
-        </button>
-        <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> usuario
-        </button>
-      </nav>
-  <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
+      <div class="logo">
+        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
+      </div>
+      <nav class="menu">
+          <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button">
+            <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
+          </button>
+          <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button active">
+            <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Recibir pedidos"> Recibir pedidos
+          </button>
+          <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button">
+            <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Realizar pedidos"> Realizar pedidos
+          </button>
+          <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button">
+            <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Historial pedidos"> Historial pedidos
+          </button>
+          <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
+            <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> usuario
+          </button>
+        </nav>
+    <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
   </div>
 
   
   <main class="content">
   <div class="box-welcome">
-  <h1 class="welcome-title">Panel de empleado</h1>
+    <h1 class="welcome-title">Panel de empleado</h1>
   </div>
 
   <div class="order-panel">
     <div class="order-header">
-<<<<<<< HEAD
-  <span>Categoria producto</span>
-  <span>Fecha vencimiento</span>
-  <span>Nombre producto</span>
-  <span>Cantidad</span>
+      <span>Categoria producto</span>
+      <span>Nombre producto</span>
     </div>
 
     <div class="order-row">
-  <input type="checkbox">
-  <input type="text" placeholder="Categoria">
-  <input type="date">
-  <input type="text" placeholder="Nombre producto">
-  <input type="number" placeholder="Cantidad">
-    </div>
-
-    <div class="inner-box"></div>
-
-  <button class="confirm-btn">Confirmar</button>
-=======
-      <span>Product Category</span>
-      <span>Name Product</span>
-    </div>
-
-    <div class="order-row">
-      <input type="text" placeholder="Category">
-      <input type="text" placeholder="Product name">
-    <button class="confirm-btn">CONFIRMATION</button>
+      <input type="text" placeholder="Categoria">
+      <input type="text" placeholder="Nombre producto">
+    <button class="confirm-btn">CONFIRMAR</button>
     </div>
     <div class="inner-box"></div>
->>>>>>> 67898608a21da27e8640beb5e402ca774d89d2d2
   </div>
 </main>
 
