@@ -1,6 +1,8 @@
 @font-face {
   font-family: 'njnaruto';
   src: url('../fonts/njnaruto.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
 }
 
 
@@ -62,27 +64,43 @@
   margin-top: 20px;
 }
 
+.icon {
+  width: 60px;
+  height: 60px;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
 .btn {
-  background: red;
-  border: none;
-  padding: 10px 20px;
+  background: rgb(0, 0, 0);
   border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
-  color: white;
+  color: rgb(0, 0, 0);
   transition: 0.3s;
 }
 
 .btn:hover {
-  background: #ff4d4d;
+  background: #ffffff;
+  color: #000000;
 }
 
 .btn.secondary {
-  background: gray;
+  background: rgb(0, 0, 0);
 }
 
 .btn.secondary:hover {
-  background: #666;
+  background: #ffffff;
+  color: #000000;
+}
+
+.btn.danger {
+  background: rgb(0, 0, 0);
+}
+
+.btn.danger:hover {
+  background: #ffffff;
+  color: #000000;
 }
 
 .employee-container {
@@ -91,7 +109,6 @@
   align-items: stretch;
 }
 
-/* --- register --- */
 .register-box {
   flex: 2; 
   background-color: black;
@@ -102,7 +119,7 @@
   min-height: 500px; 
   display: flex;
   flex-direction: column;
-}
+  }
 
 /* --- search --- */
 .search-box {
@@ -161,22 +178,14 @@
 
 .btn,
 .btn-register {
-  background-color: red;
+  background-color: transparent;
   color: white;
 }
 
 .btn:hover,
 .btn-register:hover {
-  background-color: #ff4d4d;
-}
-
-.btn-clear {
-  background-color: gray;
-  color: white;
-}
-
-.btn-clear:hover {
-  background-color: #666;
+  background-color: #f8f8f8;
+  color: #000000;
 }
 
 /* --- Resultados --- */
@@ -185,13 +194,72 @@
   padding: 15px;
   border: 2px dashed red;
   border-radius: 10px;
-  text-align: center;
+  text-align: left;
   flex: 1;
+  max-height: 350px;
+  overflow-y: auto;   
+  overflow-x: hidden;
 }
 
-.result-box img {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  margin-bottom: 10px;
+
+/* Hacemos que la caja tenga scroll */
+#resultEmpleado {
+  max-height: 400px; 
+  overflow-y: auto;
+  padding-right: 8px; 
 }
+
+/* Scrollbar general */
+#resultEmpleado::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Fondo del scrollbar */
+#resultEmpleado::-webkit-scrollbar-track {
+  background: #1e1e1e;  
+  border-radius: 10px;
+}
+
+/* Parte que se mueve (thumb) */
+#resultEmpleado::-webkit-scrollbar-thumb {
+  background: #e60000; 
+  border-radius: 10px;
+  border: 2px solid #1e1e1e; 
+}
+
+/* Hover sobre el thumb */
+#resultEmpleado::-webkit-scrollbar-thumb:hover {
+  background: #ff3333;
+}
+
+
+/* Tarjeta de cada empleado */
+.empleado-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; 
+  gap: 15px;
+  padding: 10px;
+  border-bottom: 1px solid red;
+}
+
+.empleado-actions {
+  margin-left: auto;
+}
+
+.empleado-actions button {
+  background: red;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.empleado-actions button:hover {
+  background: darkred;
+}
+
+    

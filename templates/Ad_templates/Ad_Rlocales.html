@@ -3,83 +3,85 @@
 <head>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Rlocales.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Menu.css') }}">
+  <meta charset="UTF-8">
+  <title>Ichiraku Ramen - Gestion de Puntos de Venta</title>
 </head>
 <body>
 
   <div class="sidebar">
       <div class="logo">
-        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
+        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Logo Ichiraku">
       </div>
 
       <nav class="menu">
           <button onclick="window.location.href='{{ url_for('Ad_Inicio') }}'" class="menu-button">
-            <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Home"> Home
+            <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
-            <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Employees
+            <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Empleados
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
-            <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Products
+            <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button">
-            <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reports
+            <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reportes
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'" class="menu-button active">
-            <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Puntos de Venta"> Points Sale
+            <img src="{{ url_for('static', filename='image/personas.png') }}" alt="locales"> locales
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
-            <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notifications
+            <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notificaciones
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
-            <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> User
+            <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> Usuario
           </button>
         </nav>
-      <button class="logout-btn" onclick="window.location.href='/logout'">LOG OUT</button>
+      <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar Sesion</button>
   </div>
 
-  <!-- Main Content -->
+  <!-- Contenido principal -->
   <main class="main-content">
       <div class="welcome-box">
-        <h1 class="welcome-title">Administrator Panel</h1>
+        <h1 class="welcome-title">Panel de Administracion</h1>
       </div>
 
       <div class="local-container">
 
         <!-- Caja izquierda: formulario -->
         <section class="register-box">
-          <h2>Register point of sale</h2>
+          <h2>Registrar Punto Venta</h2>
           <form id="registerForm">
-            <label>Name point of sale</label>
-            <input type="text" id="Name point of sale" placeholder="Name ...">
+            <label>Nombre Punto Venta</label>
+            <input type="text" id="nombre_local" placeholder="Nombre ...">
 
-            <label>Dirección</label>
-            <input type="text" id="direccion" placeholder="Address ...">
+            <label>Ubicacion</label>
+            <input type="text" id="ubicacion" placeholder="Ubicacion ...">
 
-            <label>ID local</label>
+            <label>ID Local</label>
             <input type="text" id="id_local" placeholder="ID local ...">
 
             <div class="form-actions">
-              <button type="submit" class="btn">Register</button>
-              <button type="reset" class="btn secondary">Clear</button>
+              <button type="submit" class="btn">Registrar</button>
+              <button type="reset" class="btn secondary">Limpiar</button>
             </div>
           </form>
         </section>
 
-        <!-- Caja derecha: búsqueda -->
+        <!-- Caja derecha: busqueda -->
         <section class="search-box">
-          <h2>List Points of Sale</h2>
+          <h2>Lista de Puntos Venta</h2>
           
-          <!-- Input de búsqueda -->
-          <label for="buscarEmpleado" class="sr-only">Buscar punto de venta</label>
+          <!-- Input de busqueda -->
+          <label for="buscarLocal" class="sr-only">Buscar punto venta</label>
           <input
             type="text"
-            id="buscarEmpleado" 
-            placeholder="Search by Name or ID..."
+            id="buscarLocal" 
+            placeholder="Buscar por nombre o ID..."
             autocomplete="off"
           >
 
           <!-- Resultados -->
-          <div id="resultEmpleado" class="result-box">
+          <div id="resultLocal" class="result-box">
             <p>No se ha realizado ninguna busqueda</p>
           </div>
         </section>
