@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ichiraku Ramen - Gestion Productos</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Rproductos.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
+</head>
+<body>
+
+  <div class="sidebar">
+      <div class="logo">
+        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Logo Ichiraku">
+      </div>
+
+    <nav class="menu">
+        <button onclick="window.location.href='{{ url_for('Ad_Inicio') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Empleados
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button active">
+          <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reportes
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> Locales
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notificaciones
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> Usuario
+        </button>
+      </nav>
+    <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar Sesion</button>
+  </div>
+
+  <!-- Contenido principal -->
+  <main class="main-content">
+      <div class="welcome-box">
+        <h1 class="welcome-title">Panel de Administracion</h1>
+      </div>
+
+    <div class="product-container">
+
+      <!-- Caja izquierda: formulario -->
+      <section class="register-box">
+        <h2>Registrar Producto</h2>
+        <form id="registerProductForm">
+
+          <label for="nombreProducto">Nombre Producto</label>
+          <input type="text" id="nombreProducto" placeholder="Nombre producto ..." required>
+
+          <label for="categoriaProducto">Categoria Producto</label>
+          <input type="text" id="categoriaProducto" placeholder="Categoria producto ..." required>
+
+          <label for="unidadProducto">Unidad</label>
+          <input type="text" id="unidadProducto" placeholder="Unidad ..." required>
+
+          <label for="serialProducto">Serial Producto</label>
+          <input type="text" id="serialProducto" placeholder="Serial producto ..." required>
+
+          <div class="form-actions">
+            <button type="submit" class="btn">
+              <img class="icon" src="{{ url_for('static', filename='image/mas.png') }}" alt="mas" />
+              Registrar
+            </button>
+
+            <button type="button" class="btn secondary" onclick="uploadClick()">
+              <img class="icon" src="{{ url_for('static', filename='image/subir.png') }}" alt="subir" />
+              Subir
+            </button>
+
+            <button type="button" class="btn danger" onclick="deleteClick()">
+              <img class="icon" src="{{ url_for('static', filename='image/basura.png') }}" alt="basura" />
+              Eliminar
+            </button>
+          </div>
+
+        </form>
+      </section>
+
+      <!-- Caja derecha: busqueda -->
+      <section class="search-box">
+        <h2>Lista Productos</h2>
+        
+        <!-- Input de busqueda -->
+        <label for="buscarProducto" class="sr-only">Buscar producto</label>
+        <input
+          type="text"
+          id="buscarProducto"
+          placeholder="Buscar por nombre o serial"
+          autocomplete="off"
+        >
+
+        <!-- Resultados -->
+        <div id="resultProducto" class="result-box">
+          <p>No se ha realizado ninguna busqueda</p>
+        </div>
+      </section>
+
+    </div>
+    <div id="registerMsg" style="color: green; margin-top: 10px;"></div>
+
+  </main>
+
+</body>
+<script>
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+</script>
+</html>

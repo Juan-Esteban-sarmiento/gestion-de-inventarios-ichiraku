@@ -3,67 +3,69 @@
 <head>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Pnotificaciones.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Menu.css') }}">
+  <meta charset="UTF-8">
+  <title>Ichiraku Ramen - Administrador de Avisos</title>
 </head>
 <body>
 
-  <!-- Sidebar -->
+  <!-- Barra lateral -->
   <div class="sidebar">
       <div class="logo">
-        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
+        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Logo Ichiraku">
       </div>
 
       <nav class="menu">
           <button onclick="window.location.href='{{ url_for('Ad_Inicio') }}'" class="menu-button">
-            <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Home"> Home
+            <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
-            <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Employees
+            <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Empleados
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
-            <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Products
+            <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button">
-            <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reports
+            <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reportes
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'" class="menu-button">
-            <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Puntos de Venta"> Points Sale
+            <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> locales
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button active">
-            <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notifications
+            <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notificaciones
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
-            <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> User
+            <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Usuario"> Usuario
           </button>
         </nav>
-      <button class="logout-btn" onclick="window.location.href='/logout'">LOG OUT</button>
+      <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
   </div>
 
-  <!-- Main Content -->
+  <!-- Contenido principal -->
   <main class="main-content">
       <div class="welcome-box">
-        <h1 class="welcome-title">Administrator Panel</h1>
+        <h1 class="welcome-title">Panel de administrador</h1>
       </div>
 
-        <!-- Contenedor de notificaciones -->
+        <!-- Contenedor de avisos -->
         <div class="notification-container">
 
-            <!-- Caja única para filtros y notificaciones -->
+            <!-- Caja unica para filtros y avisos -->
             <section class="search-box">
-                <h2>List Notifications</h2>
+                <h2>Lista de notificaciones</h2>
 
-                <!-- Barra de filtros (fecha + búsqueda) -->
+                <!-- Barra de filtros (fecha + busqueda) -->
                 <div class="filters">
                     <input type="date" class="filter-input">
-                    <input type="text" class="filter-input" placeholder="Search ...">
+                    <input type="text" class="filter-input" placeholder="Buscar ...">
                 </div>
 
-                <!-- Listado dinámico desde la base de datos -->
+                <!-- Listado dinamico desde la base de datos -->
                 <div class="notifications-list">
                     {% for noti in notificaciones %}
                     <div class="notification-item">
                         <!-- Icono izquierda -->
                         <img src="{{ url_for('static', filename='image/campana.png') }}" 
-                            class="icon-left" alt="Bell">
+                            class="icon-left" alt="Campana">
 
                         <!-- Texto -->
                         <span class="notification-text">
@@ -71,17 +73,17 @@
                             <small>{{ noti.fecha }}</small>
                         </span>
 
-                        <!-- Icono derecha según estado -->
+                        <!-- Icono derecha segun estado -->
                         {% if noti.estado == 'leido' %}
                         <img src="{{ url_for('static', filename='image/check.png') }}" 
-                            class="icon-right" alt="Check">
+                            class="icon-right" alt="Revisado">
                         {% else %}
                         <img src="{{ url_for('static', filename='image/x.png') }}" 
-                            class="icon-right" alt="No leído">
+                            class="icon-right" alt="Sin revisar">
                         {% endif %}
                     </div>
                     {% else %}
-                    <p style="text-align:center; color:white;">No hay notificaciones disponibles</p>
+                    <p style="text-align:center; color:white;">No hay avisos disponibles</p>
                     {% endfor %}
                 </div>
             </section>

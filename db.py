@@ -6,8 +6,15 @@ def get_db_connection():
         host="localhost",
         user="root",
         password="admin",
-        database="dbgich"
+        database="dbgich",
+        charset='utf8mb4',
+        use_unicode=True
     )
+    cursor = conn.cursor()
+    cursor.execute("SET NAMES utf8mb4;")
+    cursor.execute("SET CHARACTER SET utf8mb4;")
+    cursor.execute("SET character_set_connection=utf8mb4;")
+    cursor.close()
     return conn
 
 def get_empleados():
@@ -20,12 +27,15 @@ def get_empleados():
     return empleados
 
 
-def add_empleado(cedula, nombre, numero_contacto, contrasena, foto):
+def add_empleado(cedula, nombre, contacto, contrasena, foto_binaria):
     conn = get_db_connection()
     cursor = conn.cursor()
-    sql = "INSERT INTO empleados (Cedula, Nombre, Numero_contacto, Contrasena, Foto) VALUES (%s, %s, %s, %s, %s)"
-    values = (cedula, nombre, numero_contacto, contrasena, foto)
-    cursor.execute(sql, values)
+    query = """
+        INSERT INTO empleados (Cedula, Nombre, Numero_contacto, Contrasena, Foto)
+        VALUES (%s, %s, %s, %s, %s)
+    """
+    cursor.execute(query, (cedula, nombre, contacto, contrasena, foto_binaria))
     conn.commit()
     cursor.close()
     conn.close()
+

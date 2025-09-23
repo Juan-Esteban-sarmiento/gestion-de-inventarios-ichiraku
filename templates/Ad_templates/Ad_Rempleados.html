@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Rempleados.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Menu.css') }}">
+  <meta charset="UTF-8">
+  <title>Ichiraku Ramen - Administrador de Empleados</title>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="logo">
+      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Logo Ichiraku">
+    </div>
+
+    <nav class="menu">
+        <button onclick="window.location.href='{{ url_for('Ad_Inicio') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button active">
+          <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Empleados
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reportes
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> Locales
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notificaciones
+        </button>
+        <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
+          <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> Usuario
+        </button>
+      </nav>
+    <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar Sesion</button>
+  </div>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+      <div class="welcome-box">
+        <h1 class="welcome-title">Panel de Administracion</h1>
+
+      <div class="employee-container">
+
+        <!-- Caja izquierda: formulario -->
+        <section class="register-box">
+          <h2>Registrar Empleados</h2>
+          <form id="registerForm">
+            <label>Nombre</label>
+            <input type="text" id="nombre" placeholder="Nombre...">
+
+            <label>ID</label>
+            <input type="text" id="cedula" placeholder="ID...">
+
+            <label>Clave</label>
+            <input type="password" id="contrasena" placeholder="Clave...">
+
+            <label>Numero de Contacto</label>
+            <input type="text" id="contacto" placeholder="Numero de contacto...">
+
+            <div class="form-actions">
+              <button type="submit" class="btn">
+                <img class="icon" src="{{ url_for('static', filename='image/mas.png') }}" alt="Agregar" />
+                Registrar
+              </button>
+
+              <input type="file" id="foto" accept="image/*" style="display:none;">
+              <img id="previewFoto" src="" alt="Vista previa" style="display:none; max-width:100px; margin-top:10px; border:1px solid #ccc; border-radius:5px;">
+
+              <button type="button" class="btn secondary" onclick="document.getElementById('foto').click()">
+                <img class="icon" src="{{ url_for('static', filename='image/subir.png') }}" alt="Subir" />
+                Subir Foto
+              </button>
+
+              <button type="button" class="btn danger" onclick="deleteClick()">
+                <img class="icon" src="{{ url_for('static', filename='image/basura.png') }}" alt="Eliminar" />
+                Eliminar
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Caja derecha: busqueda -->
+        <section class="search-box">
+          <h2>Lista de Empleados</h2>
+          
+          <!-- Input de busqueda -->
+          <label for="buscarEmpleado" class="sr-only">Buscar empleado</label>
+          <input 
+            type="text" 
+            id="buscarEmpleado" 
+            placeholder="Buscar por nombre o documento..."
+            autocomplete="off"
+          >
+
+          <!-- Resultados -->
+          <div id="resultEmpleado" class="result-box">
+            <p>No se ha realizado ninguna busqueda</p>
+          </div>
+        </section>
+
+
+          </div>
+          <div id="registerMsg" style="color: green; margin-top: 10px;"></div>
+
+    </main>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/Rempleados.js') }}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</body>
+</html>
