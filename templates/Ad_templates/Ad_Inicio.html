@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Ichiraku Ramen - Admin</title>
+  <title>Ichiraku Ramen - Panel de Inicio</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Inicio.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
 </head>
@@ -14,28 +14,28 @@
 
     <nav class="menu">
         <button onclick="window.location.href='{{ url_for('Ad_Inicio') }}'" class="menu-button active">
-          <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Home"> Home
+          <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
         </button>
         <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Employees
+          <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Empleados
         </button>
         <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Products
+          <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
         </button>
         <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reports
+          <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reportes
         </button>
         <button onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Puntos de Venta"> Points Sale
+          <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> Locales
         </button>
         <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notifications
+          <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notificaciones
         </button>
         <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> user
+          <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Usuario"> Usuario
         </button>
       </nav>
-    <button class="logout-btn" onclick="window.location.href='/logout'">LOG OUT</button>
+    <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
   </div>
 
   <main class="content">
@@ -43,14 +43,13 @@
       <h1 class="welcome-title">Bienvenido</h1>
     </div>
     
-
     <section class="notification-box">
       <div class="notification-header">
-        <h2>Recent Notifications</h2>
-        <span>More</span>
+        <h2>Notificaciones recientes</h2>
+        <span>Mas</span>
       </div>
       <div class="notification-body">
-        <p>Today</p>
+        <p>Hoy</p>
       </div>
     </section>
 

@@ -3,71 +3,69 @@
 <head>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Dinformes.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
+  <meta charset="UTF-8">
+  <title>Ichiraku Ramen - Administrador de Informes</title>
 </head>
 <body>
     <div class="layout">
-            <div class="sidebar">
-                <div class="logo">
+        <div class="sidebar">
+            <div class="logo">
                 <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
-                </div>
+            </div>
 
             <nav class="menu">
                 <button onclick="window.location.href='{{ url_for('Ad_Inicio') }}'" class="menu-button">
-                <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Home"> Home
+                    <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
                 </button>
                 <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
-                <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Employees
+                    <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Empleados
                 </button>
                 <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
-                <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Products
+                    <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
                 </button>
                 <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button active">
-                <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reports
+                    <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reportes
                 </button>
                 <button onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'" class="menu-button">
-                <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Puntos de Venta"> Points Sale
+                    <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> Locales
                 </button>
                 <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
-                <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notifications
+                    <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notificaciones
                 </button>
                 <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
-                <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> user
+                    <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Usuario"> Usuario
                 </button>
             </nav>
-            <button class="logout-btn" onclick="window.location.href='/logout'">LOG OUT</button>
+            <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
         </div>
 
         <main class="main-content">
             <div class="welcome-box">
-                <h1 class="welcome-title">Administrator Panel</h1>
+                <h1 class="welcome-title">Panel de Administrador</h1>
             </div>
 
-            <!-- Caja de búsqueda -->
+            <!-- Caja de busqueda -->
             <div class="search-box">
                 <form id="searchForm">
-                    <input type="text" id="date" placeholder="DATE ...">
-                    <input type="text" id="productName" placeholder="NAME PRODUCT ...">
-                    <input type="text" id="localName" placeholder="LOCAL NAME ...">
-                    <input type="text" id="search" placeholder="SEARCH ...">
+                    <input type="text" id="date" placeholder="FECHA ...">
+                    <input type="text" id="productName" placeholder="NOMBRE PRODUCTO ...">
+                    <input type="text" id="localName" placeholder="NOMBRE LOCAL ...">
+                    <input type="text" id="search" placeholder="BUSCAR ...">
                 </form>
             </div>
 
             <!-- Resultados -->
-                <div id="resultEmpleado" class="result-box">
+            <div id="resultEmpleado" class="result-box">
                 <p>No se ha realizado ninguna busqueda</p>
-                </div>
-            </section>
+            </div>
         </main>
     </div>
 
     <div class="download-container">
-        <button  class="download-button">
-            <img src="{{ url_for('static', filename='image/descargar.png') }}" alt="Editar"> Download
+        <button class="download-button">
+            <img src="{{ url_for('static', filename='image/descargar.png') }}" alt="Descargar"> Descargar
         </button>
     </div>
-
-
-    
 
 </body>
 <script>
