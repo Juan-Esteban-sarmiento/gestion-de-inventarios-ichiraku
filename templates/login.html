@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestor de Inventarios</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/login.css') }}">
 </head>
 <body>
 
@@ -12,7 +12,7 @@
       <img src="{{ url_for('static', filename='image/ramen.png') }}" alt="Ramen">
     </div>
     <div class="title">
-        <h1>GESTOR DE INVENTARIOS</h1>
+  <h1>Gestor de inventarios</h1>
   <div class="container">
     <div class="right">
 
@@ -22,41 +22,41 @@
       <form>
         <div class="form-group">
           <label for="id">ID</label>
-          <input type="text" id="id" placeholder="Enter your ID">
+          <input type="text" id="id" placeholder="Ingresa tu ID">
         </div>
         <div class="form-group">
-          <label for="password">PASSWORD</label>
-          <input type="password" id="password" placeholder="Enter password">
+          <label for="password">CLAVE</label>
+          <input type="password" id="password" placeholder="Ingresa clave">
         </div>
-        <span class="recover">Recover Password</span>
+  <span class="recover">Recuperar clave</span>
         <div class="form-group">
-          <label for="role">SELECT ROLE</label>
+          <label for="role">Selecciona rol</label>
           <select id="role" onchange="toggleBranch()">
             <option value="">-- Selecciona --</option>
             <option value="Administrador">Administrador</option>
-            <option value="Empleado">Empleado</option>
+            <option value="Empleado">Personal</option>
           </select>
         </div>
 
         <div class="form-group" id="branch-group" style="display: none;">
-          <label for="branch">SELECT BRANCH</label>
+          <label for="branch">Selecciona local</label>
           <select id="branch">
             <option value="">-- Selecciona --</option>
-            <option value="Sucursal 1">Sucursal 1</option>
-            <option value="Sucursal 2">Sucursal 2</option>
-            <option value="Sucursal 3">Sucursal 3</option>
+            <option value="Local 1">Local 1</option>
+            <option value="Local 2">Local 2</option>
+            <option value="Local 3">Local 3</option>
           </select>
         </div>
         <div class="checkbox">
           <input type="checkbox" id="remember">
-          <label for="remember">Remember Me</label>
+          <label for="remember">Recordar usuario</label>
         </div>
-        <button type="button" class="btn" onclick="login()">CONECT</button>
+  <button type="button" class="btn" onclick="login()">Conectar</button>
       </form>
       <img class="naruto" src="{{ url_for('static', filename='image/person 1.png') }}" alt="Naruto">
     </div>
   </div>
 </body>
 
-<script src="{{ url_for('static', filename='js/login.js') }}"></script>
+<script src="{{ url_for('static', filename='js/Global_js/login.js') }}"></script>
 </html>

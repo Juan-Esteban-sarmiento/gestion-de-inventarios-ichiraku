@@ -1,8 +1,8 @@
 /* --- Sidebar Menu Styles --- */
 body {
   margin: 0;
-  font-family: 'njnaruto', sans-serif;
-  background: url('../image/fondo.png') repeat;
+  font-family: 'njnaruto';
+  background: url('../../image/fondo.png') repeat;
   display: flex;
   min-height: 100vh;
   color: white;
@@ -71,7 +71,7 @@ body {
   font-size: 16px;
   width: 100%;
   font-family: 'njnaruto';
-  src: url('../fonts/njnaruto.ttf') format('truetype')
+  src: url('../../fonts/njnaruto.ttf') format('truetype')
 }
 
 .menu-button:hover,
@@ -100,6 +100,8 @@ body {
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-family: 'njnaruto';
+  src: url('../../fonts/njnaruto.ttf') format('truetype')
 }
 
 .logout-btn:hover {

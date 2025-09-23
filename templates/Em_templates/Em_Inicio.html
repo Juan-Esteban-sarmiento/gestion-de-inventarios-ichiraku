@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_Inicio.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Inicio.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
 </head>
 <body>
   <div class="sidebar">
@@ -12,37 +12,37 @@
 
     <nav class="menu">
         <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button active">
-          <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Home"> Home
+          <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
         </button>
         <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Receive orders"> Receive orders
+          <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Recibir pedidos"> Recibir pedidos
         </button>
         <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Place orders"> Place orders
+          <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Realizar pedidos"> Realizar pedidos
         </button>
         <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Order History"> Order History
+          <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Historial pedidos"> Historial pedidos
         </button>
         <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> user
+          <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> usuario
         </button>
       </nav>
-    <button class="logout-btn" onclick="window.location.href='/logout'">LOG OUT</button>
+  <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
   </div>
 
   <main class="content">
     <div class="box-welcome">
-      <h1 class="welcome-title">Bienvenido</h1>
+  <h1 class="welcome-title">Bienvenido</h1>
     </div>
     
 
     <section class="notification-box">
       <div class="notification-header">
-        <h2>Recent Notifications</h2>
-        <span>More</span>
+  <h2>Avisos recientes</h2>
+  <span>Mas</span>
       </div>
       <div class="notification-body">
-        <p>Today</p>
+  <p>Hoy</p>
       </div>
     </section>
 

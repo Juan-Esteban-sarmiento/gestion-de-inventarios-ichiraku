@@ -2,14 +2,9 @@ import os
 import base64
 from flask import Flask, flash, jsonify, render_template, request, redirect, url_for, session, make_response
 from db import add_empleado, get_db_connection
-from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = '123456789'
-app.config['JSON_AS_ASCII'] = False
-UPLOAD_FOLDER = 'static/uploads/empleados'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 #redirecion inicial de logueo
@@ -31,11 +26,22 @@ def login():
         branch = data.get('branch')
 
         if role == "Administrador":
-            ADMIN_USER = "admin"
-            ADMIN_PASS = "admin123"
-            if usuario == ADMIN_USER and password == ADMIN_PASS:
+            conn = get_db_connection()
+            cursor = conn.cursor(dictionary=True)
+            # Cambia los nombres de columna según tu tabla 'administrador'
+            cursor.execute(
+                "SELECT * FROM administrador WHERE ID=%s AND Contrasena=%s",
+                (usuario, password)
+            )
+            admin_user = cursor.fetchone()
+            cursor.close()
+            conn.close()
+
+            if admin_user:
                 session['logged_in'] = True
                 session['role'] = 'Administrador'
+                session['cedula'] = admin_user.get('ID', usuario)
+                session['nombre'] = admin_user.get('Nombre', '')
                 return jsonify({"success": True, "redirect": url_for('Ad_Inicio')})
             else:
                 return jsonify({"success": False, "msg": "Usuario o contraseña de administrador incorrectos"})
@@ -108,8 +114,6 @@ def registrar_empleado():
         return jsonify({"success": False, "msg": f"Error al registrar: {str(e)}"})
 
     
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
  #busqueda de empleado
 
@@ -179,9 +183,118 @@ def eliminar_empleado(cedula):
         return jsonify({"success": False, "msg": "Error en el servidor"}), 500
 
 
+# Registrar producto
+
 @app.route('/Ad_Rproductos', methods=['GET', 'POST'])
 def Ad_Rproductos():
     return render_template("Ad_templates/Ad_Rproductos.html")
+
+@app.route('/registrar_producto', methods=['POST'])
+def registrar_producto():
+    nombre = request.form.get('nombre')
+    categoria = request.form.get('categoria')
+    unidad = request.form.get('unidad')
+    serial = request.form.get('serial')
+    try:
+        serial_int = int(serial)
+        if serial_int <= 0 or serial_int == 2147483647:
+            return jsonify({"success": False, "msg": "El ID del producto no puede ser 0 ni 2147483647."})
+    except Exception:
+        return jsonify({"success": False, "msg": "El ID del producto debe ser un número válido."})
+
+    # Verificar si el ID ya existe
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT Id_Producto FROM productos WHERE Id_Producto = %s", (serial_int,))
+    if cursor.fetchone():
+        cursor.close()
+        conn.close()
+        return jsonify({"success": False, "msg": "Ya existe un producto con ese ID."})
+    cursor.close()
+    conn.close()
+    foto = request.files.get('foto')
+
+    if not (nombre and categoria and unidad and serial and foto):
+        return jsonify({"success": False, "msg": "Todos los campos son obligatorios, incluyendo la foto."})
+
+    foto_binaria = foto.read() if foto else None
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        query = """
+            INSERT INTO productos (Id_Producto, Nombre, Categoria, Unidad, Foto)
+            VALUES (%s, %s, %s, %s, %s)
+        """
+        cursor.execute(query, (serial, nombre, categoria, unidad, foto_binaria))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"success": True, "msg": "Producto registrado correctamente."})
+    except Exception as e:
+        print("Error al registrar producto:", e)
+        if "Duplicate entry" in str(e):
+            return jsonify({"success": False, "msg": "Ya existe un producto con ese ID."})
+        return jsonify({"success": False, "msg": f"Error al registrar: {str(e)}"})
+    
+# Eliminar producto
+@app.route("/eliminar_producto/<id_producto>", methods=["DELETE"])
+def eliminar_producto(id_producto):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM productos WHERE Id_Producto = %s", (id_producto,))
+        prod = cursor.fetchone()
+        if not prod:
+            cursor.close()
+            conn.close()
+            return jsonify({"success": False, "msg": "Producto no encontrado"}), 404
+        cursor.execute("DELETE FROM productos WHERE Id_Producto = %s", (id_producto,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"success": True, "msg": "Producto eliminado correctamente."}), 200
+    except Exception as e:
+        print("Error al eliminar producto:", e)
+        return jsonify({"success": False, "msg": "Error en el servidor"}), 500
+    
+
+# Busqueda de producto
+@app.route("/buscar_producto", methods=["POST"])
+def buscar_producto():
+    data = request.get_json()
+    termino = data.get("termino")
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        query = """
+            SELECT Id_Producto, Nombre, Categoria, Unidad, Foto
+            FROM productos
+            WHERE Id_Producto LIKE %s OR Nombre LIKE %s
+        """
+        like_pattern = f"%{termino}%"
+        cursor.execute(query, (like_pattern, like_pattern))
+
+        productos = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        # Convertir binario a Base64
+        for prod in productos:
+            if prod["Foto"]:
+                prod["Foto"] = f"data:image/jpeg;base64,{base64.b64encode(prod['Foto']).decode('utf-8')}"
+            else:
+                prod["Foto"] = None
+
+        if productos:
+            return jsonify({"success": True, "productos": productos})
+        else:
+            return jsonify({"success": False, "msg": "Producto no encontrado"})
+    except Exception as e:
+        print("Error en búsqueda de producto:", e)
+        return jsonify({"success": False, "msg": "Error en servidor"})
 
 @app.route('/Ad_Dinformes', methods=['GET', 'POST'])
 def Ad_Dinformes():
@@ -195,19 +308,79 @@ def Ad_Rlocales():
 def Ad_Pnotificaciones():
     return render_template("Ad_templates/Ad_Pnotificaciones.html")
 
-@app.route('/Ad_Ceditar', methods=['GET'])
+
+# Edicion de administrador: GET muestra datos, POST actualiza, foto POST/DELETE
+@app.route('/Ad_Ceditar', methods=['GET', 'POST'])
 def Ad_Ceditar():
     if not session.get('logged_in') or session.get('role') != 'Administrador':
         return redirect(url_for('login'))
 
-    # Datos fijos del administrador
-    user = {
-        "Cedula": "0001",
-        "Nombre": "admin",
-        "Contrasena": "admin123"
-    }
+    cedula = session.get('cedula')
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM administrador WHERE ID = %s", (cedula,))
+    admin = cursor.fetchone()
 
-    return render_template("Ad_templates/Ad_Ceditar.html", user=user)
+    # GET normal
+    if request.method == 'GET':
+        photo_url = None
+        if admin and admin.get('Foto'):
+            photo_url = f"data:image/jpeg;base64,{base64.b64encode(admin['Foto']).decode('utf-8')}"
+        return render_template("Ad_templates/Ad_Ceditar.html", user={
+            "Cedula": admin.get('ID', ''),
+            "Nombre": admin.get('Nombre', ''),
+            "Contrasena": admin.get('Contrasena', ''),
+            "photo_url": photo_url
+        })
+
+    # POST actualiza datos
+    if request.method == 'POST' and request.is_json:
+        try:
+            data = request.get_json()
+            nombre = data.get("Nombre")
+            contrasena = data.get("Contrasena")
+            cursor.execute("""
+                UPDATE administrador SET Nombre = %s, Contrasena = %s WHERE ID = %s
+            """, (nombre, contrasena, cedula))
+            conn.commit()
+            return jsonify({"success": True, "msg": "Usuario actualizado correctamente"}), 200
+        except Exception as e:
+            print("Error update admin:", e)
+            return jsonify({"success": False, "msg": "Error en servidor"}), 500
+        finally:
+            cursor.close()
+            conn.close()
+
+    cursor.close()
+    conn.close()
+    return redirect(url_for('Ad_Ceditar'))
+
+# Subir o eliminar foto de administrador
+@app.route('/Ad_Ceditar_foto', methods=['POST', 'DELETE'])
+def Ad_Ceditar_foto():
+    if not session.get('logged_in') or session.get('role') != 'Administrador':
+        return jsonify({"success": False, "msg": "No autorizado"}), 401
+    cedula = session.get('cedula')
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    if request.method == 'POST':
+        foto = request.files.get('foto')
+        if not foto:
+            return jsonify({"success": False, "msg": "No se envio foto"})
+        foto_binaria = foto.read()
+        cursor.execute("UPDATE administrador SET Foto = %s WHERE ID = %s", (foto_binaria, cedula))
+        conn.commit()
+        photo_url = f"data:image/jpeg;base64,{base64.b64encode(foto_binaria).decode('utf-8')}"
+        cursor.close()
+        conn.close()
+        return jsonify({"success": True, "photo_url": photo_url})
+    elif request.method == 'DELETE':
+        cursor.execute("UPDATE administrador SET Foto = NULL WHERE ID = %s", (cedula,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        default_url = url_for('static', filename='image/default.png')
+        return jsonify({"success": True, "photo_url": default_url})
 
 #rutas de empleado con control de sesión y caché deshabilitada
 

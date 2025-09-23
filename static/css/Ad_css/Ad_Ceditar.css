@@ -1,6 +1,6 @@
 @font-face {
       font-family: 'njnaruto';
-      src: url('../fonts/njnaruto.ttf') format('truetype');
+      src: url('../../fonts/njnaruto.ttf') format('truetype');
     }
 
     .form-container {
@@ -30,6 +30,7 @@
   color: white;
 }
 
+
 .edit-form input {
   padding: 10px;
   border: 2px solid red;
@@ -37,6 +38,64 @@
   background: black;
   color: white;
   font-size: 16px;
+}
+
+/* Botón de confirmar edición */
+.submit-btn {
+  background: red;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: bold;
+  font-size: 18px;
+  cursor: pointer;
+  margin-top: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transition: background 0.3s;
+  font-family: 'njnaruto';
+  src: url('../../fonts/njnaruto.ttf') format('truetype')
+}
+.submit-btn:hover {
+  background: #ff4d4d;
+}
+
+/* Modal de confirmación */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+}
+.modal-content {
+  background: #222;
+  color: white;
+  border-radius: 12px;
+  padding: 30px 40px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  text-align: center;
+  border: 2px solid red;
+}
+.modal-content button {
+  background: red;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background 0.3s;
+}
+.modal-content button:hover {
+  background: #ff4d4d;
 }
 
 /* Ajustes para inputs de solo lectura */
@@ -79,6 +138,8 @@
   width: 100%;
   max-width: 180px;
   text-align: center;
+  font-family: 'njnaruto';
+  src: url('../../fonts/njnaruto.ttf') format('truetype')
 }
 
 .profile-btn:hover {

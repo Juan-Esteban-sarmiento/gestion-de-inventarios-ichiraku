@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Rlocales.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Menu.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Rlocales.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/Menu.css') }}">
   <meta charset="UTF-8">
-  <title>Ichiraku Ramen - Gestion de Puntos de Venta</title>
+  <title>Ichiraku Ramen - Administracion de locales de venta</title>
 </head>
 <body>
 
@@ -18,7 +18,7 @@
             <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
-            <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Empleados
+            <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Personal"> Personal
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
             <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
@@ -30,34 +30,34 @@
             <img src="{{ url_for('static', filename='image/personas.png') }}" alt="locales"> locales
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
-            <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notificaciones
+            <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Avisos
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
             <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> Usuario
           </button>
         </nav>
-      <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar Sesion</button>
+  <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
   </div>
 
   <!-- Contenido principal -->
   <main class="main-content">
       <div class="welcome-box">
-        <h1 class="welcome-title">Panel de Administracion</h1>
+  <h1 class="welcome-title">Panel de administracion</h1>
       </div>
 
       <div class="local-container">
 
         <!-- Caja izquierda: formulario -->
         <section class="register-box">
-          <h2>Registrar Punto Venta</h2>
+          <h2>Registrar local de venta</h2>
           <form id="registerForm">
-            <label>Nombre Punto Venta</label>
+            <label>Nombre local</label>
             <input type="text" id="nombre_local" placeholder="Nombre ...">
 
             <label>Ubicacion</label>
             <input type="text" id="ubicacion" placeholder="Ubicacion ...">
 
-            <label>ID Local</label>
+            <label>ID local</label>
             <input type="text" id="id_local" placeholder="ID local ...">
 
             <div class="form-actions">

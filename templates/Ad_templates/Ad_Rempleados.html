@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_Rempleados.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Menu.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Rempleados.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/Menu.css') }}">
   <meta charset="UTF-8">
-  <title>Ichiraku Ramen - Administrador de Empleados</title>
+  <title>Ichiraku Ramen - Administrador de personal</title>
 </head>
 <body>
   <div class="sidebar">
@@ -17,7 +17,7 @@
           <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
         </button>
         <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button active">
-          <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Empleados"> Empleados
+          <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Personal"> Personal
         </button>
         <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
           <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
@@ -29,25 +29,25 @@
           <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> Locales
         </button>
         <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notificaciones
+          <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> avisos
         </button>
         <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
           <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> Usuario
         </button>
       </nav>
-    <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar Sesion</button>
+  <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
   </div>
 
     <!-- Contenido Principal -->
     <main class="main-content">
       <div class="welcome-box">
-        <h1 class="welcome-title">Panel de Administracion</h1>
+  <h1 class="welcome-title">Panel de administracion</h1>
 
       <div class="employee-container">
 
         <!-- Caja izquierda: formulario -->
         <section class="register-box">
-          <h2>Registrar Empleados</h2>
+          <h2>Registrar personal</h2>
           <form id="registerForm">
             <label>Nombre</label>
             <input type="text" id="nombre" placeholder="Nombre...">
@@ -58,7 +58,7 @@
             <label>Clave</label>
             <input type="password" id="contrasena" placeholder="Clave...">
 
-            <label>Numero de Contacto</label>
+            <label>Numero de contacto</label>
             <input type="text" id="contacto" placeholder="Numero de contacto...">
 
             <div class="form-actions">
@@ -81,10 +81,10 @@
 
         <!-- Caja derecha: busqueda -->
         <section class="search-box">
-          <h2>Lista de Empleados</h2>
+          <h2>Lista de personal</h2>
           
           <!-- Input de busqueda -->
-          <label for="buscarEmpleado" class="sr-only">Buscar empleado</label>
+          <label for="buscarEmpleado" class="sr-only">Buscar personal</label>
           <input 
             type="text" 
             id="buscarEmpleado" 
@@ -105,7 +105,7 @@
     </main>
   </div>
 
-  <script src="{{ url_for('static', filename='js/Rempleados.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/Ad_js/Rempleados.js') }}"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 </body>

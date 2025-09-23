@@ -1,13 +1,13 @@
 @font-face {
   font-family: 'njnaruto';
-  src: url('../fonts/njnaruto.ttf') format('truetype');
+  src: url('../../fonts/njnaruto.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 
 body {
       font-family: 'njnaruto';
-      background: url('../image/fondo.png') repeat;
+  background: url('../../image/fondo.png') repeat;
       display: flex;
       justify-content: center;
       height: 67vh;
