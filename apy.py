@@ -428,47 +428,68 @@ def descargar_informe(id_informe):
         # 🔹 Obtener datos del informe
         cursor.execute('SELECT * FROM informe WHERE Id_Informe = %s', (id_informe,))
         informe = cursor.fetchone()
-
         if not informe:
             cursor.close()
             conn.close()
             return jsonify({"success": False, "msg": "Informe no encontrado"}), 404
 
-        # 🔹 Obtener ID del pedido asociado al informe
-        pedido_id = informe["Id_Inf_Pedido"]
+        # 🔹 Determinar período según tipo
+        pedidos = []
+        if informe["Tipo"] == "semanal":
+            # formato esperado: "2025-W39"
+            anio, semana = map(int, informe["Periodo"].split('-W'))
+            cursor.execute("""
+                SELECT pe.Id_Pedido
+                FROM pedido pe
+                WHERE YEAR(pe.fecha_pedido) = %s AND WEEK(pe.fecha_pedido) = %s
+                ORDER BY pe.Id_Pedido
+            """, (anio, semana))
+            pedidos = [row["Id_Pedido"] for row in cursor.fetchall()]
+        elif informe["Tipo"] == "mensual":
+            # formato esperado: "2025-M09"
+            anio, mes = informe["Periodo"].split('-M')
+            anio = int(anio)
+            mes = int(mes)
+            cursor.execute("""
+                SELECT pe.Id_Pedido
+                FROM pedido pe
+                WHERE YEAR(pe.fecha_pedido) = %s AND MONTH(pe.fecha_pedido) = %s
+                ORDER BY pe.Id_Pedido
+            """, (anio, mes))
+            pedidos = [row["Id_Pedido"] for row in cursor.fetchall()]
 
-        # 🔹 Obtener detalles del pedido asociado
-        cursor.execute("""
-            SELECT p.Nombre, p.Categoria, dp.Cantidad
-            FROM pedido pe
-            JOIN detalle_pedido dp ON pe.Id_pedido = dp.id_pedido
-            JOIN productos p ON dp.id_producto = p.Id_Producto
-            WHERE pe.Id_pedido = %s
-        """, (pedido_id,))
-        detalles = cursor.fetchall()
-
+        # 🔹 Obtener detalles de todos los pedidos
+        if pedidos:
+            cursor.execute(f"""
+                SELECT pe.Id_Pedido, i.Id_Local, p.Nombre, p.Categoria, dp.Cantidad
+                FROM pedido pe
+                JOIN detalle_pedido dp ON pe.Id_Pedido = dp.Id_Pedido
+                JOIN inventario i ON i.Id_Producto = dp.Id_Producto
+                JOIN productos p ON p.Id_Producto = dp.Id_Producto
+                WHERE pe.Id_Pedido IN ({','.join(['%s']*len(pedidos))})
+                ORDER BY pe.Id_Pedido
+            """, tuple(pedidos))
+            detalles = cursor.fetchall()
+        else:
+            detalles = []
 
         cursor.close()
         conn.close()
 
-        # 🔹 Crear buffer para PDF
+        # 🔹 Crear PDF
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter)
         elements = []
         styles = getSampleStyleSheet()
 
-        # 🔹 Título elegante
-        titulo = Paragraph(f"📊 Informe #{informe['Id_Informe']}", styles['Title'])
-        elements.append(titulo)
+        elements.append(Paragraph(f"📊 Informe #{informe['Id_Informe']}", styles['Title']))
         elements.append(Spacer(1, 20))
 
-        # 🔹 Info general del informe
         info_table_data = [
             ["ID Informe", informe["Id_Informe"]],
             ["Tipo", informe["Tipo"]],
             ["Periodo", informe["Periodo"]],
             ["Fecha Creación", str(informe["Fecha_Creacion"])],
-            ["ID Pedido", informe["Id_Inf_Pedido"]],
         ]
         info_table = Table(info_table_data, colWidths=[150, 300])
         info_table.setStyle(TableStyle([
@@ -482,13 +503,12 @@ def descargar_informe(id_informe):
         elements.append(info_table)
         elements.append(Spacer(1, 20))
 
-        # 🔹 Detalles del pedido
         if detalles:
-            elements.append(Paragraph("📦 Detalles del Pedido", styles['Heading2']))
-            detalles_data = [["Producto", "Categoría", "Cantidad"]] + [
-                [d["Nombre"], d["Categoria"], d["Cantidad"]] for d in detalles
+            elements.append(Paragraph("📦 Detalles de Pedidos", styles['Heading2']))
+            detalles_data = [["ID Pedido", "ID Local", "Producto", "Categoría", "Cantidad"]] + [
+                [d["Id_Pedido"], d["Id_Local"], d["Nombre"], d["Categoria"], d["Cantidad"]] for d in detalles
             ]
-            detalles_table = Table(detalles_data, colWidths=[250, 150, 100])
+            detalles_table = Table(detalles_data, colWidths=[60, 60, 180, 120, 60])
             detalles_table.setStyle(TableStyle([
                 ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#e63900")),
                 ("TEXTCOLOR", (0,0), (-1,0), colors.white),
@@ -499,12 +519,10 @@ def descargar_informe(id_informe):
             ]))
             elements.append(detalles_table)
         else:
-            elements.append(Paragraph("⚠️ No hay detalles de pedido registrados.", styles['Normal']))
+            elements.append(Paragraph("⚠️ No hay pedidos en este período.", styles['Normal']))
 
-        # 🔹 Construir PDF
         doc.build(elements)
 
-        # 🔹 Preparar respuesta
         buffer.seek(0)
         response = make_response(buffer.read())
         response.headers['Content-Type'] = 'application/pdf'
@@ -513,7 +531,8 @@ def descargar_informe(id_informe):
 
     except Exception as e:
         print("Error al generar PDF:", e)
-        return jsonify({"success": False, "msg": "Error al generar informe PDF"})
+        return jsonify({"success": False, "msg": f"Error al generar informe PDF: {e}"})
+
 
 # ╔══════════════════════════════════════════════╗
 # ║ Edición de Datos del Administrador           ║
@@ -675,24 +694,17 @@ def registrar_pedido():
 
     try:
         data = request.get_json()
-        id_local = data.get("Id_Local")  # ID de la sucursal (puedes obtenerlo de sesión o dropdown)
+        id_local = data.get("Id_Local")
         productos = data.get("Productos")  # Lista de {Id_Producto, Cantidad, Fecha_Ingreso, Fecha_Caducidad}
 
         if not (id_local and productos and isinstance(productos, list) and len(productos) > 0):
-            return jsonify({"success": False, "msg": "Datos inválidos: necesita ID de local y al menos un producto"}), 400
+            return jsonify({"success": False, "msg": "Datos inválidos"}), 400
 
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # 1️⃣ Insertar un solo pedido (con la cédula del empleado logueado)
-        cursor.execute("""
-            INSERT INTO pedido (cedula_empleado, fecha_pedido)
-            VALUES (%s, NOW())
-        """, (session.get("cedula"),))
-        id_pedido = cursor.lastrowid
-
-        # 2️⃣ Insertar CADA producto en inventario (asociado al mismo pedido)
-        productos_insertados = 0
+        # 🔹 1️⃣ Crear registros en inventario para cada producto
+        inventarios = []
         for prod in productos:
             id_producto = prod.get("Id_Producto")
             cantidad = prod.get("Cantidad")
@@ -700,31 +712,50 @@ def registrar_pedido():
             fecha_caducidad = prod.get("Fecha_Caducidad")
 
             if not (id_producto and cantidad and fecha_ingreso and fecha_caducidad):
-                # Si un producto es inválido, salta pero continúa con los demás
-                print(f"Producto inválido saltado: {id_producto}")
                 continue
 
             cursor.execute("""
-                INSERT INTO inventario (Id_Local, Id_Producto, Cantidad, Fecha_Ingreso, Fecha_Caducidad, Id_Pedido)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, (id_local, id_producto, cantidad, fecha_ingreso, fecha_caducidad, id_pedido))
-            productos_insertados += 1
+                INSERT INTO inventario (Id_Local, Id_Producto, Cantidad, Fecha_ingreso, Fecha_caducidad)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (id_local, id_producto, cantidad, fecha_ingreso, fecha_caducidad))
+
+            inventarios.append(cursor.lastrowid)  # Guardamos el Id_Inventario generado
+
+        if not inventarios:
+            return jsonify({"success": False, "msg": "No se pudieron registrar los inventarios"}), 400
+
+        # 🔹 2️⃣ Crear un solo pedido apuntando al primer inventario (o puedes ajustar según tu lógica)
+        id_inventario = inventarios[0]
+        cursor.execute("""
+            INSERT INTO pedido (Id_Inventario, Cedula, fecha_pedido)
+            VALUES (%s, %s, NOW())
+        """, (id_inventario, session.get("cedula")))
+        id_pedido = cursor.lastrowid
+
+        # 🔹 3️⃣ Insertar cada producto en detalle_pedido
+        for prod in productos:
+            id_producto = prod.get("Id_Producto")
+            cantidad = prod.get("Cantidad")
+            fecha_pedido = prod.get("Fecha_Ingreso")  # Usamos fecha de ingreso como referencia del pedido
+
+            cursor.execute("""
+                INSERT INTO detalle_pedido (Id_Pedido, Id_Producto, Cantidad, Fecha_Pedido)
+                VALUES (%s, %s, %s, %s)
+            """, (id_pedido, id_producto, cantidad, fecha_pedido))
 
         conn.commit()
         cursor.close()
         conn.close()
 
-        if productos_insertados > 0:
-            return jsonify({
-                "success": True, 
-                "msg": f"Pedido #{id_pedido} registrado con éxito. {productos_insertados} productos agregados al inventario."
-            }), 201
-        else:
-            return jsonify({"success": False, "msg": "No se pudieron insertar productos válidos"}), 400
+        return jsonify({
+            "success": True,
+            "msg": f"Pedido #{id_pedido} registrado con éxito con {len(productos)} productos."
+        }), 201
 
     except Exception as e:
         print("Error al registrar pedido:", e)
         return jsonify({"success": False, "msg": f"Error en servidor: {str(e)}"}), 500
+
 
 # ╔══════════════════════════════════════════════╗
 # ║ Edición de Datos del Empleado             ║
