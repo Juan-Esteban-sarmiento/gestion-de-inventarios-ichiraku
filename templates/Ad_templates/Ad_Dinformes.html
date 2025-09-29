@@ -47,32 +47,27 @@
             <!-- Caja de busqueda -->
             <div class="search-box">
                 <form id="searchForm">
-                    <input type="text" id="date" placeholder="Fecha ...">
-                    <input type="text" id="productName" placeholder="Nombre producto ...">
-                    <input type="text" id="localName" placeholder="Nombre local ...">
-                    <input type="text" id="search" placeholder="Buscar ...">
+                    <input type="text" id="id_informe" placeholder="ID Informe ...">
+                    <input type="date" id="date" placeholder="Fecha ...">
+                    <button type="submit">Buscar</button>
                 </form>
             </div>
 
             <!-- Resultados -->
             <div id="resultEmpleado" class="result-box">
-                <p>No se ha realizado ninguna busqueda</p>
+                <p>No hay informes generados</p>
+            </div>
+
+            <!-- Contenedor de botones (mételo aquí dentro del main) -->
+            <div class="download-container">
+                <button class="download-button" id="downloadBtn">
+                    <img src="{{ url_for('static', filename='image/descargar.png') }}" alt="Descargar"> Descargar
+                </button>
+                <button class="download-button" id="genSemBtn">Generar semanal</button>
+                <button class="download-button" id="genMesBtn">Generar mensual</button>
             </div>
         </main>
     </div>
-
-    <div class="download-container">
-        <button class="download-button">
-            <img src="{{ url_for('static', filename='image/descargar.png') }}" alt="Descargar"> Descargar
-        </button>
-    </div>
-
 </body>
-<script>
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted) {
-            window.location.reload();
-        }
-    });
-</script>
+<script src="{{ url_for('static', filename='js/Ad_js/Dinformes.js') }}"></script>
 </html>

@@ -6,90 +6,335 @@
 .content {
   padding: 40px;
   position: relative;
+  flex-grow: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .welcome-box {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 0px;
   margin-bottom: 20px;
   position: relative;
 }
 
 .welcome-title {
-  position: absolute;   /* se posiciona libremente */
-  top: 0px;           /* distancia desde arriba */
-  left: 0px;          /* distancia desde la izquierda */
+  top: 0px;
+  left: 0px;
   white-space: nowrap;
   color: white;
   font-family: 'njnaruto', sans-serif;
-}
-
-.box-welcome {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0px;
-  margin-bottom: 20px;
-  position: relative;
-  margin-left: 500px;
+  font-size: 3em;
+  text-align: center;
+  width: 100%;
 }
 
 .order-panel {
   background-color: black;
   border: 2px solid red;
-  padding: 20px;          /* espacio interno */
-  margin-left: 30px;      /* separación hacia la derecha */
-  width: 1500px;           /* 👉 puedes cambiar ancho */
-  height: 640px;          /* 👉 puedes cambiar alto */
-  position: absolute;   /* se posiciona libremente */
-  top: 200px;           /* distancia desde arriba */
-  left: 50px;
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 1400px;
+  width: 95%;
+  min-height: 500px;
+  max-height: 80vh;
   border-radius: 10px;
   color: white;
   font-family: 'njnaruto', sans-serif;
+  display: flex;
+  gap: 20px;
+  position: relative;
+  overflow: hidden; /* Evita desbordes generales */
+}
+
+.product-selection-section {
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-height: calc(80vh - 120px);
+  overflow-y: auto; /* Solo scroll vertical */
+  overflow-x: hidden; /* Previene horizontal */
+  padding-right: 10px;
 }
 
 .order-header {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
   text-align: center;
   font-weight: bold;
   margin-bottom: 10px;
   color: red;
+  font-size: 1.5em;
+  border-bottom: 1px solid red;
+  padding-bottom: 10px;
+  flex-shrink: 0; /* No se encoge */
 }
 
-.order-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+.search-controls {
+  display: flex;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   align-items: center;
+  flex-shrink: 0; /* No se encoge */
 }
 
-.order-row input {
+.search-controls input {
+  flex-grow: 1;
+  padding: 10px;
+  border: 1px solid red;
+  border-radius: 5px;
+  background: #000000;
+  color: white;
+  font-size: 1em;
+}
+
+.search-controls .confirm-btn {
+  padding: 10px 15px;
+  white-space: nowrap;
+  background: black;
+  border: 2px solid red;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'njnaruto', sans-serif;
+  transition: background 0.3s, color 0.3s;
+  font-size: 0.95em; /* Ligeramente más pequeño para caber mejor */
+}
+
+.search-controls .confirm-btn:hover {
+  background: red;
+  color: black;
+}
+
+/* Estilo específico para el botón "Mostrar Todos" */
+.search-controls .show-all-btn {
+  background: #006400; /* Verde oscuro para diferenciar */
+  border: 2px solid #32CD32; /* Borde verde */
+  font-size: 0.9em; /* Más compacto */
+  padding: 10px 12px; /* Más pequeño */
+}
+
+.search-controls .show-all-btn:hover {
+  background: #32CD32; /* Verde claro en hover */
+  color: black;
+}
+
+.productos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Reducido para evitar horizontal */
+  gap: 15px; /* Gap más pequeño para más espacio horizontal */
+  overflow-y: auto; /* Solo vertical si es necesario */
+  overflow-x: hidden; /* Previene horizontal */
+  min-height: 0; /* Permite flex shrinking */
+  padding-bottom: 10px; /* Espacio extra al final para scroll */
+}
+
+/* Scrollbar estilizada para el grid de productos (solo vertical) */
+.productos-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.productos-grid::-webkit-scrollbar-track {
+  background: #333;
+  border-radius: 10px;
+}
+
+.productos-grid::-webkit-scrollbar-thumb {
+  background: red;
+  border-radius: 10px;
+  border: 2px solid #333;
+}
+
+.productos-grid::-webkit-scrollbar-thumb:hover {
+  background: #ff4d4d;
+}
+
+/* Scrollbar para toda la sección de productos (solo vertical) */
+.product-selection-section::-webkit-scrollbar {
+  width: 8px;
+}
+
+.product-selection-section::-webkit-scrollbar-track {
+  background: #333;
+  border-radius: 10px;
+}
+
+.product-selection-section::-webkit-scrollbar-thumb {
+  background: red;
+  border-radius: 10px;
+  border: 2px solid #333;
+}
+
+.product-selection-section::-webkit-scrollbar-thumb:hover {
+  background: #ff4d4d;
+}
+
+.card {
+  background: #111;
+  border: 2px solid red;
+  border-radius: 10px;
+  padding: 15px;
+  text-align: center;
+  color: white;
+  font-family: 'njnaruto', sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 320px; /* Altura fija para uniformidad */
+  box-sizing: border-box;
+  overflow: hidden; /* Evita desbordes en tarjetas individuales */
+}
+
+.card img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.card h3 {
+  font-size: 1.2em;
+  margin-bottom: 5px;
+  color: white;
+  flex-grow: 0;
+  min-height: 1.2em;
+  overflow: hidden; /* Evita texto largo desbordando */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card p {
+  font-size: 0.9em;
+  margin-bottom: 5px;
+  color: #ccc;
+  flex-grow: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card input[type="number"] {
+  width: 80px;
+  margin: 10px auto;
   padding: 5px;
   border: 1px solid red;
   border-radius: 5px;
   background: #000000;
   color: white;
+  text-align: center;
+  flex-shrink: 0;
 }
 
-.inner-box {
-  background-color: #000000;
+.card button {
+  background: black;
   border: 2px solid red;
-  border-radius: 8px;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+  font-family: 'njnaruto', sans-serif;
+  font-size: 1em;
+  flex-shrink: 0;
+  white-space: nowrap; /* Evita wrap en texto del botón */
+}
+
+.card button:hover {
+  background: red;
+  color: black;
+}
+
+.pedido-box {
+  flex: 1;
+  background: black;
+  border: 2px solid red;
+  border-radius: 10px;
   padding: 15px;
-  margin-bottom: 20px;
-  width: 1460px;   /* 👉 cambia ancho */
-  height: 540px;  /* 👉 cambia alto */
+  color: white;
+  font-family: 'njnaruto', sans-serif;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(80vh - 40px);
+  overflow: hidden; /* Contenedor no desborda */
+}
+
+.pedido-box h2 {
+  text-align: center;
+  color: red;
+  margin-bottom: 15px;
+  font-size: 1.4em;
+  border-bottom: 1px solid red;
+  padding-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.pedido-box ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto; /* Solo vertical */
+  overflow-x: hidden; /* Previene horizontal */
+  flex-grow: 1;
+  padding-right: 5px;
+  max-height: calc(80vh - 200px);
+}
+
+/* Scrollbar para la lista del carrito (solo vertical) */
+.pedido-box ul::-webkit-scrollbar {
+  width: 8px;
+}
+
+.pedido-box ul::-webkit-scrollbar-track {
+  background: #333;
+  border-radius: 10px;
+}
+
+.pedido-box ul::-webkit-scrollbar-thumb {
+  background: red;
+  border-radius: 10px;
+  border: 2px solid #333;
+}
+
+.pedido-box ul::-webkit-scrollbar-thumb:hover {
+  background: #ff4d4d;
+}
+
+.pedido-box li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px dashed #333;
+  font-size: 0.95em;
+  overflow: hidden; /* Evita desbordes en items largos */
+}
+
+.pedido-box li:last-child {
+  border-bottom: none;
+}
+
+.pedido-box li button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 1.2em;
+  padding: 0 5px;
+  flex-shrink: 0;
+}
+
+.pedido-box li button:hover {
+  color: red;
 }
 
 .confirm-btn {
-  position: relative;   /* o absolute, según lo necesites */
-  top: -20px;            /* distancia desde arriba */
-  left: 0px;
-  margin: auto;
+  display: block;
+  width: 100%;
+  margin-top: 20px;
   padding: 15px 30px;
   border: 2px solid red;
   background-color: black;
@@ -98,9 +343,144 @@
   cursor: pointer;
   font-family: 'njnaruto', sans-serif;
   transition: 0.3s;
+  font-size: 1.2em;
+  flex-shrink: 0;
 }
 
 .confirm-btn:hover {
   background-color: red;
   color: black;
 }
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .order-panel {
+    flex-direction: column;
+    align-items: center;
+    max-height: none; /* En tablets, permite expansión completa */
+    min-height: auto;
+  }
+
+  .product-selection-section,
+  .pedido-box {
+    width: 100%;
+    max-width: 700px;
+    max-height: none; /* Expande en pantallas medianas */
+  }
+
+  .productos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px; /* Aún más pequeño en tablets */
+  }
+
+  .search-controls {
+    flex-wrap: wrap; /* Permite wrap si hay 3 botones */
+  }
+}
+
+@media (max-width: 768px) {
+  .welcome-title {
+    font-size: 2.5em;
+  }
+
+  .content {
+    padding: 20px; /* Menos padding en móviles */
+  }
+
+  .search-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .search-controls input,
+  .search-controls .confirm-btn,
+  .search-controls .show-all-btn {
+    width: 100%;
+  }
+
+  .productos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px; /* Mínimo en móviles */
+  }
+
+  .order-panel {
+    padding: 15px;
+    gap: 15px;
+  }
+
+  .card {
+    height: 280px; /* Tarjetas más compactas en móviles */
+  }
+
+  .card img {
+    height: 120px;
+  }
+
+  .show-all-btn {
+    order: -1; /* En móviles, "Mostrar Todos" va primero en columna */
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-title {
+    font-size: 2em;
+  }
+
+  .order-panel {
+    padding: 10px;
+    margin: 10px auto;
+  }
+
+  .card {
+    padding: 10px;
+    height: 260px;
+  }
+
+  .card h3 {
+    font-size: 1em;
+  }
+
+  .card p {
+    font-size: 0.8em;
+  }
+
+  .card button {
+    padding: 6px 10px;
+    font-size: 0.9em;
+  }
+
+  .pedido-box h2 {
+    font-size: 1.2em;
+  }
+
+  .pedido-box li {
+    font-size: 0.9em;
+  }
+
+  .confirm-btn {
+    padding: 12px 20px;
+    font-size: 1em;
+  }
+
+  .search-controls .confirm-btn,
+  .search-controls .show-all-btn {
+    padding: 12px; /* Más alto en móviles para touch */
+    font-size: 1em;
+  }
+}
+
+#messageArea {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px;
+  border-radius: 5px;
+  color: white;
+  font-weight: bold;
+  z-index: 1000;
+  display: none;
+  min-width: 300px;
+}
+#messageArea.success { background-color: green; }
+#messageArea.error { background-color: red; }

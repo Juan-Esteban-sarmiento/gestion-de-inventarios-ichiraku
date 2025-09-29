@@ -3,6 +3,8 @@
 <head>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Rpedido.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+  <meta charset="UTF-8">
+  <title>Ichiraku Ramen - Realizar Pedido</title>
 </head>
 <body>
   <div class="sidebar">
@@ -13,10 +15,10 @@
           <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button">
             <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
           </button>
-          <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button active">
+          <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button">
             <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Recibir pedidos"> Recibir pedidos
           </button>
-          <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button">
+          <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button active">
             <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Realizar pedidos"> Realizar pedidos
           </button>
           <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button">
@@ -26,29 +28,46 @@
             <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> usuario
           </button>
         </nav>
-    <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
+    <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesión</button>
   </div>
 
-  
   <main class="content">
-  <div class="box-welcome">
-    <h1 class="welcome-title">Panel de empleado</h1>
-  </div>
+    <!-- Área para mensajes (alertas) -->
+    <div id="messageArea"></div>
 
-  <div class="order-panel">
-    <div class="order-header">
-      <span>Categoria producto</span>
-      <span>Nombre producto</span>
+    <div class="box-welcome">
+      <h1 class="welcome-title">Realizar Pedido</h1>
     </div>
 
-    <div class="order-row">
-      <input type="text" placeholder="Categoria">
-      <input type="text" placeholder="Nombre producto">
-    <button class="confirm-btn">CONFIRMAR</button>
-    </div>
-    <div class="inner-box"></div>
-  </div>
-</main>
+    <div class="order-panel">
+      <!-- Product Search and Display Section -->
+      <div class="product-selection-section">
+        <div class="order-header">
+          <span>Buscar Productos</span>
+        </div>
+        <div class="search-controls">
+          <input type="text" id="searchTerm" placeholder="Escribe para buscar (carga automática al inicio)">
+          <button class="confirm-btn" onclick="buscarProductos()">Buscar</button>
+          <button class="confirm-btn show-all-btn" onclick="mostrarTodos()">Mostrar Todos</button>
+        </div>
 
+        <!-- Product Grid -->
+        <div id="productos-container" class="productos-grid">
+          <!-- Product cards will be loaded here by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Shopping Cart Section -->
+      <div class="pedido-box">
+        <h2>🛒 Productos Seleccionados</h2>
+        <ul id="pedido-lista">
+          <!-- Cart items will be loaded here by JavaScript -->
+        </ul>
+        <button class="confirm-btn" onclick="enviarPedido()">Confirmar Pedido</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/Em_js/Rpedidos.js') }}"></script>
 </body>
 </html>
