@@ -2,3 +2,5 @@ flask
 mysql-connector-python
 reportlab
 
+command:
+    pip install -r requirements.txt

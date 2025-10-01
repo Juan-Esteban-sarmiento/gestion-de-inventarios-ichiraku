@@ -17,7 +17,7 @@ app.secret_key = '123456789'
 
 
 # ╔══════════════════════════════════════════════╗
-# ║ Redirección inicial de Logueo             ║
+# ║ Redirección inicial de Logueo                ║
 # ╚══════════════════════════════════════════════╝
 
 @app.route('/')
@@ -25,7 +25,7 @@ def index():
     return redirect(url_for('login'))
 
 # ╔══════════════════════════════════════════════╗
-# ║ Configuración de Logueo y Cierre de Sesión     ║
+# ║ Configuración de Logueo y Cierre de Sesión   ║
 # ╚══════════════════════════════════════════════╝
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -489,7 +489,7 @@ def descargar_informe(id_informe):
             ["ID Informe", informe["Id_Informe"]],
             ["Tipo", informe["Tipo"]],
             ["Periodo", informe["Periodo"]],
-            ["Fecha Creación", str(informe["Fecha_Creacion"])],
+            ["Fecha Creación", str(informe["fecha_creacion"])],
         ]
         info_table = Table(info_table_data, colWidths=[150, 300])
         info_table.setStyle(TableStyle([
@@ -648,7 +648,7 @@ def buscar_producto_empleado():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        if termino:  # Si hay término de búsqueda
+        if termino: 
             query = """
                 SELECT Id_Producto, Nombre, Categoria, Unidad, Foto
                 FROM productos
@@ -657,7 +657,7 @@ def buscar_producto_empleado():
             """
             like_pattern = f"%{termino}%"
             cursor.execute(query, (like_pattern, like_pattern))
-        else:  # Si termino vacío, listar TODOS los productos
+        else:
             query = """
                 SELECT Id_Producto, Nombre, Categoria, Unidad, Foto
                 FROM productos
@@ -695,7 +695,7 @@ def registrar_pedido():
     try:
         data = request.get_json()
         id_local = data.get("Id_Local")
-        productos = data.get("Productos")  # Lista de {Id_Producto, Cantidad, Fecha_Ingreso, Fecha_Caducidad}
+        productos = data.get("Productos")  
 
         if not (id_local and productos and isinstance(productos, list) and len(productos) > 0):
             return jsonify({"success": False, "msg": "Datos inválidos"}), 400
@@ -703,7 +703,7 @@ def registrar_pedido():
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # 🔹 1️⃣ Crear registros en inventario para cada producto
+        # Crear registros en inventario para cada producto
         inventarios = []
         for prod in productos:
             id_producto = prod.get("Id_Producto")
