@@ -50,19 +50,25 @@
         <!-- Caja izquierda: formulario -->
         <section class="register-box">
           <h2>Registrar local de venta</h2>
-          <form id="registerForm">
+          <form id="registerForm" novalidate>
             <label>Nombre local</label>
-            <input type="text" id="nombre_local" placeholder="Nombre ...">
+            <input type="text" id="nombre_local" placeholder="Nombre ..." required>
 
             <label>Ubicacion</label>
-            <input type="text" id="ubicacion" placeholder="Ubicacion ...">
+            <input type="text" id="ubicacion" placeholder="Ubicacion ..." required>
 
             <label>ID local</label>
-            <input type="text" id="id_local" placeholder="ID local ...">
+            <input type="text" id="id_local" placeholder="ID local ..." required>
 
             <div class="form-actions">
-              <button type="submit" class="btn">Registrar</button>
-              <button type="reset" class="btn secondary">Limpiar</button>
+              <button type="submit" class="btn">
+                <img class="icon" src="{{ url_for('static', filename='image/mas.png') }}" alt="Guardar">
+                Registrar
+              </button>
+              <button type="reset" class="btn secondary">
+                <img class="icon" src="{{ url_for('static', filename='image/basura.png') }}" alt="Limpiar">
+                Limpiar
+              </button>
             </div>
           </form>
         </section>
@@ -76,7 +82,7 @@
           <input
             type="text"
             id="buscarLocal" 
-            placeholder="Buscar por nombre o ID..."
+            placeholder="Buscar por nombre o Direccion..."
             autocomplete="off"
           >
 
@@ -91,11 +97,6 @@
   </main>
 
 </body>
-<script>
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted) {
-            window.location.reload();
-        }
-    });
-</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ url_for('static', filename='js/Ad_js/Rlocales.js') }}"></script>
 </html>

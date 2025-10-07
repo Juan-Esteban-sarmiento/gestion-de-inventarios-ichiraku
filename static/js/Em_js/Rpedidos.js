@@ -51,12 +51,12 @@ async function buscarProductos(termino = null) {
                 card.classList.add("card");
 
                 card.innerHTML = `
-                    <img src="${prod.Foto || '/static/image/default.png'}" alt="${prod.Nombre}" onerror="this.src='/static/image/default.png'">
-                    <h3>${prod.Nombre}</h3>
-                    <p>Categoría: ${prod.Categoria}</p>
-                    <p>Unidad: ${prod.Unidad}</p>
-                    <input type="number" min="1" value="1" id="cantidad-${prod.Id_Producto}">
-                    <button onclick="agregarCarrito(${prod.Id_Producto}, '${prod.Nombre.replace(/'/g, "\\'")}', '${prod.Categoria.replace(/'/g, "\\'")}', '${prod.Unidad.replace(/'/g, "\\'")}')">Agregar al Carrito</button>
+                    <img src="${prod.foto || '/static/image/default.png'}" alt="${prod.nombre}" onerror="this.src='/static/image/default.png'">
+                    <h3>${prod.nombre}</h3>
+                    <p>Categoría: ${prod.categoria}</p>
+                    <p>Unidad: ${prod.unidad}</p>
+                    <input type="number" min="1" value="1" id="cantidad-${prod.id_producto}">
+                    <button onclick="agregarCarrito(${prod.id_producto}, '${prod.nombre.replace(/'/g, "\\'")}', '${prod.categoria.replace(/'/g, "\\'")}', '${prod.unidad.replace(/'/g, "\\'")}')">Agregar al Carrito</button>
                 `;
                 container.appendChild(card);
             });
