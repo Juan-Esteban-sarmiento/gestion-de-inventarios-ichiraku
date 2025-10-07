@@ -1,4 +1,8 @@
 flask
 mysql-connector-python
 reportlab
+supabase
+python-dotenv
 
+command:
+    pip install -r requirements.txt

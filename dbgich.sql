@@ -1,113 +1,179 @@
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
 
-ALTER USER 'root'@'localhost' IDENTIFIED BY 'admin';
-FLUSH PRIVILEGES;
+-- Base de datos: dbgich
+-- Compatible con PostgreSQL
 
-CREATE TABLE `detalle_pedido` (
-  `Id_Pedido` int NOT NULL,
-  `Id_Producto` int NOT NULL,
-  `Fecha_Pedido` date DEFAULT NULL,
-  `Cantidad` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+-- =========================================
+-- TABLA: roles
+-- =========================================
+CREATE TABLE roles (
+  Id_Rol SERIAL PRIMARY KEY,
+  Nombre VARCHAR(100) NOT NULL
+);
 
-CREATE TABLE `empleados` (
-  `Cedula` int NOT NULL,
-  `Nombre` varchar(100) NOT NULL,
-  `Numero_contacto` int DEFAULT NULL,
-  `Contrasena` varchar(100) NOT NULL,
-  `Foto` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+-- =========================================
+-- TABLA: locales
+-- =========================================
+CREATE TABLE locales (
+  Id_Local SERIAL PRIMARY KEY,
+  Nombre VARCHAR(100) NOT NULL,
+  Direccion TEXT,
+  Foto TEXT,
+  created_at TIMESTAMP DEFAULT now()
+);
 
-CREATE TABLE `informe` (
-  `Id_Informe` int NOT NULL,
-  `Id_Inf_Pedido` int DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+-- =========================================
+-- TABLA: empleados
+-- =========================================
+CREATE TABLE empleados (
+  Cedula SERIAL PRIMARY KEY,
+  Nombre VARCHAR(100) NOT NULL,
+  Numero_contacto INT,
+  Contrasena VARCHAR(100) NOT NULL,
+  Foto BYTEA,
+  Id_Rol INT REFERENCES roles(Id_Rol),
+  User_ID UUID DEFAULT gen_random_uuid(),
+  created_at TIMESTAMP DEFAULT now(),
+  updated_at TIMESTAMP DEFAULT now()
+);
 
-CREATE TABLE `inventario` (
-  `Id_Inventario` int NOT NULL,
-  `Id_Local` int DEFAULT NULL,
-  `Id_Producto` int DEFAULT NULL,
-  `Cantidad` int NOT NULL,
-  `Fecha_caducidad` date DEFAULT NULL,
-  `Fecha_ingreso` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+-- =========================================
+-- TABLA: productos
+-- =========================================
 
-CREATE TABLE `locales` (
-  `Id_Local` int NOT NULL,
-  `Nombre` varchar(100) NOT NULL,
-  `Direccion` varchar(255) DEFAULT NULL,
-  `Foto` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+CREATE TABLE productos (
+  Id_Producto SERIAL PRIMARY KEY,
+  Nombre VARCHAR(100) NOT NULL,
+  Categoria VARCHAR(100),
+  Unidad VARCHAR(50),
+  Foto TEXT,
+  Precio_Compra NUMERIC(10,2),             -- nuevo: costo unitario
+  Precio_Venta NUMERIC(10,2),              -- nuevo: precio al público
+  created_at TIMESTAMP DEFAULT now(),
+  updated_at TIMESTAMP DEFAULT now()
+);
 
-CREATE TABLE `notificaciones` (
-  `Id_Notificaciones` int NOT NULL,
-  `Id_Inventario` int DEFAULT NULL,
-  `Mensaje` varchar(255) DEFAULT NULL,
-  `Fecha` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+-- =========================================
+-- TABLA: inventario
+-- =========================================
+CREATE TABLE inventario (
+  Id_Inventario SERIAL PRIMARY KEY,
+  Id_Local INT REFERENCES locales(Id_Local),
+  Id_Producto INT REFERENCES productos(Id_Producto),
+  Cantidad INT NOT NULL,
+  Fecha_caducidad DATE,
+  Fecha_ingreso DATE,
+  Stock_Minimo INT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT now(),
+  updated_at TIMESTAMP DEFAULT now()
+);
 
-CREATE TABLE `pedido` (
-  `Id_Pedido` int NOT NULL,
-  `Id_Inventario` int DEFAULT NULL,
-  `Cedula` int DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+-- =========================================
+-- TABLA: pedido
+-- =========================================
 
-CREATE TABLE `productos` (
-  `Id_Producto` int NOT NULL,
-  `Nombre` varchar(100) NOT NULL,
-  `Categoria` varchar(100) DEFAULT NULL,
-  `Unidad` varchar(50) DEFAULT NULL,
-  `Foto` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+CREATE TABLE pedido (
+  Id_Pedido SERIAL PRIMARY KEY,
+  Id_Inventario INT REFERENCES inventario(Id_Inventario),
+  Cedula INT REFERENCES empleados(Cedula),
+  Fecha_Pedido TIMESTAMP DEFAULT now(),
+  Estado VARCHAR(50) DEFAULT 'Pendiente'
+);
 
-ALTER TABLE `detalle_pedido`
-  ADD PRIMARY KEY (`Id_Pedido`,`Id_Producto`),
-  ADD KEY `Id_Producto` (`Id_Producto`);
+-- =========================================
+-- TABLA: detalle_pedido
+-- =========================================
+CREATE TABLE detalle_pedido (
+  Id_Pedido INT REFERENCES pedido(Id_Pedido),
+  Id_Producto INT REFERENCES productos(Id_Producto),
+  Fecha_Pedido DATE,
+  Cantidad INT NOT NULL,
+  Precio NUMERIC(10,2),
+  Subtotal NUMERIC(10,2) GENERATED ALWAYS AS (Cantidad * Precio) STORED,
+  PRIMARY KEY (Id_Pedido, Id_Producto)
+);
 
-ALTER TABLE `empleados`
-  ADD PRIMARY KEY (`Cedula`);
+-- =========================================
+-- TABLA: informe
+-- =========================================
+CREATE TABLE informe (
+  Id_Informe SERIAL PRIMARY KEY,
+  Id_Inf_Pedido INT REFERENCES pedido(Id_Pedido),
+  Fecha_Creacion TIMESTAMP DEFAULT now()
+);
 
-ALTER TABLE `informe`
-  ADD PRIMARY KEY (`Id_Informe`),
-  ADD KEY `Id_Inf_Pedido` (`Id_Inf_Pedido`);
+-- =========================================
+-- TABLA: notificaciones
+-- =========================================
+CREATE TABLE notificaciones (
+  Id_Notificaciones SERIAL PRIMARY KEY,
+  Id_Inventario INT REFERENCES inventario(Id_Inventario),
+  Mensaje TEXT,
+  Tipo VARCHAR(50),
+  Leido BOOLEAN DEFAULT FALSE,
+  Fecha TIMESTAMP DEFAULT now()
+);
 
-ALTER TABLE `inventario`
-  ADD PRIMARY KEY (`Id_Inventario`),
-  ADD KEY `Id_Local` (`Id_Local`),
-  ADD KEY `Id_Producto` (`Id_Producto`);
+-- =========================================
+-- TABLA: movimiento_inventario
+-- =========================================
+CREATE TABLE movimiento_inventario (
+  Id_Movimiento SERIAL PRIMARY KEY,
+  Id_Producto INT REFERENCES productos(Id_Producto)
+);
 
-ALTER TABLE `locales`
-  ADD PRIMARY KEY (`Id_Local`);
+-- =========================================
+-- TABLA: administrador
+-- =========================================
+CREATE TABLE administrador (
+  ID SERIAL PRIMARY KEY,
+  Nombre VARCHAR(100) NOT NULL,
+  Contrasena VARCHAR(40) NOT NULL,
+  Foto BYTEA
+);
 
-ALTER TABLE `notificaciones`
-  ADD PRIMARY KEY (`Id_Notificaciones`),
-  ADD KEY `Id_Inventario` (`Id_Inventario`);
 
-ALTER TABLE `pedido`
-  ADD PRIMARY KEY (`Id_Pedido`),
-  ADD KEY `Id_Inventario` (`Id_Inventario`),
-  ADD KEY `Cedula` (`Cedula`);
+INSERT INTO administrador (ID, Nombre, Contrasena, Foto) VALUES
+(1, 'juan', 'Admin123', decode('FFD8FFE000104A46494600010100000100010000...', 'hex'));
 
-ALTER TABLE `productos`
-  ADD PRIMARY KEY (`Id_Producto`);
+INSERT INTO pedido (Id_Pedido, Id_Inventario, Cedula, Fecha_Pedido, Estado) VALUES
+(1, 21, 8, '2025-10-01 10:00:00', 'Pendiente'),
+(2, 23, 1000225584, '2025-10-01 11:00:00', 'Pendiente'),
+(3, 26, 8, '2025-10-01 12:00:00', 'Pendiente');
 
-ALTER TABLE `detalle_pedido`
-  ADD CONSTRAINT `detalle_pedido_ibfk_1` FOREIGN KEY (`Id_Pedido`) REFERENCES `pedido` (`Id_Pedido`),
-  ADD CONSTRAINT `detalle_pedido_ibfk_2` FOREIGN KEY (`Id_Producto`) REFERENCES `productos` (`Id_Producto`);
+INSERT INTO detalle_pedido (Id_Pedido, Id_Producto, Fecha_Pedido, Cantidad) VALUES
+(1, 3, '2025-10-01', 2),
+(1, 234567, '2025-10-01', 1),
+(2, 2, '2025-10-01', 3),
+(2, 3, '2025-10-01', 5),
+(2, 234567, '2025-10-01', 4),
+(3, 1, '2025-10-01', 2),
+(3, 54321, '2025-10-01', 6);
 
-ALTER TABLE `informe`
-  ADD CONSTRAINT `informe_ibfk_1` FOREIGN KEY (`Id_Inf_Pedido`) REFERENCES `pedido` (`Id_Pedido`);
+INSERT INTO empleados (Cedula, Nombre, Numero_contacto, Contrasena, Foto)
+VALUES
+(8, 'Fuad', 2147483647, '1234567', decode('FFD8FFE000104A46494600010101006000600000...', 'hex')),
+(1000225584, 'juan', 456789, '123', decode('FFD8FFE000104A46494600010100000100010000...', 'hex'));
 
-ALTER TABLE `inventario`
-  ADD CONSTRAINT `inventario_ibfk_1` FOREIGN KEY (`Id_Local`) REFERENCES `locales` (`Id_Local`),
-  ADD CONSTRAINT `inventario_ibfk_2` FOREIGN KEY (`Id_Producto`) REFERENCES `productos` (`Id_Producto`);
 
-ALTER TABLE `notificaciones`
-  ADD CONSTRAINT `notificaciones_ibfk_1` FOREIGN KEY (`Id_Inventario`) REFERENCES `inventario` (`Id_Inventario`);
 
-ALTER TABLE `pedido`
-  ADD CONSTRAINT `pedido_ibfk_1` FOREIGN KEY (`Id_Inventario`) REFERENCES `inventario` (`Id_Inventario`),
-  ADD CONSTRAINT `pedido_ibfk_2` FOREIGN KEY (`Cedula`) REFERENCES `empleados` (`Cedula`);
-COMMIT;
+INSERT INTO informe (Id_Informe, Id_Inf_Pedido, Fecha_Creacion)
+VALUES
+(1, 1, now()),
+(2, 1, now());
+
+
+INSERT INTO locales (Id_Local, Nombre, Direccion)
+VALUES
+(1, 'ichiraku ramen 1', 'calle 70 noroeste');
+
+
+INSERT INTO inventario (Id_Inventario, Id_Local, Id_Producto, Cantidad, Fecha_caducidad, Fecha_ingreso)
+VALUES
+(21, 1, 3, 2, '2025-11-01', '2025-10-01'),
+(22, 1, 234567, 1, '2025-11-01', '2025-10-01'),
+(23, 1, 2, 3, '2025-11-01', '2025-10-01'),
+(24, 1, 234567, 4, '2025-11-01', '2025-10-01'),
+(25, 1, 3, 5, '2025-11-01', '2025-10-01'),
+(26, 1, 1, 2, '2025-11-01', '2025-10-01'),
+(27, 1, 54321, 6, '2025-11-01', '2025-10-01');
+

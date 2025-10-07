@@ -1,4 +1,4 @@
-function login(event) {
+async function login(event) {
     if (event) event.preventDefault();
 
     const id = document.getElementById("id").value;
@@ -28,11 +28,7 @@ function login(event) {
     .then(data => {
         if (data.success) {
             alert(data.msg || "Inicio de sesión exitoso");
-            if (data.redirect) {
-                window.location.href = data.redirect;
-            } else {
-                window.location.href = "/";
-            }
+            window.location.href = data.redirect || "/";
         } else {
             alert(data.msg);
         }
@@ -42,8 +38,40 @@ function login(event) {
     return false;
 }
 
+// Mostrar select solo si rol = Empleado
 function toggleBranch() {
     const role = document.getElementById("role").value;
     const branchGroup = document.getElementById("branch-group");
     branchGroup.style.display = (role === "Empleado") ? "block" : "none";
+
+    if (role === "Empleado") {
+        cargarLocales();
+    }
+}
+
+// Cargar locales desde backend
+async function cargarLocales() {
+    try {
+        const response = await fetch("/get_locales");
+        const data = await response.json();
+        const select = document.getElementById("branch");
+
+        select.innerHTML = '<option value="">-- Selecciona --</option>';
+
+        if (data.success && data.locales.length > 0) {
+            data.locales.forEach(loc => {
+                const option = document.createElement("option");
+                option.value = loc.id_local; // id real
+                option.textContent = loc.nombre;
+                select.appendChild(option);
+            });
+        } else {
+            const option = document.createElement("option");
+            option.textContent = "No hay locales disponibles";
+            option.disabled = true;
+            select.appendChild(option);
+        }
+    } catch (err) {
+        console.error("Error al cargar locales:", err);
+    }
 }
