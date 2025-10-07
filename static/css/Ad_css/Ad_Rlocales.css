@@ -203,4 +203,48 @@
   border-radius: 50%;
   margin-bottom: 10px;
 }
+
+/* --- Tarjetas de locales --- */
+.local-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-bottom: 1px solid red;
+}
+
+.local-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: white;
+}
+
+.local-info p {
+  margin: 0;
+  font-size: 15px;
+}
+
+.local-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.local-actions button {
+  background: red;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+  font-family: 'njnaruto';
+}
+
+.local-actions button:hover {
+  background: darkred;
+}
     

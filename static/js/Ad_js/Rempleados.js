@@ -1,66 +1,111 @@
-document.getElementById('registerForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
+// 🎴 ALERTA NINJA CON PALETA NEGRO, BLANCO Y ROJO
+function alertaNinja(icon, title, text) {
+  const iconColors = {
+    success: '#e60000',
+    error: '#ff3333',
+    warning: '#ff3333',
+    info: '#ffffff',
+    question: '#e60000'
+  };
 
-    const formData = new FormData();
-    formData.append("nombre", document.getElementById('nombre').value);
-    formData.append("cedula", document.getElementById('cedula').value);
-    formData.append("contrasena", document.getElementById('contrasena').value);
-    formData.append("contacto", document.getElementById('contacto').value);
-
-    const fotoFile = document.getElementById('foto').files[0];
-    if (fotoFile) {
-        formData.append("foto", fotoFile);
+  Swal.fire({
+    icon: icon,
+    title: `<span style="font-family:njnaruto; color:#fff;">${title}</span>`,
+    text: text || '',
+    background: '#000',
+    color: '#fff',
+    iconColor: iconColors[icon] || '#e60000',
+    confirmButtonColor: '#e60000',
+    confirmButtonText: '<span style="font-family:njnaruto;">Aceptar</span>',
+    buttonsStyling: false,
+    didRender: () => {
+      const btn = Swal.getConfirmButton();
+      if (btn) {
+        btn.style.background = '#e60000';
+        btn.style.color = '#fff';
+        btn.style.fontWeight = 'bold';
+        btn.style.border = '2px solid #ff3333';
+        btn.style.borderRadius = '8px';
+        btn.style.padding = '8px 16px';
+        btn.style.transition = '0.3s';
+        btn.addEventListener('mouseenter', () => (btn.style.background = '#ff3333'));
+        btn.addEventListener('mouseleave', () => (btn.style.background = '#e60000'));
+      }
     }
+  });
+}
 
-    const response = await fetch('/registrar_empleado', {
-        method: 'POST',
-        body: formData
-    });
+// 🔄 Evita errores al recargar desde caché
+window.addEventListener('pageshow', function (event) {
+  if (event.persisted) window.location.reload();
+});
 
+// 🧾 Registro de empleado
+document.getElementById('registerForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const formData = new FormData();
+  formData.append("nombre", document.getElementById('nombre').value);
+  formData.append("cedula", document.getElementById('cedula').value);
+  formData.append("contrasena", document.getElementById('contrasena').value);
+  formData.append("contacto", document.getElementById('contacto').value);
+
+  const fotoFile = document.getElementById('foto').files[0];
+  if (fotoFile) formData.append("foto", fotoFile);
+
+  try {
+    const response = await fetch('/registrar_empleado', { method: 'POST', body: formData });
     const data = await response.json();
-    document.getElementById('registerMsg').innerText = data.msg;
 
     if (data.success) {
-        document.getElementById('registerForm').reset();
-        setTimeout(() => window.location.reload(), 1000);
-    }
-});
-
-
-
-window.addEventListener('pageshow', function(event) {
-    if (event.persisted) {
-        window.location.reload();
-    }
-});
-
-// Vista previa de la foto antes de registrar
-document.getElementById('foto').addEventListener('change', function() {
-    const file = this.files[0];
-    const preview = document.getElementById('previewFoto');
-
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            preview.src = e.target.result;
-            preview.style.display = "block";
-        };
-        reader.readAsDataURL(file);
+      alertaNinja('success', 'Registrado correctamente', data.msg || 'Empleado agregado exitosamente.');
+      document.getElementById('registerForm').reset();
+      setTimeout(() => window.location.reload(), 1000);
     } else {
-        preview.src = "";
-        preview.style.display = "none";
+      alertaNinja('error', 'Error en registro', data.msg || 'No se pudo registrar el empleado.');
     }
+  } catch (error) {
+    alertaNinja('error', 'Error del servidor', 'Ocurrió un problema al registrar el empleado.');
+  }
+});
+
+// 📸 Vista previa de la foto
+document.getElementById('foto').addEventListener('change', function () {
+  const file = this.files[0];
+  const preview = document.getElementById('previewFoto');
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      preview.src = e.target.result;
+      preview.style.display = "block";
+      alertaNinja('info', 'Foto seleccionada', 'La imagen se ha cargado correctamente.');
+    };
+    reader.readAsDataURL(file);
+  } else {
+    preview.src = "";
+    preview.style.display = "none";
+    alertaNinja('warning', 'Foto eliminada', 'No hay imagen seleccionada.');
+  }
 });
 
 
-document.getElementById("buscarEmpleado").addEventListener("input", async function() {
-  let termino = this.value.trim();
-  let resultBox = document.getElementById("resultEmpleado");
+document.addEventListener("DOMContentLoaded", async function () {
+  await cargarEmpleados("");
+});
 
-  if (termino.length === 0) {
-    resultBox.innerHTML = "<p>No se ha realizado ninguna búsqueda</p>";
-    return;
+
+document.getElementById("buscarEmpleado").addEventListener("keydown", async function (e) {
+  if (e.key === "Enter") {
+    e.preventDefault(); // evita que se recargue el formulario
+    const termino = this.value.trim();
+    await cargarEmpleados(termino);
   }
+});
+
+
+async function cargarEmpleados(termino = "") {
+  const resultBox = document.getElementById("resultEmpleado");
 
   try {
     const response = await fetch("/buscar_empleado", {
@@ -75,117 +120,115 @@ document.getElementById("buscarEmpleado").addEventListener("input", async functi
       resultBox.innerHTML = data.empleados.map(emp => `
         <div class="empleado-card">
           <div style="display: flex; align-items: center; gap: 15px;">
-            <img src="${emp.Foto ? emp.Foto : '/static/image/default.png'}" 
-              alt="Foto de ${emp.Nombre}" 
+            <img src="${emp.foto || '/static/image/default.png'}" 
+              alt="Foto de ${emp.nombre}" 
               style="width:60px; height:60px; border-radius:50%; object-fit:cover;">
             <div class="empleado-info">
-              <p><strong>${emp.Nombre}</strong></p>
-              <p>ID: ${emp.Cedula}</p>
-              <p>Contacto: ${emp.Numero_contacto}</p>
+              <p><strong>${emp.nombre || 'Sin nombre'}</strong></p>
+              <p>ID: ${emp.cedula || '---'}</p>
+              <p>Contacto: ${emp.numero_contacto || '---'}</p>
             </div>
           </div>
           <div class="empleado-actions">
-            <button onclick="eliminarEmpleado('${emp.Cedula}')">Eliminar</button>
+            <button onclick="editarEmpleado('${emp.cedula}', '${emp.nombre}', '${emp.numero_contacto}', '${emp.contrasena || ''}')">Editar</button>
+            <button onclick="eliminarEmpleado('${emp.cedula}')">Eliminar</button>
           </div>
         </div>
       `).join("");
-    } else {
-      resultBox.innerHTML = "<p>" + data.msg + "</p>";
+    }else {
+      resultBox.innerHTML = "<p>No se encontraron empleados</p>";
     }
 
   } catch (err) {
     console.error("Error en la búsqueda:", err);
     resultBox.innerHTML = "<p>Error en el servidor</p>";
   }
-});
+}
 
-
-function mostrarResultados(data) {
-  const contenedor = document.getElementById("resultEmpleado");
-  contenedor.innerHTML = "";
-  if (data.length === 0) {
-    contenedor.innerHTML = "<p>No se encontraron empleados</p>";
-    return;
-  }
-
-  data.forEach(emp => {
-    const card = document.createElement("div");
-    card.classList.add("empleado-card");
-
-    card.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 15px;">
-        <img src="${emp.foto || '/static/image/default.png'}" alt="Foto de ${emp.nombre}">
-        <div class="empleado-info">
-          <strong>${emp.nombre}</strong>
-          <span>ID: ${emp.id}</span>
-          <span>Contacto: ${emp.contacto}</span>
-        </div>
+// ✏️ Editar empleado
+function editarEmpleado(cedula, nombre, contacto, contrasena) {
+  Swal.fire({
+    title: '<span style="font-family:njnaruto; color:#fff;">Editar Empleado</span>',
+    html: `
+      <input id="editNombre" class="swal2-input" placeholder="Nombre" value="${nombre}">
+      <input id="editCedula" class="swal2-input" placeholder="Cédula" value="${cedula}">
+      <input id="editContacto" class="swal2-input" placeholder="Número de contacto" value="${contacto}">
+      <div style="position: relative;">
+        <input id="editContrasena" class="swal2-input" type="password" placeholder="Contraseña" value="${contrasena}">
+        <span id="toggleContrasena" 
+          style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:1.2rem; color:#e60000;">🍜</span>
       </div>
-      <div class="empleado-actions">
-        <button onclick="eliminarEmpleado('${emp.id}')">Eliminar</button>
-      </div>
-    `;
-
-    contenedor.appendChild(card);
+    `,
+    confirmButtonText: '<span style="font-family:njnaruto;">Guardar</span>',
+    showCancelButton: true,
+    cancelButtonText: '<span style="font-family:njnaruto;">Cancelar</span>',
+    background: '#000',
+    color: '#fff',
+    confirmButtonColor: '#e60000',
+    cancelButtonColor: '#888',
+    didOpen: () => {
+      const toggle = document.getElementById("toggleContrasena");
+      const input = document.getElementById("editContrasena");
+      toggle.addEventListener("click", () => {
+        const isHidden = input.type === "password";
+        input.type = isHidden ? "text" : "password";
+        toggle.textContent = isHidden ? "🍥" : "🍜";
+      });
+    },
+    preConfirm: () => {
+      return {
+        nombre: document.getElementById("editNombre").value,
+        cedula: document.getElementById("editCedula").value,
+        numero_contacto: document.getElementById("editContacto").value,
+        contrasena: document.getElementById("editContrasena").value
+      };
+    }
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      const data = result.value;
+      const response = await fetch(`/editar_empleado/${cedula}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      const resData = await response.json();
+      if (resData.success) {
+        alertaNinja('success', 'Empleado actualizado', resData.msg);
+        await cargarEmpleados("");
+      } else {
+        alertaNinja('error', 'Error al actualizar', resData.msg);
+      }
+    }
   });
 }
 
+// 🗑️ Eliminar empleado
 function eliminarEmpleado(id) {
   Swal.fire({
-    title: '<span style="font-family: njnaruto; font-size: 2rem;">ESTAS SEGURO</span>',
-    html: '<span style="font-family: njnaruto; font-size: 1.2rem;">ESTA ACCION ELIMINARA AL EMPLEADO</span>',
+    title: '<span style="font-family:njnaruto; font-size: 2rem; color:#fff;">¿ESTÁS SEGURO?</span>',
+    html: '<span style="font-family:njnaruto; font-size: 1.2rem; color:#fff;">Esta acción eliminará al empleado.</span>',
     icon: 'warning',
+    iconColor: '#e60000',
     showCancelButton: true,
     confirmButtonColor: '#e60000',
     cancelButtonColor: '#888',
-    confirmButtonText: '<span style="font-family: njnaruto;">Si eliminar</span>',
-    cancelButtonText: '<span style="font-family: njnaruto;">Cancelar</span>',
+    confirmButtonText: '<span style="font-family:njnaruto;">Si, eliminar</span>',
+    cancelButtonText: '<span style="font-family:njnaruto;">Cancelar</span>',
     background: '#000',
-    color: '#fff',
-    customClass: {
-      popup: 'swal2-border-radius',
-      title: 'swal2-title-custom',
-      confirmButton: 'swal2-confirm-custom',
-      cancelButton: 'swal2-cancel-custom'
-    }
+    color: '#fff'
   }).then((result) => {
     if (result.isConfirmed) {
-      fetch(`/eliminar_empleado/${id}`, {
-        method: 'DELETE'
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          Swal.fire({
-            icon: 'success',
-            title: '<span style="font-family: njnaruto;">Empleado eliminado</span>',
-            text: 'El registro fue eliminado correctamente',
-            confirmButtonColor: '#e60000',
-            background: '#000',
-            color: '#fff',
-            customClass: {
-              title: 'swal2-title-custom',
-              confirmButton: 'swal2-confirm-custom'
-            }
-          });
-          document.getElementById("buscarEmpleado").dispatchEvent(new Event("input")); // refresca lista
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: '<span style="font-family: njnaruto;">Error</span>',
-            text: data.msg,
-            confirmButtonColor: '#e60000',
-            background: '#000',
-            color: '#fff',
-            customClass: {
-              title: 'swal2-title-custom',
-              confirmButton: 'swal2-confirm-custom'
-            }
-          });
-        }
-      });
+      fetch(`/eliminar_empleado/${id}`, { method: 'DELETE' })
+        .then(res => res.json())
+        .then(async data => {
+          if (data.success) {
+            alertaNinja('success', 'Empleado eliminado', 'El registro fue eliminado correctamente.');
+            await cargarEmpleados("");
+          } else {
+            alertaNinja('error', 'Error', data.msg);
+          }
+        })
+        .catch(() => alertaNinja('error', 'Error del servidor', 'No se pudo eliminar el empleado.'));
     }
   });
 }
-
-
