@@ -50,7 +50,7 @@
       <!-- Caja izquierda: formulario -->
       <section class="register-box">
   <h2>Registrar producto</h2>
-        <form id="registerProductForm">
+        <form id="registerProductForm" novalidate>
           <label for="nombreProducto">Nombre producto</label>
           <input type="text" id="nombreProducto" placeholder="Nombre producto ..." required>
 
@@ -107,14 +107,5 @@
 </body>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-  window.addEventListener('pageshow', function(event) {
-    if (event.persisted) {
-      window.location.reload();
-    }
-  });
-</script>
 <script src="{{ url_for('static', filename='js/Ad_js/Rproductos.js') }}"></script>
-<script src="{{ url_for('static', filename='js/Ad_js/Rproductos_buscar.js') }}"></script>
-<script src="{{ url_for('static', filename='js/Ad_js/Rproductos_eliminar.js') }}"></script>
 </html>
