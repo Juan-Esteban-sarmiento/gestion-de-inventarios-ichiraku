@@ -13,6 +13,8 @@ from db import add_empleado, get_db_connection
 from supabase import create_client, Client
 from dotenv import load_dotenv
 from datetime import datetime
+from functools import wraps
+from flask import session, redirect, url_for
 
 # Cargar variables del archivo .env
 load_dotenv()
@@ -42,7 +44,7 @@ def index():
     return redirect(url_for('login'))
 
 # ╔══════════════════════════════════════════════╗
-# ║ Configuración de Logueo y Cierre de Sesión   ║
+# ║ Configuración de Logueo                      ║
 # ╚══════════════════════════════════════════════╝
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -111,16 +113,27 @@ def get_locales():
     except Exception as e:
         print("❌ Error al obtener locales:", e)
         return jsonify({"success": False, "msg": "Error al obtener locales"})
+    
+
+def login_requerido(rol=None):
+    def decorador(f):
+        @wraps(f)
+        def decorado(*args, **kwargs):
+            if not session.get('logged_in'):
+                return redirect(url_for('login'))
+            if rol and session.get('role') != rol:
+                return redirect(url_for('login'))
+            return f(*args, **kwargs)
+        return decorado
+    return decorador
 
 # ╔════════════════╗
 # ║ Ruta de inicio ║
 # ╚════════════════╝
 
 @app.route('/Ad_Inicio', methods=['GET', 'POST'])
+@login_requerido(rol='Administrador')
 def Ad_Inicio():
-    if not session.get('logged_in') or session.get('role') != 'Administrador':
-        return redirect(url_for('login'))
-    
     response = make_response(render_template("Ad_templates/Ad_Inicio.html"))
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
     response.headers['Pragma'] = 'no-cache'
@@ -134,10 +147,12 @@ def Ad_Inicio():
 # ╚════════════════════════════════════════════════════════╝
 
 @app.route('/Ad_Rempleados', methods=['GET', 'POST'])
+@login_requerido(rol='Administrador')
 def Ad_Rempleados():
     return render_template("Ad_templates/Ad_Rempleados.html"), 200, {"Content-Type": "text/html; charset=utf-8"}
 
 @app.route('/registrar_empleado', methods=['POST'])
+@login_requerido(rol='Administrador')
 def registrar_empleado():
     nombre = request.form.get('nombre')
     cedula = request.form.get('cedula')
@@ -303,6 +318,7 @@ def Ad_Pnotificaciones():
 # ╚══════════════════════════════════════════════╝
 
 @app.route('/Ad_Rproductos', methods=['GET', 'POST'])
+@login_requerido(rol='Administrador')
 def Ad_Rproductos():
     return render_template("Ad_templates/Ad_Rproductos.html")
 
@@ -439,6 +455,7 @@ def eliminar_producto(id_producto):
 # ╚══════════════════════════════════════════════╝
 
 @app.route('/Ad_Dinformes', methods=['GET'])
+@login_requerido(rol='Administrador')
 def Ad_Dinformes():
     return render_template("Ad_templates/Ad_Dinformes.html")
 
@@ -489,8 +506,6 @@ def generar_informe_mensual():
         print("❌ Error al generar informe mensual:", e)
         return jsonify({"success": False, "msg": f"Error al generar informe mensual: {e}"})
 
-
-
 @app.route('/buscar_informe', methods=['POST'])
 def buscar_informe():
     try:
@@ -513,8 +528,6 @@ def buscar_informe():
     except Exception as e:
         print("❌ Error al buscar informe:", e)
         return jsonify({"success": False, "msg": f"Error al buscar informe: {e}"})
-
-
 
 @app.route('/descargar_informe/<int:id_informe>', methods=['GET'])
 def descargar_informe(id_informe):
@@ -578,13 +591,13 @@ def descargar_informe(id_informe):
     except Exception as e:
         print("❌ Error al generar PDF:", e)
         return jsonify({"success": False, "msg": f"Error al generar informe PDF: {e}"})
-
-
+    
 # ╔═══════════════════════════════════════════════════════╗
 # ║ Gestion , busqueda, edicion y eliminacion de locales  ║
 # ╚═══════════════════════════════════════════════════════╝
 
 @app.route('/Ad_Rlocales', methods=['GET', 'POST'])
+@login_requerido(rol='Administrador')
 def Ad_Rlocales():
     return render_template("Ad_templates/Ad_Rlocales.html")
 
@@ -698,10 +711,8 @@ def eliminar_local(id_local):
 # ╚══════════════════════════════════════════════╝
 
 @app.route("/Ad_Ceditar", methods=["GET", "POST"])
+@login_requerido(rol='Administrador')
 def Ad_Ceditar():
-    if not session.get("logged_in") or session.get("role") != "Administrador":
-        return redirect(url_for("login"))
-
     cedula = session.get("cedula")
 
     try:
@@ -760,10 +771,8 @@ def Ad_Ceditar():
         return jsonify({"success": False, "msg": "Error en el servidor"}), 500
 
 @app.route('/Ad_Ceditar_foto', methods=['POST', 'DELETE'])
+@login_requerido(rol='Administrador')
 def Ad_Ceditar_foto():
-    if not session.get('logged_in') or session.get('role') != 'Administrador':
-        return jsonify({"success": False, "msg": "No autorizado"}), 401
-
     cedula = session.get('cedula')
 
     try:
@@ -827,9 +836,8 @@ def Ad_Ceditar_foto():
 # ╚══════════════════════════════════════════════╝
 
 @app.route('/Em_Inicio', methods=['GET', 'POST'])
+@login_requerido(rol='Empleado')
 def Em_Inicio():
-    if not session.get('logged_in') or session.get('role') != 'Empleado':
-        return redirect(url_for('login'))
     response = make_response(render_template("Em_templates/Em_Inicio.html"))
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
     response.headers['Pragma'] = 'no-cache'
@@ -837,14 +845,17 @@ def Em_Inicio():
     return response
 
 @app.route('/Em_Rordenes', methods=['GET', 'POST'])
+@login_requerido(rol='Empleado')
 def Em_Rordenes():
     return render_template("Em_templates/Em_Rordenes.html")
 
 @app.route('/Em_Rpedido', methods=['GET', 'POST'])
+@login_requerido(rol='Empleado')
 def Em_Rpedido():
     return render_template("Em_templates/Em_Rpedido.html")
 
 @app.route('/Em_Hordenes', methods=['GET', 'POST'])
+@login_requerido(rol='Empleado')
 def Em_Hordenes():
     return render_template("Em_templates/Em_Hordenes.html")
 
@@ -965,6 +976,7 @@ def registrar_pedido():
 # ╚══════════════════════════════════════════════╝
 
 @app.route("/Em_Ceditar", methods=["GET", "POST"])
+@login_requerido(rol='Empleado')
 def Em_Ceditar():
     if not session.get('logged_in'):
         if request.is_json:
@@ -1022,8 +1034,13 @@ def Em_Ceditar():
 
 @app.route('/logout')
 def logout():
-    session.clear()
-    return jsonify({"success": True, "msg": "Sesión cerrada correctamente", "redirect": url_for('login')})
+    session.clear()  # Elimina toda la sesión del usuario
+    response = redirect(url_for('login'))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
 
 if __name__ == '__main__':
     app.run(debug=True)
