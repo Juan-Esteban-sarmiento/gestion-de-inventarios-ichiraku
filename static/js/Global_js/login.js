@@ -38,6 +38,14 @@ async function login(event) {
     return false;
 }
 
+function logout() {
+    fetch('/logout', { method: 'GET' })
+        .then(() => {
+            window.location.href = '/login';
+        })
+        .catch(err => console.error('Error al cerrar sesión:', err));
+}
+
 // Mostrar select solo si rol = Empleado
 function toggleBranch() {
     const role = document.getElementById("role").value;
@@ -48,6 +56,7 @@ function toggleBranch() {
         cargarLocales();
     }
 }
+
 
 // Cargar locales desde backend
 async function cargarLocales() {
