@@ -172,7 +172,7 @@ function eliminarLocal(id) {
     showCancelButton: true,
     confirmButtonColor: '#e60000',
     cancelButtonColor: '#888',
-    confirmButtonText: '<span style="font-family:njnaruto;">Sí, eliminar</span>',
+    confirmButtonText: '<span style="font-family:njnaruto;">Eliminar</span>',
     cancelButtonText: '<span style="font-family:njnaruto;">Cancelar</span>',
     background: '#000',
     color: '#fff'

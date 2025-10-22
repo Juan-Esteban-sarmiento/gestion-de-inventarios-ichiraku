@@ -322,6 +322,7 @@ def Ad_Pnotificaciones():
 def Ad_Rproductos():
     return render_template("Ad_templates/Ad_Rproductos.html")
 
+
 @app.route('/registrar_producto', methods=['POST'])
 def registrar_producto():
     nombre = request.form.get('nombre')
@@ -356,14 +357,15 @@ def registrar_producto():
             print("❌ Error al subir foto:", e)
             return jsonify({"success": False, "msg": "Error al procesar la foto."})
 
-    # Insertar en tabla productos
+    # Insertar en tabla productos con habilitado=True por defecto
     try:
         data = {
             "id_producto": serial_int,
             "nombre": nombre,
             "categoria": categoria,
             "unidad": unidad,
-            "foto": foto_url
+            "foto": foto_url,
+            "habilitado": True  # Nuevo campo
         }
         response = supabase.table("productos").insert(data).execute()
 
@@ -381,23 +383,27 @@ def buscar_producto():
         data = request.get_json()
         termino = data.get("termino", "").strip()
 
-        # Si no hay término, devuelve todos los productos
+        # Los administradores ven TODOS los productos (habilitados y deshabilitados)
         if not termino:
             response = supabase.table("productos").select("*").execute()
             return jsonify({"success": True, "productos": response.data})
+        
+        response = supabase.table("productos").select("*").execute()
+        productos = response.data if hasattr(response, "data") else []
+        
+        termino_lower = termino.lower()
 
-        # Buscar por nombre o ID (minúsculas)
-        response = supabase.table("productos") \
-            .select("*") \
-            .or_(f"nombre.ilike.%{termino}%,id_producto.ilike.%{termino}%") \
-            .execute()
+        productos_filtrados = [
+            p for p in productos
+            if termino_lower in str(p.get("id_producto", "")).lower()
+            or termino_lower in str(p.get("nombre","")).lower()
+            or termino_lower in str(p.get("categoria","")).lower()
+        ]
 
-        productos = response.data
-
-        if not productos:
+        if not productos_filtrados:
             return jsonify({"success": False, "msg": "No se encontraron productos", "productos": []})
 
-        return jsonify({"success": True, "productos": productos})
+        return jsonify({"success": True, "productos": productos_filtrados})
 
     except Exception as e:
         print("❌ Error en búsqueda de producto:", e)
@@ -408,7 +414,7 @@ def editar_producto(id_producto):
     try:
         data = request.get_json()
         nombre = data.get("nombre")
-        nueva_id = data.get("id_producto")
+        nueva_id = data.get("nueva_id")
         categoria = data.get("categoria")
         unidad = data.get("unidad")
 
@@ -437,16 +443,24 @@ def editar_producto(id_producto):
         return jsonify({"success": False, "msg": f"Error en servidor: {e}"}), 500
 
 
-@app.route("/eliminar_producto/<int:id_producto>", methods=["DELETE"])
-def eliminar_producto(id_producto):
+@app.route("/cambiar_estado_producto/<int:id_producto>", methods=["POST"])
+def cambiar_estado_producto(id_producto):
     try:
-        response = supabase.table("productos").delete().eq("id_producto", id_producto).execute()
+        data = request.get_json()
+        habilitado = data.get("habilitado")
+        
+        if habilitado is None:
+            return jsonify({"success": False, "msg": "Estado no especificado."}), 400
+
+        response = supabase.table("productos").update({"habilitado": habilitado}).eq("id_producto", id_producto).execute()
+        
         if hasattr(response, "data") and response.data:
-            return jsonify({"success": True, "msg": "Producto eliminado correctamente."})
+            estado = "habilitado" if habilitado else "deshabilitado"
+            return jsonify({"success": True, "msg": f"Producto {estado} correctamente."})
         else:
             return jsonify({"success": False, "msg": "No se encontró el producto."}), 404
     except Exception as e:
-        print("❌ Error al eliminar producto:", e)
+        print("❌ Error al cambiar estado del producto:", e)
         return jsonify({"success": False, "msg": f"Error en servidor: {e}"}), 500
 
 
@@ -869,7 +883,8 @@ def buscar_producto_empleado():
         data = request.get_json()
         termino = data.get("termino", "").strip()
 
-        query = supabase.table("productos").select("id_producto, nombre, categoria, unidad, foto")
+        # Los empleados solo ven productos HABILITADOS
+        query = supabase.table("productos").select("id_producto, nombre, categoria, unidad, foto").eq("habilitado", True)
 
         if termino:
             query = query.or_(f"nombre.ilike.%{termino}%,categoria.ilike.%{termino}%")
@@ -886,6 +901,7 @@ def buscar_producto_empleado():
     except Exception as e:
         print("❌ Error en búsqueda de producto (empleado):", e)
         return jsonify({"success": False, "msg": "Error al obtener productos"}), 500
+
 
 # ╔══════════════════════════════════════════════╗
 # ║ Registro de Pedidos para EMPLEADO            ║
