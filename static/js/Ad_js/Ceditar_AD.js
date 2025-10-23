@@ -106,3 +106,132 @@ eliminarBtn.addEventListener('click', async function() {
     mostrarModal('Error al eliminar foto', 'error');
   }
 });
+
+async function recuperarContrasena() {
+  const { value: nombre } = await Swal.fire({
+    title: 'Recuperar contraseña',
+    input: 'text',
+    inputLabel: 'Ingresa tu nombre de usuario (Administrador)',
+    inputPlaceholder: 'Ejemplo: admin1',
+    showCancelButton: true,
+    confirmButtonText: 'Continuar',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#e60000',
+    cancelButtonColor: '#888',
+    preConfirm: (value) => {
+      if (!value || value.trim() === '') {
+        Swal.showValidationMessage('Debes ingresar tu nombre de usuario');
+      }
+      return value;
+    }
+  });
+
+  // 1️⃣ Pedir teléfono
+  const { value: telefono } = await Swal.fire({
+    title: 'Recuperar contraseña',
+    input: 'text',
+    inputLabel: 'Ingresa el número de teléfono donde recibirás el código',
+    inputPlaceholder: 'Ejemplo: 3001234567',
+    showCancelButton: true,
+    confirmButtonText: 'Enviar código',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#e60000',
+    cancelButtonColor: '#888',
+    preConfirm: (value) => {
+      if (!value || value.trim() === '') {
+        Swal.showValidationMessage('Debes ingresar un número de teléfono válido');
+      }
+      return value;
+    }
+  });
+
+  if (!telefono) return;
+
+  try {
+    // 2️⃣ Enviar token al backend
+    let telefonoFormateado = telefono.trim();
+    if (!telefonoFormateado.startsWith('+57')) {
+      telefonoFormateado = '+57' + telefonoFormateado;
+    }
+
+    const res = await fetch("/enviar_token_recuperacion", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ telefono: telefonoFormateado })
+    });
+
+    const data = await res.json();
+
+    if (!data.success) {
+      return Swal.fire('❌ Error', data.msg, 'error');
+    }
+
+    await Swal.fire('✅ Código enviado', 'Revisa tu teléfono para ver el código de verificación.', 'success');
+
+    // 3️⃣ Pedir el token recibido por SMS
+    const { value: token } = await Swal.fire({
+      title: 'Verificación',
+      input: 'text',
+      inputLabel: 'Ingresa el código recibido en tu teléfono',
+      inputPlaceholder: 'Ejemplo: 123456',
+      showCancelButton: true,
+      confirmButtonText: 'Validar código',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#e60000',
+      cancelButtonColor: '#888',
+      preConfirm: (value) => {
+        if (!value || value.trim().length < 4) {
+          Swal.showValidationMessage('Debes ingresar el código recibido');
+        }
+        return value;
+      }
+    });
+
+    if (!token) return;
+
+    // 4️⃣ Pedir nueva contraseña
+    const { value: nuevaContrasena } = await Swal.fire({
+      title: 'Nueva contraseña',
+      input: 'password',
+      inputLabel: 'Ingresa tu nueva contraseña',
+      inputPlaceholder: '********',
+      inputAttributes: {
+        minlength: 6,
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Actualizar contraseña',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#e60000',
+      cancelButtonColor: '#888',
+      preConfirm: (value) => {
+        if (!value || value.length < 6) {
+          Swal.showValidationMessage('La contraseña debe tener al menos 6 caracteres');
+        }
+        return value;
+      }
+    });
+
+    if (!nuevaContrasena) return;
+
+    // 5️⃣ Enviar al backend para validar token y actualizar la contraseña
+    const resp = await fetch("/validar_token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre, telefono, token, nueva_clave: nuevaContrasena })
+    });
+
+    const resultado = await resp.json();
+
+    if (resultado.success) {
+      Swal.fire('🎉 Éxito', 'Tu contraseña se actualizó correctamente.', 'success');
+    } else {
+      Swal.fire('❌ Error', resultado.msg, 'error');
+    }
+
+  } catch (err) {
+    console.error("Error en la petición:", err);
+    Swal.fire('❌ Error', 'No se pudo conectar con el servidor', 'error');
+  }
+}
+
+

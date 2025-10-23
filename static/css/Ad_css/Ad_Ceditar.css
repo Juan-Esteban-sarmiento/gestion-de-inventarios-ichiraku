@@ -126,7 +126,7 @@
   object-fit: cover;
 }
 
-.profile-btn {
+.profile-btn, .profile-btn-c{
   background: red;
   border: none;
   padding: 8px 15px;

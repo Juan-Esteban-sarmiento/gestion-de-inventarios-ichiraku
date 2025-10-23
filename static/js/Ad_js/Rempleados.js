@@ -153,11 +153,7 @@ function editarEmpleado(cedula, nombre, contacto, contrasena) {
       <input id="editNombre" class="swal2-input" placeholder="Nombre" value="${nombre}">
       <input id="editCedula" class="swal2-input" placeholder="Cédula" value="${cedula}">
       <input id="editContacto" class="swal2-input" placeholder="Número de contacto" value="${contacto}">
-      <div style="position: relative;">
-        <input id="editContrasena" class="swal2-input" type="password" placeholder="Contraseña" value="${contrasena}">
-        <span id="toggleContrasena" 
-          style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:1.2rem; color:#e60000;">🍜</span>
-      </div>
+      <input id="editContrasena" class="swal2-input" type="password" placeholder="Contraseña" value="${contrasena}" disabled>
     `,
     confirmButtonText: '<span style="font-family:njnaruto;">Guardar</span>',
     showCancelButton: true,
@@ -166,15 +162,6 @@ function editarEmpleado(cedula, nombre, contacto, contrasena) {
     color: '#fff',
     confirmButtonColor: '#e60000',
     cancelButtonColor: '#888',
-    didOpen: () => {
-      const toggle = document.getElementById("toggleContrasena");
-      const input = document.getElementById("editContrasena");
-      toggle.addEventListener("click", () => {
-        const isHidden = input.type === "password";
-        input.type = isHidden ? "text" : "password";
-        toggle.textContent = isHidden ? "🍥" : "🍜";
-      });
-    },
     preConfirm: () => {
       return {
         nombre: document.getElementById("editNombre").value,
@@ -232,3 +219,6 @@ function eliminarEmpleado(id) {
     }
   });
 }
+
+
+

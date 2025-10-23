@@ -49,13 +49,14 @@
         <!-- Formulario editable -->
         <form method="POST" class="edit-form" id="editarForm">
           <label for="id">ID:</label>
-          <input type="text" id="id" name="id" value="{{ user.Cedula }}" readonly>
+          <input type="text" id="id" name="id" value="{{ user.Cedula }}" disabled>
 
           <label for="Nombre">Nombre:</label>
           <input type="text" id="Nombre" name="Nombre" value="{{ user.Nombre }}" required>
 
-          <label for="Contrasena">Clave:</label>
-          <input type="text" id="Contrasena" name="Contrasena" value="{{ user.Contrasena }}" required>
+          <button type="button" class="profile-btn-c" onclick="recuperarContrasena()">Cambiar clave</button>
+
+          
 
           <button type="submit" class="submit-btn">Confirmar</button>
         </form>
@@ -93,5 +94,6 @@
   {% endwith %}
 
 </body>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{ url_for('static', filename='js/Ad_js/Ceditar_AD.js') }}"></script>
 </html>

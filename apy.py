@@ -2,6 +2,8 @@ import os
 import base64
 import csv
 import io
+import random
+import string
 from urllib import response
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
@@ -12,12 +14,25 @@ from flask import Flask, flash, jsonify, render_template, request, redirect, url
 from db import add_empleado, get_db_connection
 from supabase import create_client, Client
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime , timedelta
 from functools import wraps
 from flask import session, redirect, url_for
+from werkzeug.security import generate_password_hash, check_password_hash
+from twilio.rest import Client
+
 
 # Cargar variables del archivo .env
 load_dotenv()
+
+
+
+TWILIO_SID = os.getenv("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH = os.getenv("TWILIO_AUTH_TOKEN")
+TWILIO_PHONE = os.getenv("TWILIO_PHONE_NUMBER")
+VERIFY_SID = os.getenv("VERIFY_SERVICE_SID")
+
+twilio_client = Client(TWILIO_SID, TWILIO_AUTH)
+tokens_temporales = {}
 
 # Leer valores desde el .env
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -33,6 +48,23 @@ supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_
 
 app = Flask(__name__)
 app.secret_key = '123456789'
+
+import random
+
+def enviar_token_sms(numero):
+    # Generar código de 6 dígitos
+    token = str(random.randint(100000, 999999))
+
+    # Enviar SMS
+    mensaje = twilio_client.messages.create(
+        body=f"Tu código de verificación es: {token}",
+        from_=TWILIO_PHONE,
+        to=f"+57{numero}"  # Agrega el código de país
+    )
+
+    print(f"✅ SMS enviado a {numero}. SID: {mensaje.sid}")
+    return token
+
 
 
 # ╔══════════════════════════════════════════════╗
@@ -54,7 +86,7 @@ def login():
         usuario = data.get('id')
         password = data.get('password')
         role = data.get('role')
-        branch = data.get('branch')  # ahora es id_local
+        branch = data.get('branch')
 
         if not usuario or not password or not role:
             return jsonify({"success": False, "msg": "Por favor completa todos los campos."})
@@ -62,44 +94,64 @@ def login():
         try:
             # LOGIN ADMINISTRADOR
             if role == "Administrador":
-                query = supabase.table("administrador").select("*").eq("id", usuario).eq("contrasena", password).execute()
-                if query.data:
-                    admin_user = query.data[0]
-                    session['logged_in'] = True
-                    session['role'] = 'Administrador'
-                    session['cedula'] = admin_user.get('id', usuario)
-                    session['nombre'] = admin_user.get('nombre', '')
-                    return jsonify({"success": True, "redirect": url_for('Ad_Inicio')})
-                else:
-                    return jsonify({"success": False, "msg": "Usuario o contraseña de administrador incorrectos"})
+
+                if not usuario.isdigit():
+                    return jsonify({"success": False, "msg": "El ID de administrador debe ser numérico."})
+                
+                query = (
+                    supabase.table("administrador")
+                    .select("*")
+                    .eq("id", int(usuario))
+                    .execute()
+                )
+
+                if not query.data:
+                    return jsonify({"success": False, "msg": "Administrador no encontrado."}),404
+                
+                admin_user = query.data[0]
+
+                if not check_password_hash(admin_user['contrasena'], password):
+                    return jsonify({"success": False, "msg": "Contraseña incorrecta."}),401
+                
+                session['logged_in'] = True
+                session['role'] = 'Administrador'
+                session['cedula'] = admin_user.get('id', usuario)
+                session['nombre'] = admin_user.get('nombre', '')
+                return jsonify({"success": True, "msg": f"Bienvenido, {admin_user.get('nombre', '')}", "redirect": url_for('Ad_Inicio')})
 
             # LOGIN EMPLEADO
             elif role == "Empleado":
                 if not branch:
                     return jsonify({"success": False, "msg": "Por favor selecciona una sucursal."})
 
-                query = supabase.table("empleados").select("*").eq("cedula", usuario).eq("contrasena", password).execute()
-                if query.data:
-                    empleado = query.data[0]
-                    session['logged_in'] = True
-                    session['role'] = 'Empleado'
-                    session['cedula'] = empleado['cedula']
-                    session['nombre'] = empleado['nombre']
-                    session['branch'] = int(branch) 
-                    return jsonify({
-                        "success": True,
-                        "msg": f"Bienvenido, {empleado['nombre']}",
-                        "redirect": url_for('Em_Inicio')
-                    })
-                else:
-                    return jsonify({"success": False, "msg": "Usuario o contraseña incorrectos"})
+                query = (
+                    supabase.table("empleados")
+                    .select("*")
+                    .eq("cedula", int(usuario))
+                    .execute()
+                )
 
+                if not query.data:
+                    return jsonify({"success": False, "msg": "Empleado no encontrado."}),404
+                
+                empleado = query.data[0]
+
+                if not check_password_hash(empleado['contrasena'], password):
+                    return jsonify({"success": False, "msg": "Contraseña incorrecta."}),401
+                
+                session['logged_in'] = True
+                session['role'] = 'Empleado'
+                session['cedula'] = empleado('cedula', usuario)
+                session['nombre'] = empleado('nombre', '')
+                session['branch'] = int(branch)
+                return jsonify({"success": True, "msg": f"Bienvenido, {empleado.get('nombre', '')}", "redirect": url_for('Em_Inicio')})
+            
             else:
-                return jsonify({"success": False, "msg": "Rol no válido."})
-
+                return jsonify({"success": False, "msg": "Rol no válido."}),400
+            
         except Exception as e:
-            print("❌ Error en login:", e)
-            return jsonify({"success": False, "msg": f"Error interno: {e}"})
+            print("❌ Error durante el login:", e)
+            return jsonify({"success": False, "msg": "Error en el servidor."}),500
 
     return render_template("login.html")
 
@@ -751,7 +803,6 @@ def Ad_Ceditar():
                 user={
                     "Cedula": admin.get("id", ""),
                     "Nombre": admin.get("nombre", ""),
-                    "Contrasena": admin.get("contrasena", ""),
                     "photo_url": photo_url
                 }
             )
@@ -760,17 +811,13 @@ def Ad_Ceditar():
         if request.method == "POST" and request.is_json:
             data = request.get_json()
             nombre = data.get("Nombre")
-            contrasena = data.get("Contrasena")
 
-            if not (nombre and contrasena):
+            if not nombre:
                 return jsonify({"success": False, "msg": "Todos los campos son obligatorios."}), 400
 
             update_response = (
                 supabase.table("administrador")
-                .update({
-                    "nombre": nombre,
-                    "contrasena": contrasena
-                })
+                .update({"nombre" : nombre})
                 .eq("id", cedula)
                 .execute()
             )
@@ -790,7 +837,7 @@ def Ad_Ceditar_foto():
     cedula = session.get('cedula')
 
     try:
-        # 📸 SUBIR FOTO
+
         if request.method == 'POST':
             foto = request.files.get('foto')
             if not foto:
@@ -844,6 +891,76 @@ def Ad_Ceditar_foto():
     except Exception as e:
         print("❌ Error en Ad_Ceditar_foto:", e)
         return jsonify({"success": False, "msg": "Error en el servidor"}), 500
+    
+@app.route("/enviar_token_recuperacion", methods=["POST"])
+def enviar_token_recuperacion():
+    try:
+        data = request.get_json()
+        telefono = data.get("telefono", "").strip()
+
+        if not telefono:
+            return jsonify({"success": False, "msg": "Debe ingresar un número de teléfono."}), 400
+
+        # 🔹 Limpiar duplicados de prefijo (+57 o 57)
+        telefono = telefono.replace(" ", "")
+        if telefono.startswith("+57"):
+            telefono = telefono[3:]
+        elif telefono.startswith("57"):
+            telefono = telefono[2:]
+
+        # 🔹 Validar longitud y formato
+        if not telefono.isdigit() or len(telefono) != 10:
+            return jsonify({"success": False, "msg": "El número de teléfono no es válido (debe tener 10 dígitos)."}), 400
+
+        # 🔹 Crear cliente Twilio
+        client = Client(TWILIO_SID, TWILIO_AUTH)
+
+        # 🔹 Enviar el código
+        verification = client.verify.v2.services(VERIFY_SID).verifications.create(
+            to=f"+57{telefono}",
+            channel="sms"
+        )
+
+        print(f"✅ Token enviado a +57{telefono}")
+        return jsonify({"success": True, "msg": "Código enviado correctamente."})
+
+    except Exception as e:
+        print(f"❌ Error en enviar_token_recuperacion: {e}")
+        return jsonify({"success": False, "msg": str(e)}), 500
+
+
+@app.route("/validar_token", methods=["POST"])
+def validar_token():
+    try:
+        data = request.get_json()
+        nombre = data.get("nombre")
+        telefono = data.get("telefono")
+        token = data.get("token")
+        nueva_contrasena = data.get("nueva_clave")
+
+
+        if not (telefono and token and nueva_contrasena):
+            return jsonify({"success": False, "msg": "Todos los campos son obligatorios."}), 400
+
+        client = Client(TWILIO_SID, TWILIO_AUTH)
+        verfification_check = client.verify.v2.services(VERIFY_SID).verification_checks.create(
+            to=f"+57{telefono}",
+            code=token
+        )
+
+        if verfification_check.status != "approved":
+            return jsonify({"success": False, "msg": "Código inválido o expirado."}), 400
+        
+        hashed_password = generate_password_hash(nueva_contrasena)
+        supabase.table("administrador").update(
+            {"contrasena": hashed_password}
+        ).eq("nombre", nombre).execute()
+
+        return jsonify({"success": True, "msg": "Contraseña actualizada correctamente."})
+    
+    except Exception as e:
+        print(f"❌ Error en validar_token: {e}")
+        return jsonify({"success": False, "msg": str(e)}), 500
 
 # ╔══════════════════════════════════════════════╗
 # ║ Rutas de Empleado                            ║
