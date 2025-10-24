@@ -1,135 +1,163 @@
-// ⚔️ ALERTA NINJA GLOBAL (colores negro, blanco y rojo)
+// 🎴 ALERTA NINJA CON PALETA NEGRO, BLANCO Y ROJO
 function alertaNinja(icon, title, text) {
+  const iconColors = {
+    success: '#e60000',
+    error: '#ff3333',
+    warning: '#ff3333',
+    info: '#ffffff',
+    question: '#e60000'
+  };
+
   Swal.fire({
     icon: icon,
-    title: `<span style="font-family:njnaruto;">${title}</span>`,
+    title: `<span style="font-family:njnaruto; color:#fff;">${title}</span>`,
     text: text || '',
     background: '#000',
     color: '#fff',
+    iconColor: iconColors[icon] || '#e60000',
     confirmButtonColor: '#e60000',
     confirmButtonText: '<span style="font-family:njnaruto;">Aceptar</span>',
-    customClass: {
-      popup: 'swal2-border-radius',
-      title: 'swal2-title-custom',
-      confirmButton: 'swal2-confirm-custom'
+    buttonsStyling: false,
+    didRender: () => {
+      const btn = Swal.getConfirmButton();
+      if (btn) {
+        btn.style.background = '#e60000';
+        btn.style.color = '#fff';
+        btn.style.fontWeight = 'bold';
+        btn.style.border = '2px solid #ff3333';
+        btn.style.borderRadius = '8px';
+        btn.style.padding = '8px 16px';
+        btn.style.transition = '0.3s';
+        btn.addEventListener('mouseenter', () => (btn.style.background = '#ff3333'));
+        btn.addEventListener('mouseleave', () => (btn.style.background = '#e60000'));
+      }
     }
   });
 }
 
-// 🔁 Recarga si se vuelve atrás
-window.addEventListener("pageshow", function (event) {
+// 🔄 Evita errores al recargar desde caché
+window.addEventListener('pageshow', function (event) {
   if (event.persisted) window.location.reload();
 });
 
-// 🩸 REGISTRO DE LOCAL
-document.getElementById("registerForm").addEventListener("submit", async function (e) {
+// 🧾 REGISTRO DE LOCAL
+document.getElementById('registerForm').addEventListener('submit', async function (e) {
   e.preventDefault();
 
-  const nombre = document.getElementById("nombre_local").value.trim();
-  const direccion = document.getElementById("ubicacion").value.trim();
-  const id_local = document.getElementById("id_local").value.trim();
+  const nombre = document.getElementById('nombre_local').value.trim();
+  const direccion = document.getElementById('ubicacion').value.trim();
+  const id_local = document.getElementById('id_local').value.trim();
+  const fotoFile = document.getElementById('foto_local').files[0];
 
-  // ⚠️ Validación manual con alerta ninja
   if (!nombre || !direccion || !id_local) {
     alertaNinja('warning', 'Campos incompletos', 'Debes llenar todos los campos antes de registrar el local.');
     return;
   }
 
   const formData = new FormData();
-  formData.append("nombre", nombre);
-  formData.append("direccion", direccion);
-  formData.append("id_local", id_local);
+  formData.append('nombre', nombre);
+  formData.append('direccion', direccion);
+  formData.append('id_local', id_local);
+  if (fotoFile) formData.append('foto', fotoFile);
 
   try {
-    const response = await fetch("/registrar_local", { method: "POST", body: formData });
+    const response = await fetch('/registrar_local', { method: 'POST', body: formData });
     const data = await response.json();
 
     if (data.success) {
       alertaNinja('success', 'Local registrado', data.msg || 'El local fue agregado correctamente.');
-      document.getElementById("registerForm").reset();
+      document.getElementById('registerForm').reset();
+      document.getElementById('previewFotoLocal').style.display = 'none';
       setTimeout(() => window.location.reload(), 1000);
     } else {
       alertaNinja('error', 'Error en registro', data.msg || 'No se pudo registrar el local.');
     }
-  } catch (err) {
-    console.error("❌ Error al registrar local:", err);
+  } catch (error) {
     alertaNinja('error', 'Error del servidor', 'Ocurrió un problema al registrar el local.');
   }
 });
 
-// 🩸 MOSTRAR LOCALES EN LISTA
-function mostrarLocales(locales) {
-  const resultBox = document.getElementById("resultLocal");
-  if (!locales || locales.length === 0) {
-    resultBox.innerHTML = "<p>No se encontraron locales</p>";
-    return;
+// 📸 VISTA PREVIA DE FOTO
+document.getElementById('foto_local').addEventListener('change', function () {
+  const file = this.files[0];
+  const preview = document.getElementById('previewFotoLocal');
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      preview.src = e.target.result;
+      preview.style.display = "block";
+      preview.style.width = "100px";
+      preview.style.height = "100px";
+      preview.style.borderRadius = "50%";
+      preview.style.objectFit = "cover";
+      preview.style.margin = "10px auto";
+      preview.style.border = "2px solid #e60000";
+      alertaNinja('info', 'Foto seleccionada', 'La imagen se ha cargado correctamente.');
+    };
+    reader.readAsDataURL(file);
+  } else {
+    preview.src = "";
+    preview.style.display = "none";
+    alertaNinja('warning', 'Foto eliminada', 'No hay imagen seleccionada.');
   }
+});
 
-  resultBox.innerHTML = locales.map(loc => `
-    <div class="local-card">
-      <div class="local-info">
-        <p><strong>${loc.nombre}</strong></p>
-        <p>ID: ${loc.id_local}</p>
-        <p>Dirección: ${loc.direccion}</p>
-      </div>
-      <div class="local-actions">
-        <button onclick="editarLocal(${loc.id_local}, '${loc.nombre}', '${loc.direccion}')">Editar</button>
-        <button onclick="eliminarLocal(${loc.id_local})">Eliminar</button>
-      </div>
-    </div>
-  `).join("");
-}
+// 🔍 BUSCAR LOCALES AL PRESIONAR ENTER
+document.getElementById('buscarLocal').addEventListener('keydown', async function (e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const termino = this.value.trim();
+    await cargarLocales(termino);
+  }
+});
 
-// 🩸 CARGAR TODOS LOS LOCALES AL INICIO
-async function cargarLocales() {
+// 📦 Cargar locales
+async function cargarLocales(termino = "") {
+  const resultBox = document.getElementById("resultLocal");
+
   try {
     const response = await fetch("/buscar_local", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ termino: "" })
+      body: JSON.stringify({ termino })
     });
 
     const data = await response.json();
-    if (data.success) mostrarLocales(data.locales);
-    else document.getElementById("resultLocal").innerHTML = "<p>No hay locales registrados</p>";
+
+    if (data.success) {
+      resultBox.innerHTML = data.locales.map(loc => `
+        <div class="local-card" style="${!loc.habilitado ? 'opacity: 0.6; background-color: #f8d7da;' : ''}">
+          <div style="display: flex; align-items: center; gap: 15px;">
+            <img src="${loc.foto || '/static/image/default.png'}" alt="Foto del local" style="width:60px; height:60px; border-radius:50%; object-fit:cover;">
+            <div class="local-info">
+              <p><strong>${loc.nombre || 'Sin nombre'}</strong></p>
+              <p>ID: ${loc.id_local || '---'}</p>
+              <p>Dirección: ${loc.direccion || '---'}</p>
+            </div>
+          </div>
+          <div class="local-actions">
+            <button onclick="editarLocal('${loc.id_local}', '${loc.nombre}', '${loc.direccion}')">Editar</button>
+            <button onclick="${loc.habilitado ? `deshabilitarLocal('${loc.id_local}')` : `habilitarLocal('${loc.id_local}')`}">${loc.habilitado ? 'Deshabilitar' : 'Habilitar'}</button>
+          </div>
+        </div>
+      `).join("");
+    } else {
+      resultBox.innerHTML = `<p>No se encontraron locales.</p>`;
+    } 
   } catch (err) {
     console.error("Error al cargar locales:", err);
-    alertaNinja('error', 'Error del servidor', 'No se pudieron cargar los locales.');
+    resultBox.innerHTML = `<p>Error en el servidor.</p>`;
   }
 }
 
-// 🩸 BUSCAR SOLO AL PRESIONAR ENTER
-document.getElementById("buscarLocal").addEventListener("keydown", async function (e) {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    const termino = this.value.trim();
-
-    try {
-      const response = await fetch("/buscar_local", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ termino })
-      });
-
-      const data = await response.json();
-      if (data.success) mostrarLocales(data.locales);
-      else {
-        mostrarLocales([]);
-        alertaNinja('info', 'Sin resultados', data.msg);
-      }
-    } catch (err) {
-      console.error("Error al buscar local:", err);
-      alertaNinja('error', 'Error del servidor', 'Ocurrió un problema en la búsqueda.');
-    }
-  }
-});
-
-// 🩸 EDITAR LOCAL CON SWEETALERT PERSONALIZADO
-async function editarLocal(id, nombre, direccion) {
-  const { value: formValues } = await Swal.fire({
-    title: '<span style="font-family:njnaruto;">Editar Local</span>',
+// ✏️ Editar local
+function editarLocal(id_local, nombre, direccion) {
+  Swal.fire({
+    title: '<span style="font-family:njnaruto; color:#fff;">Editar Local</span>',
     html: `
-      <input id="editNombre" class="swal2-input" placeholder="Nombre" value="${nombre}">
+      <input id="editNombre" class="swal2-input" placeholder="Nombre del local" value="${nombre}">
+      <input id="editId" class="swal2-input" placeholder="ID del local" value="${id_local}" disabled>
       <input id="editDireccion" class="swal2-input" placeholder="Dirección" value="${direccion}">
     `,
     confirmButtonText: '<span style="font-family:njnaruto;">Guardar</span>',
@@ -138,60 +166,111 @@ async function editarLocal(id, nombre, direccion) {
     background: '#000',
     color: '#fff',
     confirmButtonColor: '#e60000',
-    preConfirm: () => ({
-      nombre: document.getElementById("editNombre").value,
-      direccion: document.getElementById("editDireccion").value,
-    })
-  });
-
-  if (!formValues) return;
-
-  try {
-    const response = await fetch(`/editar_local/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formValues),
-    });
-
-    const resData = await response.json();
-    alertaNinja(resData.success ? 'success' : 'error',
-      resData.success ? 'Actualizado' : 'Error', resData.msg);
-    document.getElementById("buscarLocal").dispatchEvent(new Event("keydown", { key: "Enter" }));
-  } catch (err) {
-    console.error("❌ Error al editar local:", err);
-    alertaNinja('error', 'Error del servidor', 'No se pudo editar el local.');
-  }
-}
-
-// 🩸 ELIMINAR LOCAL CON CONFIRMACIÓN NINJA
-function eliminarLocal(id) {
-  Swal.fire({
-    title: '<span style="font-family:njnaruto;">¿Eliminar local?</span>',
-    html: '<span style="font-family:njnaruto;">Esta acción no se puede deshacer.</span>',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#e60000',
     cancelButtonColor: '#888',
-    confirmButtonText: '<span style="font-family:njnaruto;">Eliminar</span>',
-    cancelButtonText: '<span style="font-family:njnaruto;">Cancelar</span>',
-    background: '#000',
-    color: '#fff'
-  }).then((result) => {
+    preConfirm: () => {
+      const nombre = document.getElementById("editNombre").value.trim();
+      const direccion = document.getElementById("editDireccion").value.trim();
+
+      if (!nombre || !direccion) {
+        Swal.showValidationMessage("Todos los campos son obligatorios");
+        return false;
+      }
+
+      return { nombre, direccion };
+    }
+  }).then(async (result) => {
     if (result.isConfirmed) {
-      fetch(`/eliminar_local/${id}`, { method: "DELETE" })
-        .then(res => res.json())
-        .then(data => {
-          alertaNinja(data.success ? 'success' : 'error',
-            data.success ? 'Eliminado' : 'Error', data.msg);
-          document.getElementById("buscarLocal").dispatchEvent(new Event("keydown", { key: "Enter" }));
-        })
-        .catch(err => {
-          console.error("❌ Error al eliminar local:", err);
-          alertaNinja('error', 'Error del servidor', 'No se pudo eliminar el local.');
-        });
+      const data = result.value;
+      const response = await fetch(`/editar_local/${id_local}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      const resData = await response.json();
+
+      if (resData.success) {
+        alertaNinja('success', 'Local actualizado', resData.msg);
+        await cargarLocales("");
+      } else {
+        alertaNinja('error', 'Error al actualizar', resData.msg);
+      }
     }
   });
 }
 
-// 🩸 CARGAR LA LISTA AL INICIAR
-window.addEventListener("DOMContentLoaded", cargarLocales);
+// 🔒 Deshabilitar local
+async function deshabilitarLocal(id_local) {
+  const confirmacion = await Swal.fire({
+    title: '<span style="font-family:njnaruto; color:#fff;">¿Deshabilitar Local?</span>',
+    text: "El local se deshabilitará.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc3545',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: '<span style="font-family:njnaruto;">Sí, deshabilitar</span>',
+    cancelButtonText: '<span style="font-family:njnaruto;">Cancelar</span>',
+    background: '#000'
+  });
+
+  if (confirmacion.isConfirmed) {
+    try {
+      const response = await fetch(`/cambiar_estado_local/${id_local}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ habilitado: false })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alertaNinja('success', 'Local deshabilitado', data.msg);
+        await cargarLocales();
+      } else {
+        alertaNinja('error', 'Error', data.msg);
+      }
+    } catch (error) {
+      alertaNinja('error', 'Error del servidor', 'No se pudo deshabilitar el local.');
+    }
+  }
+}
+
+// ✅ Habilitar local
+async function habilitarLocal(id_local) {
+  const confirmacion = await Swal.fire({
+    title: '<span style="font-family:njnaruto; color:#fff;">¿Habilitar Local?</span>',
+    text: "El local se habilitará.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#28a745',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: '<span style="font-family:njnaruto;">Sí, habilitar</span>',
+    cancelButtonText: '<span style="font-family:njnaruto;">Cancelar</span>',
+    background: '#000'
+  });
+
+  if (confirmacion.isConfirmed) {
+    try {
+      const response = await fetch(`/cambiar_estado_local/${id_local}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ habilitado: true })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alertaNinja('success', 'Local habilitado', data.msg);
+        await cargarLocales();
+      } else {
+        alertaNinja('error', 'Error', data.msg);
+      }
+    } catch (error) {
+      alertaNinja('error', 'Error del servidor', 'No se pudo habilitar el local.');
+    }
+  }
+}
+
+// ⚙️ EJECUTAR CARGA INICIAL
+document.addEventListener('DOMContentLoaded', async function () {
+  await cargarLocales('');
+});

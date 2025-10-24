@@ -136,13 +136,16 @@ def login():
                 
                 empleado = query.data[0]
 
+                if not empleado.get('habilitado', True):
+                    return jsonify({"success": False, "msg": "Empleado deshabilitado. Contacta al administrador."}),403
+
                 if not check_password_hash(empleado['contrasena'], password):
                     return jsonify({"success": False, "msg": "Contraseña incorrecta."}),401
                 
                 session['logged_in'] = True
                 session['role'] = 'Empleado'
-                session['cedula'] = empleado('cedula', usuario)
-                session['nombre'] = empleado('nombre', '')
+                session['cedula'] = empleado.get('cedula', usuario)
+                session['nombre'] = empleado.get('nombre', '')
                 session['branch'] = int(branch)
                 return jsonify({"success": True, "msg": f"Bienvenido, {empleado.get('nombre', '')}", "redirect": url_for('Em_Inicio')})
             
@@ -215,13 +218,14 @@ def registrar_empleado():
     if not (nombre and cedula and contrasena and contacto):
         return jsonify({"success": False, "msg": "Todos los campos son obligatorios."})
 
+    # Hashear la contraseña antes de guardarla
+    contrasena_hash = generate_password_hash(contrasena)
+
     foto_url = None
 
     if foto:
         try:
- 
             filename = f"empleados/{cedula}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
-
             upload_response = supabase.storage.from_("Fotos").upload(filename, foto.read())
 
             if hasattr(upload_response, "error") and upload_response.error:
@@ -240,7 +244,7 @@ def registrar_empleado():
             "cedula": int(cedula),
             "nombre": nombre,
             "numero_contacto": int(contacto),
-            "contrasena": contrasena,
+            "contrasena": contrasena_hash,  # Usar la contraseña hasheada
             "foto": foto_url
         }
 
@@ -312,9 +316,8 @@ def editar_empleado(cedula):
         nombre = data.get("nombre")
         nueva_cedula = data.get("cedula")
         numero_contacto = data.get("numero_contacto")
-        contrasena = data.get("contrasena")
 
-        if not (nombre and nueva_cedula and numero_contacto and contrasena):
+        if not (nombre and nueva_cedula and numero_contacto):
             return jsonify({"success": False, "msg": "Todos los campos son obligatorios."}), 400
 
         response = (
@@ -323,7 +326,6 @@ def editar_empleado(cedula):
                 "nombre": nombre,
                 "cedula": int(nueva_cedula),
                 "numero_contacto": int(numero_contacto),
-                "contrasena": contrasena
             })
             .eq("cedula", cedula)
             .execute()
@@ -360,6 +362,27 @@ def eliminar_empleado(cedula):
     except Exception as e:
         print("Error al eliminar empleado:", e)
         return jsonify({"success": False, "msg": "Error en el servidor"}), 500
+    
+@app.route("/cambiar_estado_empleado/<int:cedula>", methods=["POST"])
+def cambiar_estado_empleado(cedula):
+    try:
+        data = request.get_json()
+        habilitado = data.get("habilitado")
+        
+        if habilitado is None:
+            return jsonify({"success": False, "msg": "Estado no especificado."}), 400
+
+        response = supabase.table("empleados").update({"habilitado": habilitado}).eq("cedula", cedula).execute()
+        
+        if hasattr(response, "data") and response.data:
+            estado = "habilitado" if habilitado else "deshabilitado"
+            return jsonify({"success": True, "msg": f"Empleado {estado} correctamente."})
+        else:
+            return jsonify({"success": False, "msg": "No se encontró el empleado."}), 404
+    except Exception as e:
+        print("❌ Error al cambiar estado del producto:", e)
+        return jsonify({"success": False, "msg": f"Error en servidor: {e}"}), 500
+
 
 @app.route('/Ad_Pnotificaciones', methods=['GET', 'POST'])
 def Ad_Pnotificaciones():
@@ -380,54 +403,56 @@ def registrar_producto():
     nombre = request.form.get('nombre')
     categoria = request.form.get('categoria')
     unidad = request.form.get('unidad')
-    serial = request.form.get('serial')
     foto = request.files.get('foto')
 
-    if not (nombre and categoria and unidad and serial):
+    if not (nombre and categoria and unidad):
         return jsonify({"success": False, "msg": "Todos los campos son obligatorios."})
 
-    try:
-        serial_int = int(serial)
-    except ValueError:
-        return jsonify({"success": False, "msg": "El ID del producto debe ser numérico."})
-
-    # Verificar duplicado en Supabase
-    existing = supabase.table("productos").select("*").eq("id_producto", serial_int).execute()
-    if existing.data:
-        return jsonify({"success": False, "msg": "Ya existe un producto con ese ID."})
-
-    foto_url = None
-    if foto:
-        try:
-            filename = f"productos/{serial_int}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
-            upload_response = supabase.storage.from_("Fotos").upload(filename, foto.read())
-            if hasattr(upload_response, "error") and upload_response.error:
-                print("❌ Error al subir imagen:", upload_response.error)
-                return jsonify({"success": False, "msg": "Error al subir imagen."})
-            foto_url = f"{SUPABASE_URL}/storage/v1/object/public/Fotos/{filename}"
-        except Exception as e:
-            print("❌ Error al subir foto:", e)
-            return jsonify({"success": False, "msg": "Error al procesar la foto."})
-
-    # Insertar en tabla productos con habilitado=True por defecto
+    # Insertamos primero para obtener el ID del producto
     try:
         data = {
-            "id_producto": serial_int,
             "nombre": nombre,
             "categoria": categoria,
             "unidad": unidad,
-            "foto": foto_url,
-            "habilitado": True  # Nuevo campo
+            "habilitado": True,
+            "foto": None
         }
         response = supabase.table("productos").insert(data).execute()
 
-        if hasattr(response, "data") and response.data:
-            return jsonify({"success": True, "msg": "Producto registrado correctamente."})
-        else:
+        if not (hasattr(response, "data") and response.data):
             return jsonify({"success": False, "msg": "Error al registrar producto."})
+
+        producto_id = response.data[0]["id_producto"]
+
     except Exception as e:
         print("❌ Error al insertar producto:", e)
         return jsonify({"success": False, "msg": f"Error en servidor: {e}"})
+
+    # Subir imagen con el nombre final después de tener el ID
+    foto_url = None
+    if foto:
+        try:
+            filename = f"productos/{producto_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
+            upload_response = supabase.storage.from_("Fotos").upload(filename, foto.read())
+
+            if hasattr(upload_response, "error") and upload_response.error:
+                print("❌ Error al subir imagen:", upload_response.error)
+                return jsonify({"success": False, "msg": "Error al subir imagen."})
+
+            foto_url = f"{SUPABASE_URL}/storage/v1/object/public/Fotos/{filename}"
+            supabase.table("productos").update({"foto": foto_url}).eq("id_producto", producto_id).execute()
+
+        except Exception as e:
+            print("❌ Error al subir foto:", e)
+            return jsonify({"success": False, "msg": "Error al subir foto."})
+
+    return jsonify({
+        "success": True,
+        "msg": f"Producto registrado correctamente con el serial #{producto_id}.",
+        "id_generado": producto_id,
+        "foto_url": foto_url
+    })
+
 
 @app.route("/buscar_producto", methods=["POST"])
 def buscar_producto():
@@ -460,23 +485,38 @@ def buscar_producto():
     except Exception as e:
         print("❌ Error en búsqueda de producto:", e)
         return jsonify({"success": False, "msg": "Error en servidor"}), 500
+    
+@app.route("/obtener_proximo_id",methods=["GET"])
+def obtener_proximo_id():
+    try:
+        response = supabase.table("productos").select("id_producto").order("id_producto", desc=True).limit(1).execute()
+
+        if hasattr(response, "data") and response.data:
+            ultimo_id = response.data[0]["id_producto"]
+            proximo_id = ultimo_id + 1
+        else:
+            proximo_id = 1
+        
+        return jsonify({"success": True, "proximo_id": proximo_id})
+    
+    except Exception as e:
+        print("❌ Error al obtener próximo ID de producto:", e)
+        return jsonify({"success": False, "msg": "Error en servidor"}), 500
 
 @app.route("/editar_producto/<int:id_producto>", methods=["PUT"])
 def editar_producto(id_producto):
     try:
         data = request.get_json()
         nombre = data.get("nombre")
-        nueva_id = data.get("nueva_id")
         categoria = data.get("categoria")
         unidad = data.get("unidad")
 
-        if not (nombre and nueva_id and categoria and unidad):
+        if not (nombre and categoria and unidad):
             return jsonify({"success": False, "msg": "Todos los campos son obligatorios."}), 400
 
         response = (
             supabase.table("productos")
             .update({
-                "id_producto": int(nueva_id),
                 "nombre": nombre,
                 "categoria": categoria,
                 "unidad": unidad
@@ -672,6 +712,7 @@ def registrar_local():
     nombre = request.form.get('nombre')
     direccion = request.form.get('direccion')
     id_local = request.form.get('id_local')
+    foto = request.files.get('foto')
 
     # Validación
     if not (nombre and direccion and id_local):
@@ -686,11 +727,25 @@ def registrar_local():
         print("Error al verificar local:", e)
         return jsonify({"success": False, "msg": "Error al verificar duplicados."})
 
+    foto_url = None
+    if foto:
+        try:
+            filename = f"locales/{id_local}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
+            upload_response = supabase.storage.from_("Fotos").upload(filename, foto.read())
+            if hasattr(upload_response, "error") and upload_response.error:
+                print("❌ Error al subir imagen:", upload_response.error)
+                return jsonify({"success": False, "msg": "Error al subir imagen."})
+            foto_url = f"{SUPABASE_URL}/storage/v1/object/public/Fotos/{filename}"
+        except Exception as e:
+            print("❌ Error al subir foto:", e)
+            return jsonify({"success": False, "msg": "Error al procesar la foto."})
+
     try:
         data = {
             "id_local": id_local,
             "nombre": nombre,
             "direccion": direccion,
+            "foto": foto_url
         }
         response = supabase.table("locales").insert(data).execute()
 
@@ -710,7 +765,7 @@ def buscar_local():
     termino = data.get("termino", "").strip()
 
     try:
-        query = supabase.table("locales").select("id_local, nombre, direccion")
+        query = supabase.table("locales").select("id_local, nombre, direccion, foto, habilitado")
 
         if termino.isdigit():
             query = query.eq("id_local", int(termino))
@@ -757,20 +812,27 @@ def editar_local(id_local):
     except Exception as e:
         print("❌ Error al editar local:", e)
         return jsonify({"success": False, "msg": "Error en el servidor"})
-
-
-@app.route("/eliminar_local/<int:id_local>", methods=["DELETE"])
-def eliminar_local(id_local):
+    
+@app.route("/cambiar_estado_local/<int:id_local>", methods=["POST"])
+def cambiar_estado_local(id_local):
     try:
-        response = supabase.table("locales").delete().eq("id_local", id_local).execute()
-        if response.data:
-            print("Local eliminado correctamente:", response.data)
-            return jsonify({"success": True, "msg": "Local eliminado correctamente."})
+        data = request.get_json()
+        habilitado = data.get("habilitado")
+        
+        if habilitado is None:
+            return jsonify({"success": False, "msg": "Estado no especificado."}), 400
+
+        response = supabase.table("locales").update({"habilitado": habilitado}).eq("id_local", id_local).execute()
+        
+        if hasattr(response, "data") and response.data:
+            estado = "habilitado" if habilitado else "deshabilitado"
+            return jsonify({"success": True, "msg": f"Local {estado} correctamente."})
         else:
-            return jsonify({"success": False, "msg": "Local no encontrado."})
+            return jsonify({"success": False, "msg": "No se encontró el Local."}), 404
     except Exception as e:
-        print("❌ Error al eliminar local:", e)
-        return jsonify({"success": False, "msg": "Error en el servidor"})
+        print("❌ Error al cambiar estado del Local:", e)
+        return jsonify({"success": False, "msg": f"Error en servidor: {e}"}), 500
+
 
 # ╔══════════════════════════════════════════════╗
 # ║ Edición de Datos del Administrador           ║

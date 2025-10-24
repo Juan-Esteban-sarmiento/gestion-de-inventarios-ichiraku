@@ -65,6 +65,24 @@ document.getElementById('registerProductForm').addEventListener('submit', async 
   }
 });
 
+async function cargarProximoID() {
+
+  try {
+    const response = await fetch("/obtener_proximo_id")
+    const data = await response.json();
+
+    if (data.success) {
+      document.getElementById("serialProducto").value = data.proximo_id;
+    } else {
+      alertaNinja("error", "Error al obtener ID", data.msg);
+    }
+  } catch (error) {
+    console.error("❌ Error al obtener próximo ID:", error);
+    alertaNinja("error", "Error del servidor", "No se pudo obtener el próximo ID.");
+  }
+
+}
+
 
 // ✅ Mostrar productos con estética ninja
 function mostrarProductos(productos) {
@@ -81,7 +99,6 @@ function mostrarProductos(productos) {
              alt="Foto de ${prod.nombre}"
              style="width:60px; height:60px; border-radius:50%; object-fit:cover;">
         <div class="producto-info">
-          <p><strong>${prod.nombre}</strong> ${!prod.habilitado ? '<span style="color: #dc3545;">(Deshabilitado)</span>' : ''}</p>
           <p>ID: ${prod.id_producto}</p>
           <p>Categoría: ${prod.categoria}</p>
           <p>Unidad: ${prod.unidad}</p>
@@ -139,6 +156,24 @@ function editarProducto( id_producto,nombre,  categoria, unidad){
       }
     });
 }
+
+// Mostar vista previa de la imagen seleccionada
+document.getElementById('fotoProducto').addEventListener('change', function() {
+  const file = e.target.files[0];
+  const preview = document.getElementById('previewFotoProducto');
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      preview.src = event.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  } else {
+    preview.src = '';
+    preview.style.display = 'none';
+  }
+});
 
 // ✅ Cargar productos al inicio
 async function cargarProductos() {
@@ -261,4 +296,7 @@ async function habilitarProducto(id_producto) {
 }
 
 // ✅ Ejecutar carga inicial
-window.addEventListener("DOMContentLoaded", cargarProductos);
+window.addEventListener("DOMContentLoaded", () => {
+  cargarProductos();
+  cargarProximoID();
+});

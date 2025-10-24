@@ -118,11 +118,9 @@ async function cargarEmpleados(termino = "") {
 
     if (data.success) {
       resultBox.innerHTML = data.empleados.map(emp => `
-        <div class="empleado-card">
+        <div class="empleado-card" style="${!emp.habilitado ? 'opacity: 0.6; background-color: #f8d7da;' : ''}">>
           <div style="display: flex; align-items: center; gap: 15px;">
-            <img src="${emp.foto || '/static/image/default.png'}" 
-              alt="Foto de ${emp.nombre}" 
-              style="width:60px; height:60px; border-radius:50%; object-fit:cover;">
+            <img src="${emp.foto || '/static/image/default.png'}" alt="Foto de ${emp.nombre}" style="width:60px; height:60px; border-radius:50%; object-fit:cover;">
             <div class="empleado-info">
               <p><strong>${emp.nombre || 'Sin nombre'}</strong></p>
               <p>ID: ${emp.cedula || '---'}</p>
@@ -131,7 +129,7 @@ async function cargarEmpleados(termino = "") {
           </div>
           <div class="empleado-actions">
             <button onclick="editarEmpleado('${emp.cedula}', '${emp.nombre}', '${emp.numero_contacto}', '${emp.contrasena || ''}')">Editar</button>
-            <button onclick="eliminarEmpleado('${emp.cedula}')">Eliminar</button>
+            <button onclick="${emp.habilitado ? `desabilitarEmpleado('${emp.cedula}')` : `habilitarEmpleado('${emp.cedula}')`}">${emp.habilitado ? 'Deshabilitar' : 'Habilitar'}</button>
           </div>
         </div>
       `).join("");
@@ -153,7 +151,6 @@ function editarEmpleado(cedula, nombre, contacto, contrasena) {
       <input id="editNombre" class="swal2-input" placeholder="Nombre" value="${nombre}">
       <input id="editCedula" class="swal2-input" placeholder="Cédula" value="${cedula}">
       <input id="editContacto" class="swal2-input" placeholder="Número de contacto" value="${contacto}">
-      <input id="editContrasena" class="swal2-input" type="password" placeholder="Contraseña" value="${contrasena}" disabled>
     `,
     confirmButtonText: '<span style="font-family:njnaruto;">Guardar</span>',
     showCancelButton: true,
@@ -167,7 +164,6 @@ function editarEmpleado(cedula, nombre, contacto, contrasena) {
         nombre: document.getElementById("editNombre").value,
         cedula: document.getElementById("editCedula").value,
         numero_contacto: document.getElementById("editContacto").value,
-        contrasena: document.getElementById("editContrasena").value
       };
     }
   }).then(async (result) => {
@@ -189,36 +185,76 @@ function editarEmpleado(cedula, nombre, contacto, contrasena) {
   });
 }
 
-// 🗑️ Eliminar empleado
-function eliminarEmpleado(id) {
-  Swal.fire({
-    title: '<span style="font-family:njnaruto; font-size: 2rem; color:#fff;">¿ESTÁS SEGURO?</span>',
-    html: '<span style="font-family:njnaruto; font-size: 1.2rem; color:#fff;">Esta acción eliminará al empleado.</span>',
+// ❌ Deshabilitar empleado
+async function desabilitarEmpleado(cedula) {
+  const confirmacion = await Swal.fire({
+    title: '<span style="font-family:njnaruto; color:#fff;">¿Deshabilitar Empleado?</span>',
+    text: "El empleado se desabilitara.",
     icon: 'warning',
-    iconColor: '#e60000',
     showCancelButton: true,
-    confirmButtonColor: '#e60000',
-    cancelButtonColor: '#888',
-    confirmButtonText: '<span style="font-family:njnaruto;">Si, eliminar</span>',
+    confirmButtonColor: '#dc3545',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: '<span style="font-family:njnaruto;">Sí, deshabilitar</span>',
     cancelButtonText: '<span style="font-family:njnaruto;">Cancelar</span>',
-    background: '#000',
-    color: '#fff'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      fetch(`/eliminar_empleado/${id}`, { method: 'DELETE' })
-        .then(res => res.json())
-        .then(async data => {
-          if (data.success) {
-            alertaNinja('success', 'Empleado eliminado', 'El registro fue eliminado correctamente.');
-            await cargarEmpleados("");
-          } else {
-            alertaNinja('error', 'Error', data.msg);
-          }
-        })
-        .catch(() => alertaNinja('error', 'Error del servidor', 'No se pudo eliminar el empleado.'));
-    }
+    background: '#000'
   });
+
+  if (confirmacion.isConfirmed) {
+    try {
+      const response = await fetch(`/cambiar_estado_empleado/${cedula}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ habilitado: false })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        alertaNinja('success', 'Empleado deshabilitado', data.msg);
+        await cargarEmpleados();
+      } else {
+        alertaNinja('error', 'Error', data.msg);
+      }
+    } catch (error) {
+      console.error("❌ Error al deshabilitar el empleado:", error);
+      alertaNinja('error', 'Error del servidor', 'No se pudo deshabilitar el empleado.');
+    }
+  }
 }
 
+// ✅ Habilitar empleado
+async function habilitarEmpleado(cedula) {
+  const confirmacion = await Swal.fire({
+    title: '<span style="font-family:njnaruto; color:#fff;">¿Habilitar Empleado?</span>',
+    text: "El empleado volvera a estar habilitado.",
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#28a745',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: '<span style="font-family:njnaruto;">Sí, habilitar</span>',
+    cancelButtonText: '<span style="font-family:njnaruto;">Cancelar</span>',
+    background: '#000'
+  });
+
+  if (confirmacion.isConfirmed) {
+    try {
+      const response = await fetch(`/cambiar_estado_empleado/${cedula}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ habilitado: true })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        alertaNinja('success', 'Empleado habilitado', data.msg);
+        await cargarEmpleados();
+      } else {
+        alertaNinja('error', 'Error', data.msg);
+      }
+    } catch (error) {
+      console.error("❌ Error al habilitar producto:", error);
+      alertaNinja('error', 'Error del servidor', 'No se pudo habilitar el producto.');
+    }
+  }
+}
 
 

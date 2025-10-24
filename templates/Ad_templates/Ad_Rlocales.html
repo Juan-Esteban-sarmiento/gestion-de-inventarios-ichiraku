@@ -65,10 +65,15 @@
                 <img class="icon" src="{{ url_for('static', filename='image/mas.png') }}" alt="Guardar">
                 Registrar
               </button>
-              <button type="reset" class="btn secondary">
-                <img class="icon" src="{{ url_for('static', filename='image/basura.png') }}" alt="Limpiar">
-                Limpiar
+
+              <input type="file" id="foto_local" name="foto" accept="image/*" style="display: none;">
+              <img id="previewFotoLocal" src="#" alt="Vista previa de la foto" style="display:none; width:60px; height:60px; border-radius:50%; object-fit:cover; margin-left:10px;">
+              <button type="button" class="btn secondary" onclick="document.getElementById('foto_local').click()">
+                <img class="icon" src="{{ url_for('static', filename='image/subir.png') }}" alt="Subir">
+                subir foto
               </button>
+              
+
             </div>
           </form>
         </section>
