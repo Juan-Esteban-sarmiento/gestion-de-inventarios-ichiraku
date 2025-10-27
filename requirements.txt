@@ -3,6 +3,5 @@ mysql-connector-python
 reportlab
 supabase
 python-dotenv
--U Flask Werkzeug
+Werkzeug
 twilio
-
