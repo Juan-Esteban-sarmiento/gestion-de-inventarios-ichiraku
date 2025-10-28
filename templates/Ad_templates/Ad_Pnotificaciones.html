@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Pnotificaciones.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/Menu.css') }}">
   <meta charset="UTF-8">
   <title>Ichiraku Ramen - Administrador de avisos</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Pnotificaciones.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/Menu.css') }}">
 </head>
 <body>
 
@@ -28,7 +28,7 @@
             <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reportes
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'" class="menu-button">
-            <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> locales
+            <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> Locales
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button active">
             <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Avisos"> Avisos
@@ -37,60 +37,59 @@
             <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Usuario"> Usuario
           </button>
         </nav>
-  <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
+  <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesión</button>
   </div>
 
   <!-- Contenido principal -->
   <main class="main-content">
       <div class="welcome-box">
-  <h1 class="welcome-title">Panel de administrador</h1>
+          <h1 class="welcome-title">Panel de administrador</h1>
       </div>
 
-        <!-- Contenedor de avisos -->
-        <div class="notification-container">
+      <!-- Contenedor de avisos -->
+      <div class="notification-container">
+          <section class="search-box">
+              <h2>Lista de avisos</h2>
 
-            <!-- Caja unica para filtros y avisos -->
-            <section class="search-box">
-                <h2>Lista de avisos</h2>
+              <!-- Barra de filtros -->
+              <div class="filters">
+                  <input type="date" class="filter-input">
+                  <input type="text" class="filter-input" placeholder="Buscar ...">
+              </div>
 
-                <!-- Barra de filtros (fecha + busqueda) -->
-                <div class="filters">
-                    <input type="date" class="filter-input">
-                    <input type="text" class="filter-input" placeholder="Buscar ...">
-                </div>
-
-                <!-- Listado dinamico desde la base de datos -->
-                <div class="notifications-list">
-                    {% for noti in notificaciones %}
-                    <div class="notification-item">
-                        <!-- Icono izquierda -->
-                        <img src="{{ url_for('static', filename='image/campana.png') }}" 
-                            class="icon-left" alt="Campana">
-
-                        <!-- Texto -->
+              <div class="notifications-list">
+                  {% for noti in notificaciones %}
+                  <div class="notification-item {% if noti.tipo == 'prioritaria' %}prioritaria{% endif %}" 
+                       data-id="{{ noti.id_notificaciones }}">
+                      
+                      <img src="{{ url_for('static', filename='image/campana.png') }}" class="icon-left" alt="Campana">
+                      
                         <span class="notification-text">
                             {{ noti.mensaje }} <br>
-                            <small>{{ noti.fecha }}</small>
+                            <small>{{ noti.fecha[:10] }}</small>
                         </span>
 
-                        <!-- Icono derecha segun estado -->
-                        {% if noti.estado == 'leido' %}
-                        <img src="{{ url_for('static', filename='image/check.png') }}" 
-                            class="icon-right" alt="Revisado">
-                        {% else %}
-                        <img src="{{ url_for('static', filename='image/x.png') }}" 
-                            class="icon-right" alt="Sin revisar">
-                        {% endif %}
-                    </div>
-                    {% else %}
-                    <p style="text-align:center; color:white;">No hay avisos disponibles</p>
-                    {% endfor %}
-                </div>
-            </section>
 
-        </div>
+                      <div class="notification-buttons">
+                          {% if not noti.leido %}
+                          <button class="btn-prioritaria">Prioritaria</button>
+                          <button class="btn-resuelta">Resuelta</button>
+                          {% else %}
+                          <img src="{{ url_for('static', filename='image/check.png') }}" class="icon-right" alt="Revisado">
+                          {% endif %}
+                      </div>
+                  </div>
+                  {% else %}
+                  <p style="text-align:center; color:white;">No hay avisos disponibles</p>
+                  {% endfor %}
+              </div>
+          </section>
       </div>
   </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="{{ url_for('static', filename='js/Ad_js/Pnotificaciones.js') }}"></script>
 
 </body>
 </html>

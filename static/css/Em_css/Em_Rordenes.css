@@ -156,19 +156,185 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
 }
 
+@font-face {
+  font-family: 'njnaruto';
+  src: url('../../fonts/njnaruto.ttf') format('truetype');
+}
+
+.content {
+  padding: 40px;
+  position: relative;
+}
+
+.box-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  margin-left: 500px;
+}
+
+.employee-container {
+  display: flex;
+  gap: 30px;
+  align-items: stretch;
+  margin-left: 200px;
+}
+
+/* --- FORMULARIO IZQUIERDO --- */
+.register-box {
+  flex: 2;
+  background-color: black;
+  border: 2px solid red;
+  border-radius: 15px;
+  padding: 25px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.register-box input {
+  width: 90%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 2px solid red;
+  border-radius: 8px;
+  background: black;
+  color: white;
+  font-size: 16px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.btn {
+  background: red;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  color: white;
+  transition: 0.3s;
+}
+.btn:hover {
+  background: #ff4d4d;
+}
+
+/* --- LISTA DERECHA --- */
+.search-box {
+  flex: 1.5;
+  background-color: black;
+  border: 2px solid red;
+  border-radius: 15px;
+  padding: 25px;
+  color: white;
+  overflow-y: auto;
+  max-height: 600px;
+}
+
+.pedido-item {
+  border: 1px solid red;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 15px;
+  transition: 0.3s;
+}
+
+.pedido-item:hover {
+  background-color: rgba(255, 0, 0, 0.1);
+}
+
+.btn-registro {
+  background-color: red;
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.btn-registro:hover {
+  background-color: #ff4d4d;
+}
+
+/* --- PEDIDOS RECIBIDOS --- */
+.recibido {
+  border-color: #00ff7f;
+  background-color: rgba(0, 255, 127, 0.1);
+}
+
+.recibido-texto {
+  color: #00ff7f;
+  font-weight: bold;
+  text-align: center;
+}
+.tabla-productos {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  color: white;
+  font-size: 14px;
+}
+
+.tabla-productos th, .tabla-productos td {
+  border: 1px solid red;
+  padding: 6px;
+  text-align: center;
+}
+
+.tabla-productos th {
+  background-color: rgba(255, 0, 0, 0.2);
+  font-weight: bold;
+}
+
+.confirmado {
+  background-color: rgba(0, 255, 0, 0.2);
+  filter: blur(1px);
+  transition: all 0.3s ease-in-out;
+}
+
+.recibido-texto {
+  color: #00ff7f;
+  font-weight: bold;
+  text-align: center;
+}
+.seleccionado {
+  background-color: rgba(255, 255, 0, 0.2);
+  transition: background-color 0.3s ease;
+}
+.confirmado {
+  background-color: rgba(0, 255, 0, 0.2);
+  filter: blur(1px);
+  transition: all 0.3s ease-in-out;
+}
 
 
+.recibido {
+  background-color: rgba(0, 255, 127, 0.15);
+  border-color: #00ff7f;
+  position: relative;
+}
 
+.recibido::after {
+  content: "📦 Recibido";
+  position: absolute;
+  top: 5px;
+  right: 15px;
+  color: #00ff7f;
+  font-weight: bold;
+  font-size: 14px;
+}
 
+.btn-confirmar-pedido {
+  background-color: #00ff7f;
+  color: black;
+  margin-top: 10px;
+  font-weight: bold;
+}
 
-
-
-
-
-
-
-
-
-
-
-
+.btn-confirmar-pedido:hover {
+  background-color: #00ffaa;
+}

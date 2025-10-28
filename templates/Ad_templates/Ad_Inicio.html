@@ -43,15 +43,29 @@
   <h1 class="welcome-title">Bienvenido</h1>
     </div>
     
-    <section class="notification-box">
-      <div class="notification-header">
-  <h2>Avisos recientes</h2>
-  <span>Mas</span>
-      </div>
-      <div class="notification-body">
-  <p>Hoy</p>
-      </div>
-    </section>
+      <section class="notification-box">
+        <div class="notification-header">
+          <h2>Avisos recientes</h2>
+          <span><a href="{{ url_for('Ad_Pnotificaciones') }}" style="color: #ffd700; text-decoration: none;">Ver más</a></span>
+        </div>
+
+        <div class="notification-body">
+          {% if notificaciones %}
+            {% for noti in notificaciones %}
+            <div class="notification-item">
+              <img src="{{ url_for('static', filename='image/campana.png') }}" class="icon-left" alt="Aviso">
+              <span class="notification-text">
+                {{ noti.Mensaje }} <br>
+                <small>{{ noti.Fecha }}</small>
+              </span>
+            </div>
+            {% endfor %}
+          {% else %}
+            <p>No hay avisos recientes</p>
+          {% endif %}
+        </div>
+      </section>
+
 
     <div class="logo-main">
       <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Ramen">

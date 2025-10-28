@@ -1,3 +1,4 @@
+/* Fuente personalizada */
 @font-face {
   font-family: 'njnaruto';
   src: url('../../fonts/njnaruto.ttf') format('truetype');
@@ -25,7 +26,7 @@
   margin-bottom: 20px;
 }
 
-/* Filtros arriba en una fila */
+/* Filtros */
 .filters {
   display: flex;
   gap: 15px;
@@ -42,7 +43,7 @@
   font-size: 16px;
 }
 
-/* Listado de notificaciones */
+/* Lista de notificaciones */
 .notifications-list {
   display: flex;
   flex-direction: column;
@@ -58,6 +59,7 @@
   border-radius: 12px;
   padding: 10px 15px;
   background: black;
+  color: white;
   transition: transform 0.2s;
 }
 
@@ -68,9 +70,9 @@
 
 .notification-text {
   flex: 1;
-  text-align: center;
-  font-size: 18px;
-  font-weight: bold;
+  margin: 0 10px;
+  text-align: left;
+  font-size: 16px;
 }
 
 /* Iconos */
@@ -83,4 +85,58 @@
   width: 35px;
   height: 35px;
   cursor: pointer;
+}
+
+/* Estados */
+.notification-item.prioritaria {
+  border-color: red;
+  border-width: 3px;
+  box-shadow: 0 0 10px red;
+}
+
+.notification-item.resuelta {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.notification-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.notification-buttons button {
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-prioritaria {
+  background-color: red;
+  color: white;
+}
+
+.btn-resuelta {
+  background-color: green;
+  color: white;
+}
+/* Prioritaria */
+.notification-item.prioritaria {
+  border-color: red;
+  background-color: #330000;
+  box-shadow: 0 0 10px red;
+}
+
+/* Resuelta */
+.notification-item.resuelta {
+  opacity: 0.5;
+  background-color: #1a1a1a;
+}
+
+/* Check interno */
+.check-icon {
+  color: limegreen;
+  font-size: 20px;
+  font-weight: bold;
 }

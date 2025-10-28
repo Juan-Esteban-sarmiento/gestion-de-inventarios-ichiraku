@@ -14,7 +14,7 @@ from flask import Flask, flash, jsonify, render_template, request, redirect, url
 from db import add_empleado, get_db_connection
 from supabase import create_client, Client
 from dotenv import load_dotenv
-from datetime import datetime , timedelta
+from datetime import datetime , timedelta, date
 from functools import wraps
 from flask import session, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -189,12 +189,26 @@ def login_requerido(rol=None):
 @app.route('/Ad_Inicio', methods=['GET', 'POST'])
 @login_requerido(rol='Administrador')
 def Ad_Inicio():
-    response = make_response(render_template("Ad_templates/Ad_Inicio.html"))
-    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '-1'
-    
-    return response
+
+    try:
+        verificar_productos_caducidad()
+
+        reesponse = supabase.table("notificaciones").select("*").order("fecha", desc=True).limit(3).execute()
+        notificaciones = response.data if response.data else []
+
+
+        response_page = make_response(render_template(
+            "Ad_templates/Ad_Inicio.html",
+            notificaciones = notificaciones
+        ))
+
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '-1'
+        return response
+    except Exception as e:
+        print("❌ Error al cargar página de inicio:", e)
+        return render_template("Ad_templates/Ad_Inicio.html" , notificaciones=[]), 500
 
 
 # ╔════════════════════════════════════════════════════════╗
@@ -384,9 +398,7 @@ def cambiar_estado_empleado(cedula):
         return jsonify({"success": False, "msg": f"Error en servidor: {e}"}), 500
 
 
-@app.route('/Ad_Pnotificaciones', methods=['GET', 'POST'])
-def Ad_Pnotificaciones():
-    return render_template("Ad_templates/Ad_Pnotificaciones.html")
+
 
 # ╔══════════════════════════════════════════════╗
 # ║ Registro, Búsqueda y Eliminación de Productos║
@@ -556,6 +568,7 @@ def cambiar_estado_producto(id_producto):
         return jsonify({"success": False, "msg": f"Error en servidor: {e}"}), 500
 
 
+
 # ╔══════════════════════════════════════════════╗
 # ║ Generación y gestión de informes             ║
 # ╚══════════════════════════════════════════════╝
@@ -698,6 +711,86 @@ def descargar_informe(id_informe):
         print("❌ Error al generar PDF:", e)
         return jsonify({"success": False, "msg": f"Error al generar informe PDF: {e}"})
     
+
+# ╔═══════════════════════════════════════════════════════╗
+# ║ Gestion de notificaciones                             ║
+# ╚═══════════════════════════════════════════════════════╝
+
+@app.route('/Ad_Pnotificaciones', methods=['GET'])
+@login_requerido(rol='Administrador')
+def Ad_Pnotificaciones():
+    generar_notificaciones_caducidad()
+
+    # Obtener todas las notificaciones ordenadas por fecha
+    notificaciones = supabase.table("notificaciones") \
+        .select("*") \
+        .order("fecha", desc=True) \
+        .execute()
+
+    return render_template("Ad_templates/Ad_Pnotificaciones.html", notificaciones=notificaciones.data)
+
+
+def generar_notificaciones_caducidad():
+    try:
+        hoy = datetime.now().date()
+        limite = hoy + timedelta(days=7)
+
+        # Traer inventario próximo a caducar
+        proximos = supabase.table("inventario") \
+            .select("id_inventario, id_producto, cantidad, fecha_caducidad") \
+            .gte("fecha_caducidad", hoy.isoformat()) \
+            .lte("fecha_caducidad", limite.isoformat()) \
+            .execute()
+
+        for item in proximos.data:
+            # Traer nombre del producto desde tabla productos
+            producto = supabase.table("productos") \
+                .select("nombre") \
+                .eq("id_producto", item["id_producto"]) \
+                .single() \
+                .execute()
+
+            nombre_producto = producto.data["nombre"] if producto.data else "Nombre no encontrado"
+
+            # Verificar si ya existe notificación
+            noti_existente = supabase.table("notificaciones") \
+                .select("id_notificaciones") \
+                .eq("id_inventario", item["id_inventario"]) \
+                .eq("tipo", "caducidad") \
+                .execute()
+
+            if not noti_existente.data:
+                mensaje = f"⚠️ Producto '{nombre_producto}' (ID: {item['id_producto']}) caduca el {item['fecha_caducidad']} | Cantidad: {item['cantidad']}"
+                supabase.table("notificaciones").insert({
+                    "id_inventario": item["id_inventario"],
+                    "mensaje": mensaje,
+                    "tipo": "caducidad",
+                    "leido": False,
+                    "fecha": datetime.now().isoformat()
+                }).execute()
+
+        print("✅ Notificaciones generadas correctamente.")
+    except Exception as e:
+        print("❌ Error al generar notificaciones:", e)
+
+
+# Marcar notificación como leída
+@app.route('/marcar_leido/<int:id>', methods=['POST'])
+def marcar_leido(id):
+    # Actualiza leido y cambia tipo si era prioritaria
+    supabase.table("notificaciones").update({"leido": True, "tipo": "resuelta"}).eq("id_notificaciones", id).execute()
+    return jsonify({"success": True})
+
+
+# Marcar notificación como prioritaria
+@app.route('/marcar_prioritaria/<int:id>', methods=['POST'])
+def marcar_prioritaria(id):
+    # Solo actualiza tipo sin crear nuevo registro
+    supabase.table("notificaciones").update({"tipo": "prioritaria"}).eq("id_notificaciones", id).execute()
+    return jsonify({"success": True})
+
+
+    
 # ╔═══════════════════════════════════════════════════════╗
 # ║ Gestion , busqueda, edicion y eliminacion de locales  ║
 # ╚═══════════════════════════════════════════════════════╝
@@ -757,6 +850,21 @@ def registrar_local():
     except Exception as e:
         print("❌ Error inesperado al registrar local:", e)
         return jsonify({"success": False, "msg": "Error en el servidor."})
+    
+@app.route('/obtener_siguiente_id_local', methods=['GET'])
+def obtener_siguiente_id_local():
+    try:
+        response = supabase.table("locales").select("id_local").order("id_local", desc=True).limit(1).execute()
+        if response.data:
+            ultimo_id = int(response.data[0]["id_local"])
+            siguiente_id = ultimo_id + 1
+        else:
+            siguiente_id = 1
+        return jsonify({"success": True, "siguiente_id": siguiente_id})
+    except Exception as e:
+        print("❌ Error al obtener siguiente ID:", e)
+        return jsonify({"success": False, "msg": "Error al calcular el ID."})
+    
 
 
 @app.route("/buscar_local", methods=["POST"])
@@ -1037,10 +1145,7 @@ def Em_Inicio():
     response.headers['Expires'] = '-1'
     return response
 
-@app.route('/Em_Rordenes', methods=['GET', 'POST'])
-@login_requerido(rol='Empleado')
-def Em_Rordenes():
-    return render_template("Em_templates/Em_Rordenes.html")
+
 
 @app.route('/Em_Rpedido', methods=['GET', 'POST'])
 @login_requerido(rol='Empleado')
@@ -1051,35 +1156,6 @@ def Em_Rpedido():
 @login_requerido(rol='Empleado')
 def Em_Hordenes():
     return render_template("Em_templates/Em_Hordenes.html")
-
-# ╔══════════════════════════════════════════════╗
-# ║ Búsqueda y Lista de Productos para EMPLEADOS ║
-# ╚══════════════════════════════════════════════╝
-
-@app.route("/buscar_producto_empleado", methods=["POST"])
-def buscar_producto_empleado():
-    try:
-        data = request.get_json()
-        termino = data.get("termino", "").strip()
-
-        # Los empleados solo ven productos HABILITADOS
-        query = supabase.table("productos").select("id_producto, nombre, categoria, unidad, foto").eq("habilitado", True)
-
-        if termino:
-            query = query.or_(f"nombre.ilike.%{termino}%,categoria.ilike.%{termino}%")
-
-        result = query.order("nombre").execute()
-        productos = result.data or []
-
-        # Si hay imagen, ya viene en texto base64 o URL
-        for prod in productos:
-            if not prod.get("foto"):
-                prod["foto"] = "/static/image/default.png"
-
-        return jsonify({"success": True, "productos": productos})
-    except Exception as e:
-        print("❌ Error en búsqueda de producto (empleado):", e)
-        return jsonify({"success": False, "msg": "Error al obtener productos"}), 500
 
 
 # ╔══════════════════════════════════════════════╗
@@ -1120,8 +1196,7 @@ def registrar_pedido():
                 "id_local": id_local,
                 "id_producto": id_producto,
                 "cantidad": cantidad,
-                "fecha_ingreso": fecha_ingreso,
-                "fecha_caducidad": fecha_caducidad
+                "stock_minimo": 0
             }).execute()
 
             if inv.data:
@@ -1165,6 +1240,141 @@ def registrar_pedido():
     except Exception as e:
         print("❌ Error al registrar pedido:", e)
         return jsonify({"success": False, "msg": f"Error en el servidor: {str(e)}"}), 500
+    
+@app.route("/buscar_producto_empleado", methods=["POST"])
+def buscar_producto_empleado():
+    try:
+        data = request.get_json()
+        termino = data.get("termino", "").strip()
+
+        # Los empleados solo ven productos HABILITADOS
+        query = supabase.table("productos").select("id_producto, nombre, categoria, unidad, foto").eq("habilitado", True)
+
+        if termino:
+            query = query.or_(f"nombre.ilike.%{termino}%,categoria.ilike.%{termino}%")
+
+        result = query.order("nombre").execute()
+        productos = result.data or []
+
+        # Si hay imagen, ya viene en texto base64 o URL
+        for prod in productos:
+            if not prod.get("foto"):
+                prod["foto"] = "/static/image/default.png"
+
+        return jsonify({"success": True, "productos": productos})
+    except Exception as e:
+        print("❌ Error en búsqueda de producto (empleado):", e)
+        return jsonify({"success": False, "msg": "Error al obtener productos"}), 500
+    
+
+# ╔══════════════════════════════════════════════╗
+# ║ Recibir pedidos                              ║
+# ╚══════════════════════════════════════════════╝
+
+@app.route('/Em_Rordenes', methods=['GET', 'POST'])
+@login_requerido(rol='Empleado')
+def Em_Rordenes():
+    try:
+        if request.method == 'POST':
+            data = request.get_json()
+            if not data:
+                return jsonify({"success": False, "msg": "No se recibieron datos."}), 400
+
+            id_pedido = data.get("id_pedido")
+            id_producto = data.get("id_producto")
+            cantidad = data.get("cantidad")
+            fecha_caducidad = data.get("fecha_caducidad")
+
+            # Validación
+            if not all([id_pedido, id_producto, cantidad, fecha_caducidad]):
+                return jsonify({"success": False, "msg": "Completa todos los campos."}), 400
+
+            try:
+                id_producto = int(id_producto)
+                cantidad = int(cantidad)
+                fecha_cad_dt = datetime.fromisoformat(fecha_caducidad).date()
+            except Exception as e:
+                return jsonify({"success": False, "msg": f"Error de tipo: {e}"}), 400
+
+            hoy = date.today()
+            if fecha_cad_dt <= hoy:
+                return jsonify({"success": False, "msg": "La fecha de caducidad debe ser posterior a hoy."}), 400
+
+            # 🔹 Buscar el inventario que corresponde al producto y al local
+            inv_res = supabase.table("inventario")\
+                .select("*")\
+                .eq("id_local", session.get("branch"))\
+                .eq("id_producto", id_producto)\
+                .execute()
+
+            inventarios = inv_res.data or []
+            if not inventarios:
+                return jsonify({"success": False, "msg": "No existe inventario previo para este producto."}), 400
+
+            inventario_id = inventarios[0]["id_inventario"]
+
+            # 🔹 Actualizar el registro existente
+            try:
+                supabase.table("inventario").update({
+                    "cantidad": cantidad,                          # cantidad recibida
+                    "fecha_ingreso": hoy.isoformat(),              # actualizar fecha de ingreso al día de recepción
+                    "fecha_caducidad": fecha_cad_dt.isoformat()   # fecha de caducidad recibida
+                }).eq("id_inventario", inventario_id).execute()
+            except Exception as e:
+                return jsonify({"success": False, "msg": f"Error al actualizar inventario: {e}"}), 500
+
+
+            return jsonify({"success": True, "msg": "Producto confirmado correctamente."})
+
+        # GET: mostrar pedidos
+        pedidos = supabase.table("pedido")\
+            .select("id_pedido, estado, fecha_pedido")\
+            .order("id_pedido", desc=True)\
+            .execute().data or []
+
+        detalles = supabase.table("detalle_pedido")\
+            .select("id_pedido, id_producto, cantidad, productos(nombre, categoria, unidad, foto)")\
+            .execute().data or []
+
+        pedidos_dict = {p["id_pedido"]: {"info": p, "productos": []} for p in pedidos}
+        for d in detalles:
+            if d["id_pedido"] in pedidos_dict:
+                pedidos_dict[d["id_pedido"]]["productos"].append(d)
+
+        return render_template("Em_templates/Em_Rordenes.html", pedidos=pedidos_dict)
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "msg": str(e)}), 500
+
+@app.route('/actualizar_estado', methods=['POST'])
+@login_requerido(rol='Empleado')
+def actualizar_estado():
+    try:
+        data = request.get_json()
+        if not data or 'id_pedido' not in data:
+            return jsonify({"success": False, "msg": "No se recibió id_pedido"}), 400
+
+        try:
+            id_pedido = int(data['id_pedido'])
+        except (ValueError, TypeError):
+            return jsonify({"success": False, "msg": "id_pedido inválido"}), 400
+
+        # Actualizar estado en Supabase
+        supabase.table("pedido").update({"estado": "Recibido"})\
+            .eq("id_pedido", id_pedido).execute()
+
+        # Como la base ya actualizó, solo devolvemos éxito
+        return jsonify({"success": True, "msg": "Pedido actualizado correctamente."})
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "msg": str(e)}), 500
+
+
+
 
 # ╔══════════════════════════════════════════════╗
 # ║ Edición de Datos del Empleado                ║

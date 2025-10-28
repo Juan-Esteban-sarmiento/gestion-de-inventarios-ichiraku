@@ -1,76 +1,125 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta charset="UTF-8">
+  <title>Recibir pedidos</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Rordenes.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
 </head>
 <body>
+  <!-- Sidebar -->
   <div class="sidebar">
     <div class="logo">
       <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
     </div>
     <nav class="menu">
-        <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
-        </button>
-        <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button active">
-          <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Recibir pedidos"> Recibir pedidos
-        </button>
-        <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Realizar pedidos"> Realizar pedidos
-        </button>
-        <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Historial pedidos"> Historial pedidos
-        </button>
-        <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> usuario
-        </button>
-      </nav>
-  <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
+      <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button active">
+        <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Recibir pedidos"> Recibir pedidos
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Realizar pedidos"> Realizar pedidos
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Historial pedidos"> Historial pedidos
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> Usuario
+      </button>
+    </nav>
+    <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesión</button>
   </div>
 
+  <!-- Contenido principal -->
   <main class="content">
     <div class="box-welcome">
-  <h1 class="welcome-title">Panel de empleado</h1>
+      <h1 class="welcome-title">Panel de empleado</h1>
     </div>
 
     <div class="employee-container">
-
-      <!-- Caja izquierda: formulario -->
+      <!-- Izquierda: Formulario -->
       <section class="register-box">
-  <h2>Panel de empleado</h2>
-        <form id="registerForm">
+        <h2>Registrar recepción</h2>
+        <form id="recepcionForm" method="POST" action="{{ url_for('Em_Rordenes') }}">
+
+          <input type="hidden" name="id_pedido" id="id_pedido">
+          <input type="hidden" id="id_producto" name="id_producto">
+
           <label>Nombre producto</label>
-          <input type="text" id="" placeholder="Nombre producto ...">
+          <input type="text" id="nombre_producto" name="nombre_producto" placeholder="Nombre del producto..." required readonly>
 
-          <label>Fecha vencimiento</label>
-          <input type="date" id="expirationDate" name="expirationDate" min="2025-01-01" max="2130-12-31">
-  
-          <label>Cantidad producto</label>
-          <input type="password" id="" placeholder="Cantidad producto ...">
+          <label>Categoría</label>
+          <input type="text" id="categoria" name="categoria" placeholder="Categoría..." required readonly>
 
-          <label>Categoria producto</label>
-          <input type="text" id="" placeholder="Numero contacto ...">
+          <label>Cantidad</label>
+          <input type="number" id="cantidad" name="cantidad" placeholder="Cantidad..." required>
+
+          <label>Unidad</label>
+          <input type="text" id="unidad" name="unidad" placeholder="Unidad..." readonly>
+
+          <label>Fecha de caducidad</label>
+          <input type="date" id="fecha_caducidad" name="fecha_caducidad" required>
 
           <div class="form-actions">
-            <button type="submit" class="btn">Confirmar</button>
+            <button type="submit" class="btn">Confirmar producto</button>
           </div>
         </form>
       </section>
-
-      <!-- Caja derecha: búsqueda -->
+      
       <section class="search-box">
-        <form id="searchForm">
-          <div class="search-row">
-            <input type="text" placeholder="Categoria producto...">
-            <input type="text" placeholder="Fecha vencimiento...">
-            <input type="text" placeholder="Nombre producto...">
-            <input type="text" placeholder="Cantidad ...">
-          </div>
-        </form>
+        <h2>Pedidos pendientes</h2>
+        <div class="pedido-lista">
+          {% for id_pedido, pedido in pedidos.items() %}
+            <div class="pedido-item" id="pedido-{{ id_pedido }}">
+              <h3>📦 Pedido #{{ id_pedido }}</h3>
+              <p><strong>Estado:</strong> {{ pedido.info.estado }}</p>
+              <p><strong>Fecha:</strong> {{ pedido.info.fecha_pedido }}</p>
+
+              <button class="btn" onclick="toggleDetalles('{{ id_pedido }}')">Seleccionar</button>
+
+              <!-- Contenedor oculto para los productos -->
+              <div class="productos-detalle" id="detalles-{{ id_pedido }}" style="display:none; margin-top:10px;">
+                <table class="tabla-productos">
+                  <thead>
+                    <tr>
+                      <th>Producto</th>
+                      <th>Categoría</th>
+                      <th>Cantidad</th>
+                      <th>Unidad</th>
+                      <th>Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                      {% for prod in pedido.productos %}
+                      <tr id="prod-{{ id_pedido }}-{{ prod.id_producto }}">
+                        <td>{{ prod.productos.nombre }}</td>
+                        <td>{{ prod.productos.categoria }}</td>
+                        <td>{{ prod.cantidad }}</td>
+                        <td>{{ prod.productos.unidad }}</td>
+                        <td>
+                          <input type="date" id="fecha_caducidad-{{id_pedido}}-{{prod.id_producto}}" style="display:none;">
+                          <button class="btn-registro"
+                            onclick="autocompletarFormulario('{{ id_pedido }}', '{{ prod.id_producto }}', '{{ prod.productos.nombre }}', '{{ prod.productos.categoria }}', '{{ prod.cantidad }}', '{{ prod.productos.unidad }}')">
+                            Registrar producto
+                          </button>
+                        </td>
+                      </tr>
+                      {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          {% else %}
+            <p>No hay pedidos pendientes.</p>
+          {% endfor %}
+        </div>
       </section>
-    </main>
-  </div>
+    </div>
   </main>
+
+  <script src="{{ url_for('static', filename='js/Em_js/Rordenes.js') }}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>
