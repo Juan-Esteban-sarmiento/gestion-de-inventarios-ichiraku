@@ -6,52 +6,71 @@
   font-style: normal;
 }
 
+/* --- CONTENEDOR PRINCIPAL --- */
+.notification-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  margin-top: 20px;
+}
+
+/* --- CAJA CENTRAL --- */
 .search-box {
-  flex: 1;
+  width: 65%;
   background-color: black;
   border: 2px solid red;
   border-radius: 15px;
-  padding: 25px;
+  padding: 25px 30px;
   color: white;
-  min-height: 500px;
+  min-height: 400px;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
 }
 
+/* --- TÍTULO --- */
 .search-box h2 {
   text-align: center;
-  font-size: 22px;
+  font-size: 24px;
   border-bottom: 2px solid red;
   padding-bottom: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  font-family: 'njnaruto';
 }
 
-/* Filtros */
+/* --- FILTROS --- */
 .filters {
   display: flex;
+  justify-content: center;
   gap: 15px;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 }
 
 .filters input {
   flex: 1;
-  padding: 12px;
+  max-width: 45%;
+  padding: 10px;
   border: 2px solid red;
   border-radius: 8px;
   background: black;
   color: white;
-  font-size: 16px;
+  font-size: 15px;
+  text-align: center;
 }
 
-/* Lista de notificaciones */
+/* --- LISTA DE NOTIFICACIONES --- */
 .notifications-list {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 15px;
   flex: 1;
 }
 
+/* --- ITEM DE NOTIFICACIÓN --- */
 .notification-item {
+  width: 90%;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -60,45 +79,29 @@
   padding: 10px 15px;
   background: black;
   color: white;
-  transition: transform 0.2s;
+  transition: all 0.2s ease-in-out;
 }
 
 .notification-item:hover {
-  transform: scale(1.02);
+  transform: scale(1.03);
   background: #1a1a1a;
 }
 
+/* --- TEXTO E ICONOS --- */
 .notification-text {
   flex: 1;
   margin: 0 10px;
   text-align: left;
   font-size: 16px;
+  font-family: 'njnaruto';
 }
 
-/* Iconos */
 .icon-left {
-  width: 35px;
-  height: 35px;
+  width: 30px;
+  height: 30px;
 }
 
-.icon-right {
-  width: 35px;
-  height: 35px;
-  cursor: pointer;
-}
-
-/* Estados */
-.notification-item.prioritaria {
-  border-color: red;
-  border-width: 3px;
-  box-shadow: 0 0 10px red;
-}
-
-.notification-item.resuelta {
-  text-decoration: line-through;
-  opacity: 0.7;
-}
-
+/* --- BOTONES --- */
 .notification-buttons {
   display: flex;
   gap: 10px;
@@ -110,33 +113,23 @@
   border: none;
   cursor: pointer;
   font-weight: bold;
+  font-family: 'njnaruto';
 }
 
 .btn-prioritaria {
   background-color: red;
   color: white;
+  box-shadow: 0 0 5px red;
 }
 
-.btn-resuelta {
-  background-color: green;
-  color: white;
-}
-/* Prioritaria */
+/* --- ESTADOS --- */
 .notification-item.prioritaria {
   border-color: red;
   background-color: #330000;
   box-shadow: 0 0 10px red;
 }
 
-/* Resuelta */
 .notification-item.resuelta {
   opacity: 0.5;
   background-color: #1a1a1a;
-}
-
-/* Check interno */
-.check-icon {
-  color: limegreen;
-  font-size: 20px;
-  font-weight: bold;
 }

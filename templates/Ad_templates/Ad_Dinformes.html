@@ -3,6 +3,10 @@
 <head>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Dinformes.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+
   <meta charset="UTF-8">
     <title>Ichiraku Ramen - Administrador de reportes</title>
 </head>
@@ -46,31 +50,43 @@
 
             <!-- Caja de busqueda -->
             <div class="search-box">
-                <form id="searchForm">
-                    <input type="text" id="id_informe" placeholder="ID Informe ...">
-                    <input type="date" id="date" placeholder="Fecha ...">
-                    <button type="submit">Buscar</button>
-                </form>
+            <form id="searchForm">
+                <input type="text" id="id_informe" placeholder="ID Informe ...">
+                <input type="text" id="datePicker" placeholder="Seleccionar fecha..." readonly>
+                <button type="submit">Buscar</button>
+            </form>
             </div>
 
-            <!-- Resultados -->
             <div id="resultEmpleado" class="result-box">
                 <p>No hay informes generados</p>
             </div>
 
-            <!-- Contenedor de botones (mételo aquí dentro del main) -->
+            <!-- 🔥 Aquí van tus botones -->
             <div class="download-container">
-                <button class="download-button" id="downloadBtn">
-                    <img src="{{ url_for('static', filename='image/descargar.png') }}" alt="Descargar"> Descargar
+                <button class="download-button" id="genDayBtn">
+                    <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Generar"> Generar informe
                 </button>
-                <button class="download-button" id="genSemBtn">Generar semanal</button>
-                <button class="download-button" id="genMesBtn">Generar mensual</button>
+
+                <button class="download-button" id="downloadSemBtn">
+                    <img src="{{ url_for('static', filename='image/descargar.png') }}" alt="Descargar"> Descargar semanal
+                </button>
+
+                <button class="download-button" id="downloadMesBtn">
+                    <img src="{{ url_for('static', filename='image/descargar.png') }}" alt="Descargar"> Descargar mensual
+                </button>
+
+                <button class="download-button" id="downloadAnioBtn">
+                    <img src="{{ url_for('static', filename='image/descargar.png') }}" alt="Descargar"> Descargar anual
+                </button>
             </div>
+            </div>
+
         </main>
     </div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="{{ url_for('static', filename='js/Ad_js/Dinformes.js') }}"></script>
+
 
 </html>

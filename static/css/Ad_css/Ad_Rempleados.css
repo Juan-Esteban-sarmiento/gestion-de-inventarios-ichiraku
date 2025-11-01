@@ -5,6 +5,14 @@
   font-style: normal;
 }
 
+/* --- Fondo general --- */
+body {
+  font-family: 'njnaruto', sans-serif;
+  background-color: #000;
+  color: white;
+  margin: 0;
+  padding: 0;
+}
 
 /* --- Search Bar --- */
 .search-bar {
@@ -16,243 +24,247 @@
 
 .search-bar input {
   padding: 10px;
-  border: 2px solid red;
-  border-radius: 8px;
-  background: black;
+  border: 2px solid #e60000;
+  border-radius: 10px;
+  background: #111;
   color: white;
   font-size: 16px;
   width: 250px;
+  outline: none;
+  transition: 0.3s;
+}
+
+.search-bar input:focus {
+  border-color: #ff3333;
+  box-shadow: 0 0 8px #ff3333;
 }
 
 .search-btn {
-  background: red;
+  background: #e60000;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 8px 12px;
   cursor: pointer;
+  transition: 0.3s;
+}
+
+.search-btn:hover {
+  background: #ff3333;
+  transform: scale(1.05);
 }
 
 .search-btn img {
   width: 20px;
 }
 
-/* --- Formulario --- */
-
-.form-card h2 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.form-card form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.form-card input {
-  padding: 10px;
-  border: 2px solid red;
-  border-radius: 8px;
-  background: black;
-  color: white;
-  font-size: 16px;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-}
-
-.icon {
-  width: 60px;
-  height: 60px;
-  vertical-align: middle;
-  margin-right: 8px;
-}
-
-.btn {
-  background: rgb(0, 0, 0);
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  color: rgb(0, 0, 0);
-  transition: 0.3s;
-}
-
-.btn:hover {
-  background: #ffffff;
-  color: #000000;
-}
-
-.btn.secondary {
-  background: rgb(0, 0, 0);
-}
-
-.btn.secondary:hover {
-  background: #ffffff;
-  color: #000000;
-}
-
-.btn.danger {
-  background: rgb(0, 0, 0);
-}
-
-.btn.danger:hover {
-  background: #ffffff;
-  color: #000000;
-}
-
+/* --- Contenedor Principal --- */
 .employee-container {
   display: flex;
   gap: 30px;
-  align-items: stretch;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 30px;
 }
 
+/* --- Caja de Registro --- */
 .register-box {
-  flex: 2; 
-  background-color: black;
-  border: 2px solid red;
-  border-radius: 15px;
-  padding: 25px;
+  flex: 2;
+  background-color: #000;
+  border: 3px solid #e60000;
+  border-radius: 20px;
+  padding: 30px;
   color: white;
-  min-height: 500px; 
-  display: flex;
-  flex-direction: column;
-  }
-
-/* --- search --- */
-.search-box {
-  flex: 1;
-  background-color: black;
-  border: 2px solid red;
-  border-radius: 15px;
-  padding: 25px;
-  color: white;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
   min-height: 500px;
   display: flex;
   flex-direction: column;
 }
 
-/* --- titles --- */
-.register-box h2,
+.register-box h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 26px;
+  border-bottom: 2px solid #e60000;
+  padding-bottom: 10px;
+  letter-spacing: 1px;
+}
+
+/* --- Caja de Búsqueda --- */
+.search-box {
+  flex: 1.3;
+  background-color: #000;
+  border: 3px solid #e60000;
+  border-radius: 20px;
+  padding: 30px;
+  color: white;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
 .search-box h2 {
   text-align: center;
   margin-bottom: 20px;
-  font-size: 22px;
-  border-bottom: 2px solid red;
+  font-size: 24px;
+  border-bottom: 2px solid #e60000;
   padding-bottom: 10px;
 }
 
 /* --- Inputs --- */
 .register-box input,
 .search-box input {
-  width: 90%;
+  width: 100%;
   padding: 12px;
+  padding-right: 1px;
   margin-bottom: 15px;
-  border: 2px solid red;
-  border-radius: 8px;
-  background: black;
+  border: 2px solid #e60000;
+  border-radius: 10px;
+  background: #111;
   color: white;
   font-size: 16px;
-  display : flex;
+  outline: none;
+  transition: 0.3s;
+}
+
+.register-box input:focus,
+.search-box input:focus {
+  border-color: #ff3333;
+  box-shadow: 0 0 8px #ff3333;
 }
 
 /* --- Botones --- */
 .form-actions {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  gap: 15px;
   margin-top: 20px;
 }
 
 .btn,
 .btn-register,
 .btn-clear {
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: 0.3s;
-  border: none;
-}
-
-.btn,
-.btn-register {
-  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 18px;
+  background-color: #e60000;
   color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
 .btn:hover,
 .btn-register:hover {
-  background-color: #f8f8f8;
-  color: #000000;
+  background-color: #ff3333;
+  transform: scale(1.05);
+}
+
+.btn.secondary {
+  background-color: #111;
+  border: 2px solid #e60000;
+}
+
+.btn.secondary:hover {
+  background-color: #ff3333;
+  color: #000;
+}
+
+.btn.danger {
+  background-color: #111;
+  border: 2px solid #e60000;
+}
+
+.btn.danger:hover {
+  background-color: #ff3333;
+  color: #000;
+}
+
+.icon {
+  width: 28px;
+  height: 28px;
 }
 
 /* --- Resultados --- */
 .result-box {
   margin-top: 20px;
   padding: 15px;
-  border: 2px dashed red;
+  border: 2px dashed #e60000;
   border-radius: 10px;
   text-align: left;
   flex: 1;
-  max-height: 350px;
+  max-height: 400px;
   overflow-y: auto;
   overflow-x: hidden;
 }
 
-#resultEmpleado {
-  max-height: 400px;
-  overflow-y: auto;
-  padding-right: 8px;
-}
-
-#resultEmpleado::-webkit-scrollbar {
+/* Scroll personalizado */
+.result-box::-webkit-scrollbar {
   width: 10px;
 }
 
-#resultEmpleado::-webkit-scrollbar-track {
+.result-box::-webkit-scrollbar-track {
   background: #1e1e1e;
   border-radius: 10px;
 }
 
-#resultEmpleado::-webkit-scrollbar-thumb {
+.result-box::-webkit-scrollbar-thumb {
   background: #e60000;
   border-radius: 10px;
   border: 2px solid #1e1e1e;
 }
 
-#resultEmpleado::-webkit-scrollbar-thumb:hover {
+.result-box::-webkit-scrollbar-thumb:hover {
   background: #ff3333;
 }
 
+/* --- Tarjeta empleado --- */
 .empleado-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 15px;
   padding: 10px;
-  border-bottom: 1px solid red;
+  border-bottom: 1px solid #e60000;
+  transition: 0.3s;
+}
+
+.empleado-card:hover {
+  background: rgba(255, 0, 0, 0.08);
+}
+
+.empleado-card img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid #e60000;
+  object-fit: cover;
 }
 
 .empleado-actions {
   margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .empleado-actions button {
-  background: red;
+  background: #e60000;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 6px 12px;
   color: white;
   font-weight: bold;
   cursor: pointer;
   transition: 0.3s;
-  margin-bottom: 20px;
 }
 
 .empleado-actions button:hover {
-  background: darkred;
+  background: #ff3333;
 }
-
-    

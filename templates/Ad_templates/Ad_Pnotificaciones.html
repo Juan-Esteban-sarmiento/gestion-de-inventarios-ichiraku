@@ -58,31 +58,28 @@
               </div>
 
               <div class="notifications-list">
-                  {% for noti in notificaciones %}
-                  <div class="notification-item {% if noti.tipo == 'prioritaria' %}prioritaria{% endif %}" 
-                       data-id="{{ noti.id_notificaciones }}">
-                      
-                      <img src="{{ url_for('static', filename='image/campana.png') }}" class="icon-left" alt="Campana">
-                      
-                        <span class="notification-text">
-                            {{ noti.mensaje }} <br>
-                            <small>{{ noti.fecha[:10] }}</small>
-                        </span>
+                {% for noti in notificaciones %}
+                <div class="notification-item {% if noti.tipo == 'prioritaria' %}prioritaria{% endif %}" 
+                    data-id="{{ noti.id_notificaciones }}">
+                    
+                    <img src="{{ url_for('static', filename='image/campana.png') }}" class="icon-left" alt="Campana">
+                    
+                    <span class="notification-text">
+                        {{ noti.mensaje }} <br>
+                        <small>{{ noti.fecha[:10] }}</small>
+                    </span>
 
-
-                      <div class="notification-buttons">
-                          {% if not noti.leido %}
-                          <button class="btn-prioritaria">Prioritaria</button>
-                          <button class="btn-resuelta">Resuelta</button>
-                          {% else %}
-                          <img src="{{ url_for('static', filename='image/check.png') }}" class="icon-right" alt="Revisado">
-                          {% endif %}
-                      </div>
-                  </div>
-                  {% else %}
-                  <p style="text-align:center; color:white;">No hay avisos disponibles</p>
-                  {% endfor %}
+                    <div class="notification-buttons">
+                        {% if not noti.leido %}
+                        <button class="btn-prioritaria">Prioritaria</button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <p style="text-align:center; color:white;">No hay avisos disponibles</p>
+                {% endfor %}
               </div>
+
           </section>
       </div>
   </main>

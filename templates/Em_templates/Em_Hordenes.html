@@ -10,48 +10,82 @@
       <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
     </div>
     <nav class="menu">
-        <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
-        </button>
-        <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Recibir pedidos"> Recibir pedidos
-        </button>
-        <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Realizar pedidos"> Realizar pedidos
-        </button>
-        <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button active">
-          <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Historial pedidos"> Historial pedidos
-        </button>
-        <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> usuario
-        </button>
-      </nav>
-  <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
+      <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/casita.png') }}"> Inicio
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/caja.png') }}"> Recibir pedidos
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/carrito_super.png') }}"> Realizar pedidos
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button active">
+        <img src="{{ url_for('static', filename='image/reloj.png') }}"> Historial pedidos
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/corazon.png') }}"> Usuario
+      </button>
+    </nav>
+    <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesión</button>
   </div>
 
   <main class="content">
     <div class="box-welcome">
-  <h1 class="welcome-title">Panel de empleado</h1>
+      <h1 class="welcome-title">Historial de Pedidos</h1>
     </div>
 
-    <div class="order-panel">
-    <div class="order-header">
-  <span>Fecha</span>
-  <span>Categoria producto</span>
-  <span>Fecha vencimiento</span>
-  <span>Nombre producto</span>
-  <span>Cantidad</span>
-    </div>
+    <!-- 🔍 Barra de búsqueda -->
+    <form class="search-box" id="formBuscar" method="GET" action="{{ url_for('Em_Hordenes') }}">
+      <input type="date" name="fecha" id="buscarFecha" class="ninja-input" value="{{ request.args.get('fecha', '') }}">
+      
+      <select name="categoria" id="buscarCategoria" class="ninja-select">
+        <option value="">Todas las categorías</option>
+        {% for cat in ["Carnes","Bebidas","Verduras","Frutas","Cereales","Salsas y condimentos","Panes y masas","Mariscos","Lacteos"] %}
+          <option value="{{ cat }}" {% if request.args.get('categoria') == cat %}selected{% endif %}>{{ cat }}</option>
+        {% endfor %}
+      </select>
 
-    <div class="order-row">
-  <input type="date">
-  <input type="text" placeholder="Categoria">
-  <input type="date">
-  <input type="text" placeholder="Nombre producto">
-  <input type="number" placeholder="Cantidad">
+      <input type="text" name="producto" id="buscarProducto" class="ninja-input" placeholder="🔎 Producto..." value="{{ request.args.get('producto', '') }}">
+      <input type="number" name="cantidad" id="buscarCantidad" class="ninja-input" placeholder="Cantidad" value="{{ request.args.get('cantidad', '') }}">
+
+      <select name="unidad" id="buscarUnidad" class="ninja-select">
+        <option value="">Todas las unidades</option>
+        {% for uni in ["kg","g","L","ml","unidad","docena"] %}
+          <option value="{{ uni }}" {% if request.args.get('unidad') == uni %}selected{% endif %}>{{ uni }}</option>
+        {% endfor %}
+      </select>
+
+      <button type="submit" class="ninja-btn">Buscar</button>
+    </form>
+
+    <!-- 🧾 Panel de pedidos -->
+    <div class="order-panel" id="tablaPedidos">
+      <div class="order-header">
+        <span>Fecha</span>
+        <span>Categoría</span>
+        <span>Producto</span>
+        <span>Cantidad</span>
+        <span>Unidad</span>
+      </div>
+
+      {% if pedidos %}
+        {% for pedido in pedidos %}
+          {% for detalle in pedido.detalle_pedido %}
+            <div class="order-row">
+              <span class="col-fecha">{{ pedido.fecha_pedido or "Sin fecha" }}</span>
+              <span class="col-categoria">{{ detalle.productos.categoria or "Sin categoría" }}</span>
+              <span class="col-producto">{{ detalle.productos.nombre or "Sin nombre" }}</span>
+              <span class="col-cantidad">{{ detalle.cantidad or "0" }}</span>
+              <span class="col-unidad">{{ detalle.productos.unidad or "-" }}</span>
+            </div>
+          {% endfor %}
+        {% endfor %}
+      {% else %}
+        <div class="no-orders"><p>No hay pedidos confirmados 💤</p></div>
+      {% endif %}
     </div>
-    
   </main>
-  
+
+  <script src="{{ url_for('static', filename='js/Em_js/Em_Hordenes.js') }}"></script>
 </body>
 </html>

@@ -1,4 +1,3 @@
-
 // ✅ Alerta Ninja universal
 function alertaNinja(icon, title, text) {
   Swal.fire({
@@ -7,7 +6,7 @@ function alertaNinja(icon, title, text) {
     text: text || '',
     background: '#000',
     color: '#fff',
-    confirmButtonColor: '#e60000',
+    confirmButtonColor: '#ff0000ff',
     confirmButtonText: '<span style="font-family:njnaruto;">Aceptar</span>',
     customClass: {
       popup: 'swal2-border-radius',
@@ -27,9 +26,8 @@ document.getElementById('registerProductForm').addEventListener('submit', async 
   const serial = document.getElementById('serialProducto').value.trim();
   const fotoFile = document.getElementById('fotoProducto').files[0];
 
-  // ⚠️ Validación previa antes de enviar al backend
   if (!nombre || !categoria || !unidad || !serial) {
-    alertaNinja('warning', 'Campos incompletos', 'Debes llenar todos los campos antes de registrar el producto.');
+    alertaNinja('warning', 'Campos incompletos', 'Debes llenar todos los campos antes de registrar el producto');
     return;
   }
 
@@ -46,27 +44,68 @@ document.getElementById('registerProductForm').addEventListener('submit', async 
       body: formData
     });
 
-    // ⚙️ Convertimos la respuesta a JSON siempre
     const data = await response.json();
 
-    // 🩸 Mostramos cualquier respuesta con alerta ninja
     if (data.success) {
-      alertaNinja('success', 'Producto registrado', data.msg || 'El producto se registró correctamente.');
+      alertaNinja('success', 'Producto registrado', data.msg || 'El producto se registro correctamente');
       document.getElementById('registerProductForm').reset();
       document.getElementById('previewFotoProducto').style.display = "none";
       setTimeout(() => window.location.reload(), 1000);
     } else {
-      alertaNinja('error', 'Error en registro', data.msg || 'No se pudo registrar el producto.');
+      alertaNinja('error', 'Error en registro', data.msg || 'No se pudo registrar el producto');
     }
 
   } catch (error) {
-    console.error("❌ Error al registrar producto:", error);
-    alertaNinja('error', 'Error del servidor', 'Ocurrió un problema al registrar el producto.');
+    console.error("Error al registrar producto", error);
+    alertaNinja('error', 'Error del servidor', 'Ocurrio un problema al registrar el producto');
+  }
+});
+
+const categoriasUnidades = {
+  "Carnes": ["kg", "g"],
+  "Bebidas": ["L", "ml"],
+  "Verduras": ["kg", "g"],
+  "Frutas": ["kg", "g"],
+  "Cereales": ["kg", "g"],
+  "Salsas y condimentos": ["ml", "L"],
+  "Panes y masas": ["unidad", "docena"],
+  "Mariscos": ["kg", "g"],
+  "Lacteos": ["L", "ml"],
+};
+
+function cargarCategorias() {
+  const categoriaSelect = document.getElementById("categoriaProducto");
+  categoriaSelect.innerHTML = `<option value="">Seleccione una categoria</option>`;
+
+  Object.keys(categoriasUnidades).forEach(cat => {
+    const option = document.createElement("option");
+    option.value = cat;
+    option.textContent = cat;
+    categoriaSelect.appendChild(option);
+  });
+}
+
+document.getElementById("categoriaProducto").addEventListener("change", function() {
+  const categoria = this.value;
+  const unidadSelect = document.getElementById("unidadProducto");
+
+  unidadSelect.innerHTML = "";
+  unidadSelect.disabled = false;
+
+  if (categoria && categoriasUnidades[categoria]) {
+    categoriasUnidades[categoria].forEach(u => {
+      const opt = document.createElement("option");
+      opt.value = u;
+      opt.textContent = u;
+      unidadSelect.appendChild(opt);
+    });
+  } else {
+    unidadSelect.innerHTML = `<option value="">Seleccione una categoria primero</option>`;
+    unidadSelect.disabled = true;
   }
 });
 
 async function cargarProximoID() {
-
   try {
     const response = await fetch("/obtener_proximo_id")
     const data = await response.json();
@@ -77,14 +116,11 @@ async function cargarProximoID() {
       alertaNinja("error", "Error al obtener ID", data.msg);
     }
   } catch (error) {
-    console.error("❌ Error al obtener próximo ID:", error);
-    alertaNinja("error", "Error del servidor", "No se pudo obtener el próximo ID.");
+    console.error("Error al obtener proximo ID", error);
+    alertaNinja("error", "Error del servidor", "No se pudo obtener el proximo ID");
   }
-
 }
 
-
-// ✅ Mostrar productos con estética ninja
 function mostrarProductos(productos) {
   const resultBox = document.getElementById("resultProducto");
   if (!productos || productos.length === 0) {
@@ -93,79 +129,79 @@ function mostrarProductos(productos) {
   }
 
   resultBox.innerHTML = productos.map(prod => `
-    <div class="producto-card" style="${!prod.habilitado ? 'opacity: 0.6; background-color: #f8d7da;' : ''}">
+    <div class="producto-card" style="${!prod.habilitado ? 'opacity: 0.6; background-color: #f8d7d710;' : ''}">
       <div style="display: flex; align-items: center; gap: 15px;">
         <img src="${prod.foto || '/static/image/default.png'}"
              alt="Foto de ${prod.nombre}"
              style="width:60px; height:60px; border-radius:50%; object-fit:cover;">
         <div class="producto-info">
-          <p>ID: ${prod.id_producto}</p>
-          <p>Categoría: ${prod.categoria}</p>
-          <p>Unidad: ${prod.unidad}</p>
+          <p>ID ${prod.id_producto}</p>
+          <p>Categoria ${prod.categoria}</p>
+          <p>Unidad ${prod.unidad}</p>
         </div>
       </div>
       <div class="producto-actions">
         <button onclick="editarProducto('${prod.id_producto}', '${prod.nombre}', '${prod.categoria}', '${prod.unidad}')">Editar</button>
         ${prod.habilitado ? 
-          `<button onclick="deshabilitarProducto('${prod.id_producto}')" style="background-color: #dc3545;">Deshabilitar</button>` :
-          `<button onclick="habilitarProducto('${prod.id_producto}')" style="background-color: #28a745;">Habilitar</button>`
+          `<button onclick="deshabilitarProducto('${prod.id_producto}')" style="background-color: #ff0000;">Deshabilitar</button>` :
+          `<button onclick="habilitarProducto('${prod.id_producto}')" style="background-color: #ff0000;">Habilitar</button>`
         }
       </div>
     </div>
   `).join("");
 }
-function editarProducto( id_producto,nombre,  categoria, unidad){
+
+function editarProducto(id_producto, nombre, categoria, unidad) {
   Swal.fire({
-      title: '<span style="font-family:njnaruto; color:#fff;">Editar Empleado</span>',
-      html: `
-        <input id="editNombre" class="swal2-input" placeholder="Nombre" value="${nombre}">
-        <input id="editId" class="swal2-input" placeholder="Id delproducto" value="${id_producto}"disabled>
-        <input id="editCategoria" class="swal2-input" placeholder="Categoria" value="${categoria}">
-        <input id="editUnidad" class="swal2-input" placeholder="Unidad" value="${unidad}">
-      `,
-      confirmButtonText: '<span style="font-family:njnaruto;">Guardar</span>',
-      showCancelButton: true,
-      cancelButtonText: '<span style="font-family:njnaruto;">Cancelar</span>',
-      background: '#000',
-      color: '#fff',
-      confirmButtonColor: '#e60000',
-      cancelButtonColor: '#888',
-      preConfirm: () => {
-        return {
-          nombre: document.getElementById("editNombre").value,
-          nueva_id: id_producto,
-          categoria: document.getElementById("editCategoria").value,
-          unidad: document.getElementById("editUnidad").value
-        };
-      }
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        const data = result.value;
+    title: '<span style="font-family:njnaruto; color:#fff;">Editar Empleado</span>',
+    html: `
+      <input id="editNombre" class="swal2-input" placeholder="Nombre" value="${nombre}">
+      <input id="editId" class="swal2-input" placeholder="Id del producto" value="${id_producto}" disabled>
+      <input id="editCategoria" class="swal2-input" placeholder="Categoria" value="${categoria}">
+      <input id="editUnidad" class="swal2-input" placeholder="Unidad" value="${unidad}">
+    `,
+    confirmButtonText: '<span style="font-family:njnaruto;">Guardar</span>',
+    showCancelButton: true,
+    cancelButtonText: '<span style="font-family:njnaruto;">Cancelar</span>',
+    background: '#000',
+    color: '#fff',
+    confirmButtonColor: '#e60000',
+    cancelButtonColor: '#ff0000ff',
+    preConfirm: () => {
+      return {
+        nombre: document.getElementById("editNombre").value,
+        nueva_id: id_producto,
+        categoria: document.getElementById("editCategoria").value,
+        unidad: document.getElementById("editUnidad").value
+      };
+    }
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      const data = result.value;
       const response = await fetch(`/editar_producto/${id_producto}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
       });
-        const resData = await response.json();
-        if (resData.success) {
-          alertaNinja('success', 'Producto actualizado', resData.msg);
-          await cargarEmpleados("");
-        } else {
-          alertaNinja('error', 'Error al actualizar', resData.msg);
-        }
+      const resData = await response.json();
+      if (resData.success) {
+        alertaNinja('success', 'Producto actualizado', resData.msg);
+        await cargarEmpleados("");
+      } else {
+        alertaNinja('error', 'Error al actualizar', resData.msg);
       }
-    });
+    }
+  });
 }
 
-// Mostar vista previa de la imagen seleccionada
-document.getElementById('fotoProducto').addEventListener('change', function() {
-  const file = e.target.files[0];
+document.getElementById('fotoProducto').addEventListener('change', function(event) {
+  const file = event.target.files[0];
   const preview = document.getElementById('previewFotoProducto');
 
   if (file) {
     const reader = new FileReader();
-    reader.onload = function(event) {
-      preview.src = event.target.result;
+    reader.onload = function(e) {
+      preview.src = e.target.result;
       preview.style.display = 'block';
     };
     reader.readAsDataURL(file);
@@ -175,7 +211,6 @@ document.getElementById('fotoProducto').addEventListener('change', function() {
   }
 });
 
-// ✅ Cargar productos al inicio
 async function cargarProductos() {
   try {
     const response = await fetch("/buscar_producto", {
@@ -190,12 +225,11 @@ async function cargarProductos() {
       document.getElementById("resultProducto").innerHTML = "<p>No hay productos registrados</p>";
     }
   } catch (err) {
-    console.error("Error al cargar productos:", err);
-    alertaNinja("error", "Error del servidor", "No se pudieron cargar los productos.");
+    console.error("Error al cargar productos", err);
+    alertaNinja("error", "Error del servidor", "No se pudieron cargar los productos");
   }
 }
 
-// ✅ Buscar solo al presionar Enter
 document.getElementById("buscarProducto").addEventListener("keydown", async function(e) {
   if (e.key === "Enter") {
     e.preventDefault();
@@ -216,23 +250,21 @@ document.getElementById("buscarProducto").addEventListener("keydown", async func
         alertaNinja("info", "Sin resultados", data.msg);
       }
     } catch (err) {
-      console.error("Error en búsqueda:", err);
-      alertaNinja("error", "Error del servidor", "Ocurrió un problema en la búsqueda.");
+      console.error("Error en busqueda", err);
+      alertaNinja("error", "Error del servidor", "Ocurrio un problema en la busqueda");
     }
   }
 });
 
-
-// ✅ Deshabilitar producto
 async function deshabilitarProducto(id_producto) {
   const confirmacion = await Swal.fire({
-    title: '<span style="font-family:njnaruto; color:#fff;">¿Deshabilitar producto?</span>',
-    text: "El producto no estará disponible para los empleados.",
+    title: '<span style="font-family:njnaruto; color:#fff;">Deshabilitar producto</span>',
+    text: "El producto no estara disponible para los empleados",
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#dc3545',
-    cancelButtonColor: '#6c757d',
-    confirmButtonText: '<span style="font-family:njnaruto;">Sí, deshabilitar</span>',
+    confirmButtonColor: '#ff0019ff',
+    cancelButtonColor: '#ff0000ff',
+    confirmButtonText: '<span style="font-family:njnaruto;">Si deshabilitar</span>',
     cancelButtonText: '<span style="font-family:njnaruto;">Cancelar</span>',
     background: '#000'
   });
@@ -253,22 +285,21 @@ async function deshabilitarProducto(id_producto) {
         alertaNinja('error', 'Error', data.msg);
       }
     } catch (error) {
-      console.error("❌ Error al deshabilitar producto:", error);
-      alertaNinja('error', 'Error del servidor', 'No se pudo deshabilitar el producto.');
+      console.error("Error al deshabilitar producto", error);
+      alertaNinja('error', 'Error del servidor', 'No se pudo deshabilitar el producto');
     }
   }
 }
 
-// ✅ Habilitar producto
 async function habilitarProducto(id_producto) {
   const confirmacion = await Swal.fire({
-    title: '<span style="font-family:njnaruto; color:#fff;">¿Habilitar producto?</span>',
-    text: "El producto estará disponible para los empleados.",
+    title: '<span style="font-family:njnaruto; color:#fff;">Habilitar producto</span>',
+    text: "El producto estara disponible para los empleados",
     icon: 'question',
     showCancelButton: true,
-    confirmButtonColor: '#28a745',
-    cancelButtonColor: '#6c757d',
-    confirmButtonText: '<span style="font-family:njnaruto;">Sí, habilitar</span>',
+    confirmButtonColor: '#ff0000ff',
+    cancelButtonColor: '#ff0000ff',
+    confirmButtonText: '<span style="font-family:njnaruto;">Si habilitar</span>',
     cancelButtonText: '<span style="font-family:njnaruto;">Cancelar</span>',
     background: '#000'
   });
@@ -289,14 +320,14 @@ async function habilitarProducto(id_producto) {
         alertaNinja('error', 'Error', data.msg);
       }
     } catch (error) {
-      console.error("❌ Error al habilitar producto:", error);
-      alertaNinja('error', 'Error del servidor', 'No se pudo habilitar el producto.');
+      console.error("Error al habilitar producto", error);
+      alertaNinja('error', 'Error del servidor', 'No se pudo habilitar el producto');
     }
   }
 }
 
-// ✅ Ejecutar carga inicial
 window.addEventListener("DOMContentLoaded", () => {
   cargarProductos();
   cargarProximoID();
+  cargarCategorias();
 });

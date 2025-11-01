@@ -1,4 +1,4 @@
-/* --- Sidebar Menu Styles --- */
+/* --- Fondo y estructura general --- */
 body {
   margin: 0;
   font-family: 'njnaruto';
@@ -14,97 +14,115 @@ body {
 }
 
 .main-content {
-  padding: 40px;
+  flex: 1;
+  padding: 40px 60px;
   position: relative;
-  margin-left: 250px; /* Ancho del sidebar */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
+/* --- Encabezado principal --- */
 .welcome-box {
   display: flex;
   flex-direction: column;
-  gap: 0px;
-  margin-bottom: 20px;
-  position: relative;
+  align-items: center;
+  margin-bottom: 30px;
 }
 
 .welcome-title {
   text-align: center;
-  font-size: 90px;
-  margin-bottom: 20px;
+  font-size: 85px;
+  margin: 0;
+  letter-spacing: 3px;
+  text-shadow: 3px 3px 10px red;
+  font-family: 'njnaruto';
 }
 
-/* --- Sidebar Styles --- */
-
+/* --- Sidebar --- */
 .sidebar {
   width: 250px;
   background-color: black;
-  border-right: 2px solid red;
+  border-right: 3px solid red;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px 10px;
+  padding: 25px 15px;
+  box-shadow: 3px 0 15px rgba(255, 0, 0, 0.2);
 }
 
+/* --- Logo --- */
 .sidebar .logo img {
-  width: 120px;
-  margin-bottom: 30px;
+  width: 130px;
+  margin-bottom: 40px;
+  transition: transform 0.3s ease;
 }
 
+.sidebar .logo img:hover {
+  transform: scale(1.08);
+}
+
+/* --- Menú de botones --- */
 .menu {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 10px;
   width: 100%;
+  align-items: center;
 }
 
+/* --- Botones del menú --- */
 .menu-button {
   display: flex;
   align-items: center;
-  gap: 30px;
-  padding: 25px;
+  gap: 25px;
+  padding: 18px 20px;
+  width: 90%;
   background: none;
   border: 2px solid transparent;
-  border-radius: 10px;
+  border-radius: 12px;
   color: white;
   cursor: pointer;
-  transition: 0.3s;
-  font-size: 16px;
-  width: 100%;
+  transition: all 0.3s ease;
+  font-size: 17px;
+  justify-content: flex-start;
   font-family: 'njnaruto';
-  src: url('../../fonts/njnaruto.ttf') format('truetype')
+}
+
+.menu-button img {
+  width: 35px;
+  height: auto;
+  transition: transform 0.3s ease;
+}
+
+.menu-button:hover img {
+  transform: scale(1.1);
 }
 
 .menu-button:hover,
 .menu-button.active {
   border: 2px solid white;
-  box-shadow: 0 0 10px rgba(255,255,255,0.6);
-}
-.menu-button img {
-  width: 40px;
-  height: auto;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+  background-color: rgba(255, 0, 0, 0.15);
 }
 
-.menu-button span {
-  margin-top: 5px;
-  font-size: 14px;
-}
-
+/* --- Botón de cerrar sesión --- */
 .logout-btn {
-  margin-top: 10px;
-  margin-bottom: 20px;
-  padding: 20px 40px;
+  margin-top: auto;
+  margin-bottom: 10px;
+  padding: 18px 35px;
   background-color: red;
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: 'njnaruto';
-  src: url('../../fonts/njnaruto.ttf') format('truetype')
 }
 
 .logout-btn:hover {
   background-color: #ff4d4d;
-  box-shadow: 0 0 10px red;
+  box-shadow: 0 0 12px red;
+  transform: translateY(-2px);
 }

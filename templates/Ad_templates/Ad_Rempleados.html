@@ -4,7 +4,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Rempleados.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/Menu.css') }}">
   <meta charset="UTF-8">
-  <title>Ichiraku Ramen - Administrador de personal</title>
+  <title>Ichiraku Ramen Administrador de personal</title>
 </head>
 <body>
   <div class="sidebar">
@@ -29,7 +29,7 @@
           <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> Locales
         </button>
         <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> avisos
+          <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Avisos
         </button>
         <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
           <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> Usuario
@@ -38,28 +38,26 @@
   <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
   </div>
 
-    <!-- Contenido Principal -->
     <main class="main-content">
       <div class="welcome-box">
   <h1 class="welcome-title">Panel de administracion</h1>
 
       <div class="employee-container">
 
-        <!-- Caja izquierda: formulario -->
         <section class="register-box">
           <h2>Registrar personal</h2>
           <form id="registerForm">
             <label>Nombre</label>
-            <input type="text" id="nombre" placeholder="Nombre...">
+            <input type="text" id="nombre" placeholder="Nombre">
 
             <label>ID</label>
-            <input type="text" id="cedula" placeholder="ID...">
+            <input type="text" id="cedula" placeholder="ID">
 
             <label>Clave</label>
-            <input type="password" id="contrasena" placeholder="Clave...">
+            <input type="password" id="contrasena" placeholder="Clave">
 
             <label>Numero de contacto</label>
-            <input type="text" id="contacto" placeholder="Numero de contacto...">
+            <input type="text" id="contacto" placeholder="Numero de contacto">
 
             <div class="form-actions">
               <button type="submit" class="btn">
@@ -72,32 +70,28 @@
 
               <button type="button" class="btn secondary" onclick="document.getElementById('foto').click()">
                 <img class="icon" src="{{ url_for('static', filename='image/subir.png') }}" alt="Subir" />
-                Subir Foto
+                Subir foto
               </button>
 
             </div>
           </form>
         </section>
 
-        <!-- Caja derecha: busqueda -->
         <section class="search-box">
           <h2>Lista de personal</h2>
           
-          <!-- Input de busqueda -->
           <label for="buscarEmpleado" class="sr-only">Buscar personal</label>
           <input 
             type="text" 
             id="buscarEmpleado" 
-            placeholder="Buscar por nombre o documento..."
+            placeholder="Buscar por nombre o documento"
             autocomplete="off"
           >
 
-          <!-- Resultados -->
           <div id="resultEmpleado" class="result-box">
             <p>No se ha realizado ninguna busqueda</p>
           </div>
         </section>
-
 
           </div>
           <div id="registerMsg" style="color: green; margin-top: 10px;"></div>

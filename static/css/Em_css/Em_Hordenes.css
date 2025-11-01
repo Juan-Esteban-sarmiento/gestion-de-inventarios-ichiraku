@@ -5,55 +5,101 @@
 
 .content {
   padding: 40px;
-  position: relative;
+  margin-left: 280px;
+  color: white;
+  font-family: 'njnaruto';
 }
 
 .box-welcome {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0px;
+  text-align: center;
   margin-bottom: 20px;
-  position: relative;
-  margin-left: 500px;
+}
+
+.search-box {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 15px;
+  background: #111;
+  border: 2px solid #e63900;
+  border-radius: 15px;
+  margin: 0 auto 25px auto;
+  width: 95%;
+  flex-wrap: wrap;
+}
+
+.ninja-input, .ninja-select {
+  background-color: #000;
+  border: 2px solid #e63900;
+  color: #fff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 14px;
+  outline: none;
+  transition: 0.3s;
+}
+
+.ninja-input:focus, .ninja-select:focus {
+  border-color: #ff6600;
+  box-shadow: 0 0 6px #ff6600;
+}
+
+.ninja-btn {
+  background: #e63900;
+  border: none;
+  color: white;
+  font-family: 'njnaruto';
+  border-radius: 10px;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.ninja-btn:hover {
+  background: #ff6600;
 }
 
 .order-panel {
-  background-color: black;
-  border: 2px solid red;
-  padding: 20px;          /* espacio interno */
-  margin-left: 80px;      /* separación hacia la derecha */
-  width: 1400px;           /* 👉 puedes cambiar ancho */
-  height: 600px;          /* 👉 puedes cambiar alto */
-  position: absolute;   /* se posiciona libremente */
-  top: 200px;           /* distancia desde arriba */
-  left: 50px;
-  border-radius: 10px;
-  color: white;
-  font-family: 'njnaruto', sans-serif;
+  background: #000;
+  border: 2px solid #e63900;
+  border-radius: 15px;
+  padding: 20px;
+  width: 95%;
+  margin: 0 auto;
+  max-height: 550px;
+  overflow-y: auto;
+}
+
+.order-header, .order-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  text-align: center;
+  padding: 10px 0;
 }
 
 .order-header {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-  text-align: center;
+  color: #ff6600;
   font-weight: bold;
-  margin-bottom: 10px;
-  color: red;
+  border-bottom: 2px solid #e63900;
 }
 
 .order-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 10px;
-  align-items: center;
+  border-bottom: 1px solid #e63900;
 }
 
-.order-row input {
-  padding: 5px;
-  border: 1px solid red;
-  border-radius: 5px;
-  background: #000000;
-  color: white;
+.no-orders {
+  text-align: center;
+  color: #e63900;
+  padding: 40px;
+}
+
+
+/* Scrollbar ninja */
+.order-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.order-panel::-webkit-scrollbar-thumb {
+  background-color: #e60000;
+  border-radius: 4px;
 }
