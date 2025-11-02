@@ -241,7 +241,7 @@ window.recuperarContrasena = async function() {
 
     if (!nuevaContrasena) return;
 
-    const resp = await fetch("/validar_token", {
+    const resp = await fetch("/Em_validar_token", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre, telefono, token, nueva_clave: nuevaContrasena })

@@ -255,23 +255,25 @@ def Ad_Inicio():
 def Ad_Rempleados():
     return render_template("Ad_templates/Ad_Rempleados.html"), 200, {"Content-Type": "text/html; charset=utf-8"}
 
+
 @app.route('/registrar_empleado', methods=['POST'])
 @login_requerido(rol='Administrador')
 def registrar_empleado():
     nombre = request.form.get('nombre')
     cedula = request.form.get('cedula')
     contrasena = request.form.get('contrasena')
-    contacto = request.form.get('contacto')
+    telefono = request.form.get('contacto')  # 🟢 Renombramos a 'telefono'
     foto = request.files.get('foto')
 
-    if not (nombre and cedula and contrasena and contacto):
+    if not (nombre and cedula and contrasena and telefono):
         return jsonify({"success": False, "msg": "Todos los campos son obligatorios."})
 
-    # Hashear la contraseña antes de guardarla
+    # 🔒 Hashear la contraseña antes de guardarla
     contrasena_hash = generate_password_hash(contrasena)
 
     foto_url = None
 
+    # 🖼️ Subir la foto al bucket de Supabase
     if foto:
         try:
             filename = f"empleados/{cedula}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
@@ -289,11 +291,12 @@ def registrar_empleado():
             return jsonify({"success": False, "msg": "Error al procesar la imagen."})
 
     try:
+        # 🟢 Insertar en la tabla 'empleados' con la nueva columna 'telefono'
         data = {
             "cedula": int(cedula),
             "nombre": nombre,
-            "numero_contacto": int(contacto),
-            "contrasena": contrasena_hash,  # Usar la contraseña hasheada
+            "telefono": str(telefono),  # <- aquí usamos la columna correcta
+            "contrasena": contrasena_hash,
             "foto": foto_url
         }
 
@@ -316,8 +319,9 @@ def registrar_empleado():
         print("❌ Error inesperado al registrar:", e)
         return jsonify({
             "success": False,
-            "msg": "Error al registrar empleado."
+            "msg": f"Error al registrar empleado: {e}"
         })
+
 
 @app.route("/buscar_empleado", methods=["POST"])
 def buscar_empleado():
@@ -1831,21 +1835,24 @@ def Em_validar_token():
             return jsonify({"success": False, "msg": "Empleado no encontrado."}), 404
 
         cedula = empleado_resp.data[0]["cedula"]
+        print("🆔 Cedula encontrada:", cedula)
 
-        # 🔹 Hashear nueva contraseña
+        # 🔹 Generar hash
         hashed_password = generate_password_hash(nueva_contrasena)
+        print("🔒 Hash generado:", hashed_password)
 
-        # 🔹 Actualizar contraseña usando .update(...).eq(...)
+        # 🔹 Actualizar contraseña
         update_resp = supabase.table("empleados").update(
             {"contrasena": hashed_password}
-        ).eq("cedula", cedula).execute()
+        ).match({"cedula": cedula}).execute()
 
-        # 🔹 Revisar errores
-        if hasattr(update_resp, "error") and update_resp.error:
-            print("❌ Error al actualizar contraseña:", update_resp.error)
-            return jsonify({"success": False, "msg": "No se pudo actualizar la contraseña."}), 500
+        print("📤 Respuesta update:", update_resp)
+
+        if not update_resp.data:
+            return jsonify({"success": False, "msg": "No se actualizó ninguna fila. Verifique el filtro."}), 400
 
         return jsonify({"success": True, "msg": "Contraseña actualizada correctamente."})
+
 
     except Exception as e:
         print(f"❌ Error en Em_validar_token: {e}")
