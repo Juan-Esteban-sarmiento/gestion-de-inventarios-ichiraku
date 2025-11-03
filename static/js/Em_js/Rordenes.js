@@ -1,17 +1,3 @@
-// 🎴 ALERTA NINJA GLOBAL
-function alertaNinja(icon, title, text) {
-    const iconColors = { success:'#00ff7f', error:'#ff3333', warning:'#ffcc00', info:'#ffffff', question:'#e60000' };
-    Swal.fire({
-        icon: icon,
-        title: `<span style="font-family:njnaruto; color:#fff;">${title}</span>`,
-        text: text || '',
-        background: '#000',
-        color: '#fff',
-        iconColor: iconColors[icon] || '#e60000',
-        confirmButtonColor: '#e60000',
-        confirmButtonText: '<span style="font-family:njnaruto;">Aceptar</span>',
-    });
-}
 
 // 🔽 Mostrar / Ocultar detalles del pedido
 function toggleDetalles(idPedido) {
@@ -106,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 guardarConfirmado(idPedido,idProducto);
 
-                // Mostrar botón solo si todos los productos están confirmados
+                // Mostrar boton solo si todos los productos estan confirmados
                 const allRows = document.querySelectorAll(`#detalles-${idPedido} tbody tr`);
                 const allConfirmed = Array.from(allRows).every(r=>r.classList.contains("confirmado"));
                 if(allConfirmed) mostrarBotonConfirmarPedido(idPedido);
@@ -122,7 +108,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-
 function mostrarBotonConfirmarPedido(idPedido){
     const pedidoDiv = document.getElementById(`pedido-${idPedido}`);
     const allRows = pedidoDiv.querySelectorAll("tbody tr");
@@ -137,21 +122,20 @@ function mostrarBotonConfirmarPedido(idPedido){
     }
 }
 
-
 function confirmarPedidoCompleto(idPedido) {
     if (!idPedido || isNaN(idPedido)) {
-        alertaNinja('error','Error','id_pedido inválido.');
+        alertaNinja('error','Error','id_pedido invalido.');
         return;
     }
 
     Swal.fire({
         title: '<span style="font-family:njnaruto; color:#fff;">¿Confirmar pedido completo?</span>',
-        text: 'El pedido será marcado como recibido.',
+        text: 'El pedido sera marcado como recibido.',
         icon: 'question',
         background: '#000',
         color: '#fff',
         showCancelButton: true,
-        confirmButtonText: '<span style="font-family:njnaruto;">Sí, confirmar</span>',
+        confirmButtonText: '<span style="font-family:njnaruto;">Si, confirmar</span>',
         cancelButtonText: '<span style="font-family:njnaruto;">Cancelar</span>',
         confirmButtonColor: '#00ff7f',
         cancelButtonColor: '#6c757d',

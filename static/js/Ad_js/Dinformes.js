@@ -1,39 +1,3 @@
-// 🎴 ALERTA NINJA CON PALETA NEGRO BLANCO Y ROJO
-function alertaNinja(icon, title, text) {
-  const iconColors = {
-    success: '#e60000',
-    error: '#ff3333',
-    warning: '#ff3333',
-    info: '#ffffff',
-    question: '#e60000'
-  };
-
-  Swal.fire({
-    icon: icon,
-    title: `<span style="font-family:njnaruto; color:#fff;">${title}</span>`,
-    text: text || '',
-    background: '#000',
-    color: '#fff',
-    iconColor: iconColors[icon] || '#e60000',
-    confirmButtonColor: '#e60000',
-    confirmButtonText: '<span style="font-family:njnaruto;">Aceptar</span>',
-    buttonsStyling: false,
-    didRender: () => {
-      const btn = Swal.getConfirmButton();
-      if (btn) {
-        btn.style.background = '#e60000';
-        btn.style.color = '#fff';
-        btn.style.fontWeight = 'bold';
-        btn.style.border = '2px solid #ff0000ff';
-        btn.style.borderRadius = '8px';
-        btn.style.padding = '8px 16px';
-        btn.style.transition = '0.3s';
-        btn.addEventListener('mouseenter', () => (btn.style.background = '#ff0000ff'));
-        btn.addEventListener('mouseleave', () => (btn.style.background = '#e60000'));
-      }
-    }
-  });
-}
 
 // ⚡ Buscar informes
 document.getElementById('searchForm').addEventListener('submit', async (e) => {

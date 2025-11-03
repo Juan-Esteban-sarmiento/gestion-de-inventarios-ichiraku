@@ -1,48 +1,75 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta charset="UTF-8">
+  <title>Ichiraku Ramen - Panel de Empleado</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Inicio.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
 </head>
 <body>
+  <!-- ====== SIDEBAR ====== -->
   <div class="sidebar">
     <div class="logo">
       <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
     </div>
 
     <nav class="menu">
-        <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button active">
-          <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
-        </button>
-        <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Recibir pedidos"> Recibir pedidos
-        </button>
-        <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Realizar pedidos"> Realizar pedidos
-        </button>
-        <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Historial pedidos"> Historial pedidos
-        </button>
-        <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
-          <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> usuario
-        </button>
-      </nav>
-  <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
+      <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button active">
+        <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Recibir pedidos"> Recibir pedidos
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Realizar pedidos"> Realizar pedidos
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Historial pedidos"> Historial pedidos
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Usuario"> Usuario
+      </button>
+    </nav>
+
+    <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesión</button>
   </div>
 
+  <!-- ====== CONTENIDO PRINCIPAL ====== -->
   <main class="content">
     <div class="box-welcome">
-  <h1 class="welcome-title">Bienvenido</h1>
+      <h1 class="welcome-title">Bienvenido</h1>
     </div>
-    
 
+    <!-- ====== SECCIÓN DE NOTIFICACIONES ====== -->
     <section class="notification-box">
       <div class="notification-header">
-  <h2>Avisos recientes</h2>
-  <span>Mas</span>
+        <h2>Avisos recientes</h2>
+        <span><a href="{{ url_for('Em_Rordenes') }}" class="ver-mas">Ver más</a></span>
       </div>
+
       <div class="notification-body">
-  <p>Hoy</p>
+        {% if notificaciones %}
+          {% for noti in notificaciones %}
+          <div class="notification-item">
+            <img src="{{ url_for('static', filename='image/campana.png') }}" class="icon-left" alt="Aviso">
+            <div class="notification-text">
+              <strong>{{ noti.mensaje }}</strong><br>
+              <div class="fecha-notificacion">
+                {{ noti.fecha_formateada }}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+
+          {% if restantes > 0 %}
+          <div class="extra-info">
+            Hay {{ restantes }} aviso{{ 's' if restantes > 1 else '' }} más  
+            Da clic en <a href="{{ url_for('Em_Rordenes') }}" class="link-ver">Ver más</a> para verlos.
+          </div>
+          {% endif %}
+        {% else %}
+          <p>No hay avisos recientes</p>
+        {% endif %}
       </div>
     </section>
 
@@ -50,6 +77,5 @@
       <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Ramen">
     </div>
   </main>
-
 </body>
 </html>

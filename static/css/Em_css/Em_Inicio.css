@@ -3,61 +3,164 @@
   src: url('../../fonts/njnaruto.ttf') format('truetype');
 }
 
+/* =============== CONTENIDO GENERAL =============== */
 .content {
   padding: 40px;
   position: relative;
+  font-family: 'njnaruto', sans-serif;
+  color: #fff;
 }
 
+/* =============== ENCABEZADO DE BIENVENIDA =============== */
 .box-welcome {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0px;
-  margin-bottom: 20px;
+  gap: 8px;
+  margin-bottom: 30px;
   position: relative;
-  margin-left: 500px;
+  margin-left: 480px;
+  text-align: center;
 }
 
+/* =============== CONTENEDOR DE NOTIFICACIONES =============== */
 .notification-box {
-  background-color: #000;
-  border: 2px solid red;
-  border-radius: 15px;
-  padding: 20px;
-  width: 450px;
+  background: linear-gradient(180deg, #0a0a0a 0%, #121212 100%);
+  border: 2px solid #ff0000;
+  border-radius: 20px;
+  padding: 28px;
+  width: 760px;
   max-width: 90%;
   position: relative;
+  box-shadow: 0 0 18px rgba(255, 0, 0, 0.25);
+  transition: all 0.3s ease-in-out;
+  margin-top: 120px;
 }
 
+.notification-box:hover {
+  box-shadow: 0 0 28px rgba(255, 0, 0, 0.45);
+  transform: translateY(-2px);
+}
+
+/* =============== CABECERA =============== */
 .notification-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 20px;
+  font-size: 22px;
+  color: #fff;
+  letter-spacing: 1px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 0, 0, 0.4);
 }
 
+.notification-header h2 {
+  text-shadow: 0 0 8px rgba(255, 0, 0, 0.7);
+  font-size: 24px;
+  margin: 0;
+}
+
+.notification-header .ver-mas {
+  color: #ff3c3c;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.notification-header .ver-mas:hover {
+  color: #ffffff;
+  text-shadow: 0 0 10px #ff0000;
+}
+
+/* =============== LISTA DE NOTIFICACIONES =============== */
 .notification-body {
-  margin-top: 20px;
+  margin-top: 22px;
   font-size: 16px;
 }
 
-.logo-main {
-  position: absolute;
-  left: 950px;
-  top: 250px;
+/* Tarjeta individual */
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: linear-gradient(145deg, #181818, #0d0d0d);
+  border: 1px solid #ff0000;
+  border-radius: 14px;
+  padding: 14px 18px;
+  color: #fff;
+  transition: all 0.3s ease;
+  margin-bottom: 16px;
+  box-shadow: inset 0 0 8px rgba(255, 0, 0, 0.3);
 }
 
-.logo-main img {   
-  max-width: 1500px;    
-  height: auto;       
-  right: 150px;
-  top: 250px;
+.notification-item:hover {
+  background: linear-gradient(145deg, #202020, #101010);
+  transform: scale(1.03);
+  box-shadow: 0 0 14px rgba(255, 0, 0, 0.4);
+}
+
+/* Icono de campana */
+.icon-left {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 4px rgba(255, 0, 0, 0.8));
+}
+
+/* Texto principal */
+.notification-text strong {
+  color: #ffffff;
+  font-size: 17px;
+  display: block;
+  margin-bottom: 4px;
+  text-shadow: 0 0 6px rgba(255, 0, 0, 0.6);
+}
+
+.notification-text small {
+  color: #ff7777;
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+/* =============== INFO EXTRA =============== */
+.extra-info {
+  margin-top: 14px;
+  color: #ffcc33;
+  font-style: italic;
+  font-size: 15px;
+  text-align: center;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.35);
+}
+
+.link-ver {
+  color: #ff4444;
+  font-weight: bold;
+  text-decoration: none;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.link-ver:hover {
+  color: #fff;
+  text-shadow: 0 0 10px #ff0000;
+}
+
+/* =============== LOGO CENTRAL =============== */
+.logo-main {
+  position: absolute;
+  left: 940px;
+  top: 190px;
 }
 
 .logo-main img {
   width: 600px;
   height: 600px;
-  border-radius: 70%;
-  border: 5px solid rgb(255, 255, 255);
+  border-radius: 50%;
+  border: 4px solid #fff;
+  box-shadow: 0 0 28px rgba(255, 0, 0, 0.5);
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
 }
 
-
+.logo-main img:hover {
+  transform: rotate(3deg) scale(1.04);
+  box-shadow: 0 0 35px rgba(255, 0, 0, 0.7);
+}

@@ -17,7 +17,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0px;
+  gap: 0;
   margin-bottom: 20px;
 }
 
@@ -27,24 +27,26 @@
   font-size: 3em;
   text-align: center;
   width: 100%;
+  text-shadow: 0 0 8px red;
 }
 
 /* ------------------ Panel de pedido ------------------ */
 .order-panel {
   display: flex;
-  gap: 25px; /* Espacio entre productos y carrito */
+  gap: 25px;
   padding: 25px;
   max-width: 1400px;
   width: 95%;
   min-height: 500px;
   max-height: 80vh;
-  border-radius: 10px;
-  background-color: black;
+  border-radius: 12px;
+  background-color: #000;
   border: 2px solid red;
   color: white;
   font-family: 'njnaruto';
   overflow: hidden;
-  flex-wrap: wrap; /* Permite bajar carrito en pantallas pequeñas */
+  flex-wrap: wrap;
+  box-shadow: 0 0 25px rgba(255, 0, 0, 0.2);
 }
 
 /* ------------------ Sección de productos ------------------ */
@@ -75,7 +77,7 @@
   gap: 12px;
   margin-bottom: 15px;
   align-items: center;
-  flex-wrap: wrap; /* Permite bajar botones en pantallas pequeñas */
+  flex-wrap: wrap;
 }
 
 .search-controls input {
@@ -83,10 +85,18 @@
   min-width: 180px;
   padding: 10px;
   border: 1px solid red;
-  border-radius: 5px;
-  background: #000;
+  border-radius: 6px;
+  background: #111;
   color: white;
   font-size: 1em;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.1);
+  transition: all 0.3s;
+}
+
+.search-controls input:focus {
+  outline: none;
+  border-color: #ff4d4d;
+  box-shadow: 0 0 12px red;
 }
 
 .search-controls .confirm-btn,
@@ -96,32 +106,36 @@
   font-family: 'njnaruto';
   font-size: 0.95em;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 6px;
   transition: 0.3s;
   white-space: nowrap;
 }
 
-/* Botones individuales */
+/* Botones */
 .search-controls .confirm-btn {
   background: black;
   border: 2px solid red;
   color: white;
+  box-shadow: 0 0 12px rgba(255, 0, 0, 0.3);
 }
 
 .search-controls .confirm-btn:hover {
   background: red;
   color: black;
+  box-shadow: 0 0 18px red;
 }
 
 .search-controls .show-all-btn {
-  background: #006400;
+  background: #004400;
   border: 2px solid #32CD32;
   color: white;
+  box-shadow: 0 0 10px rgba(50, 205, 50, 0.2);
 }
 
 .search-controls .show-all-btn:hover {
   background: #32CD32;
   color: black;
+  box-shadow: 0 0 15px #32CD32;
 }
 
 /* ------------------ Grilla de productos ------------------ */
@@ -135,9 +149,9 @@
   padding-bottom: 10px;
 }
 
-/* Tarjetas de productos */
+/* Tarjetas */
 .card {
-  background: #111;
+  background: #0d0d0d;
   border: 2px solid red;
   border-radius: 10px;
   padding: 15px;
@@ -146,10 +160,14 @@
   justify-content: space-between;
   height: 420px;
   box-sizing: border-box;
-  overflow: hidden;
   text-align: center;
   color: white;
-  font-family: 'njnaruto';
+  transition: transform 0.2s, box-shadow 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 20px red;
 }
 
 .card img {
@@ -158,7 +176,6 @@
   object-fit: cover;
   border-radius: 8px;
   margin-bottom: 10px;
-  flex-shrink: 0;
 }
 
 .card h3 {
@@ -197,6 +214,7 @@
   border-radius: 5px;
   cursor: pointer;
   font-family: 'njnaruto';
+  transition: 0.3s;
 }
 
 .card button:hover {
@@ -207,7 +225,7 @@
 /* ------------------ Carrito ------------------ */
 .pedido-box {
   flex: 1;
-  background: black;
+  background: #0a0a0a;
   border: 2px solid red;
   border-radius: 10px;
   padding: 15px;
@@ -216,6 +234,7 @@
   flex-direction: column;
   max-height: calc(80vh - 40px);
   overflow: hidden;
+  box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.2);
 }
 
 .pedido-box h2 {
@@ -231,7 +250,6 @@
   padding: 0;
   margin: 0;
   overflow-y: auto;
-  overflow-x: hidden;
   flex-grow: 1;
   padding-right: 5px;
 }
@@ -243,7 +261,6 @@
   padding: 8px 0;
   border-bottom: 1px dashed #333;
   font-size: 0.95em;
-  overflow: hidden;
 }
 
 .pedido-box li:last-child {
@@ -273,39 +290,51 @@
   cursor: pointer;
   font-size: 1.2em;
   font-family: 'njnaruto';
+  transition: 0.3s;
 }
 
 .confirm-btn:hover {
   background-color: red;
   color: black;
+  box-shadow: 0 0 20px red;
 }
 
-/* ------------------ Scrollbars ------------------ */
+/* ------------------ Scrollbar estilo ninja ------------------ */
 .productos-grid::-webkit-scrollbar,
 .product-selection-section::-webkit-scrollbar,
 .pedido-box ul::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 
 .productos-grid::-webkit-scrollbar-track,
 .product-selection-section::-webkit-scrollbar-track,
 .pedido-box ul::-webkit-scrollbar-track {
-  background: #333;
+  background: linear-gradient(180deg, #000 0%, #111 100%);
   border-radius: 10px;
 }
 
 .productos-grid::-webkit-scrollbar-thumb,
 .product-selection-section::-webkit-scrollbar-thumb,
 .pedido-box ul::-webkit-scrollbar-thumb {
-  background: red;
+  background: linear-gradient(180deg, red 0%, #660000 100%);
   border-radius: 10px;
-  border: 2px solid #333;
+  border: 2px solid #111;
+  box-shadow: 0 0 10px red;
 }
 
 .productos-grid::-webkit-scrollbar-thumb:hover,
 .product-selection-section::-webkit-scrollbar-thumb:hover,
 .pedido-box ul::-webkit-scrollbar-thumb:hover {
-  background: #ff4d4d;
+  background: linear-gradient(180deg, #ff4d4d 0%, #b30000 100%);
+  box-shadow: 0 0 15px #ff4d4d;
+}
+
+/* Firefox */
+.product-selection-section,
+.pedido-box ul,
+.productos-grid {
+  scrollbar-width: thin;
+  scrollbar-color: red black;
 }
 
 /* ------------------ Responsive ------------------ */
@@ -401,6 +430,7 @@
   z-index: 1000;
   display: none;
   min-width: 300px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.4);
 }
 #messageArea.success { background-color: green; }
 #messageArea.error { background-color: red; }

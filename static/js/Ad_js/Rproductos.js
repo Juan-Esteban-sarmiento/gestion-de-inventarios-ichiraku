@@ -1,21 +1,3 @@
-// ✅ Alerta Ninja universal
-function alertaNinja(icon, title, text) {
-  Swal.fire({
-    icon: icon,
-    title: `<span style="font-family:njnaruto;">${title}</span>`,
-    text: text || '',
-    background: '#000',
-    color: '#fff',
-    confirmButtonColor: '#ff0000ff',
-    confirmButtonText: '<span style="font-family:njnaruto;">Aceptar</span>',
-    customClass: {
-      popup: 'swal2-border-radius',
-      title: 'swal2-title-custom',
-      confirmButton: 'swal2-confirm-custom'
-    }
-  });
-}
-
 // ✅ Registro de producto con alerta ninja
 document.getElementById('registerProductForm').addEventListener('submit', async function(e) {
   e.preventDefault();

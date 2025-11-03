@@ -6,17 +6,6 @@ window.onload = () => {
   });
 };
 
-function mostrarModal(mensaje, tipo="success") {
-  const modalText = document.getElementById("modal-text");
-  modalText.textContent = mensaje;
-  modalText.className = tipo;
-  document.getElementById("modal").style.display = "flex";
-}
-
-function cerrarModal() {
-  document.getElementById("modal").style.display = "none";
-}
-
 function validarFormulario(e) {
   let cambios = false;
   document.querySelectorAll("input").forEach(input => {
@@ -30,14 +19,16 @@ function validarFormulario(e) {
 document.getElementById("editarForm").addEventListener("submit", async function(e) {
   e.preventDefault();
   if (!validarFormulario()) {
-    mostrarModal("No se han hecho cambios", "error");
+    alertaNinja("warning", "Sin cambios", "No se han realizado modificaciones.");
     return;
   }
+
   const formData = new FormData(this);
   const data = {
     Nombre: formData.get("Nombre"),
     Contrasena: formData.get("Contrasena")
   };
+
   try {
     let response = await fetch("/Ad_Ceditar", {
       method: "POST",
@@ -47,6 +38,7 @@ document.getElementById("editarForm").addEventListener("submit", async function(
       },
       body: JSON.stringify(data)
     });
+
     let result;
     try {
       result = await response.json();
@@ -54,17 +46,19 @@ document.getElementById("editarForm").addEventListener("submit", async function(
       let text = await response.text();
       return;
     }
+
     if (result.success) {
-      mostrarModal("Usuario actualizado correctamente", "success");
+      alertaNinja("success", "Actualización exitosa", "Usuario actualizado correctamente.");
     } else {
-      mostrarModal("Error al actualizar", "error");
+      alertaNinja("error", "Error", "No se pudo actualizar el usuario.");
     }
   } catch (err) {
     console.error("Error en la petición:", err);
+    alertaNinja("error", "Error", "No se pudo conectar con el servidor.");
   }
 });
 
-// Subir foto
+// 🖼 Subir foto
 const subirBtn = document.querySelector('.profile-btn:not(.delete)');
 const fileInput = document.createElement('input');
 fileInput.type = 'file';
@@ -72,9 +66,7 @@ fileInput.accept = 'image/*';
 fileInput.style.display = 'none';
 document.body.appendChild(fileInput);
 
-subirBtn.addEventListener('click', () => {
-  fileInput.click();
-});
+subirBtn.addEventListener('click', () => fileInput.click());
 
 fileInput.addEventListener('change', async function() {
   const formData = new FormData();
@@ -86,13 +78,13 @@ fileInput.addEventListener('change', async function() {
   let result = await response.json();
   if (result.success) {
     document.querySelector('.profile-section img').src = result.photo_url;
-    mostrarModal('Foto actualizada', 'success');
+    alertaNinja('success', 'Foto actualizada', 'Tu foto de perfil ha sido cambiada.');
   } else {
-    mostrarModal('Error al subir foto', 'error');
+    alertaNinja('error', 'Error', 'No se pudo subir la foto.');
   }
 });
 
-// Eliminar foto
+// 🗑 Eliminar foto
 const eliminarBtn = document.querySelector('.profile-btn.delete');
 eliminarBtn.addEventListener('click', async function() {
   let response = await fetch('/Ad_Ceditar_foto', {
@@ -101,12 +93,13 @@ eliminarBtn.addEventListener('click', async function() {
   let result = await response.json();
   if (result.success) {
     document.querySelector('.profile-section img').src = result.photo_url;
-    mostrarModal('Foto eliminada', 'success');
+    alertaNinja('success', 'Foto eliminada', 'Tu foto de perfil fue eliminada correctamente.');
   } else {
-    mostrarModal('Error al eliminar foto', 'error');
+    alertaNinja('error', 'Error', 'No se pudo eliminar la foto.');
   }
 });
 
+// 🔑 Recuperar contraseña (mantiene Swal para entradas)
 async function recuperarContrasena() {
   const { value: nombre } = await Swal.fire({
     title: 'Recuperar contraseña',
@@ -125,6 +118,8 @@ async function recuperarContrasena() {
       return value;
     }
   });
+
+  if (!nombre) return;
 
   // 1️⃣ Pedir teléfono
   const { value: telefono } = await Swal.fire({
@@ -148,7 +143,7 @@ async function recuperarContrasena() {
   if (!telefono) return;
 
   try {
-    // 2️⃣ Enviar token al backend
+    // 2️⃣ Enviar token
     let telefonoFormateado = telefono.trim();
     if (!telefonoFormateado.startsWith('+57')) {
       telefonoFormateado = '+57' + telefonoFormateado;
@@ -163,16 +158,16 @@ async function recuperarContrasena() {
     const data = await res.json();
 
     if (!data.success) {
-      return Swal.fire('❌ Error', data.msg, 'error');
+      return alertaNinja('error', 'Error', data.msg);
     }
 
-    await Swal.fire('✅ Código enviado', 'Revisa tu teléfono para ver el código de verificación.', 'success');
+    alertaNinja('success', 'Código enviado', 'Revisa tu teléfono para ver el código.');
 
-    // 3️⃣ Pedir el token recibido por SMS
+    // 3️⃣ Token recibido
     const { value: token } = await Swal.fire({
       title: 'Verificación',
       input: 'text',
-      inputLabel: 'Ingresa el código recibido en tu teléfono',
+      inputLabel: 'Ingresa el código recibido',
       inputPlaceholder: 'Ejemplo: 123456',
       showCancelButton: true,
       confirmButtonText: 'Validar código',
@@ -189,15 +184,13 @@ async function recuperarContrasena() {
 
     if (!token) return;
 
-    // 4️⃣ Pedir nueva contraseña
+    // 4️⃣ Nueva contraseña
     const { value: nuevaContrasena } = await Swal.fire({
       title: 'Nueva contraseña',
       input: 'password',
       inputLabel: 'Ingresa tu nueva contraseña',
       inputPlaceholder: '********',
-      inputAttributes: {
-        minlength: 6,
-      },
+      inputAttributes: { minlength: 6 },
       showCancelButton: true,
       confirmButtonText: 'Actualizar contraseña',
       cancelButtonText: 'Cancelar',
@@ -205,7 +198,7 @@ async function recuperarContrasena() {
       cancelButtonColor: '#888',
       preConfirm: (value) => {
         if (!value || value.length < 6) {
-          Swal.showValidationMessage('La contraseña debe tener al menos 6 caracteres');
+          Swal.showValidationMessage('Debe tener al menos 6 caracteres');
         }
         return value;
       }
@@ -213,7 +206,7 @@ async function recuperarContrasena() {
 
     if (!nuevaContrasena) return;
 
-    // 5️⃣ Enviar al backend para validar token y actualizar la contraseña
+    // 5️⃣ Validar token y actualizar
     const resp = await fetch("/validar_token", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -223,15 +216,13 @@ async function recuperarContrasena() {
     const resultado = await resp.json();
 
     if (resultado.success) {
-      Swal.fire('🎉 Éxito', 'Tu contraseña se actualizó correctamente.', 'success');
+      alertaNinja('success', 'Éxito', 'Tu contraseña se actualizó correctamente.');
     } else {
-      Swal.fire('❌ Error', resultado.msg, 'error');
+      alertaNinja('error', 'Error', resultado.msg);
     }
 
   } catch (err) {
     console.error("Error en la petición:", err);
-    Swal.fire('❌ Error', 'No se pudo conectar con el servidor', 'error');
+    alertaNinja('error', 'Error', 'No se pudo conectar con el servidor.');
   }
 }
-
-

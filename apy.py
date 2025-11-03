@@ -67,7 +67,12 @@ def enviar_token_sms(numero):
     print(f"✅ SMS enviado a {numero}. SID: {mensaje.sid}")
     return token
 
-
+@app.template_filter('format_fecha')
+def format_fecha(value):
+    if not value:
+        return "Sin fecha"
+    dt = datetime.fromisoformat(value.split('T')[0])
+    return dt.strftime("%d/%m/%Y")  # Día/Mes/Año
 
 
 
@@ -368,9 +373,9 @@ def editar_empleado(cedula):
 
         nombre = data.get("nombre")
         nueva_cedula = data.get("cedula")
-        numero_contacto = data.get("numero_contacto")
+        telefono = data.get("telefono")
 
-        if not (nombre and nueva_cedula and numero_contacto):
+        if not (nombre and nueva_cedula and telefono):
             return jsonify({"success": False, "msg": "Todos los campos son obligatorios."}), 400
 
         response = (
@@ -378,7 +383,7 @@ def editar_empleado(cedula):
             .update({
                 "nombre": nombre,
                 "cedula": int(nueva_cedula),
-                "numero_contacto": int(numero_contacto),
+                "telefono": str(telefono),
             })
             .eq("cedula", cedula)
             .execute()
@@ -1376,11 +1381,56 @@ def validar_token():
 @app.route('/Em_Inicio', methods=['GET', 'POST'])
 @login_requerido(rol='Empleado')
 def Em_Inicio():
-    response = make_response(render_template("Em_templates/Em_Inicio.html"))
-    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '-1'
-    return response
+    try:
+        # 🔹 Generar y limpiar notificaciones (opcional, solo si quieres mantener la sincronización)
+        generar_notificaciones_caducidad()
+        eliminar_notificaciones_caducadas()
+
+        # 🔹 Obtener todas las notificaciones ordenadas por fecha
+        todas_response = supabase.table("notificaciones").select("*").order("fecha", desc=True).execute()
+        todas = todas_response.data if todas_response.data else []
+
+        # 🔹 Filtrar solo las que tienen mensaje válido
+        todas = [n for n in todas if n.get("mensaje") and n["mensaje"].strip() != ""]
+
+        # 🔹 Intentar establecer idioma de fechas
+        try:
+            locale.setlocale(locale.LC_TIME, "es_ES.utf8")
+        except:
+            locale.setlocale(locale.LC_TIME, "es_CO.utf8")
+
+        # 🔹 Formatear la fecha
+        for noti in todas:
+            if noti.get("fecha"):
+                try:
+                    fecha_obj = datetime.fromisoformat(noti["fecha"])
+                    noti["fecha_formateada"] = fecha_obj.strftime("%d de %B de %Y, %I:%M %p").capitalize()
+                except:
+                    noti["fecha_formateada"] = noti["fecha"]
+
+        # 🔹 Mostrar solo las 3 más recientes
+        notificaciones = todas[:3]
+        total_notificaciones = len(todas)
+        restantes = max(0, total_notificaciones - 3)
+
+        # 🔹 Renderizar la plantilla de inicio del empleado
+        http_response = make_response(render_template(
+            "Em_templates/Em_Inicio.html",
+            notificaciones=notificaciones,
+            restantes=restantes,
+            total_notificaciones=total_notificaciones
+        ))
+
+        # 🔹 Evitar caché
+        http_response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+        http_response.headers['Pragma'] = 'no-cache'
+        http_response.headers['Expires'] = '-1'
+
+        return http_response
+
+    except Exception as e:
+        print("❌ Error al cargar página de inicio del empleado:", e)
+        return render_template("Em_templates/Em_Inicio.html", notificaciones=[], restantes=0), 500
 
 
 # ╔══════════════════════════════════════════════╗
@@ -1619,34 +1669,22 @@ def Em_Hordenes():
             "unidad": request.args.get("unidad", "")
         }
 
+        id_pedido = request.args.get("id_pedido", "")
+        fecha = request.args.get("fecha", "")
+
         query = supabase.table("pedido") \
             .select("id_pedido, estado, fecha_pedido, detalle_pedido(id_producto, cantidad, productos(nombre, categoria, unidad))") \
             .eq("estado", "Recibido") \
             .order("fecha_pedido", desc=True)
 
         pedidos = query.execute().data or []
-
-        # 🔹 Filtro en servidor
-        if any(filtros.values()):
-            pedidos_filtrados = []
-            for pedido in pedidos:
-                detalles_filtrados = []
-                for detalle in pedido["detalle_pedido"]:
-                    if (
-                        (not filtros["categoria"] or filtros["categoria"].lower() in detalle["productos"]["categoria"].lower()) and
-                        (not filtros["producto"] or filtros["producto"].lower() in detalle["productos"]["nombre"].lower()) and
-                        (not filtros["unidad"] or filtros["unidad"].lower() in detalle["productos"]["unidad"].lower()) and
-                        (not filtros["cantidad"] or str(detalle["cantidad"]) == filtros["cantidad"]) and
-                        (not filtros["fecha"] or filtros["fecha"] == (pedido["fecha_pedido"] or "").split("T")[0])
-                    ):
-                        detalles_filtrados.append(detalle)
-                if detalles_filtrados:
-                    pedido["detalle_pedido"] = detalles_filtrados
-                    pedidos_filtrados.append(pedido)
-            pedidos = pedidos_filtrados
+                # 🔹 Filtrado
+        if id_pedido:
+            pedidos = [p for p in pedidos if str(p["id_pedido"]) == str(id_pedido)]
+        if fecha:
+            pedidos = [p for p in pedidos if (p["fecha_pedido"] or "").split("T")[0] == fecha]
 
         return render_template("Em_templates/Em_Hordenes.html", pedidos=pedidos)
-
     except Exception as e:
         print("❌ Error al cargar historial de órdenes:", e)
         return render_template("Em_templates/Em_Hordenes.html", pedidos=[])

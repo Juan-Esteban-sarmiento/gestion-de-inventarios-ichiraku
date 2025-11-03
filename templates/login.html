@@ -1,25 +1,30 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestor de inventarios</title>
+  <title>Gestor de Inventarios</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/login.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
+  <div class="background-pattern"></div>
 
-  <div class="left">
-    <img src="{{ url_for('static', filename='image/ramen.png') }}" alt="Ramen">
-  </div>
-  
-  <div class="title">
-    <h1>Gestor de inventarios</h1>
-    
-    <div class="container">
-      <div class="right">
+  <div class="content">
+    <!-- 🍜 Lado Izquierdo -->
+    <div class="left-side">
+      <img class="ramen" src="{{ url_for('static', filename='image/ramen.png') }}" alt="Ramen">
+    </div>
 
-        <div class="logo">
-          <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
+    <!-- 🟥 Lado Derecho -->
+    <div class="right-side">
+      <div class="login-box">
+        <div class="header-box">
+          <div class="logo">
+            <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
+          </div>
+          <h1 class="title">Gestor de Inventarios</h1>
         </div>
 
         <form id="loginForm">

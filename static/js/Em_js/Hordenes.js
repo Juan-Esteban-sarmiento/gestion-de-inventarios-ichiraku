@@ -47,3 +47,13 @@ document.addEventListener("DOMContentLoaded", () => {
     form.submit(); // deja que Flask haga la búsqueda avanzada
   });
 });
+function toggleDetallePedido(idPedido) {
+  const detalle = document.getElementById(`detalle-${idPedido}`);
+  if(!detalle) return;
+  detalle.style.display = detalle.style.display === "block" ? "none" : "block";
+}
+function toggleDetallePedido(idPedido) {
+  const detalle = document.getElementById(`detalle-${idPedido}`);
+  if (!detalle) return;
+  detalle.style.display = detalle.style.display === "block" ? "none" : "block";
+}

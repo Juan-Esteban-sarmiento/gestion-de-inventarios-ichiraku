@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta charset="UTF-8">
+  <title>Historial de Pedidos - Ichiraku</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Hordenes.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
 </head>
@@ -30,62 +32,60 @@
   </div>
 
   <main class="content">
+
+    <!-- TÍTULO fuera de la caja principal -->
     <div class="box-welcome">
       <h1 class="welcome-title">Historial de Pedidos</h1>
     </div>
 
-    <!-- 🔍 Barra de búsqueda -->
-    <form class="search-box" id="formBuscar" method="GET" action="{{ url_for('Em_Hordenes') }}">
-      <input type="date" name="fecha" id="buscarFecha" class="ninja-input" value="{{ request.args.get('fecha', '') }}">
-      
-      <select name="categoria" id="buscarCategoria" class="ninja-select">
-        <option value="">Todas las categorías</option>
-        {% for cat in ["Carnes","Bebidas","Verduras","Frutas","Cereales","Salsas y condimentos","Panes y masas","Mariscos","Lacteos"] %}
-          <option value="{{ cat }}" {% if request.args.get('categoria') == cat %}selected{% endif %}>{{ cat }}</option>
-        {% endfor %}
-      </select>
+    <!-- TODO: todo el contenido principal se agrupa dentro de .order-box (caja negra) -->
+    <div class="order-box">
+      <!-- 🔍 Barra de búsqueda simplificada -->
+      <form class="search-box" id="formBuscar" method="GET" action="{{ url_for('Em_Hordenes') }}">
+        <input type="number" name="id_pedido" id="buscarId" class="ninja-input" placeholder="ID del pedido" value="{{ request.args.get('id_pedido', '') }}">
+        <input type="date" name="fecha" id="buscarFecha" class="ninja-input" value="{{ request.args.get('fecha', '') }}">
+        <button type="submit" class="ninja-btn">Buscar</button>
+      </form>
 
-      <input type="text" name="producto" id="buscarProducto" class="ninja-input" placeholder="🔎 Producto..." value="{{ request.args.get('producto', '') }}">
-      <input type="number" name="cantidad" id="buscarCantidad" class="ninja-input" placeholder="Cantidad" value="{{ request.args.get('cantidad', '') }}">
-
-      <select name="unidad" id="buscarUnidad" class="ninja-select">
-        <option value="">Todas las unidades</option>
-        {% for uni in ["kg","g","L","ml","unidad","docena"] %}
-          <option value="{{ uni }}" {% if request.args.get('unidad') == uni %}selected{% endif %}>{{ uni }}</option>
-        {% endfor %}
-      </select>
-
-      <button type="submit" class="ninja-btn">Buscar</button>
-    </form>
-
-    <!-- 🧾 Panel de pedidos -->
-    <div class="order-panel" id="tablaPedidos">
-      <div class="order-header">
-        <span>Fecha</span>
-        <span>Categoría</span>
-        <span>Producto</span>
-        <span>Cantidad</span>
-        <span>Unidad</span>
-      </div>
-
-      {% if pedidos %}
-        {% for pedido in pedidos %}
-          {% for detalle in pedido.detalle_pedido %}
-            <div class="order-row">
-              <span class="col-fecha">{{ pedido.fecha_pedido or "Sin fecha" }}</span>
-              <span class="col-categoria">{{ detalle.productos.categoria or "Sin categoría" }}</span>
-              <span class="col-producto">{{ detalle.productos.nombre or "Sin nombre" }}</span>
-              <span class="col-cantidad">{{ detalle.cantidad or "0" }}</span>
-              <span class="col-unidad">{{ detalle.productos.unidad or "-" }}</span>
+      <!-- BOX que envuelve todas las órdenes -->
+      <div class="order-container">
+        {% if pedidos %}
+          {% for pedido in pedidos %}
+            <div class="order-card" id="pedido-{{ pedido.id_pedido }}">
+              <div class="order-card-header">
+                <div>
+                  <strong>Pedido #{{ pedido.id_pedido }}</strong>
+                  <span>{{ pedido.fecha_pedido|format_fecha }}</span>
+                </div>
+                <div>
+                  <span>Cliente: {{ pedido.cliente_nombre or 'Desconocido' }}</span>
+                  <span>Local: {{ pedido.local or 'N/A' }}</span>
+                  <span>Estado: {{ pedido.estado }}</span>
+                </div>
+                <button class="toggle-btn" onclick="toggleDetallePedido('{{ pedido.id_pedido }}')">
+                  Ver detalles
+                </button>
+              </div>
+              <div class="order-card-body" id="detalle-{{ pedido.id_pedido }}">
+                {% for detalle in pedido.detalle_pedido %}
+                  <div class="producto-detalle">
+                    <span>Producto: {{ detalle.productos.nombre }}</span>
+                    <span>Categoría: {{ detalle.productos.categoria }}</span>
+                    <span>Cantidad: {{ detalle.cantidad }}</span>
+                    <span>Unidad: {{ detalle.productos.unidad }}</span>
+                  </div>
+                {% endfor %}
+              </div>
             </div>
           {% endfor %}
-        {% endfor %}
-      {% else %}
-        <div class="no-orders"><p>No hay pedidos confirmados 💤</p></div>
-      {% endif %}
-    </div>
+        {% else %}
+          <div class="no-orders"><p>No hay pedidos confirmados 💤</p></div>
+        {% endif %}
+      </div>
+    </div> <!-- /.order-box -->
   </main>
 
-  <script src="{{ url_for('static', filename='js/Em_js/Em_Hordenes.js') }}"></script>
+  <!-- arreglado: script tag correcto -->
+  <script src="{{ url_for('static', filename='js/Em_js/Hordenes.js') }}"></script>
 </body>
 </html>

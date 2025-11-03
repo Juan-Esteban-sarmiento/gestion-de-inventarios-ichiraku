@@ -1,47 +1,34 @@
 let carrito = [];
 
-// Función para mostrar mensajes (usa el div #messageArea)
 function showMessage(message, type = "success") {
-    const messageArea = document.getElementById("messageArea");
-    if (!messageArea) {
-        alert(message); // Fallback
-        return;
-    }
-    messageArea.textContent = message;
-    messageArea.className = `alert ${type}`;
-    messageArea.style.display = "block";
-    setTimeout(() => {
-        messageArea.style.display = "none";
-    }, 3000);
+    alertaNinja(type, type === "success" ? "Exito" : "Error", message);
 }
 
-// Nueva función para mostrar todos los productos (sin filtro)
+// Nueva funcion para mostrar todos los productos (sin filtro)
 function mostrarTodos() {
     document.getElementById("searchTerm").value = ""; // Limpia el input
-    buscarProductos(); // Llama a buscar con termino vacío
+    buscarProductos(); // Llama a buscar con termino vacio
     showMessage("Mostrando todos los productos.", "success");
 }
 
 async function buscarProductos(termino = null) {
-    // Si no se pasa termino, usa el del input
     if (termino === null) {
         termino = document.getElementById("searchTerm").value.trim();
     }
     const container = document.getElementById("productos-container");
     container.innerHTML = '<p style="text-align:center; color:#ccc;">Cargando productos...</p>';
 
-    console.log("Buscando productos con término:", termino); // Log para depurar
+    console.log("Buscando productos con termino:", termino);
 
     try {
-        // NUEVA RUTA PARA EMPLEADOS
         const resp = await fetch("/buscar_producto_empleado", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ termino })  // Envía vacío para todos
+            body: JSON.stringify({ termino })
         });
         const data = await resp.json();
 
-        console.log("Respuesta del servidor:", data); // Log para depurar
+        console.log("Respuesta del servidor:", data);
 
         container.innerHTML = "";
 
@@ -53,14 +40,14 @@ async function buscarProductos(termino = null) {
                 card.innerHTML = `
                     <img src="${prod.foto || '/static/image/default.png'}" alt="${prod.nombre}" onerror="this.src='/static/image/default.png'">
                     <h3>${prod.nombre}</h3>
-                    <p>Categoría: ${prod.categoria}</p>
+                    <p>Categoria: ${prod.categoria}</p>
                     <p>Unidad: ${prod.unidad}</p>
                     <input type="number" min="1" value="1" id="cantidad-${prod.id_producto}">
                     <button onclick="agregarCarrito(${prod.id_producto}, '${prod.nombre.replace(/'/g, "\\'")}', '${prod.categoria.replace(/'/g, "\\'")}', '${prod.unidad.replace(/'/g, "\\'")}')">Agregar al Carrito</button>
                 `;
                 container.appendChild(card);
             });
-            console.log(`Cargados ${data.productos.length} productos.`); // Log
+            console.log(`Cargados ${data.productos.length} productos.`);
         } else {
             container.innerHTML = "<p style='text-align:center; color:#ccc;'>No se encontraron productos.</p>";
             showMessage("No hay productos disponibles.", "error");
@@ -68,7 +55,7 @@ async function buscarProductos(termino = null) {
     } catch (error) {
         console.error("Error al buscar productos:", error);
         container.innerHTML = "<p style='text-align:center; color:red;'>Error al cargar productos. Revisa la consola.</p>";
-        showMessage("Error de conexión. Inténtalo de nuevo.", "error");
+        showMessage("Error de conexion. Intentalo de nuevo.", "error");
     }
 }
 
@@ -98,7 +85,7 @@ function agregarCarrito(id, nombre, categoria, unidad) {
     }
 
     renderCarrito();
-    cantidadInput.value = 1;  // Reset input
+    cantidadInput.value = 1;
 }
 
 function renderCarrito() {
@@ -106,7 +93,7 @@ function renderCarrito() {
     lista.innerHTML = "";
 
     if (carrito.length === 0) {
-        lista.innerHTML = "<li style='text-align:center; color:#ccc; padding: 20px;'>El carrito está vacío. Agrega productos.</li>";
+        lista.innerHTML = "<li style='text-align:center; color:#ccc; padding: 20px;'>El carrito esta vacio. Agrega productos.</li>";
         return;
     }
 
@@ -121,7 +108,6 @@ function renderCarrito() {
         lista.appendChild(li);
     });
 
-    // Opcional: Mostrar total al final
     const totalLi = document.createElement("li");
     totalLi.innerHTML = `<strong>Total: ${totalItems} items</strong>`;
     totalLi.style.borderTop = "2px solid red";
@@ -137,16 +123,15 @@ function eliminarDelCarrito(index) {
 
 async function enviarPedido() {
     if (carrito.length === 0) {
-        showMessage("El carrito está vacío. Agrega productos primero.", "error");
+        showMessage("El carrito esta vacio. Agrega productos primero.", "error");
         return;
     }
 
-    const id_local = 1;  // Placeholder: Cambia por un select si necesitas elegir sucursal
+    const id_local = 1;
 
-    // Preparar fechas automáticas
     const hoy = new Date().toISOString().split("T")[0];
     const caducidad = new Date();
-    caducidad.setMonth(caducidad.getMonth() + 1);  // +1 mes
+    caducidad.setMonth(caducidad.getMonth() + 1);
     const fechaCaducidad = caducidad.toISOString().split("T")[0];
 
     const productosParaEnviar = carrito.map(prod => ({
@@ -171,31 +156,27 @@ async function enviarPedido() {
         const data = await resp.json();
 
         if (data.success) {
-            showMessage("✅ Pedido registrado con éxito.", "success");
-            carrito = []; // Vaciar carrito tras éxito
+            showMessage("✅ Pedido registrado con exito.", "success");
+            carrito = [];
             renderCarrito();
-            // Opcional: limpiar búsqueda y recargar productos
             document.getElementById("searchTerm").value = "";
             buscarProductos();
         } else {
             showMessage(`❌ Error al registrar pedido: ${data.msg}`, "error");
         }
     } catch (error) {
-        console.error("Error en la petición de registro de pedido:", error);
-        showMessage("Error de conexión al registrar el pedido. Inténtalo de nuevo.", "error");
+        console.error("Error en la peticion de registro de pedido:", error);
+        showMessage("Error de conexion al registrar el pedido. Intentalo de nuevo.", "error");
     }
 }
 
-// Carga inicial: Muestra TODOS los productos automáticamente al cargar la página
 document.addEventListener("DOMContentLoaded", () => {
-    // Pequeño delay para asegurar que el DOM esté listo
     setTimeout(() => {
-        buscarProductos(""); // Llama con termino vacío explícito para cargar todos
+        buscarProductos("");
     }, 100);
-    renderCarrito(); // Render empty cart initially
+    renderCarrito();
 });
 
-// Opcional: Enter en input busca automáticamente
 document.getElementById("searchTerm").addEventListener("keypress", function(event) {
     if (event.key === "Enter") {
         event.preventDefault();
