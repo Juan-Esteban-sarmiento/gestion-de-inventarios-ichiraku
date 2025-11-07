@@ -648,7 +648,6 @@ def Ad_Dinformes():
         print("❌ Error al cargar página de informes:", e)
         return render_template("Ad_templates/Ad_Dinformes.html", ultimo_informe=None)
 
-
 def crear_informe_consolidado(pedidos, fecha):
     try:
         # Verificar si ya existe un informe para hoy
@@ -682,110 +681,192 @@ def crear_informe_consolidado(pedidos, fecha):
     except Exception as e:
         print("❌ Error al crear informe consolidado:", e)
         return False
-    
+
 def generar_pdf_consolidado(informe_id, pedidos):
     try:
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter,
-                                leftMargin=40, rightMargin=40, topMargin=50, bottomMargin=40)
+                                leftMargin=30, rightMargin=30, topMargin=40, bottomMargin=40)
         styles = getSampleStyleSheet()
         elements = []
 
-        # Encabezado
-        encabezado = Table([
-            [Paragraph("<font size=20 color='#e63900'><b>🍜 Ichiraku - Informe Diario Consolidado</b></font>", styles['Normal']),
-             Paragraph(f"<font color='#555'>#{informe_id}</font>", styles['Normal'])]
-        ], colWidths=[400, 100])
-        encabezado.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, -1), colors.whitesmoke),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        # ==================== ENCABEZADO ====================
+        elements.append(Paragraph(
+            "<font size=18 color='#e63900'><b>🍜 ICHIRAKU RAMEN - INFORME DIARIO</b></font>", 
+            styles['Heading1']
+        ))
+        elements.append(Paragraph(
+            f"<b>ID Informe:</b> #{informe_id} | <b>Fecha:</b> {datetime.now().strftime('%d/%m/%Y')}", 
+            styles['Normal']
+        ))
+        
+        # Línea decorativa
+        elements.append(Spacer(1, 10))
+        elements.append(Table([[""]], colWidths=[500], style=[
+            ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#e63900")),
         ]))
-        elements.append(encabezado)
-        elements.append(Spacer(1, 15))
+        elements.append(Spacer(1, 20))
 
-        # Información general
-        hoy = datetime.now().strftime("%d/%m/%Y")
+        # ==================== RESUMEN EJECUTIVO ====================
+        elements.append(Paragraph("<b><font color='#e63900' size=14>📊 RESUMEN DEL DÍA</font></b>", styles['Heading2']))
+        
         total_productos = 0
         categorias_totales = {}
         locales_participantes = set()
+        productos_detallados = []
 
+        # Procesar todos los pedidos para obtener estadísticas
         for pedido in pedidos:
-            # Obtener detalles del pedido
-            detalles = supabase.table("detalle_pedido").select("id_producto, cantidad")\
-                .eq("id_pedido", pedido["id_pedido"]).execute().data
-            
-            # Obtener información del local
-            inventario = supabase.table("inventario").select("id_local")\
-                .eq("id_inventario", pedido["id_inventario"]).single().execute().data
-            local = supabase.table("locales").select("nombre")\
-                .eq("id_local", inventario["id_local"]).single().execute().data
-            
-            locales_participantes.add(local['nombre'])
-            
-            # Contar productos y categorías
-            for detalle in detalles:
-                total_productos += detalle['cantidad']
-                producto = supabase.table("productos").select("categoria")\
-                    .eq("id_producto", detalle['id_producto']).single().execute().data
-                cat = producto.get('categoria', 'Sin categoría')
-                categorias_totales[cat] = categorias_totales.get(cat, 0) + detalle['cantidad']
+            try:
+                # Obtener detalles del pedido
+                detalles = supabase.table("detalle_pedido").select("id_producto, cantidad")\
+                    .eq("id_pedido", pedido["id_pedido"]).execute().data
+                
+                # Obtener información del local
+                inventario_result = supabase.table("inventario").select("id_local")\
+                    .eq("id_inventario", pedido["id_inventario"]).execute()
+                
+                local_nombre = "No especificado"
+                if inventario_result.data:
+                    local_result = supabase.table("locales").select("nombre, direccion")\
+                        .eq("id_local", inventario_result.data[0]["id_local"]).execute()
+                    if local_result.data:
+                        local_nombre = local_result.data[0]['nombre']
+                        locales_participantes.add(local_nombre)
+                
+                # Procesar cada detalle del pedido
+                for detalle in detalles:
+                    total_productos += detalle['cantidad']
+                    
+                    # Obtener información del producto
+                    producto_result = supabase.table("productos").select("nombre, categoria, unidad")\
+                        .eq("id_producto", detalle['id_producto']).execute()
+                    
+                    if producto_result.data:
+                        producto = producto_result.data[0]
+                        cat = producto.get('categoria', 'Sin categoría')
+                        categorias_totales[cat] = categorias_totales.get(cat, 0) + detalle['cantidad']
+                        
+                        # Agregar a lista detallada
+                        productos_detallados.append({
+                            'pedido_id': pedido['id_pedido'],
+                            'local': local_nombre,
+                            'producto': producto.get('nombre', 'Desconocido'),
+                            'categoria': cat,
+                            'cantidad': detalle['cantidad'],
+                            'unidad': producto.get('unidad', 'und'),
+                            'hora': datetime.fromisoformat(pedido["fecha_pedido"]).strftime("%H:%M")
+                        })
+                        
+            except Exception as e:
+                print(f"⚠️ Error procesando pedido {pedido['id_pedido']}: {e}")
+                continue
 
-        # Tabla de resumen
-        info_table = [
-            ["Fecha:", hoy],
-            ["Total de pedidos:", len(pedidos)],
-            ["Total de productos:", total_productos],
-            ["Locales participantes:", ", ".join(locales_participantes)]
+        # Tabla de resumen ejecutivo
+        hora_primero = min([datetime.fromisoformat(p["fecha_pedido"]).strftime("%H:%M") for p in pedidos]) if pedidos else "N/A"
+        hora_ultimo = max([datetime.fromisoformat(p["fecha_pedido"]).strftime("%H:%M") for p in pedidos]) if pedidos else "N/A"
+        
+        resumen_data = [
+            ["🗓️ Fecha", datetime.now().strftime("%d/%m/%Y")],
+            ["📦 Total de Pedidos", str(len(pedidos))],
+            ["🍜 Total de Platos Servidos", str(total_productos)],
+            ["⏰ Horario de Actividad", f"{hora_primero} - {hora_ultimo}"],
+            ["🏪 Locales Activos", str(len(locales_participantes))],
+            ["📍 Locales", ", ".join(locales_participantes) if locales_participantes else "No especificado"]
         ]
         
-        t = Table(info_table, colWidths=[150, 350])
-        t.setStyle(TableStyle([
-            ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-            ("GRID", (0, 0), (-1, -1), 0.25, colors.lightgrey),
+        resumen_table = Table(resumen_data, colWidths=[180, 320])
+        resumen_table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#f8f9fa")),
+            ("BACKGROUND", (1, 0), (1, -1), colors.white),
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.lightgrey),
             ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+            ("FONTSIZE", (0, 0), (-1, -1), 10),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("PADDING", (0, 0), (-1, -1), 8),
         ]))
-        elements.append(t)
+        elements.append(resumen_table)
+        elements.append(Spacer(1, 25))
+
+        # ==================== DETALLE DE PEDIDOS ====================
+        elements.append(Paragraph("<b><font color='#e63900' size=14>📋 DETALLE DE PEDIDOS</font></b>", styles['Heading2']))
+        elements.append(Spacer(1, 10))
+
+        # Agrupar productos por pedido
+        pedidos_agrupados = {}
+        for producto in productos_detallados:
+            pedido_id = producto['pedido_id']
+            if pedido_id not in pedidos_agrupados:
+                pedidos_agrupados[pedido_id] = {
+                    'local': producto['local'],
+                    'hora': producto['hora'],
+                    'productos': [],
+                    'total_platos': 0
+                }
+            pedidos_agrupados[pedido_id]['productos'].append(producto)
+            pedidos_agrupados[pedido_id]['total_platos'] += producto['cantidad']
+
+        # Generar tabla para cada pedido
+        for pedido_id, info in pedidos_agrupados.items():
+            # Encabezado del pedido
+            elements.append(Paragraph(
+                f"<b>🍱 Pedido #{pedido_id}</b> | 🏪 {info['local']} | 🕒 {info['hora']} | 🍜 {info['total_platos']} platos", 
+                styles['Heading3']
+            ))
+            
+            # Tabla de productos del pedido
+            table_data = [["Plato", "Categoría", "Cantidad"]]
+            
+            for prod in info['productos']:
+                table_data.append([
+                    prod['producto'],
+                    prod['categoria'],
+                    f"{prod['cantidad']} {prod['unidad']}"
+                ])
+            
+            pedido_table = Table(table_data, colWidths=[250, 150, 100])
+            pedido_table.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e63900")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
+                ("FONTSIZE", (0, 0), (-1, -1), 9),
+                ("PADDING", (0, 0), (-1, -1), 6),
+            ]))
+            elements.append(pedido_table)
+            elements.append(Spacer(1, 15))
+
+        # ==================== PIE DE PÁGINA ====================
         elements.append(Spacer(1, 20))
-
-        # Detalle de pedidos
-        elements.append(Paragraph("<b><font color='#e63900' size=14>Detalle de Pedidos del Día</font></b>", styles['Heading2']))
-        
-        table_data = [["ID Pedido", "Local", "Productos", "Hora"]]
-        for pedido in pedidos:
-            inventario = supabase.table("inventario").select("id_local")\
-                .eq("id_inventario", pedido["id_inventario"]).single().execute().data
-            local = supabase.table("locales").select("nombre")\
-                .eq("id_local", inventario["id_local"]).single().execute().data
-            
-            detalles = supabase.table("detalle_pedido").select("id_producto, cantidad")\
-                .eq("id_pedido", pedido["id_pedido"]).execute().data
-            
-            hora = datetime.fromisoformat(pedido["fecha_pedido"]).strftime("%H:%M")
-            
-            table_data.append([
-                pedido["id_pedido"],
-                local['nombre'],
-                len(detalles),
-                hora
-            ])
-
-        dt = Table(table_data, colWidths=[80, 150, 80, 80])
-        dt.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e63900")),
-            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-            ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+        elements.append(Table([[""]], colWidths=[500], style=[
+            ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#e63900"))
         ]))
-        elements.append(dt)
+        elements.append(Spacer(1, 10))
+        
+        footer_text = f"""
+        <para alignment='center'>
+        <font size=8 color='#666'>
+        <b>🍜 Ichiraku Ramen - Sistema de Gestión</b><br/>
+        Informe generado automáticamente el {datetime.now().strftime('%d/%m/%Y a las %H:%M')}<br/>
+        © 2025 Ichiraku Ramen - Todos los derechos reservados
+        </font>
+        </para>
+        """
+        elements.append(Paragraph(footer_text, styles['Normal']))
 
+        # Generar el PDF
         doc.build(elements)
         buffer.seek(0)
         return buffer
         
     except Exception as e:
         print("❌ Error al generar PDF consolidado:", e)
+        import traceback
+        traceback.print_exc()
         return None
-    
+
 def descargar_informe_consolidado_individual(id_informe):
     try:
         print(f"📊 Generando PDF consolidado individual para informe {id_informe}")
@@ -819,7 +900,7 @@ def descargar_informe_consolidado_individual(id_informe):
     except Exception as e:
         print(f"❌ Error al descargar informe consolidado individual {id_informe}: {e}")
         return jsonify({"success": False, "msg": f"Error: {e}"})
-def generar_pdf_consolidado(informe_id, pedidos):
+
     try:
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter,
@@ -943,6 +1024,73 @@ def generar_pdf_consolidado(informe_id, pedidos):
         print("❌ Error al generar PDF consolidado:", e)
         return None
 
+@app.route('/generar_informe_diario', methods=['POST'])
+def generar_informe_diario():
+    try:
+        hoy = datetime.now().date()
+        print(f"📅 Generando informe para: {hoy}")
+        
+        # Obtener TODOS los pedidos del día actual
+        todos_pedidos = supabase.table("pedido").select("*").execute()
+        
+        if not todos_pedidos.data:
+            return jsonify({"success": False, "msg": "No hay pedidos registrados en el sistema."})
+        
+        pedidos_hoy = [p for p in todos_pedidos.data 
+                      if datetime.fromisoformat(p["fecha_pedido"]).date() == hoy]
+        
+        print(f"📊 Pedidos encontrados hoy: {len(pedidos_hoy)}")
+        
+        if not pedidos_hoy:
+            return jsonify({"success": False, "msg": "No hay pedidos registrados para hoy."})
+        
+        # Verificar si ya existe un informe para hoy
+        fecha_inicio = f"{hoy}T00:00:00"
+        fecha_fin = f"{hoy}T23:59:59"
+        
+        informe_existente = supabase.table("informe").select("*") \
+            .gte("fecha_creacion", fecha_inicio) \
+            .lte("fecha_creacion", fecha_fin) \
+            .eq("tipo", "diario_consolidado") \
+            .execute()
+        
+        if informe_existente.data:
+            print("⚠️ Ya existe un informe para hoy")
+            # Retornar el ID del informe existente para poder descargarlo
+            informe_id = informe_existente.data[0]['id_informe']
+            return jsonify({
+                "success": False, 
+                "msg": f"Ya existe un informe para hoy (ID: {informe_id}).",
+                "informe_id": informe_id
+            })
+        
+        # Crear nuevo informe consolidado
+        nuevo_informe = {
+            "fecha_creacion": datetime.now().isoformat(),
+            "tipo": "diario_consolidado",
+            "total_pedidos": len(pedidos_hoy),
+            "id_inf_pedido": None  # Importante: dejar como None para informes consolidados
+        }
+        
+        print(f"💾 Insertando nuevo informe: {nuevo_informe}")
+        result = supabase.table("informe").insert(nuevo_informe).execute()
+        
+        if result.data:
+            informe_id = result.data[0]['id_informe']
+            print(f"✅ Informe consolidado creado: ID {informe_id}")
+            
+            return jsonify({
+                "success": True, 
+                "msg": f"Informe diario generado exitosamente con {len(pedidos_hoy)} pedidos.",
+                "informe_id": informe_id
+            })
+        else:
+            print("❌ Error al insertar informe")
+            return jsonify({"success": False, "msg": "No se pudo guardar el informe en la base de datos."})
+            
+    except Exception as e:
+        print(f"❌ Error al generar informe diario: {e}")
+        return jsonify({"success": False, "msg": f"Error: {str(e)}"})
 
 @app.route('/obtener_ultimo_informe', methods=['GET'])
 def obtener_ultimo_informe():
