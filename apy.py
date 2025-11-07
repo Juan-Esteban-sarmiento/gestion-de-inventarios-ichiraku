@@ -265,59 +265,50 @@ def logout():
 # RUTAS DE ADMINISTRADOR - INICIO Y GESTIÓN
 # ==============================================================================
 
-@app.route('/debug-simple')
-def debug_simple():
+@app.route('/debug-frontend-notificaciones')
+@login_requerido(rol='Administrador')
+def debug_frontend_notificaciones():
     try:
-        print("=== DEBUG SIMPLE INICIADO ===")
+        print("=== DEBUG FRONTEND NOTIFICACIONES ===")
         
-        # Probar conexión básica a Supabase
-        test = supabase.table("productos").select("id_producto").limit(1).execute()
-        print(f"✅ Conexión OK - Datos: {len(test.data)}")
+        # Ejecutar las funciones de notificaciones
+        generar_notificaciones_caducidad()
+        eliminar_notificaciones_caducadas()
         
-        # Probar notificaciones
-        from datetime import datetime, timedelta
-        hoy = datetime.now().date()
-        limite = hoy + timedelta(days=3)
+        # Obtener notificaciones como lo hace Ad_Inicio
+        todas_response = supabase.table("notificaciones").select("*").order("fecha", desc=True).execute()
+        todas = todas_response.data if todas_response.data else []
         
-        print(f"📅 Fechas - Hoy: {hoy}, Límite: {limite}")
+        print(f"📊 Notificaciones en BD: {len(todas)}")
+        for i, noti in enumerate(todas):
+            print(f"  {i+1}. {noti['mensaje']} - Leído: {noti.get('leido', False)}")
         
-        # Buscar productos próximos a caducar
-        productos = supabase.table("inventario") \
-            .select("id_inventario, id_producto, fecha_caducidad") \
-            .gte("fecha_caducidad", hoy.isoformat()) \
-            .lte("fecha_caducidad", limite.isoformat()) \
-            .execute()
+        # Aplicar el mismo filtro que Ad_Inicio
+        todas_filtradas = [n for n in todas if n.get("mensaje") and n["mensaje"].strip() != ""]
+        print(f"📊 Notificaciones después de filtrar: {len(todas_filtradas)}")
         
-        print(f"📦 Productos próximos a caducar: {len(productos.data)}")
+        # Tomar las primeras 3 como hace Ad_Inicio
+        notificaciones = todas_filtradas[:3]
+        total_notificaciones = len(todas_filtradas)
+        restantes = max(0, total_notificaciones - 3)
         
-        for producto in productos.data:
-            print(f"   - ID: {producto['id_inventario']}, Producto: {producto['id_producto']}, Caduca: {producto['fecha_caducidad']}")
-        
-        # Ver notificaciones existentes
-        notificaciones = supabase.table("notificaciones").select("*").execute()
-        print(f"🔔 Notificaciones existentes: {len(notificaciones.data)}")
+        print(f"🎯 Notificaciones a mostrar: {len(notificaciones)}")
+        print(f"📈 Total: {total_notificaciones}, Restantes: {restantes}")
         
         return jsonify({
-            "status": "success",
-            "conexion": "ok", 
-            "productos_proximos": len(productos.data),
-            "notificaciones_existentes": len(notificaciones.data),
-            "fechas": {
-                "hoy": str(hoy),
-                "limite": str(limite)
-            }
+            "notificaciones_en_bd": len(todas),
+            "notificaciones_filtradas": len(todas_filtradas),
+            "notificaciones_a_mostrar": len(notificaciones),
+            "detalles": notificaciones,
+            "total": total_notificaciones,
+            "restantes": restantes
         })
         
     except Exception as e:
-        print(f"❌ Error en debug: {str(e)}")
+        print(f"❌ Error en debug frontend: {str(e)}")
         import traceback
-        error_trace = traceback.format_exc()
-        print(f"Traceback completo: {error_trace}")
-        return jsonify({
-            "error": str(e),
-            "traceback": error_trace
-        }), 500
-
+        return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
+    
 @app.route('/Ad_Inicio', methods=['GET', 'POST'])
 @login_requerido(rol='Administrador')
 def Ad_Inicio():
