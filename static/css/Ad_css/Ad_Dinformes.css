@@ -13,143 +13,157 @@ body {
   background: url('../../img/fondo_ichiraku.png') repeat;
 }
 
-/* --- Contenedor principal adaptado al menú lateral --- */
-.main-container {
+/* --- Contenedor principal --- */
+.main-content {
   flex: 1;
-  padding: 40px 60px;
-  display: flex;
-  justify-content: center;
-  align-items: center; /* 🔥 centra vertical y horizontal */
+  padding: 20px;
+  margin-left: 250px; /* Ajusta según el ancho de tu sidebar */
 }
 
-/* --- Tarjeta del panel --- */
-.panel-card {
-  background: rgba(0, 0, 0, 0.75);
-  border: 3px solid #e63900;
-  border-radius: 20px;
-  padding: 40px;
-  width: 90%;
-  max-width: 1100px;
-  margin: 0 auto; /* 🔥 centra horizontalmente */
-  box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+.welcome-box {
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid #e63900;
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
   text-align: center;
 }
 
-
-/* --- Título principal --- */
-.panel-card h1 {
-  font-size: 3rem;
+.welcome-title {
   color: #fff;
-  text-shadow: 3px 3px 0 #e63900, -3px -3px 0 #000;
-  letter-spacing: 3px;
-  margin-bottom: 40px;
+  text-shadow: 2px 2px 0 #e63900;
+  margin: 0;
+  font-size: 2rem;
 }
 
-/* --- Caja de búsqueda --- */
-.search-box {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* Estilos para las secciones de informes */
+.last-report-section,
+.search-section,
+.download-section {
   background: rgba(0, 0, 0, 0.85);
   border: 2px solid #e63900;
-  border-radius: 12px;
-  padding: 10px 18px;
-  gap: 20px;
-  flex-wrap: wrap;
-  width: 80%;
-  box-shadow: 0 0 15px rgba(230, 57, 0, 0.2);
+  border-radius: 15px;
+  padding: 25px;
+  margin: 20px 0;
+  box-shadow: 0 0 20px rgba(230, 57, 0, 0.3);
 }
 
+.last-report-section h2,
+.search-section h2,
+.download-section h2 {
+  color: #e63900;
+  text-shadow: 2px 2px 0 #000;
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+}
 
-.search-box input {
+.last-report-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(230, 57, 0, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  border-left: 4px solid #e63900;
+}
+
+.no-report-card {
+  text-align: center;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  border: 2px dashed #e63900;
+}
+
+.no-report-card p {
+  color: #fff;
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+}
+
+.report-info .info-row {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.report-info .label {
+  font-weight: bold;
+  width: 150px;
+  color: #e63900;
+}
+
+.report-info .value {
+  color: #fff;
+}
+
+.search-options {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.search-options input {
   background: rgba(0, 0, 0, 0.9);
   color: #fff;
-  font-weight: bold;
-  text-transform: uppercase;
   border: 2px solid #e63900;
-  border-radius: 10px;
-  padding: 12px 16px;
-  text-align: center;
-  transition: all 0.3s ease;
+  border-radius: 8px;
+  padding: 12px;
   font-family: 'njnaruto';
-  width: 220px;
-  font-size: 1.1rem;
-  outline: none;
-}
-.search-box input {
-  height: 36px;          
-  width: 260px;          
+  flex: 1;
+  min-width: 200px;
   font-size: 1rem;
-  margin-right: 100px;
-}
-.search-box button {
-  height: 36px;          
 }
 
-
-
-.search-box input::placeholder {
-  color: #fff;
-  opacity: 0.8;
-}
-
-.search-box input:focus {
-  border-color: #fff;
-  box-shadow: 0 0 10px #e63900;
-}
-
-.search-box button {
-  background-color: #e63900;
-  border: none;
+.btn-search,
+.btn-download,
+.btn-generate,
+.btn-download-range {
+  background: #e63900;
   color: white;
-  font-family: 'njnaruto';
-  border-radius: 10px;
+  border: none;
+  border-radius: 8px;
   padding: 12px 20px;
+  font-family: 'njnaruto';
   cursor: pointer;
-  font-size: 1.1rem;
   transition: all 0.3s;
+  font-size: 1rem;
 }
 
-.search-box button:hover {
-  background-color: #ff4d00;
+.btn-search:hover,
+.btn-download:hover,
+.btn-generate:hover,
+.btn-download-range:hover {
+  background: #ff4d00;
   transform: scale(1.05);
 }
 
-/* --- 🌀 Contenedor de resultados --- */
-.result-box {
-  background: rgba(0, 0, 0, 0.92);
-  margin-top: 25px;
-  padding: 25px;
-  border: 2px dashed #e63900;
-  border-radius: 14px;
-  width: 90%;
-  box-shadow: 0 2px 15px rgba(230, 57, 0, 0.2);
+.download-options {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.search-results {
+  margin-top: 20px;
+  min-height: 100px;
+}
+
+.no-results {
+  text-align: center;
   color: #fff;
-  font-size: 1.2rem;
-  min-height: 150px;
+  padding: 20px;
+  font-style: italic;
+}
+
+/* Estilos para los resultados de búsqueda */
+.download-container {
   display: flex;
   flex-wrap: wrap;
+  gap: 20px;
   justify-content: center;
-  align-items: flex-start;
-  gap: 25px;
-  overflow-y: auto;
 }
 
-/* 🌀 Scroll personalizado */
-.result-box::-webkit-scrollbar {
-  width: 8px;
-}
-
-.result-box::-webkit-scrollbar-thumb {
-  background-color: #e63900;
-  border-radius: 10px;
-}
-
-.result-box::-webkit-scrollbar-track {
-  background-color: #1a1a1a;
-}
-
-/* --- 🩸 Tarjeta individual del informe --- */
 .informe-card {
   background: rgba(0, 0, 0, 0.9);
   border: 2px dashed #e63900;
@@ -167,7 +181,6 @@ body {
   max-width: 340px;
 }
 
-/* 🩸 Hover con efecto Ichiraku */
 .informe-card:hover {
   transform: translateY(-5px);
   border-color: #fff;
@@ -175,7 +188,6 @@ body {
   box-shadow: 0 0 25px rgba(230, 57, 0, 0.4);
 }
 
-/* 📜 Etiquetas internas (ID, fecha, etc.) */
 .informe-card p {
   margin: 6px 0;
   font-size: 1.1rem;
@@ -188,15 +200,7 @@ body {
   display: block;
 }
 
-/* 📅 Fecha */
-.informe-card .fecha {
-  font-size: 1rem;
-  color: #fff;
-  opacity: 0.9;
-}
-
-/* 📁 Botón dentro de la tarjeta */
-.informe-card .download-button {
+.download-button {
   margin-top: 10px;
   width: 100%;
   background: #111;
@@ -211,211 +215,40 @@ body {
   box-shadow: 0 0 10px rgba(230, 57, 0, 0.2);
 }
 
-.informe-card .download-button:hover {
+.download-button:hover {
   background: #e63900;
   border-color: #fff;
   transform: scale(1.05);
-}
-
-/* --- 📱 Responsivo --- */
-@media (max-width: 1024px) {
-  .panel-card {
-    padding: 30px 25px;
-  }
-
-  .informe-card {
-    flex: 1 1 calc(50% - 25px); /* 2 por fila */
-  }
-}
-
-@media (max-width: 700px) {
-  .informe-card {
-    flex: 1 1 100%; /* 1 por fila */
-  }
-
-  .panel-card h1 {
-    font-size: 2.2rem;
-  }
-
-  .search-box input,
-  .search-box button {
-    width: 100%;
-  }
-}
-/* --- 🎯 Contenedor de botones de descarga --- */
-.download-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin-top: 30px;
-}
-
-.download-container .download-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 12px 20px;
-  background: #111;
-  border: 2px solid #e63900;
-  border-radius: 10px;
-  color: #fff;
-  font-family: 'njnaruto';
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: 0.3s;
-  box-shadow: 0 0 10px rgba(230, 57, 0, 0.25);
-}
-
-.download-container .download-button img {
-  width: 22px;
-  height: 22px;
-  filter: brightness(0) invert(1);
-}
-
-.download-container .download-button:hover {
-  background: #e63900;
-  border-color: #fff;
-  transform: scale(1.05);
-}
-/* Estilos para las nuevas secciones */
-.last-report-section,
-.search-section,
-.download-section {
-    background: rgba(0, 0, 0, 0.85);
-    border: 2px solid #e63900;
-    border-radius: 15px;
-    padding: 25px;
-    margin: 20px 0;
-    box-shadow: 0 0 20px rgba(230, 57, 0, 0.3);
-}
-
-.last-report-section h2,
-.search-section h2,
-.download-section h2 {
-    color: #e63900;
-    text-shadow: 2px 2px 0 #000;
-    margin-bottom: 20px;
-    font-size: 1.8rem;
-}
-
-.last-report-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(230, 57, 0, 0.1);
-    padding: 20px;
-    border-radius: 10px;
-    border-left: 4px solid #e63900;
-}
-
-.no-report-card {
-    text-align: center;
-    padding: 40px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
-    border: 2px dashed #e63900;
-}
-
-.report-info .info-row {
-    display: flex;
-    margin-bottom: 10px;
-}
-
-.report-info .label {
-    font-weight: bold;
-    width: 150px;
-    color: #e63900;
-}
-
-.report-info .value {
-    color: #fff;
-}
-
-.search-options {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
-
-.search-options input {
-    background: rgba(0, 0, 0, 0.9);
-    color: #fff;
-    border: 2px solid #e63900;
-    border-radius: 8px;
-    padding: 12px;
-    font-family: 'njnaruto';
-    flex: 1;
-    min-width: 200px;
-}
-
-.btn-search,
-.btn-download,
-.btn-generate,
-.btn-download-range {
-    background: #e63900;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 12px 20px;
-    font-family: 'njnaruto';
-    cursor: pointer;
-    transition: all 0.3s;
-    font-size: 1rem;
-}
-
-.btn-search:hover,
-.btn-download:hover,
-.btn-generate:hover,
-.btn-download-range:hover {
-    background: #ff4d00;
-    transform: scale(1.05);
-}
-
-.download-options {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-.search-results {
-    margin-top: 20px;
-    min-height: 100px;
-}
-
-.no-results {
-    text-align: center;
-    color: #fff;
-    padding: 20px;
-    font-style: italic;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .last-report-card {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
-    }
-    
-    .search-options {
-        flex-direction: column;
-    }
-    
-    .download-options {
-        flex-direction: column;
-    }
-    
-    .report-info .info-row {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .report-info .label {
-        width: auto;
-        margin-bottom: 5px;
-    }
+  .main-content {
+    margin-left: 0;
+    padding: 10px;
+  }
+  
+  .last-report-card {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .search-options {
+    flex-direction: column;
+  }
+  
+  .download-options {
+    flex-direction: column;
+  }
+  
+  .report-info .info-row {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .report-info .label {
+    width: auto;
+    margin-bottom: 5px;
+  }
 }

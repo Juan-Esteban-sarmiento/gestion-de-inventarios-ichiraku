@@ -636,12 +636,14 @@ def cambiar_estado_producto(id_producto):
 @login_requerido(rol='Administrador')
 def Ad_Dinformes():
     try:
-        # Obtener el último informe creado
+        # Obtener el último informe creado - corregir la consulta
         ultimo_informe = supabase.table("informe")\
             .select("*")\
-            .order("fecha_creacion", desc=True)\
+            .order("id_informe", desc=True)\
             .limit(1)\
             .execute()
+        
+        print(f"🔍 Último informe encontrado: {ultimo_informe.data}")  # Para debug
         
         informe_data = ultimo_informe.data[0] if ultimo_informe.data else None
         

@@ -2,10 +2,10 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Ichiraku Ramen - Administrador de informes</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Dinformes.css') }}">
+  <title>Ichiraku Ramen - Administrador de avisos</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Pnotificaciones.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
 </head>
 <body>
 
@@ -25,13 +25,13 @@
           <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
             <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
           </button>
-          <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button active">
+          <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button">
             <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reportes
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'" class="menu-button">
             <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> Locales
           </button>
-          <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
+          <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button active">
             <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Avisos"> Avisos
           </button>
           <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
@@ -47,84 +47,48 @@
           <h1 class="welcome-title">Panel de administrador</h1>
       </div>
 
-      <!-- Sección de Último Informe -->
-      <div class="last-report-section">
-          <h2>📊 Último Informe Generado</h2>
-          
-          {% if ultimo_informe %}
-          <div class="last-report-card">
-              <div class="report-info">
-                  <div class="info-row">
-                      <span class="label">ID Informe:</span>
-                      <span class="value">{{ ultimo_informe.id_informe }}</span>
-                  </div>
-                  <div class="info-row">
-                      <span class="label">ID Pedido:</span>
-                      <span class="value">{{ ultimo_informe.id_inf_pedido }}</span>
-                  </div>
-                  <div class="info-row">
-                      <span class="label">Fecha de Creación:</span>
-                      <span class="value">
-                          {{ ultimo_informe.fecha_creacion[:10] if ultimo_informe.fecha_creacion else 'N/A' }}
-                      </span>
-                  </div>
+      <!-- Contenedor de avisos -->
+      <div class="notification-container">
+          <section class="search-box">
+              <h2>Lista de avisos</h2>
+
+              <!-- Barra de filtros -->
+              <div class="filters">
+                  <input type="date" class="filter-input">
+                  <input type="text" class="filter-input" placeholder="Buscar ...">
               </div>
-              <div class="report-actions">
-                  <button class="btn-download" onclick="descargarInforme({{ ultimo_informe.id_informe }})">
-                      📥 Descargar PDF
-                  </button>
+
+              <div class="notifications-list">
+                {% for noti in notificaciones %}
+                <div class="notification-item {% if noti.tipo == 'prioritaria' %}prioritaria{% endif %}" 
+                    data-id="{{ noti.id_notificaciones }}">
+                    
+                    <img src="{{ url_for('static', filename='image/campana.png') }}" class="icon-left" alt="Campana">
+                    
+                    <span class="notification-text">
+                        {{ noti.mensaje }} <br>
+                        <small>{{ noti.fecha[:10] }}</small>
+                    </span>
+
+                    <div class="notification-buttons">
+                        {% if not noti.leido %}
+                        <button class="btn-prioritaria">Prioritaria</button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <p style="text-align:center; color:white;">No hay avisos disponibles</p>
+                {% endfor %}
               </div>
-          </div>
-          {% else %}
-          <div class="no-report-card">
-              <p>📭 No hay informes generados aún</p>
-              <button class="btn-generate" onclick="generarInformeDiario()">
-                  🚀 Generar Informe Diario
-              </button>
-          </div>
-          {% endif %}
+
+          </section>
       </div>
-
-      <!-- Sección de Búsqueda -->
-      <div class="search-section">
-          <h2>🔍 Buscar Informes</h2>
-          
-          <div class="search-options">
-              <input type="text" id="idInforme" placeholder="Buscar por ID de informe">
-              <input type="date" id="fechaInforme" class="date-picker">
-              <button class="btn-search" onclick="buscarInforme()">Buscar</button>
-          </div>
-
-          <div id="resultadosBusqueda" class="search-results">
-              <!-- Los resultados de búsqueda aparecerán aquí -->
-          </div>
-      </div>
-
-      <!-- Sección de Descargas -->
-      <div class="download-section">
-          <h2>📦 Descargar Informes por Rango</h2>
-          
-          <div class="download-options">
-              <button class="btn-download-range" onclick="descargarPorRango('semana')">
-                  📥 Descargar Semanal
-              </button>
-              <button class="btn-download-range" onclick="descargarPorRango('mes')">
-                  📥 Descargar Mensual
-              </button>
-              <button class="btn-download-range" onclick="descargarPorRango('anio')">
-                  📥 Descargar Anual
-              </button>
-          </div>
-      </div>
-
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
   <script src="{{ url_for('static', filename='js/Global_js/alertaNinja.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/Ad_js/Dinformes.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/Ad_js/Pnotificaciones.js') }}"></script>
 
 </body>
 </html>
