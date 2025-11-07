@@ -375,7 +375,7 @@ def Ad_Inicio():
         return http_response
     except Exception as e:
         print("❌ Error al cargar página de inicio:", e)
-        return render_template("Ad_templates/Ad_Inicio.html", notificaciones=[], restantes=0), 500s
+        return render_template("Ad_templates/Ad_Inicio.html", notificaciones=[], restantes=0), 500
 
 
 # ==============================================================================
