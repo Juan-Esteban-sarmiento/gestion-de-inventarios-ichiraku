@@ -182,41 +182,6 @@ def insertar_informe(id_pedido):
         }).execute()
         return True
     return False
-
-@app.route('/debug-ad-inicio')
-def debug_ad_inicio():
-    try:
-        print("🔍 Debug Ad_Inicio - Iniciando...")
-        
-        # Probar cada función por separado
-        print("1. Probando generar_notificaciones_caducidad...")
-        generar_notificaciones_caducidad()
-        
-        print("2. Probando eliminar_notificaciones_caducadas...")
-        eliminar_notificaciones_caducadas()
-        
-        print("3. Probando consulta de notificaciones...")
-        todas_response = supabase.table("notificaciones").select("*").order("fecha", desc=True).execute()
-        todas = todas_response.data if todas_response.data else []
-        print(f"Notificaciones encontradas: {len(todas)}")
-        
-        return jsonify({
-            "status": "success", 
-            "notificaciones": len(todas),
-            "data": todas
-        })
-        
-    except Exception as e:
-        print(f"❌ Error en debug: {str(e)}")
-        import traceback
-        error_details = traceback.format_exc()
-        print(f"Traceback: {error_details}")
-        return jsonify({
-            "status": "error",
-            "error": str(e),
-            "traceback": error_details
-        }), 500
-
 # ==============================================================================
 # RUTAS PRINCIPALES Y AUTENTICACIÓN
 # ==============================================================================
@@ -299,6 +264,59 @@ def logout():
 # ==============================================================================
 # RUTAS DE ADMINISTRADOR - INICIO Y GESTIÓN
 # ==============================================================================
+
+@app.route('/debug-simple')
+def debug_simple():
+    try:
+        print("=== DEBUG SIMPLE INICIADO ===")
+        
+        # Probar conexión básica a Supabase
+        test = supabase.table("productos").select("id_producto").limit(1).execute()
+        print(f"✅ Conexión OK - Datos: {len(test.data)}")
+        
+        # Probar notificaciones
+        from datetime import datetime, timedelta
+        hoy = datetime.now().date()
+        limite = hoy + timedelta(days=3)
+        
+        print(f"📅 Fechas - Hoy: {hoy}, Límite: {limite}")
+        
+        # Buscar productos próximos a caducar
+        productos = supabase.table("inventario") \
+            .select("id_inventario, id_producto, fecha_caducidad") \
+            .gte("fecha_caducidad", hoy.isoformat()) \
+            .lte("fecha_caducidad", limite.isoformat()) \
+            .execute()
+        
+        print(f"📦 Productos próximos a caducar: {len(productos.data)}")
+        
+        for producto in productos.data:
+            print(f"   - ID: {producto['id_inventario']}, Producto: {producto['id_producto']}, Caduca: {producto['fecha_caducidad']}")
+        
+        # Ver notificaciones existentes
+        notificaciones = supabase.table("notificaciones").select("*").execute()
+        print(f"🔔 Notificaciones existentes: {len(notificaciones.data)}")
+        
+        return jsonify({
+            "status": "success",
+            "conexion": "ok", 
+            "productos_proximos": len(productos.data),
+            "notificaciones_existentes": len(notificaciones.data),
+            "fechas": {
+                "hoy": str(hoy),
+                "limite": str(limite)
+            }
+        })
+        
+    except Exception as e:
+        print(f"❌ Error en debug: {str(e)}")
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"Traceback completo: {error_trace}")
+        return jsonify({
+            "error": str(e),
+            "traceback": error_trace
+        }), 500
 
 @app.route('/Ad_Inicio', methods=['GET', 'POST'])
 @login_requerido(rol='Administrador')
