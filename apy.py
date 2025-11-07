@@ -635,7 +635,20 @@ def cambiar_estado_producto(id_producto):
 @app.route('/Ad_Dinformes', methods=['GET'])
 @login_requerido(rol='Administrador')
 def Ad_Dinformes():
-    return render_template("Ad_templates/Ad_Dinformes.html")
+    try:
+        # Obtener el último informe creado
+        ultimo_informe = supabase.table("informe")\
+            .select("*")\
+            .order("fecha_creacion", desc=True)\
+            .limit(1)\
+            .execute()
+        
+        informe_data = ultimo_informe.data[0] if ultimo_informe.data else None
+        
+        return render_template("Ad_templates/Ad_Dinformes.html", ultimo_informe=informe_data)
+    except Exception as e:
+        print("❌ Error al obtener último informe:", e)
+        return render_template("Ad_templates/Ad_Dinformes.html", ultimo_informe=None)
 
 @app.route('/generar_informe_diario', methods=['POST'])
 def generar_informe_diario():
