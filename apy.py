@@ -636,34 +636,327 @@ def cambiar_estado_producto(id_producto):
 @login_requerido(rol='Administrador')
 def Ad_Dinformes():
     try:
-        # Obtener el último informe creado - corregir la consulta
-        ultimo_informe = supabase.table("informe")\
-            .select("*")\
-            .order("id_informe", desc=True)\
-            .limit(1)\
-            .execute()
+        # Obtener el último informe para mostrarlo en el template
+        ultimo_informe = None
+        informes = supabase.table("informe").select("*").order("id_informe", desc=True).limit(1).execute()
         
-        print(f"🔍 Último informe encontrado: {ultimo_informe.data}")  # Para debug
+        if informes.data:
+            ultimo_informe = informes.data[0]
         
-        informe_data = ultimo_informe.data[0] if ultimo_informe.data else None
-        
-        return render_template("Ad_templates/Ad_Dinformes.html", ultimo_informe=informe_data)
+        return render_template("Ad_templates/Ad_Dinformes.html", ultimo_informe=ultimo_informe)
     except Exception as e:
-        print("❌ Error al obtener último informe:", e)
+        print("❌ Error al cargar página de informes:", e)
         return render_template("Ad_templates/Ad_Dinformes.html", ultimo_informe=None)
 
-@app.route('/generar_informe_diario', methods=['POST'])
-def generar_informe_diario():
+
+def crear_informe_consolidado(pedidos, fecha):
     try:
-        hoy = datetime.now().date()
-        pedidos = supabase.table("pedido").select("id_pedido, fecha_pedido").execute().data
-        if not pedidos:
-            return jsonify({"success": False, "msg": "No hay pedidos registrados."})
-        informes_creados = sum(insertar_informe(p["id_pedido"]) for p in pedidos if datetime.fromisoformat(p["fecha_pedido"]).date() == hoy)
-        msg = f"Informes diarios generados: {informes_creados}" if informes_creados else "No se generaron nuevos informes hoy."
-        return jsonify({"success": True, "msg": msg})
+        # Verificar si ya existe un informe para hoy
+        fecha_inicio = f"{fecha}T00:00:00"
+        fecha_fin = f"{fecha}T23:59:59"
+        
+        informe_existente = supabase.table("informe").select("*") \
+            .gte("fecha_creacion", fecha_inicio) \
+            .lte("fecha_creacion", fecha_fin) \
+            .execute().data
+        
+        if informe_existente:
+            print("⚠️ Ya existe un informe para hoy")
+            return False
+        
+        # Crear nuevo informe consolidado
+        nuevo_informe = {
+            "fecha_creacion": datetime.now().isoformat(),
+            "tipo": "diario_consolidado",
+            "total_pedidos": len(pedidos)
+        }
+        
+        # Insertar en la base de datos
+        result = supabase.table("informe").insert(nuevo_informe).execute()
+        
+        if result.data:
+            print(f"✅ Informe consolidado creado con {len(pedidos)} pedidos")
+            return True
+        return False
+        
     except Exception as e:
-        print("❌ Error al generar informe diario:", e)
+        print("❌ Error al crear informe consolidado:", e)
+        return False
+    
+def generar_pdf_consolidado(informe_id, pedidos):
+    try:
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter,
+                                leftMargin=40, rightMargin=40, topMargin=50, bottomMargin=40)
+        styles = getSampleStyleSheet()
+        elements = []
+
+        # Encabezado
+        encabezado = Table([
+            [Paragraph("<font size=20 color='#e63900'><b>🍜 Ichiraku - Informe Diario Consolidado</b></font>", styles['Normal']),
+             Paragraph(f"<font color='#555'>#{informe_id}</font>", styles['Normal'])]
+        ], colWidths=[400, 100])
+        encabezado.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), colors.whitesmoke),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]))
+        elements.append(encabezado)
+        elements.append(Spacer(1, 15))
+
+        # Información general
+        hoy = datetime.now().strftime("%d/%m/%Y")
+        total_productos = 0
+        categorias_totales = {}
+        locales_participantes = set()
+
+        for pedido in pedidos:
+            # Obtener detalles del pedido
+            detalles = supabase.table("detalle_pedido").select("id_producto, cantidad")\
+                .eq("id_pedido", pedido["id_pedido"]).execute().data
+            
+            # Obtener información del local
+            inventario = supabase.table("inventario").select("id_local")\
+                .eq("id_inventario", pedido["id_inventario"]).single().execute().data
+            local = supabase.table("locales").select("nombre")\
+                .eq("id_local", inventario["id_local"]).single().execute().data
+            
+            locales_participantes.add(local['nombre'])
+            
+            # Contar productos y categorías
+            for detalle in detalles:
+                total_productos += detalle['cantidad']
+                producto = supabase.table("productos").select("categoria")\
+                    .eq("id_producto", detalle['id_producto']).single().execute().data
+                cat = producto.get('categoria', 'Sin categoría')
+                categorias_totales[cat] = categorias_totales.get(cat, 0) + detalle['cantidad']
+
+        # Tabla de resumen
+        info_table = [
+            ["Fecha:", hoy],
+            ["Total de pedidos:", len(pedidos)],
+            ["Total de productos:", total_productos],
+            ["Locales participantes:", ", ".join(locales_participantes)]
+        ]
+        
+        t = Table(info_table, colWidths=[150, 350])
+        t.setStyle(TableStyle([
+            ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+            ("GRID", (0, 0), (-1, -1), 0.25, colors.lightgrey),
+            ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+        ]))
+        elements.append(t)
+        elements.append(Spacer(1, 20))
+
+        # Detalle de pedidos
+        elements.append(Paragraph("<b><font color='#e63900' size=14>Detalle de Pedidos del Día</font></b>", styles['Heading2']))
+        
+        table_data = [["ID Pedido", "Local", "Productos", "Hora"]]
+        for pedido in pedidos:
+            inventario = supabase.table("inventario").select("id_local")\
+                .eq("id_inventario", pedido["id_inventario"]).single().execute().data
+            local = supabase.table("locales").select("nombre")\
+                .eq("id_local", inventario["id_local"]).single().execute().data
+            
+            detalles = supabase.table("detalle_pedido").select("id_producto, cantidad")\
+                .eq("id_pedido", pedido["id_pedido"]).execute().data
+            
+            hora = datetime.fromisoformat(pedido["fecha_pedido"]).strftime("%H:%M")
+            
+            table_data.append([
+                pedido["id_pedido"],
+                local['nombre'],
+                len(detalles),
+                hora
+            ])
+
+        dt = Table(table_data, colWidths=[80, 150, 80, 80])
+        dt.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e63900")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+        ]))
+        elements.append(dt)
+
+        doc.build(elements)
+        buffer.seek(0)
+        return buffer
+        
+    except Exception as e:
+        print("❌ Error al generar PDF consolidado:", e)
+        return None
+    
+def descargar_informe_consolidado_individual(id_informe):
+    try:
+        print(f"📊 Generando PDF consolidado individual para informe {id_informe}")
+        
+        # Obtener el informe consolidado
+        informe_result = supabase.table("informe").select("*").eq("id_informe", id_informe).execute()
+        if not informe_result.data:
+            return jsonify({"success": False, "msg": "Informe consolidado no encontrado"}), 404
+        
+        informe = informe_result.data[0]
+        fecha_creacion = datetime.fromisoformat(informe["fecha_creacion"])
+        fecha = fecha_creacion.date()
+        
+        # Obtener todos los pedidos del día del informe
+        pedidos_hoy = supabase.table("pedido").select("*").execute().data
+        pedidos_hoy = [p for p in pedidos_hoy if datetime.fromisoformat(p["fecha_pedido"]).date() == fecha]
+        
+        if not pedidos_hoy:
+            return jsonify({"success": False, "msg": "No hay pedidos para esta fecha."})
+        
+        # Generar PDF
+        buffer = generar_pdf_consolidado(id_informe, pedidos_hoy)
+        if not buffer:
+            return jsonify({"success": False, "msg": "Error al generar el PDF consolidado."})
+        
+        response = make_response(buffer.read())
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=informe_diario_consolidado_{fecha}.pdf'
+        return response
+        
+    except Exception as e:
+        print(f"❌ Error al descargar informe consolidado individual {id_informe}: {e}")
+        return jsonify({"success": False, "msg": f"Error: {e}"})
+def generar_pdf_consolidado(informe_id, pedidos):
+    try:
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter,
+                                leftMargin=40, rightMargin=40, topMargin=50, bottomMargin=40)
+        styles = getSampleStyleSheet()
+        elements = []
+
+        # Encabezado
+        encabezado = Table([
+            [Paragraph("<font size=20 color='#e63900'><b>🍜 Ichiraku - Informe Diario Consolidado</b></font>", styles['Normal']),
+             Paragraph(f"<font color='#555'>#{informe_id}</font>", styles['Normal'])]
+        ], colWidths=[400, 100])
+        encabezado.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), colors.whitesmoke),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]))
+        elements.append(encabezado)
+        elements.append(Spacer(1, 15))
+
+        # Información general
+        hoy = datetime.now().strftime("%d/%m/%Y")
+        total_productos = 0
+        categorias_totales = {}
+        locales_participantes = set()
+
+        for pedido in pedidos:
+            try:
+                # Obtener detalles del pedido
+                detalles = supabase.table("detalle_pedido").select("id_producto, cantidad")\
+                    .eq("id_pedido", pedido["id_pedido"]).execute().data
+                
+                # Obtener información del local de forma segura
+                inventario_result = supabase.table("inventario").select("id_local")\
+                    .eq("id_inventario", pedido["id_inventario"]).execute()
+                
+                if inventario_result.data:
+                    local_result = supabase.table("locales").select("nombre")\
+                        .eq("id_local", inventario_result.data[0]["id_local"]).execute()
+                    
+                    if local_result.data:
+                        locales_participantes.add(local_result.data[0]['nombre'])
+                
+                # Contar productos y categorías
+                for detalle in detalles:
+                    total_productos += detalle['cantidad']
+                    producto_result = supabase.table("productos").select("categoria")\
+                        .eq("id_producto", detalle['id_producto']).execute()
+                    
+                    if producto_result.data:
+                        cat = producto_result.data[0].get('categoria', 'Sin categoría')
+                        categorias_totales[cat] = categorias_totales.get(cat, 0) + detalle['cantidad']
+                    else:
+                        categorias_totales['Sin categoría'] = categorias_totales.get('Sin categoría', 0) + detalle['cantidad']
+                        
+            except Exception as e:
+                print(f"⚠️ Error procesando pedido {pedido['id_pedido']}: {e}")
+                continue
+
+        # Tabla de resumen
+        info_table = [
+            ["Fecha:", hoy],
+            ["Total de pedidos:", str(len(pedidos))],
+            ["Total de productos:", str(total_productos)],
+            ["Locales participantes:", ", ".join(locales_participantes) if locales_participantes else "No especificado"]
+        ]
+        
+        t = Table(info_table, colWidths=[150, 350])
+        t.setStyle(TableStyle([
+            ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+            ("GRID", (0, 0), (-1, -1), 0.25, colors.lightgrey),
+            ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+        ]))
+        elements.append(t)
+        elements.append(Spacer(1, 20))
+
+        # Detalle de pedidos
+        elements.append(Paragraph("<b><font color='#e63900' size=14>Detalle de Pedidos del Día</font></b>", styles['Heading2']))
+        
+        table_data = [["ID Pedido", "Local", "Productos", "Hora"]]
+        for pedido in pedidos:
+            try:
+                inventario_result = supabase.table("inventario").select("id_local")\
+                    .eq("id_inventario", pedido["id_inventario"]).execute()
+                
+                local_nombre = "No especificado"
+                if inventario_result.data:
+                    local_result = supabase.table("locales").select("nombre")\
+                        .eq("id_local", inventario_result.data[0]["id_local"]).execute()
+                    if local_result.data:
+                        local_nombre = local_result.data[0]['nombre']
+                
+                detalles = supabase.table("detalle_pedido").select("id_producto, cantidad")\
+                    .eq("id_pedido", pedido["id_pedido"]).execute().data
+                
+                hora = datetime.fromisoformat(pedido["fecha_pedido"]).strftime("%H:%M")
+                
+                table_data.append([
+                    str(pedido["id_pedido"]),
+                    local_nombre,
+                    str(len(detalles)),
+                    hora
+                ])
+            except Exception as e:
+                print(f"⚠️ Error en tabla para pedido {pedido['id_pedido']}: {e}")
+                continue
+
+        dt = Table(table_data, colWidths=[80, 150, 80, 80])
+        dt.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e63900")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+        ]))
+        elements.append(dt)
+
+        doc.build(elements)
+        buffer.seek(0)
+        return buffer
+        
+    except Exception as e:
+        print("❌ Error al generar PDF consolidado:", e)
+        return None
+
+
+@app.route('/obtener_ultimo_informe', methods=['GET'])
+def obtener_ultimo_informe():
+    try:
+        # Obtener el último informe ordenado por ID descendente
+        informes = supabase.table("informe").select("*").order("id_informe", desc=True).limit(1).execute()
+        
+        if informes.data:
+            return jsonify({"success": True, "informe": informes.data[0]})
+        else:
+            return jsonify({"success": False, "msg": "No hay informes generados."})
+            
+    except Exception as e:
+        print("❌ Error al obtener último informe:", e)
         return jsonify({"success": False, "msg": f"Error: {e}"})
 
 @app.route('/buscar_informe', methods=['POST'])
@@ -684,18 +977,85 @@ def buscar_informe():
     except Exception as e:
         print("❌ Error al buscar informe:", e)
         return jsonify({"success": False, "msg": f"Error: {e}"})
+    
+@app.route('/descargar_informe_diario_consolidado', methods=['GET'])
+def descargar_informe_diario_consolidado():
+    try:
+        hoy = datetime.now().date()
+        
+        # Buscar el informe consolidado de hoy
+        fecha_inicio = f"{hoy}T00:00:00"
+        fecha_fin = f"{hoy}T23:59:59"
+        
+        informe = supabase.table("informe").select("*") \
+            .gte("fecha_creacion", fecha_inicio) \
+            .lte("fecha_creacion", fecha_fin) \
+            .eq("tipo", "diario_consolidado") \
+            .single().execute().data
+        
+        if not informe:
+            return jsonify({"success": False, "msg": "No hay informe diario generado para hoy."})
+        
+        # Obtener todos los pedidos de hoy
+        pedidos_hoy = supabase.table("pedido").select("*").execute().data
+        pedidos_hoy = [p for p in pedidos_hoy if datetime.fromisoformat(p["fecha_pedido"]).date() == hoy]
+        
+        # Generar PDF
+        buffer = generar_pdf_consolidado(informe['id_informe'], pedidos_hoy)
+        if not buffer:
+            return jsonify({"success": False, "msg": "Error al generar el PDF."})
+        
+        response = make_response(buffer.read())
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=informe_diario_{hoy}.pdf'
+        return response
+        
+    except Exception as e:
+        print("❌ Error al descargar informe diario:", e)
+        return jsonify({"success": False, "msg": f"Error: {e}"})
+
 
 @app.route('/descargar_informe/<int:id_informe>', methods=['GET'])
 def descargar_informe(id_informe):
     try:
-        informe = supabase.table("informe").select("*").eq("id_informe", id_informe).single().execute().data
-        if not informe:
+        print(f"🔍 Descargando informe ID: {id_informe}")
+        
+        # Obtener el informe
+        informe_result = supabase.table("informe").select("*").eq("id_informe", id_informe).execute()
+        if not informe_result.data:
             return jsonify({"success": False, "msg": "Informe no encontrado"}), 404
-        pedido = supabase.table("pedido").select("*").eq("id_pedido", informe["id_inf_pedido"]).single().execute().data
-        if not pedido:
+        
+        informe = informe_result.data[0]
+        print(f"✅ Informe encontrado: {informe}")
+        
+        # Verificar si es un informe consolidado
+        if informe.get("tipo") == "diario_consolidado":
+            print("📊 Es un informe consolidado, redirigiendo...")
+            return descargar_informe_consolidado_individual(id_informe)
+        
+        # Si es un informe individual, continuar con la lógica original
+        if not informe.get("id_inf_pedido"):
+            return jsonify({"success": False, "msg": "Este informe no está asociado a un pedido"}), 404
+        
+        pedido_result = supabase.table("pedido").select("*").eq("id_pedido", informe["id_inf_pedido"]).execute()
+        if not pedido_result.data:
             return jsonify({"success": False, "msg": "Pedido no encontrado"}), 404
-        inventario = supabase.table("inventario").select("id_local").eq("id_inventario", pedido["id_inventario"]).single().execute().data
-        local = supabase.table("locales").select("nombre, direccion").eq("id_local", inventario["id_local"]).single().execute().data
+        
+        pedido = pedido_result.data[0]
+        
+        # Resto de la lógica original para informes individuales...
+        inventario_result = supabase.table("inventario").select("id_local").eq("id_inventario", pedido["id_inventario"]).execute()
+        if not inventario_result.data:
+            return jsonify({"success": False, "msg": "Inventario no encontrado"}), 404
+        
+        inventario = inventario_result.data[0]
+        
+        local_result = supabase.table("locales").select("nombre, direccion").eq("id_local", inventario["id_local"]).execute()
+        if not local_result.data:
+            return jsonify({"success": False, "msg": "Local no encontrado"}), 404
+        
+        local = local_result.data[0]
+        
         detalles = supabase.table("detalle_pedido").select("id_producto, cantidad").eq("id_pedido", pedido["id_pedido"]).execute().data
         productos = supabase.table("productos").select("id_producto, nombre, unidad, categoria").execute().data
         mapa_productos = {p["id_producto"]: p for p in productos}
@@ -805,9 +1165,11 @@ def descargar_informe(id_informe):
         response.headers['Content-Type'] = 'application/pdf'
         response.headers['Content-Disposition'] = f'attachment; filename=informe_{id_informe}.pdf'
         return response
+        
     except Exception as e:
-        print("❌ Error al generar PDF:", e)
+        print(f"❌ Error al generar PDF para informe {id_informe}: {e}")
         return jsonify({"success": False, "msg": f"Error al generar informe PDF: {e}"})
+
 
 @app.route('/descargar_informes_rango', methods=['POST'])
 def descargar_informes_rango():

@@ -13,36 +13,28 @@ body {
   background: url('../../img/fondo_ichiraku.png') repeat;
 }
 
-/* --- Contenedor principal adaptado al menú lateral --- */
-.main-container {
+/* --- Layout principal --- */
+.layout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* --- Sidebar --- */
+.sidebar {
+  width: 250px;
+  background: rgba(0, 0, 0, 0.9);
+  padding: 20px;
+  border-right: 3px solid #e63900;
+}
+
+/* --- Contenido principal --- */
+.main-content {
   flex: 1;
   padding: 40px 60px;
   display: flex;
-  justify-content: center;
-  align-items: center; /* 🔥 centra vertical y horizontal */
-}
-
-/* --- Tarjeta del panel --- */
-.panel-card {
-  background: rgba(0, 0, 0, 0.75);
-  border: 3px solid #e63900;
-  border-radius: 20px;
-  padding: 40px;
-  width: 90%;
-  max-width: 1100px;
-  margin: 0 auto; /* 🔥 centra horizontalmente */
-  box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
-  text-align: center;
-}
-
-
-/* --- Título principal --- */
-.panel-card h1 {
-  font-size: 3rem;
-  color: #fff;
-  text-shadow: 3px 3px 0 #e63900, -3px -3px 0 #000;
-  letter-spacing: 3px;
-  margin-bottom: 40px;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* --- Caja de búsqueda --- */
@@ -53,40 +45,30 @@ body {
   background: rgba(0, 0, 0, 0.85);
   border: 2px solid #e63900;
   border-radius: 12px;
-  padding: 10px 18px;
+  padding: 15px 25px;
   gap: 20px;
   flex-wrap: wrap;
   width: 80%;
+  max-width: 800px;
   box-shadow: 0 0 15px rgba(230, 57, 0, 0.2);
+  margin-bottom: 25px;
 }
-
 
 .search-box input {
   background: rgba(0, 0, 0, 0.9);
   color: #fff;
   font-weight: bold;
-  text-transform: uppercase;
   border: 2px solid #e63900;
   border-radius: 10px;
-  padding: 12px 16px;
+  padding: 10px 15px;
   text-align: center;
   transition: all 0.3s ease;
   font-family: 'njnaruto';
-  width: 220px;
-  font-size: 1.1rem;
-  outline: none;
-}
-.search-box input {
-  height: 36px;          
-  width: 260px;          
+  width: 200px;
   font-size: 1rem;
-  margin-right: 100px;
+  outline: none;
+  height: 40px;
 }
-.search-box button {
-  height: 36px;          
-}
-
-
 
 .search-box input::placeholder {
   color: #fff;
@@ -104,10 +86,11 @@ body {
   color: white;
   font-family: 'njnaruto';
   border-radius: 10px;
-  padding: 12px 20px;
+  padding: 10px 20px;
   cursor: pointer;
-  font-size: 1.1rem;
+  font-size: 1rem;
   transition: all 0.3s;
+  height: 40px;
 }
 
 .search-box button:hover {
@@ -115,14 +98,15 @@ body {
   transform: scale(1.05);
 }
 
-/* --- 🌀 Contenedor de resultados --- */
+/* --- Contenedor de resultados --- */
 .result-box {
   background: rgba(0, 0, 0, 0.92);
-  margin-top: 25px;
+  margin: 25px 0;
   padding: 25px;
   border: 2px dashed #e63900;
   border-radius: 14px;
   width: 90%;
+  max-width: 1100px;
   box-shadow: 0 2px 15px rgba(230, 57, 0, 0.2);
   color: #fff;
   font-size: 1.2rem;
@@ -135,7 +119,7 @@ body {
   overflow-y: auto;
 }
 
-/* 🌀 Scroll personalizado */
+/* Scroll personalizado */
 .result-box::-webkit-scrollbar {
   width: 8px;
 }
@@ -149,7 +133,7 @@ body {
   background-color: #1a1a1a;
 }
 
-/* --- 🩸 Tarjeta individual del informe --- */
+/* --- Tarjeta individual del informe --- */
 .informe-card {
   background: rgba(0, 0, 0, 0.9);
   border: 2px dashed #e63900;
@@ -167,7 +151,7 @@ body {
   max-width: 340px;
 }
 
-/* 🩸 Hover con efecto Ichiraku */
+/* Hover con efecto Ichiraku */
 .informe-card:hover {
   transform: translateY(-5px);
   border-color: #fff;
@@ -175,10 +159,11 @@ body {
   box-shadow: 0 0 25px rgba(230, 57, 0, 0.4);
 }
 
-/* 📜 Etiquetas internas (ID, fecha, etc.) */
+/* Etiquetas internas */
 .informe-card p {
-  margin: 6px 0;
+  margin: 8px 0;
   font-size: 1.1rem;
+  width: 100%;
 }
 
 .informe-card p span {
@@ -186,24 +171,18 @@ body {
   font-size: 1rem;
   text-shadow: 1px 1px 2px #000;
   display: block;
+  margin-bottom: 5px;
 }
 
-/* 📅 Fecha */
-.informe-card .fecha {
-  font-size: 1rem;
-  color: #fff;
-  opacity: 0.9;
-}
-
-/* 📁 Botón dentro de la tarjeta */
+/* Botón dentro de la tarjeta */
 .informe-card .download-button {
-  margin-top: 10px;
+  margin-top: 15px;
   width: 100%;
   background: #111;
   border: 2px solid #e63900;
   border-radius: 10px;
   color: #fff;
-  padding: 10px 0;
+  padding: 12px 0;
   font-family: 'njnaruto';
   font-size: 1rem;
   cursor: pointer;
@@ -217,39 +196,16 @@ body {
   transform: scale(1.05);
 }
 
-/* --- 📱 Responsivo --- */
-@media (max-width: 1024px) {
-  .panel-card {
-    padding: 30px 25px;
-  }
-
-  .informe-card {
-    flex: 1 1 calc(50% - 25px); /* 2 por fila */
-  }
-}
-
-@media (max-width: 700px) {
-  .informe-card {
-    flex: 1 1 100%; /* 1 por fila */
-  }
-
-  .panel-card h1 {
-    font-size: 2.2rem;
-  }
-
-  .search-box input,
-  .search-box button {
-    width: 100%;
-  }
-}
-/* --- 🎯 Contenedor de botones de descarga --- */
+/* --- Contenedor de botones de descarga --- */
 .download-container {
   display: flex;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
   gap: 15px;
-  margin-top: 30px;
+  margin-top: 20px;
+  width: 90%;
+  max-width: 1100px;
 }
 
 .download-container .download-button {
@@ -263,15 +219,16 @@ body {
   border-radius: 10px;
   color: #fff;
   font-family: 'njnaruto';
-  font-size: 1.1rem;
+  font-size: 1rem;
   cursor: pointer;
   transition: 0.3s;
   box-shadow: 0 0 10px rgba(230, 57, 0, 0.25);
+  min-width: 200px;
 }
 
 .download-container .download-button img {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   filter: brightness(0) invert(1);
 }
 
@@ -279,4 +236,70 @@ body {
   background: #e63900;
   border-color: #fff;
   transform: scale(1.05);
+}
+
+/* --- Responsivo --- */
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 30px 25px;
+  }
+  
+  .informe-card {
+    flex: 1 1 calc(50% - 25px);
+  }
+}
+
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 3px solid #e63900;
+  }
+  
+  .main-content {
+    padding: 20px;
+  }
+  
+  .search-box {
+    width: 95%;
+    flex-direction: column;
+  }
+  
+  .search-box input {
+    width: 100%;
+    margin: 5px 0;
+  }
+  
+  .informe-card {
+    flex: 1 1 100%;
+  }
+  
+  .download-container .download-button {
+    min-width: 150px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-title {
+    font-size: 1.8rem;
+  }
+  
+  .search-box input,
+  .search-box button {
+    width: 100%;
+  }
+  
+  .download-container {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .download-container .download-button {
+    width: 100%;
+  }
 }

@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
 
-  <meta charset="UTF-8">
+    <meta charset="UTF-8">
     <title>Ichiraku Ramen - Administrador de reportes</title>
 </head>
 <body>
@@ -50,21 +50,34 @@
 
             <!-- Caja de busqueda -->
             <div class="search-box">
-            <form id="searchForm">
-                <input type="text" id="id_informe" placeholder="ID Informe ...">
-                <input type="text" id="datePicker" placeholder="Seleccionar fecha..." readonly>
-                <button type="submit">Buscar</button>
-            </form>
+                <form id="searchForm">
+                    <input type="text" id="id_informe" placeholder="ID Informe ...">
+                    <input type="text" id="datePicker" placeholder="Seleccionar fecha..." readonly>
+                    <button type="submit">Buscar</button>
+                </form>
             </div>
 
             <div id="resultEmpleado" class="result-box">
-                <p>No hay informes generados</p>
-            </div>
+                {% if ultimo_informe %}
+                <div class="download-container">
+                    <div class="informe-card">
+                    <p><span>ID Informe:</span> {{ ultimo_informe.id_informe }}</p>
+                    <p><span>ID Pedido:</span> {{ ultimo_informe.id_inf_pedido }}</p>
+                    <p><span>Fecha de creación:</span> {{ ultimo_informe.fecha_creacion }}</p>
+                    <button class="download-button" onclick="descargarInforme({{ ultimo_informe.id_informe }})">
+                        Descargar PDF
+                    </button>
+                    </div>
+                </div>
+                {% else %}
+                <p>No hay informes generados aún.</p>
+                {% endif %}
+            </div>   
 
-            <!-- 🔥 Aquí van tus botones -->
+            <!-- 🔥 Botones de acción -->
             <div class="download-container">
                 <button class="download-button" id="genDayBtn">
-                    <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Generar"> Generar informe
+                    <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Generar"> Generar informe diario
                 </button>
 
                 <button class="download-button" id="downloadSemBtn">
@@ -79,15 +92,13 @@
                     <img src="{{ url_for('static', filename='image/descargar.png') }}" alt="Descargar"> Descargar anual
                 </button>
             </div>
-            </div>
 
         </main>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/Global_js/alertaNinja.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/Ad_js/Dinformes.js') }}"></script>
 </body>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="{{ url_for('static', filename='js/Global_js/alertaNinja.js') }}"></script>
-<script src="{{ url_for('static', filename='js/Ad_js/Dinformes.js') }}"></script>
-
-
 </html>
