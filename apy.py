@@ -265,54 +265,11 @@ def logout():
 # RUTAS DE ADMINISTRADOR - INICIO Y GESTIÓN
 # ==============================================================================
 
-@app.route('/debug-frontend-notificaciones')
-@login_requerido(rol='Administrador')
-def debug_frontend_notificaciones():
-    try:
-        print("=== DEBUG FRONTEND NOTIFICACIONES ===")
-        
-        # Ejecutar las funciones de notificaciones
-        generar_notificaciones_caducidad()
-        eliminar_notificaciones_caducadas()
-        
-        # Obtener notificaciones como lo hace Ad_Inicio
-        todas_response = supabase.table("notificaciones").select("*").order("fecha", desc=True).execute()
-        todas = todas_response.data if todas_response.data else []
-        
-        print(f"📊 Notificaciones en BD: {len(todas)}")
-        for i, noti in enumerate(todas):
-            print(f"  {i+1}. {noti['mensaje']} - Leído: {noti.get('leido', False)}")
-        
-        # Aplicar el mismo filtro que Ad_Inicio
-        todas_filtradas = [n for n in todas if n.get("mensaje") and n["mensaje"].strip() != ""]
-        print(f"📊 Notificaciones después de filtrar: {len(todas_filtradas)}")
-        
-        # Tomar las primeras 3 como hace Ad_Inicio
-        notificaciones = todas_filtradas[:3]
-        total_notificaciones = len(todas_filtradas)
-        restantes = max(0, total_notificaciones - 3)
-        
-        print(f"🎯 Notificaciones a mostrar: {len(notificaciones)}")
-        print(f"📈 Total: {total_notificaciones}, Restantes: {restantes}")
-        
-        return jsonify({
-            "notificaciones_en_bd": len(todas),
-            "notificaciones_filtradas": len(todas_filtradas),
-            "notificaciones_a_mostrar": len(notificaciones),
-            "detalles": notificaciones,
-            "total": total_notificaciones,
-            "restantes": restantes
-        })
-        
-    except Exception as e:
-        print(f"❌ Error en debug frontend: {str(e)}")
-        import traceback
-        return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
-    
 @app.route('/Ad_Inicio', methods=['GET', 'POST'])
 @login_requerido(rol='Administrador')
 def Ad_Inicio():
     try:
+        print("=== AD_INICIO EJECUTÁNDOSE ===")
         generar_notificaciones_caducidad()
         eliminar_notificaciones_caducadas()
         hoy = datetime.now().date()
@@ -320,13 +277,25 @@ def Ad_Inicio():
         todas = todas_response.data if todas_response.data else []
         todas = [n for n in todas if n.get("mensaje") and n["mensaje"].strip() != ""]
 
+        # DEBUG: Agregar una notificación de prueba SIEMPRE
+        notificacion_prueba = {
+            "mensaje": "🔔 NOTIFICACIÓN DE PRUEBA - Sistema funcionando",
+            "fecha_formateada": datetime.now().strftime("%d de %B de %Y, %I:%M %p"),
+            "leido": False
+        }
+        todas.insert(0, notificacion_prueba)  # Insertar al principio
+
+        print(f"🎯 Notificaciones totales (incluyendo prueba): {len(todas)}")
+        for i, noti in enumerate(todas):
+            print(f"  {i+1}. {noti['mensaje']}")
+
         try:
             locale.setlocale(locale.LC_TIME, "es_ES.utf8")
         except:
             locale.setlocale(locale.LC_TIME, "es_CO.utf8")
 
         for noti in todas:
-            if noti.get("fecha"):
+            if noti.get("fecha") and not noti.get("fecha_formateada"):
                 try:
                     fecha_obj = datetime.fromisoformat(noti["fecha"])
                     noti["fecha_formateada"] = fecha_obj.strftime("%d de %B de %Y, %I:%M %p").capitalize()
@@ -336,6 +305,8 @@ def Ad_Inicio():
         notificaciones = todas[:3]
         total_notificaciones = len(todas)
         restantes = max(0, total_notificaciones - 3)
+
+        print(f"📤 Enviando al template: {len(notificaciones)} notificaciones")
 
         http_response = make_response(render_template(
             "Ad_templates/Ad_Inicio.html",
@@ -349,7 +320,63 @@ def Ad_Inicio():
         return http_response
     except Exception as e:
         print("❌ Error al cargar página de inicio:", e)
-        return render_template("Ad_templates/Ad_Inicio.html", notificaciones=[], restantes=0), 500
+        return render_template("Ad_templates/Ad_Inicio.html", notificaciones=[], restantes=0), 500@app.route('/Ad_Inicio', methods=['GET', 'POST'])
+@login_requerido(rol='Administrador')
+def Ad_Inicio():
+    try:
+        print("=== AD_INICIO EJECUTÁNDOSE ===")
+        generar_notificaciones_caducidad()
+        eliminar_notificaciones_caducadas()
+        hoy = datetime.now().date()
+        todas_response = supabase.table("notificaciones").select("*").order("fecha", desc=True).execute()
+        todas = todas_response.data if todas_response.data else []
+        todas = [n for n in todas if n.get("mensaje") and n["mensaje"].strip() != ""]
+
+        # DEBUG: Agregar una notificación de prueba SIEMPRE
+        notificacion_prueba = {
+            "mensaje": "🔔 NOTIFICACIÓN DE PRUEBA - Sistema funcionando",
+            "fecha_formateada": datetime.now().strftime("%d de %B de %Y, %I:%M %p"),
+            "leido": False
+        }
+        todas.insert(0, notificacion_prueba)  # Insertar al principio
+
+        print(f"🎯 Notificaciones totales (incluyendo prueba): {len(todas)}")
+        for i, noti in enumerate(todas):
+            print(f"  {i+1}. {noti['mensaje']}")
+
+        try:
+            locale.setlocale(locale.LC_TIME, "es_ES.utf8")
+        except:
+            locale.setlocale(locale.LC_TIME, "es_CO.utf8")
+
+        for noti in todas:
+            if noti.get("fecha") and not noti.get("fecha_formateada"):
+                try:
+                    fecha_obj = datetime.fromisoformat(noti["fecha"])
+                    noti["fecha_formateada"] = fecha_obj.strftime("%d de %B de %Y, %I:%M %p").capitalize()
+                except:
+                    noti["fecha_formateada"] = noti["fecha"]
+
+        notificaciones = todas[:3]
+        total_notificaciones = len(todas)
+        restantes = max(0, total_notificaciones - 3)
+
+        print(f"📤 Enviando al template: {len(notificaciones)} notificaciones")
+
+        http_response = make_response(render_template(
+            "Ad_templates/Ad_Inicio.html",
+            notificaciones=notificaciones,
+            restantes=restantes,
+            total_notificaciones=total_notificaciones
+        ))
+        http_response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+        http_response.headers['Pragma'] = 'no-cache'
+        http_response.headers['Expires'] = '-1'
+        return http_response
+    except Exception as e:
+        print("❌ Error al cargar página de inicio:", e)
+        return render_template("Ad_templates/Ad_Inicio.html", notificaciones=[], restantes=0), 500s
+
 
 # ==============================================================================
 # GESTIÓN DE EMPLEADOS (ADMIN)
