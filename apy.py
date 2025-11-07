@@ -270,44 +270,84 @@ def logout():
 def Ad_Inicio():
     try:
         print("=== AD_INICIO EJECUTÁNDOSE ===")
+        
+        # Generar notificaciones de caducidad
         generar_notificaciones_caducidad()
         eliminar_notificaciones_caducadas()
-        hoy = datetime.now().date()
-        todas_response = supabase.table("notificaciones").select("*").order("fecha", desc=True).execute()
-        todas = todas_response.data if todas_response.data else []
-        todas = [n for n in todas if n.get("mensaje") and n["mensaje"].strip() != ""]
+        
+        # CONSULTA CORREGIDA: Obtener notificaciones de la base de datos
+        try:
+            print("🔍 Buscando notificaciones en la base de datos...")
+            todas_response = supabase.table("notificaciones").select("*").order("fecha", desc=True).execute()
+            todas = todas_response.data if todas_response.data else []
+            print(f"✅ Notificaciones encontradas en BD: {len(todas)}")
+            
+            # DEBUG: Mostrar todas las notificaciones obtenidas
+            for i, noti in enumerate(todas):
+                print(f"  📋 {i+1}. ID: {noti.get('id_notificaciones')} - Mensaje: {noti.get('mensaje')} - Fecha: {noti.get('fecha')}")
+                
+        except Exception as db_error:
+            print(f"❌ Error al consultar notificaciones: {db_error}")
+            todas = []
 
-        # DEBUG: Agregar una notificación de prueba SIEMPRE
-        notificacion_prueba = {
-            "mensaje": "🔔 NOTIFICACIÓN DE PRUEBA - Sistema funcionando",
-            "fecha_formateada": datetime.now().strftime("%d de %B de %Y, %I:%M %p"),
-            "leido": False
-        }
-        todas.insert(0, notificacion_prueba)  # Insertar al principio
+        # Filtrar notificaciones vacías (pero ser más permisivo)
+        todas_filtradas = []
+        for n in todas:
+            mensaje = n.get("mensaje", "")
+            # Solo filtrar si el mensaje está completamente vacío o es None
+            if mensaje is not None and str(mensaje).strip() != "":
+                todas_filtradas.append(n)
+            else:
+                print(f"⚠️ Notificación filtrada por mensaje vacío: ID {n.get('id_notificaciones')}")
+        
+        print(f"📊 Notificaciones después de filtrar: {len(todas_filtradas)}")
+        
+        # AGREGAR NOTIFICACIÓN DE PRUEBA SOLO SI NO HAY NOTIFICACIONES REALES
+        if not todas_filtradas:
+            print("ℹ️ No hay notificaciones reales, agregando de prueba")
+            notificacion_prueba = {
+                "mensaje": "🔔 NOTIFICACIÓN DE PRUEBA - Sistema funcionando",
+                "fecha_formateada": datetime.now().strftime("%d de %B de %Y, %I:%M %p"),
+                "leido": False
+            }
+            todas_filtradas.append(notificacion_prueba)
+        else:
+            print("✅ Usando notificaciones reales de la base de datos")
 
-        print(f"🎯 Notificaciones totales (incluyendo prueba): {len(todas)}")
-        for i, noti in enumerate(todas):
-            print(f"  {i+1}. {noti['mensaje']}")
-
+        # Configurar locale para formato en español
         try:
             locale.setlocale(locale.LC_TIME, "es_ES.utf8")
         except:
-            locale.setlocale(locale.LC_TIME, "es_CO.utf8")
+            try:
+                locale.setlocale(locale.LC_TIME, "es_CO.utf8")
+            except:
+                print("⚠️ No se pudo configurar locale español")
 
-        for noti in todas:
+        # Formatear fechas
+        for noti in todas_filtradas:
             if noti.get("fecha") and not noti.get("fecha_formateada"):
                 try:
-                    fecha_obj = datetime.fromisoformat(noti["fecha"])
+                    # Manejar diferentes formatos de fecha
+                    fecha_str = noti["fecha"]
+                    if 'T' in fecha_str:
+                        fecha_obj = datetime.fromisoformat(fecha_str.replace('Z', '+00:00'))
+                    else:
+                        fecha_obj = datetime.strptime(fecha_str, "%Y-%m-%d %H:%M:%S")
+                    
                     noti["fecha_formateada"] = fecha_obj.strftime("%d de %B de %Y, %I:%M %p").capitalize()
-                except:
+                except Exception as date_error:
+                    print(f"⚠️ Error al formatear fecha {noti['fecha']}: {date_error}")
                     noti["fecha_formateada"] = noti["fecha"]
 
-        notificaciones = todas[:3]
-        total_notificaciones = len(todas)
+        # Preparar notificaciones para mostrar (máximo 3)
+        notificaciones = todas_filtradas[:3]
+        total_notificaciones = len(todas_filtradas)
         restantes = max(0, total_notificaciones - 3)
 
-        print(f"📤 Enviando al template: {len(notificaciones)} notificaciones")
+        print(f"📤 Enviando al template: {len(notificaciones)} notificaciones de {total_notificaciones} totales")
+        print(f"🔢 Restantes: {restantes}")
 
+        # Crear respuesta con headers para evitar cache
         http_response = make_response(render_template(
             "Ad_templates/Ad_Inicio.html",
             notificaciones=notificaciones,
@@ -318,10 +358,15 @@ def Ad_Inicio():
         http_response.headers['Pragma'] = 'no-cache'
         http_response.headers['Expires'] = '-1'
         return http_response
+        
     except Exception as e:
-        print("❌ Error al cargar página de inicio:", e)
-        return render_template("Ad_templates/Ad_Inicio.html", notificaciones=[], restantes=0), 500
-
+        print(f"❌ Error crítico al cargar página de inicio: {e}")
+        import traceback
+        traceback.print_exc()
+        return render_template("Ad_templates/Ad_Inicio.html", 
+                             notificaciones=[], 
+                             restantes=0, 
+                             total_notificaciones=0), 500
 
 # ==============================================================================
 # GESTIÓN DE EMPLEADOS (ADMIN)
