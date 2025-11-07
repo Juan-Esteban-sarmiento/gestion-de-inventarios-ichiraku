@@ -54,102 +54,265 @@ function descargarInforme(id) {
     setTimeout(() => window.open(`/descargar_informe/${id}`, '_blank'), 800);
 }
 
-// 🕓 Descargar informes por rango
+// 🕓 Descargar informes por rango - MEJORADO CON CALENDARIOS
 async function descargarPorRango(tipo) {
     let fecha_inicio, fecha_fin;
 
     if (tipo === 'semana') {
+        // Usar un datepicker que permita seleccionar rango
         const { value: rango } = await Swal.fire({
-            title: '<span style="font-family:njnaruto; color:#fff;">Selecciona el rango de fechas</span>',
+            title: '<span style="font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; color:#fff;">Selecciona el rango de la semana</span>',
             html: `
-                <input type="date" id="inicio" class="swal2-input" style="background:#111; color:#fff; border:2px solid #e60000; font-family:njnaruto;">
-                <input type="date" id="fin" class="swal2-input" style="background:#111; color:#fff; border:2px solid #e60000; font-family:njnaruto;">
+                <div style="text-align: left; margin-bottom: 15px; margin-right: 100px;">
+                    <label style="color: #fff; display: block; margin-bottom: 5px;">Fecha de inicio:</label>
+                    <input type="date" id="inicio" class="swal2-input" style="background:#111; color:#fff; border:2px solid #e60000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; width: 100%;">
+                </div>
+                <div style="text-align: left; margin-right: 100px;">
+                    <label style="color: #fff; display: block; margin-bottom: 5px;">Fecha de fin:</label>
+                    <input type="date" id="fin" class="swal2-input" style="background:#111; color:#fff; border:2px solid #e60000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; width: 100%;">
+                </div>
             `,
             background: '#000',
             color: '#fff',
-            confirmButtonText: '<span style="font-family:njnaruto;">Descargar</span>',
+            confirmButtonText: '<span style="font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif;">Descargar</span>',
             confirmButtonColor: '#e60000',
+            cancelButtonText: '<span style="font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif;">Cancelar</span>',
+            showCancelButton: true,
             buttonsStyling: false,
-            didRender: () => {
-                const btn = Swal.getConfirmButton();
-                if (btn) {
-                    btn.style.background = '#e60000';
-                    btn.style.color = '#fff';
-                    btn.style.fontWeight = 'bold';
-                    btn.style.border = '2px solid #ff0000ff';
-                    btn.style.borderRadius = '8px';
-                    btn.style.padding = '8px 16px';
-                    btn.style.transition = '0.3s';
-                    btn.addEventListener('mouseenter', () => (btn.style.background = '#ff0000ff'));
-                    btn.addEventListener('mouseleave', () => (btn.style.background = '#e60000'));
+            didOpen: () => {
+                // Establecer fechas por defecto (última semana) y activar flatpickr
+                const hoy = new Date();
+                const inicioSemana = new Date(hoy);
+                inicioSemana.setDate(hoy.getDate() - 7);
+
+                // Inicializar flatpickr en los inputs dentro del modal.
+                // (Asumimos que flatpickr ya está cargado en la página)
+                try {
+                    // Crear pickers con formato Y-m-d y localización en español
+                    flatpickr('#inicio', {
+                        dateFormat: 'Y-m-d',
+                        locale: 'es',
+                        maxDate: 'today',
+                        defaultDate: inicioSemana.toISOString().split('T')[0],
+                        allowInput: true
+                    });
+
+                    flatpickr('#fin', {
+                        dateFormat: 'Y-m-d',
+                        locale: 'es',
+                        maxDate: 'today',
+                        defaultDate: hoy.toISOString().split('T')[0],
+                        allowInput: true
+                    });
+                } catch (e) {
+                    // Si flatpickr no está disponible, usar los inputs nativos como fallback
+                    document.getElementById('inicio').value = inicioSemana.toISOString().split('T')[0];
+                    document.getElementById('fin').value = hoy.toISOString().split('T')[0];
                 }
             },
-            preConfirm: () => ({
-                inicio: document.getElementById('inicio').value,
-                fin: document.getElementById('fin').value
-            })
+            didRender: () => {
+                const btnConfirm = Swal.getConfirmButton();
+                const btnCancel = Swal.getCancelButton();
+                
+                if (btnConfirm) {
+                    btnConfirm.style.background = '#e60000';
+                    btnConfirm.style.color = '#fff';
+                    btnConfirm.style.fontWeight = 'bold';
+                    btnConfirm.style.border = '2px solid #ff0000ff';
+                    btnConfirm.style.borderRadius = '8px';
+                    btnConfirm.style.padding = '8px 16px';
+                    btnConfirm.style.transition = '0.3s';
+                    btnConfirm.addEventListener('mouseenter', () => (btnConfirm.style.background = '#ff0000ff'));
+                    btnConfirm.addEventListener('mouseleave', () => (btnConfirm.style.background = '#e60000'));
+                }
+                
+                if (btnCancel) {
+                    btnCancel.style.background = '#555';
+                    btnCancel.style.color = '#fff';
+                    btnCancel.style.border = '2px solid #777';
+                    btnCancel.style.borderRadius = '8px';
+                    btnCancel.style.padding = '8px 16px';
+                }
+            },
+            preConfirm: () => {
+                const inicio = document.getElementById('inicio').value;
+                const fin = document.getElementById('fin').value;
+                
+                if (!inicio || !fin) {
+                    Swal.showValidationMessage('Debes seleccionar ambas fechas');
+                    return false;
+                }
+                
+                if (new Date(inicio) > new Date(fin)) {
+                    Swal.showValidationMessage('La fecha de inicio no puede ser mayor a la fecha de fin');
+                    return false;
+                }
+                
+                return { inicio, fin };
+            }
         });
-        if (!rango?.inicio || !rango?.fin) return;
+        
+        if (!rango) return;
         fecha_inicio = `${rango.inicio}T00:00:00`;
         fecha_fin = `${rango.fin}T23:59:59`;
 
     } else if (tipo === 'mes') {
+        // Usar un input HTML y activar flatpickr para mostrar un calendario de mes
         const { value: mes } = await Swal.fire({
-            title: '<span style="font-family:njnaruto; color:#fff;">Selecciona el mes</span>',
-            input: 'month',
-            inputLabel: 'Mes a descargar',
+            title: '<span style="font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; color:#fff;">Selecciona el mes y año</span>',
+            html: `
+                <div style="text-align: left; margin-bottom: 15px; margin-right: 100px;">
+                    <label style="color: #fff; display: block; margin-bottom: 5px;">Mes a descargar:</label>
+                    <input type="text" id="mesInput" class="swal2-input" style="background:#111; color:#fff; border:2px solid #e60000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; width: 100%;" placeholder="YYYY-MM">
+                </div>
+            `,
             background: '#000',
             color: '#fff',
-            confirmButtonText: '<span style="font-family:njnaruto;">Descargar</span>',
+            confirmButtonText: '<span style="font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif;">Descargar</span>',
             confirmButtonColor: '#e60000',
+            cancelButtonText: '<span style="font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif;">Cancelar</span>',
+            showCancelButton: true,
             buttonsStyling: false,
-            didRender: () => {
-                const btn = Swal.getConfirmButton();
-                if (btn) {
-                    btn.style.background = '#e60000';
-                    btn.style.color = '#fff';
-                    btn.style.fontWeight = 'bold';
-                    btn.style.border = '2px solid #ff0000ff';
-                    btn.style.borderRadius = '8px';
-                    btn.style.padding = '8px 16px';
-                    btn.style.transition = '0.3s';
-                    btn.addEventListener('mouseenter', () => (btn.style.background = '#ff0000ff'));
-                    btn.addEventListener('mouseleave', () => (btn.style.background = '#e60000'));
+            didOpen: () => {
+                // Inicializar flatpickr en el input del mes; si no está disponible, usar input nativo 'month' como fallback
+                try {
+                    // Intentar usar flatpickr; si el plugin monthSelectPlugin está disponible, lo usamos para una selección más amigable
+                    const opts = {
+                        dateFormat: 'Y-m',
+                        locale: 'es',
+                        defaultDate: new Date(),
+                        allowInput: true
+                    };
+
+                    // Si existe monthSelectPlugin, intentar incorporarlo
+                    if (typeof monthSelectPlugin !== 'undefined') {
+                        opts['plugins'] = [new monthSelectPlugin({ shorthand: true, dateFormat: 'Y-m' })];
+                    }
+
+                    flatpickr('#mesInput', opts);
+                    // Si flatpickr inicializa, aseguramos que el valor por defecto sea YYYY-MM
+                    const el = document.getElementById('mesInput');
+                    if (el && !el.value) el.value = new Date().toISOString().slice(0, 7);
+                } catch (e) {
+                    // Fallback: usar input tipo month si flatpickr no está cargado
+                    try {
+                        const input = document.getElementById('mesInput');
+                        input.type = 'month';
+                        input.value = new Date().toISOString().slice(0, 7);
+                    } catch (err) {
+                        // último recurso: rellenar texto con YYYY-MM
+                        const input = document.getElementById('mesInput');
+                        if (input) input.value = new Date().toISOString().slice(0, 7);
+                    }
                 }
+            },
+            didRender: () => {
+                const btnConfirm = Swal.getConfirmButton();
+                const btnCancel = Swal.getCancelButton();
+                
+                if (btnConfirm) {
+                    btnConfirm.style.background = '#e60000';
+                    btnConfirm.style.color = '#fff';
+                    btnConfirm.style.fontWeight = 'bold';
+                    btnConfirm.style.border = '2px solid #ff0000ff';
+                    btnConfirm.style.borderRadius = '8px';
+                    btnConfirm.style.padding = '8px 16px';
+                    btnConfirm.style.transition = '0.3s';
+                    btnConfirm.addEventListener('mouseenter', () => (btnConfirm.style.background = '#ff0000ff'));
+                    btnConfirm.addEventListener('mouseleave', () => (btnConfirm.style.background = '#e60000'));
+                }
+                
+                if (btnCancel) {
+                    btnCancel.style.background = '#555';
+                    btnCancel.style.color = '#fff';
+                    btnCancel.style.border = '2px solid #777';
+                    btnCancel.style.borderRadius = '8px';
+                    btnCancel.style.padding = '8px 16px';
+                }
+            },
+            preConfirm: () => {
+                const val = document.getElementById('mesInput').value;
+                if (!val) {
+                    Swal.showValidationMessage('Debes seleccionar un mes');
+                    return false;
+                }
+                // Normalizar a YYYY-MM (si se seleccionó una fecha completa, tomar los primeros 7 caracteres)
+                const m = val.toString().slice(0, 7);
+                const parts = m.split('-');
+                if (parts.length !== 2 || parts[0].length !== 4) {
+                    Swal.showValidationMessage('Formato de mes inválido');
+                    return false;
+                }
+                return m;
             }
         });
+
         if (!mes) return;
-        fecha_inicio = mes;
+        const [year, month] = mes.split('-');
+        const ultimoDia = new Date(year, month, 0).getDate();
+
+        fecha_inicio = `${mes}-01T00:00:00`;
+        fecha_fin = `${year}-${month}-${ultimoDia.toString().padStart(2, '0')}T23:59:59`;
 
     } else if (tipo === 'anio') {
+        // Usar input number para año
         const { value: anio } = await Swal.fire({
-            title: '<span style="font-family:njnaruto; color:#fff;">Selecciona el año</span>',
+            title: '<span style="font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; color:#fff;">Selecciona el año</span>',
             input: 'number',
             inputLabel: 'Año a descargar',
-            inputAttributes: { min: 2000, max: 2100 },
+            inputAttributes: { 
+                min: 2020, 
+                max: 2030,
+                step: 1
+            },
             inputValue: new Date().getFullYear(),
             background: '#000',
             color: '#fff',
-            confirmButtonText: '<span style="font-family:njnaruto;">Descargar</span>',
+            confirmButtonText: '<span style="font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif;">Descargar</span>',
             confirmButtonColor: '#e60000',
+            cancelButtonText: '<span style="font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif;">Cancelar</span>',
+            showCancelButton: true,
             buttonsStyling: false,
             didRender: () => {
-                const btn = Swal.getConfirmButton();
-                if (btn) {
-                    btn.style.background = '#e60000';
-                    btn.style.color = '#fff';
-                    btn.style.fontWeight = 'bold';
-                    btn.style.border = '2px solid #ff0000ff';
-                    btn.style.borderRadius = '8px';
-                    btn.style.padding = '8px 16px';
-                    btn.style.transition = '0.3s';
-                    btn.addEventListener('mouseenter', () => (btn.style.background = '#ff0000ff'));
-                    btn.addEventListener('mouseleave', () => (btn.style.background = '#e60000'));
+                const btnConfirm = Swal.getConfirmButton();
+                const btnCancel = Swal.getCancelButton();
+                
+                if (btnConfirm) {
+                    btnConfirm.style.background = '#e60000';
+                    btnConfirm.style.color = '#fff';
+                    btnConfirm.style.fontWeight = 'bold';
+                    btnConfirm.style.border = '2px solid #ff0000ff';
+                    btnConfirm.style.borderRadius = '8px';
+                    btnConfirm.style.padding = '8px 16px';
+                    btnConfirm.style.transition = '0.3s';
+                    btnConfirm.addEventListener('mouseenter', () => (btnConfirm.style.background = '#ff0000ff'));
+                    btnConfirm.addEventListener('mouseleave', () => (btnConfirm.style.background = '#e60000'));
                 }
+                
+                if (btnCancel) {
+                    btnCancel.style.background = '#555';
+                    btnCancel.style.color = '#fff';
+                    btnCancel.style.border = '2px solid #777';
+                    btnCancel.style.borderRadius = '8px';
+                    btnCancel.style.padding = '8px 16px';
+                }
+            },
+            preConfirm: (value) => {
+                if (!value || value < 2020 || value > 2030) {
+                    Swal.showValidationMessage('Por favor ingresa un año válido entre 2020 y 2030');
+                    return false;
+                }
+                return value;
             }
         });
+        
         if (!anio) return;
-        fecha_inicio = anio.toString();
+        fecha_inicio = `${anio}-01-01T00:00:00`;
+        fecha_fin = `${anio}-12-31T23:59:59`;
+    }
+
+    if (!fecha_inicio || !fecha_fin) {
+        return;
     }
 
     alertaNinja('info', 'Generando informe', 'Por favor espera mientras se crea el PDF...');
@@ -158,27 +321,44 @@ async function descargarPorRango(tipo) {
         const res = await fetch('/descargar_informes_rango', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tipo, fecha_inicio, fecha_fin })
+            body: JSON.stringify({ 
+                tipo: tipo,
+                fecha_inicio: fecha_inicio,
+                fecha_fin: fecha_fin 
+            })
         });
         
-        if (!res.ok) throw new Error('Respuesta no válida');
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error("❌ Error del servidor:", errorText);
+            throw new Error(`Error del servidor: ${res.status}`);
+        }
         
-        const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `informe_unificado_${tipo}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
+        // Verificar si la respuesta es un PDF
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/pdf')) {
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `informe_${tipo}_${new Date().toISOString().split('T')[0]}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            alertaNinja('success', 'Éxito', `Informe ${tipo} descargado correctamente.`);
+        } else {
+            // Si no es PDF, puede ser un error en JSON
+            const errorData = await res.json();
+            console.error("❌ Error del servidor:", errorData);
+            alertaNinja('error', 'Error', errorData.msg || 'No se pudo generar el informe.');
+        }
         
     } catch (error) {
         console.error("❌ Error al descargar:", error);
         alertaNinja('error', 'Error', 'No se pudo generar o descargar el informe.');
     }
-}
-
+};
 // Reemplazar la función de generar informe diario
 $('#genDayBtn').click(() => {
     Swal.fire({

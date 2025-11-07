@@ -769,7 +769,6 @@ def generar_pdf_consolidado(informe_id, pedidos):
         resumen_data = [
             ["🗓️ Fecha", datetime.now().strftime("%d/%m/%Y")],
             ["📦 Total de Pedidos", str(len(pedidos))],
-            ["🍜 Total de Platos Servidos", str(total_productos)],
             ["⏰ Horario de Actividad", f"{hora_primero} - {hora_ultimo}"],
             ["🏪 Locales Activos", str(len(locales_participantes))],
             ["📍 Locales", ", ".join(locales_participantes) if locales_participantes else "No especificado"]
@@ -1318,97 +1317,337 @@ def descargar_informe(id_informe):
         print(f"❌ Error al generar PDF para informe {id_informe}: {e}")
         return jsonify({"success": False, "msg": f"Error al generar informe PDF: {e}"})
 
-
 @app.route('/descargar_informes_rango', methods=['POST'])
 def descargar_informes_rango():
     try:
         data = request.get_json()
         tipo = data.get("tipo")
-        ahora = datetime.now()
+        fecha_inicio = data.get("fecha_inicio")
+        fecha_fin = data.get("fecha_fin")
+        
+        print(f"📅 Generando informe {tipo} desde {fecha_inicio} hasta {fecha_fin}")
+        
+        # Validar que tenemos los datos necesarios
+        if not tipo:
+            return jsonify({"success": False, "msg": "Tipo de informe no especificado."})
+        
+        if not fecha_inicio or not fecha_fin:
+            return jsonify({"success": False, "msg": "Fechas de rango no especificadas."})
 
-        if tipo == "semana":
-            inicio = ahora - timedelta(days=ahora.weekday())
-            fin = inicio + timedelta(days=6)
-            titulo = "INFORME UNIFICADO SEMANAL"
-        elif tipo == "mes":
-            _, dias_mes = calendar.monthrange(ahora.year, ahora.month)
-            inicio = datetime(ahora.year, ahora.month, 1)
-            fin = datetime(ahora.year, ahora.month, dias_mes)
-            titulo = "INFORME UNIFICADO MENSUAL"
-        elif tipo == "anio":
-            inicio = datetime(ahora.year, 1, 1)
-            fin = datetime(ahora.year, 12, 31, 23, 59, 59)
-            titulo = "INFORME UNIFICADO ANUAL"
-        else:
-            return jsonify({"success": False, "msg": "Tipo inválido."})
-
+        # Obtener informes del rango de fechas
         informes = supabase.table("informe") \
             .select("*") \
-            .gte("fecha_creacion", inicio.isoformat()) \
-            .lte("fecha_creacion", fin.isoformat()) \
-            .execute().data
+            .gte("fecha_creacion", fecha_inicio) \
+            .lte("fecha_creacion", fecha_fin) \
+            .order("fecha_creacion", desc=True) \
+            .execute()
 
-        if not informes:
-            return jsonify({"success": False, "msg": "No se encontraron informes."})
+        if not informes.data:
+            return jsonify({"success": False, "msg": "No se encontraron informes en el rango especificado."})
+
+        print(f"📊 Encontrados {len(informes.data)} informes en el rango")
 
         buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        doc = SimpleDocTemplate(buffer, pagesize=letter,
+                                leftMargin=30, rightMargin=30, topMargin=40, bottomMargin=40)
         styles = getSampleStyleSheet()
         elements = []
 
-        elements.append(Paragraph(f"<b><font color='#e63900' size=18>🍥 {titulo}</font></b>", styles['Title']))
+        # ==================== ENCABEZADO ====================
+        # Título según el tipo
+        if tipo == "semana":
+            titulo = "INFORME SEMANAL CONSOLIDADO"
+        elif tipo == "mes":
+            titulo = "INFORME MENSUAL CONSOLIDADO"
+        elif tipo == "anio":
+            titulo = "INFORME ANUAL CONSOLIDADO"
+        else:
+            titulo = "INFORME CONSOLIDADO"
+
+        elements.append(Paragraph(f"<font size=18 color='#e63900'><b>🍜 {titulo}</b></font>", styles['Heading1']))
+        
+        # Información del rango de fechas
+        fecha_inicio_obj = datetime.fromisoformat(fecha_inicio.replace('T', ' '))
+        fecha_fin_obj = datetime.fromisoformat(fecha_fin.replace('T', ' '))
+        
+        elements.append(Paragraph(
+            f"<b>Período:</b> {fecha_inicio_obj.strftime('%d/%m/%Y')} - {fecha_fin_obj.strftime('%d/%m/%Y')}",
+            styles['Normal']
+        ))
+        elements.append(Paragraph(f"<b>Total de informes:</b> {len(informes.data)}", styles['Normal']))
+        
+        # Línea decorativa
+        elements.append(Spacer(1, 10))
+        elements.append(Table([[""]], colWidths=[500], style=[
+            ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#e63900")),
+        ]))
         elements.append(Spacer(1, 20))
 
-        for inf in informes:
-            pedido = supabase.table("pedido").select("*").eq("id_pedido", inf["id_inf_pedido"]).single().execute().data
-            if not pedido:
+        # ==================== RESUMEN GENERAL ====================
+        elements.append(Paragraph("<b><font color='#e63900' size=14>📊 RESUMEN GENERAL</font></b>", styles['Heading2']))
+        
+        total_pedidos = 0
+        total_productos = 0
+        categorias_totales = {}
+        locales_participantes = set()
+        todos_productos_detallados = []
+
+        # Procesar TODOS los informes para obtener estadísticas consolidadas
+        for inf in informes.data:
+            try:
+                # Si es un informe consolidado, obtener pedidos del día
+                if inf.get("tipo") == "diario_consolidado":
+                    fecha_inf = datetime.fromisoformat(inf["fecha_creacion"]).date()
+                    
+                    # Obtener todos los pedidos de ese día
+                    pedidos_dia = supabase.table("pedido").select("*").execute().data
+                    pedidos_dia = [p for p in pedidos_dia if datetime.fromisoformat(p["fecha_pedido"]).date() == fecha_inf]
+                    
+                    total_pedidos += len(pedidos_dia)
+                    
+                    # Procesar cada pedido del día
+                    for pedido in pedidos_dia:
+                        detalles = supabase.table("detalle_pedido").select("id_producto, cantidad")\
+                            .eq("id_pedido", pedido["id_pedido"]).execute().data
+                        
+                        # Obtener información del local
+                        inventario_result = supabase.table("inventario").select("id_local")\
+                            .eq("id_inventario", pedido["id_inventario"]).execute()
+                        
+                        local_nombre = "No especificado"
+                        if inventario_result.data:
+                            local_result = supabase.table("locales").select("nombre")\
+                                .eq("id_local", inventario_result.data[0]["id_local"]).execute()
+                            if local_result.data:
+                                local_nombre = local_result.data[0]['nombre']
+                                locales_participantes.add(local_nombre)
+                        
+                        # Procesar cada detalle del pedido
+                        for detalle in detalles:
+                            total_productos += detalle['cantidad']
+                            
+                            # Obtener información del producto
+                            producto_result = supabase.table("productos").select("nombre, categoria, unidad")\
+                                .eq("id_producto", detalle['id_producto']).execute()
+                            
+                            if producto_result.data:
+                                producto = producto_result.data[0]
+                                cat = producto.get('categoria', 'Sin categoría')
+                                categorias_totales[cat] = categorias_totales.get(cat, 0) + detalle['cantidad']
+                                
+                                # Agregar a lista detallada
+                                todos_productos_detallados.append({
+                                    'fecha': fecha_inf.strftime("%d/%m/%Y"),
+                                    'informe_id': inf['id_informe'],
+                                    'pedido_id': pedido['id_pedido'],
+                                    'local': local_nombre,
+                                    'producto': producto.get('nombre', 'Desconocido'),
+                                    'categoria': cat,
+                                    'cantidad': detalle['cantidad'],
+                                    'unidad': producto.get('unidad', 'und'),
+                                    'hora': datetime.fromisoformat(pedido["fecha_pedido"]).strftime("%H:%M")
+                                })
+                
+                # Si es un informe individual
+                elif inf.get("id_inf_pedido"):
+                    total_pedidos += 1
+                    
+                    pedido_result = supabase.table("pedido").select("*").eq("id_pedido", inf["id_inf_pedido"]).execute()
+                    if pedido_result.data:
+                        pedido = pedido_result.data[0]
+                        
+                        detalles = supabase.table("detalle_pedido").select("id_producto, cantidad")\
+                            .eq("id_pedido", pedido["id_pedido"]).execute().data
+                        
+                        # Obtener información del local
+                        inventario_result = supabase.table("inventario").select("id_local")\
+                            .eq("id_inventario", pedido["id_inventario"]).execute()
+                        
+                        local_nombre = "No especificado"
+                        if inventario_result.data:
+                            local_result = supabase.table("locales").select("nombre")\
+                                .eq("id_local", inventario_result.data[0]["id_local"]).execute()
+                            if local_result.data:
+                                local_nombre = local_result.data[0]['nombre']
+                                locales_participantes.add(local_nombre)
+                        
+                        # Procesar cada detalle del pedido
+                        for detalle in detalles:
+                            total_productos += detalle['cantidad']
+                            
+                            # Obtener información del producto
+                            producto_result = supabase.table("productos").select("nombre, categoria, unidad")\
+                                .eq("id_producto", detalle['id_producto']).execute()
+                            
+                            if producto_result.data:
+                                producto = producto_result.data[0]
+                                cat = producto.get('categoria', 'Sin categoría')
+                                categorias_totales[cat] = categorias_totales.get(cat, 0) + detalle['cantidad']
+                                
+                                # Agregar a lista detallada
+                                todos_productos_detallados.append({
+                                    'fecha': datetime.fromisoformat(inf["fecha_creacion"]).strftime("%d/%m/%Y"),
+                                    'informe_id': inf['id_informe'],
+                                    'pedido_id': pedido['id_pedido'],
+                                    'local': local_nombre,
+                                    'producto': producto.get('nombre', 'Desconocido'),
+                                    'categoria': cat,
+                                    'cantidad': detalle['cantidad'],
+                                    'unidad': producto.get('unidad', 'und'),
+                                    'hora': datetime.fromisoformat(pedido["fecha_pedido"]).strftime("%H:%M")
+                                })
+                                
+            except Exception as e:
+                print(f"⚠️ Error procesando informe {inf['id_informe']}: {e}")
                 continue
-            detalles = supabase.table("detalle_pedido").select("id_producto, cantidad").eq("id_pedido", pedido["id_pedido"]).execute().data
-            productos = supabase.table("productos").select("id_producto, nombre, unidad").execute().data
-            mapa = {p["id_producto"]: p for p in productos}
 
-            fecha_f = datetime.fromisoformat(inf["fecha_creacion"]).strftime("%d/%m/%Y %I:%M %p")
-            elements.append(Paragraph(f"<b>ID Informe:</b> {inf['id_informe']} — <b>Pedido:</b> {inf['id_inf_pedido']} — <b>Fecha:</b> {fecha_f}", styles["Normal"]))
-            elements.append(Spacer(1, 8))
+        # Tabla de resumen general
+        resumen_data = [
+            ["📅 Período", f"{fecha_inicio_obj.strftime('%d/%m/%Y')} - {fecha_fin_obj.strftime('%d/%m/%Y')}"],
+            ["📦 Total de Pedidos", str(total_pedidos)],
+            ["🍜 Total de Platos Servidos", str(total_productos)],
+            ["📋 Total de Informes", str(len(informes.data))],
+            ["🏪 Locales Activos", str(len(locales_participantes))],
+            ["📍 Locales", ", ".join(locales_participantes) if locales_participantes else "No especificado"]
+        ]
+        
+        resumen_table = Table(resumen_data, colWidths=[180, 320])
+        resumen_table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#f8f9fa")),
+            ("BACKGROUND", (1, 0), (1, -1), colors.white),
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.lightgrey),
+            ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+            ("FONTSIZE", (0, 0), (-1, -1), 10),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("PADDING", (0, 0), (-1, -1), 8),
+        ]))
+        elements.append(resumen_table)
+        elements.append(Spacer(1, 25))
 
-            if detalles:
-                table_data = [["Producto", "Cantidad", "Unidad"]]
-                for d in detalles:
-                    prod = mapa.get(d["id_producto"], {})
-                    table_data.append([
-                        prod.get("nombre", "Desconocido"),
-                        d["cantidad"],
-                        prod.get("unidad", "-")
-                    ])
+        # ==================== DISTRIBUCIÓN POR CATEGORÍA ====================
+        if categorias_totales:
+            elements.append(Paragraph("<b><font color='#e63900' size=14>📈 DISTRIBUCIÓN POR TIPO DE PLATO</font></b>", styles['Heading2']))
+            
+            cat_data = [["Tipo de Plato", "Cantidad Servida", "Porcentaje"]]
+            for cat, cant in sorted(categorias_totales.items(), key=lambda x: x[1], reverse=True):
+                porcentaje = (cant / total_productos) * 100 if total_productos > 0 else 0
+                cat_data.append([
+                    cat,
+                    f"{cant} platos",
+                    f"{porcentaje:.1f}%"
+                ])
+            
+            cat_table = Table(cat_data, colWidths=[200, 150, 150])
+            cat_table.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e63900")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
+                ("FONTSIZE", (0, 0), (-1, -1), 9),
+                ("PADDING", (0, 0), (-1, -1), 6),
+            ]))
+            elements.append(cat_table)
+            elements.append(Spacer(1, 25))
 
-                tabla = Table(table_data, colWidths=[250, 100, 100])
-                tabla.setStyle(TableStyle([
-                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e63900")),
-                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-                    ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold")
-                ]))
-                elements.append(tabla)
+        # ==================== DETALLE POR DÍA ====================
+        if todos_productos_detallados:
+            elements.append(Paragraph("<b><font color='#e63900' size=14>📋 DETALLE POR DÍA</font></b>", styles['Heading2']))
+            
+            # Agrupar por fecha
+            productos_por_fecha = {}
+            for prod in todos_productos_detallados:
+                fecha = prod['fecha']
+                if fecha not in productos_por_fecha:
+                    productos_por_fecha[fecha] = []
+                productos_por_fecha[fecha].append(prod)
+            
+            # Ordenar fechas
+            for fecha in sorted(productos_por_fecha.keys(), reverse=True):
+                elements.append(Paragraph(f"<b>🗓️ {fecha}</b>", styles['Heading3']))
+                elements.append(Spacer(1, 8))
+                
+                # Agrupar por pedido en esta fecha
+                pedidos_fecha = {}
+                for prod in productos_por_fecha[fecha]:
+                    pedido_id = prod['pedido_id']
+                    if pedido_id not in pedidos_fecha:
+                        pedidos_fecha[pedido_id] = {
+                            'local': prod['local'],
+                            'hora': prod['hora'],
+                            'productos': [],
+                            'total_platos': 0
+                        }
+                    pedidos_fecha[pedido_id]['productos'].append(prod)
+                    pedidos_fecha[pedido_id]['total_platos'] += prod['cantidad']
+                
+                # Mostrar cada pedido de esta fecha
+                for pedido_id, info in pedidos_fecha.items():
+                    elements.append(Paragraph(
+                        f"<b>🍱 Pedido #{pedido_id}</b> | 🏪 {info['local']} | 🕒 {info['hora']} | 🍜 {info['total_platos']} platos", 
+                        styles['Normal']
+                    ))
+                    
+                    # Tabla de productos del pedido
+                    table_data = [["Plato", "Categoría", "Cantidad"]]
+                    for prod in info['productos']:
+                        table_data.append([
+                            prod['producto'],
+                            prod['categoria'],
+                            f"{prod['cantidad']} {prod['unidad']}"
+                        ])
+                    
+                    pedido_table = Table(table_data, colWidths=[250, 150, 100])
+                    pedido_table.setStyle(TableStyle([
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e63900")),
+                        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                        ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                        ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
+                        ("FONTSIZE", (0, 0), (-1, -1), 8),
+                        ("PADDING", (0, 0), (-1, -1), 4),
+                    ]))
+                    elements.append(pedido_table)
+                    elements.append(Spacer(1, 10))
+                
                 elements.append(Spacer(1, 15))
 
-            elements.append(Table([[""]], colWidths=[540], style=[
-                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#e63900"))
-            ]))
-            elements.append(Spacer(1, 20))
+        # ==================== PIE DE PÁGINA ====================
+        elements.append(Spacer(1, 20))
+        elements.append(Table([[""]], colWidths=[500], style=[
+            ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#e63900"))
+        ]))
+        elements.append(Spacer(1, 10))
+        
+        footer_text = f"""
+        <para alignment='center'>
+        <font size=8 color='#666'>
+        <b>🍜 Ichiraku Ramen - Sistema de Gestión</b><br/>
+        Informe {tipo} generado automáticamente el {datetime.now().strftime('%d/%m/%Y a las %H:%M')}<br/>
+        Período: {fecha_inicio_obj.strftime('%d/%m/%Y')} - {fecha_fin_obj.strftime('%d/%m/%Y')}<br/>
+        © 2025 Ichiraku Ramen - Todos los derechos reservados
+        </font>
+        </para>
+        """
+        elements.append(Paragraph(footer_text, styles['Normal']))
 
-        elements.append(Paragraph("<font size=8 color='#666'>Sistema de gestión Ichiraku © 2025</font>", styles['Normal']))
+        # Generar PDF
         doc.build(elements)
         buffer.seek(0)
 
         response = make_response(buffer.read())
         response.headers["Content-Type"] = "application/pdf"
-        response.headers["Content-Disposition"] = f"attachment; filename=informe_unificado_{tipo}.pdf"
+        response.headers["Content-Disposition"] = f"attachment; filename=informe_{tipo}_{datetime.now().strftime('%Y%m%d')}.pdf"
         return response
+        
     except Exception as e:
-        print("❌ Error al generar informe unificado:", e)
+        print(f"❌ Error al generar informe unificado {tipo}: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({"success": False, "msg": f"Error: {e}"})
-
+    
 # ==============================================================================
 # GESTIÓN DE NOTIFICACIONES (ADMIN)
 # ==============================================================================
