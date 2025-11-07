@@ -5,6 +5,7 @@
   <title>Ichiraku Ramen - Administrador de informes</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Dinformes.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
 
@@ -84,13 +85,13 @@
           {% endif %}
       </div>
 
-      <!-- Sección de Búsqueda (tu sección actual) -->
+      <!-- Sección de Búsqueda -->
       <div class="search-section">
           <h2>🔍 Buscar Informes</h2>
           
           <div class="search-options">
               <input type="text" id="idInforme" placeholder="Buscar por ID de informe">
-              <input type="date" id="fechaInforme">
+              <input type="date" id="fechaInforme" class="date-picker">
               <button class="btn-search" onclick="buscarInforme()">Buscar</button>
           </div>
 
@@ -104,13 +105,13 @@
           <h2>📦 Descargar Informes por Rango</h2>
           
           <div class="download-options">
-              <button class="btn-download-range" onclick="descargarRango('semana')">
+              <button class="btn-download-range" onclick="descargarPorRango('semana')">
                   📥 Descargar Semanal
               </button>
-              <button class="btn-download-range" onclick="descargarRango('mes')">
+              <button class="btn-download-range" onclick="descargarPorRango('mes')">
                   📥 Descargar Mensual
               </button>
-              <button class="btn-download-range" onclick="descargarRango('anio')">
+              <button class="btn-download-range" onclick="descargarPorRango('anio')">
                   📥 Descargar Anual
               </button>
           </div>
@@ -120,6 +121,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
   <script src="{{ url_for('static', filename='js/Global_js/alertaNinja.js') }}"></script>
   <script src="{{ url_for('static', filename='js/Ad_js/Dinformes.js') }}"></script>
 
