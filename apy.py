@@ -81,22 +81,44 @@ def login_requerido(rol=None):
 
 def generar_notificaciones_caducidad():
     try:
+        print(f"🕐 Iniciando generación de notificaciones - {datetime.now()}")
         hoy = datetime.now().date()
         limite = hoy + timedelta(days=3)
+        
+        print(f"📅 Hoy: {hoy}, Límite: {limite}")
+        
+        # Verificar conexión a Supabase
+        print("🔌 Probando conexión a Supabase...")
+        test_connection = supabase.table("inventario").select("count", count="exact").execute()
+        print(f"✅ Conexión OK. Total registros en inventario: {test_connection.count}")
+        
         proximos = supabase.table("inventario") \
             .select("id_inventario, id_producto, cantidad, fecha_caducidad") \
             .gte("fecha_caducidad", hoy.isoformat()) \
             .lte("fecha_caducidad", limite.isoformat()) \
             .execute()
 
+        print(f"🔍 Productos próximos a caducar: {len(proximos.data)}")
+        
+        if not proximos.data:
+            print("ℹ️ No hay productos próximos a caducar")
+            return
+            
+        notificaciones_creadas = 0
         for item in proximos.data:
+            print(f"📦 Procesando: ID {item['id_inventario']}, Producto {item['id_producto']}, Caduca {item['fecha_caducidad']}")
+            
+            # Obtener nombre del producto
             producto = supabase.table("productos") \
                 .select("nombre") \
                 .eq("id_producto", item["id_producto"]) \
                 .single() \
                 .execute()
+                
             nombre_producto = producto.data["nombre"] if producto.data else "Nombre no encontrado"
+            print(f"   Producto: {nombre_producto}")
 
+            # Verificar si ya existe notificación
             noti_existente = supabase.table("notificaciones") \
                 .select("id_notificaciones") \
                 .eq("id_inventario", item["id_inventario"]) \
@@ -105,6 +127,8 @@ def generar_notificaciones_caducidad():
 
             if not noti_existente.data:
                 mensaje = f"⚠️ El producto '{nombre_producto}' (ID: {item['id_producto']}) caduca el {item['fecha_caducidad']} | Cantidad: {item['cantidad']}"
+                print(f"   📢 Creando notificación: {mensaje}")
+                
                 supabase.table("notificaciones").insert({
                     "id_inventario": item["id_inventario"],
                     "mensaje": mensaje,
@@ -112,9 +136,16 @@ def generar_notificaciones_caducidad():
                     "leido": False,
                     "fecha": datetime.now().isoformat()
                 }).execute()
-        print("✅ Notificaciones generadas correctamente.")
+                notificaciones_creadas += 1
+            else:
+                print(f"   ✅ Notificación ya existe")
+
+        print(f"✅ Notificaciones generadas: {notificaciones_creadas}")
+        
     except Exception as e:
         print("❌ Error al generar notificaciones:", e)
+        import traceback
+        traceback.print_exc()
 
 def eliminar_notificaciones_caducadas():
     try:
@@ -151,6 +182,40 @@ def insertar_informe(id_pedido):
         }).execute()
         return True
     return False
+
+@app.route('/debug-ad-inicio')
+def debug_ad_inicio():
+    try:
+        print("🔍 Debug Ad_Inicio - Iniciando...")
+        
+        # Probar cada función por separado
+        print("1. Probando generar_notificaciones_caducidad...")
+        generar_notificaciones_caducidad()
+        
+        print("2. Probando eliminar_notificaciones_caducadas...")
+        eliminar_notificaciones_caducadas()
+        
+        print("3. Probando consulta de notificaciones...")
+        todas_response = supabase.table("notificaciones").select("*").order("fecha", desc=True).execute()
+        todas = todas_response.data if todas_response.data else []
+        print(f"Notificaciones encontradas: {len(todas)}")
+        
+        return jsonify({
+            "status": "success", 
+            "notificaciones": len(todas),
+            "data": todas
+        })
+        
+    except Exception as e:
+        print(f"❌ Error en debug: {str(e)}")
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Traceback: {error_details}")
+        return jsonify({
+            "status": "error",
+            "error": str(e),
+            "traceback": error_details
+        }), 500
 
 # ==============================================================================
 # RUTAS PRINCIPALES Y AUTENTICACIÓN
