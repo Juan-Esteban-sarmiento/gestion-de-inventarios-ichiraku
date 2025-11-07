@@ -41,82 +41,78 @@
   <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
   </div>
 
-  <!-- Contenido principal -->
-  <main class="main-content">
-      <div class="welcome-box">
-          <h1 class="welcome-title">Panel de administrador</h1>
+  <!-- Contenido principal - MANTENIENDO TU DISEÑO ORIGINAL -->
+  <main class="main-container">
+    <div class="panel-card">
+      
+      <h1>🍜 PANEL DE ADMINISTRADOR</h1>
+
+      <!-- SECCIÓN 1: ÚLTIMO INFORME GENERADO -->
+      <div class="search-box" style="margin-bottom: 30px;">
+        <h2 style="color: #e63900; width: 100%; text-align: center; margin-bottom: 20px;">📊 ÚLTIMO INFORME GENERADO</h2>
+        
+        {% if ultimo_informe %}
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; background: rgba(230, 57, 0, 0.1); padding: 20px; border-radius: 10px; border-left: 4px solid #e63900;">
+          <div class="report-info">
+            <div style="display: flex; margin-bottom: 10px;">
+              <span style="font-weight: bold; width: 150px; color: #e63900;">ID Informe:</span>
+              <span style="color: #fff;">{{ ultimo_informe.id_informe }}</span>
+            </div>
+            <div style="display: flex; margin-bottom: 10px;">
+              <span style="font-weight: bold; width: 150px; color: #e63900;">ID Pedido:</span>
+              <span style="color: #fff;">{{ ultimo_informe.id_inf_pedido }}</span>
+            </div>
+            <div style="display: flex;">
+              <span style="font-weight: bold; width: 150px; color: #e63900;">Fecha:</span>
+              <span style="color: #fff;">
+                {{ ultimo_informe.fecha_creacion[:10] if ultimo_informe.fecha_creacion else 'N/A' }}
+              </span>
+            </div>
+          </div>
+          <button class="download-button" onclick="descargarInforme({{ ultimo_informe.id_informe }})" style="background: #e63900; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+            📥 Descargar PDF
+          </button>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 40px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; border: 2px dashed #e63900; width: 100%;">
+          <p style="color: #fff; font-size: 1.2rem; margin-bottom: 20px;">📭 No hay informes generados aún</p>
+          <button class="download-button" onclick="generarInformeDiario()" style="background: #e63900; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-size: 1.1rem;">
+            🚀 Generar Informe Diario
+          </button>
+        </div>
+        {% endif %}
       </div>
 
-      <!-- Sección de Último Informe -->
-      <div class="last-report-section">
-          <h2>📊 Último Informe Generado</h2>
-          
-          {% if ultimo_informe %}
-          <div class="last-report-card">
-              <div class="report-info">
-                  <div class="info-row">
-                      <span class="label">ID Informe:</span>
-                      <span class="value">{{ ultimo_informe.id_informe }}</span>
-                  </div>
-                  <div class="info-row">
-                      <span class="label">ID Pedido:</span>
-                      <span class="value">{{ ultimo_informe.id_inf_pedido }}</span>
-                  </div>
-                  <div class="info-row">
-                      <span class="label">Fecha de Creación:</span>
-                      <span class="value">
-                          {{ ultimo_informe.fecha_creacion[:10] if ultimo_informe.fecha_creacion else 'N/A' }}
-                      </span>
-                  </div>
-              </div>
-              <div class="report-actions">
-                  <button class="btn-download" onclick="descargarInforme({{ ultimo_informe.id_informe }})">
-                      📥 Descargar PDF
-                  </button>
-              </div>
-          </div>
-          {% else %}
-          <div class="no-report-card">
-              <p>📭 No hay informes generados aún</p>
-              <button class="btn-generate" onclick="generarInformeDiario()">
-                  🚀 Generar Informe Diario
-              </button>
-          </div>
-          {% endif %}
+      <!-- SECCIÓN 2: BUSCAR INFORMES (tu diseño original) -->
+      <div class="search-box">
+        <h2 style="color: #e63900; width: 100%; text-align: center; margin-bottom: 20px;">🔍 BUSCAR INFORMES</h2>
+        
+        <input type="text" id="id_informe" placeholder="Buscar por ID de informe">
+        <input type="text" id="datePicker" placeholder="Seleccionar fecha" class="date-picker">
+        <button onclick="buscarInforme()">BUSCAR</button>
       </div>
 
-      <!-- Sección de Búsqueda -->
-      <div class="search-section">
-          <h2>🔍 Buscar Informes</h2>
-          
-          <div class="search-options">
-              <input type="text" id="idInforme" placeholder="Buscar por ID de informe">
-              <input type="date" id="fechaInforme" class="date-picker">
-              <button class="btn-search" onclick="buscarInforme()">Buscar</button>
-          </div>
-
-          <div id="resultadosBusqueda" class="search-results">
-              <!-- Los resultados de búsqueda aparecerán aquí -->
-          </div>
+      <!-- 🌀 Contenedor de resultados -->
+      <div id="resultEmpleado" class="result-box">
+        <!-- Los resultados aparecerán aquí -->
       </div>
 
-      <!-- Sección de Descargas -->
-      <div class="download-section">
-          <h2>📦 Descargar Informes por Rango</h2>
-          
-          <div class="download-options">
-              <button class="btn-download-range" onclick="descargarPorRango('semana')">
-                  📥 Descargar Semanal
-              </button>
-              <button class="btn-download-range" onclick="descargarPorRango('mes')">
-                  📥 Descargar Mensual
-              </button>
-              <button class="btn-download-range" onclick="descargarPorRango('anio')">
-                  📥 Descargar Anual
-              </button>
-          </div>
+      <!-- SECCIÓN 3: DESCARGAR INFORMES POR RANGO -->
+      <div class="download-container">
+        <h2 style="color: #e63900; width: 100%; text-align: center; margin-bottom: 20px;">📦 DESCARGAR INFORMES</h2>
+        
+        <button class="download-button" onclick="descargarPorRango('semana')">
+          📥 DESCARGAR SEMANAL
+        </button>
+        <button class="download-button" onclick="descargarPorRango('mes')">
+          📥 DESCARGAR MENSUAL
+        </button>
+        <button class="download-button" onclick="descargarPorRango('anio')">
+          📥 DESCARGAR ANUAL
+        </button>
       </div>
 
+    </div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

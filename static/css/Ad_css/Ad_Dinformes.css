@@ -418,4 +418,57 @@ body {
         width: auto;
         margin-bottom: 5px;
     }
+}/* Estilos adicionales para el último informe */
+.report-info {
+  flex: 1;
+}
+
+.download-button {
+  background: #111;
+  border: 2px solid #e63900;
+  border-radius: 10px;
+  color: #fff;
+  padding: 12px 20px;
+  font-family: 'njnaruto';
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.3s;
+  box-shadow: 0 0 10px rgba(230, 57, 0, 0.2);
+  margin: 5px;
+}
+
+.download-button:hover {
+  background: #e63900;
+  border-color: #fff;
+  transform: scale(1.05);
+}
+
+/* Asegurar que el contenedor principal funcione con el sidebar */
+.main-container {
+  flex: 1;
+  padding: 40px 60px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Cambiado a flex-start para mejor alineación */
+  margin-left: 250px; /* Ajusta según el ancho de tu sidebar */
+  min-height: 100vh;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .main-container {
+    margin-left: 0;
+    padding: 20px;
+  }
+  
+  .search-box {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .search-box input {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
 }
