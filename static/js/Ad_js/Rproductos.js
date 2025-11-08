@@ -135,7 +135,7 @@ function mostrarProductos(productos) {
 
 function editarProducto(id_producto, nombre, categoria, unidad) {
   Swal.fire({
-    title: '<span style="font-family:njnaruto; color:#fff;">Editar Empleado</span>',
+    title: '<span style="font-family:njnaruto; color:#fff;">Editar Producto</span>',
     html: `
       <input id="editNombre" class="swal2-input" placeholder="Nombre" value="${nombre}">
       <input id="editId" class="swal2-input" placeholder="Id del producto" value="${id_producto}" disabled>
