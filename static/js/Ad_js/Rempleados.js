@@ -110,7 +110,7 @@ function editarEmpleado(cedula, nombre, contacto, contrasena) {
     html: `
       <input id="editNombre" class="swal2-input" placeholder="Nombre" value="${nombre}">
       <input id="editCedula" class="swal2-input" placeholder="Cedula" value="${cedula}" disabled>
-      <input id="editContacto" class="swal2-input" placeholder="Numero de contacto" value="${contacto}" disabled>
+      <input id="editContacto" class="swal2-input" placeholder="Numero de contacto" value="${telefono}" disabled>
     `,
     confirmButtonText: '<span style="font-family:njnaruto;">Guardar</span>',
     showCancelButton: true,
