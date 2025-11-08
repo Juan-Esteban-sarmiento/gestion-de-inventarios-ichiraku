@@ -123,7 +123,7 @@ function editarEmpleado(cedula, nombre, telefono) {
       return {
         nombre: document.getElementById("editNombre").value,
         cedula: document.getElementById("editCedula").value,
-        numero_contacto: document.getElementById("editContacto").value,
+        telefono: document.getElementById("editContacto").value,
       };
     }
   }).then(async (result) => {
