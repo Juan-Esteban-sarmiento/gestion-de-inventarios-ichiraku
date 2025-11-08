@@ -23,6 +23,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from twilio.rest import Client
 import logging
 from twilio.base.exceptions import TwilioRestException
+import requests
+import json
 
 # ==============================================================================
 # CONFIGURACIÓN INICIAL Y VARIABLES DE ENTORNO
@@ -186,6 +188,8 @@ def insertar_informe(id_pedido):
         }).execute()
         return True
     return False
+
+
 # ==============================================================================
 # RUTAS PRINCIPALES Y AUTENTICACIÓN
 # ==============================================================================
