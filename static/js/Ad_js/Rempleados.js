@@ -104,7 +104,7 @@ async function cargarEmpleados(termino = "") {
 }
 
 // ✏️ Editar empleado
-function editarEmpleado(cedula, nombre, contacto, contrasena) {
+function editarEmpleado(cedula, nombre, telefono) {
   Swal.fire({
     title: '<span style="font-family:njnaruto; color:#fff;">Editar empleado</span>',
     html: `
