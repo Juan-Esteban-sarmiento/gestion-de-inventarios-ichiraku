@@ -7,7 +7,7 @@ document.getElementById('searchForm').addEventListener('submit', async (e) => {
     console.log("🔍 Buscando:", { id_informe, fecha });
 
     if (!id_informe && !fecha)
-        return alertaNinja('warning', 'Campos vacíos', 'Debes ingresar un ID o una fecha.');
+        return alertaNinja('warning', 'Campos vacios', 'Debes ingresar un ID o una fecha.');
 
     try {
         const res = await fetch('/buscar_informe', {
@@ -43,14 +43,14 @@ document.getElementById('searchForm').addEventListener('submit', async (e) => {
             alertaNinja('info', 'Sin resultados', data.msg || 'No hay informes con esos datos.');
         }
     } catch (err) {
-        console.error("❌ Error en búsqueda:", err);
-        alertaNinja('error', 'Error del servidor', 'No se pudo realizar la búsqueda.');
+        console.error("❌ Error en busqueda:", err);
+        alertaNinja('error', 'Error del servidor', 'No se pudo realizar la busqueda.');
     }
 });
 
-// 🧾 Descargar un informe específico
+// 🧾 Descargar un informe especifico
 function descargarInforme(id) {
-    alertaNinja('info', 'Descargando informe', 'Tu archivo PDF se está generando...');
+    alertaNinja('info', 'Descargando informe', 'Tu archivo PDF se esta generando...');
     setTimeout(() => window.open(`/descargar_informe/${id}`, '_blank'), 800);
 }
 
@@ -80,15 +80,15 @@ async function descargarPorRango(tipo) {
             showCancelButton: true,
             buttonsStyling: false,
             didOpen: () => {
-                // Establecer fechas por defecto (última semana) y activar flatpickr
+                // Establecer fechas por defecto (ultima semana) y activar flatpickr
                 const hoy = new Date();
                 const inicioSemana = new Date(hoy);
                 inicioSemana.setDate(hoy.getDate() - 7);
 
                 // Inicializar flatpickr en los inputs dentro del modal.
-                // (Asumimos que flatpickr ya está cargado en la página)
+                // (Asumimos que flatpickr ya esta cargado en la pagina)
                 try {
-                    // Crear pickers con formato Y-m-d y localización en español
+                    // Crear pickers con formato Y-m-d y localizacion en espanol
                     flatpickr('#inicio', {
                         dateFormat: 'Y-m-d',
                         locale: 'es',
@@ -105,7 +105,7 @@ async function descargarPorRango(tipo) {
                         allowInput: true
                     });
                 } catch (e) {
-                    // Si flatpickr no está disponible, usar los inputs nativos como fallback
+                    // Si flatpickr no esta disponible, usar los inputs nativos como fallback
                     document.getElementById('inicio').value = inicioSemana.toISOString().split('T')[0];
                     document.getElementById('fin').value = hoy.toISOString().split('T')[0];
                 }
@@ -174,9 +174,9 @@ async function descargarPorRango(tipo) {
             showCancelButton: true,
             buttonsStyling: false,
             didOpen: () => {
-                // Inicializar flatpickr en el input del mes; si no está disponible, usar input nativo 'month' como fallback
+                // Inicializar flatpickr en el input del mes; si no esta disponible, usar input nativo 'month' como fallback
                 try {
-                    // Intentar usar flatpickr; si el plugin monthSelectPlugin está disponible, lo usamos para una selección más amigable
+                    // Intentar usar flatpickr; si el plugin monthSelectPlugin esta disponible, lo usamos para una seleccion mas amigable
                     const opts = {
                         dateFormat: 'Y-m',
                         locale: 'es',
@@ -194,13 +194,13 @@ async function descargarPorRango(tipo) {
                     const el = document.getElementById('mesInput');
                     if (el && !el.value) el.value = new Date().toISOString().slice(0, 7);
                 } catch (e) {
-                    // Fallback: usar input tipo month si flatpickr no está cargado
+                    // Fallback: usar input tipo month si flatpickr no esta cargado
                     try {
                         const input = document.getElementById('mesInput');
                         input.type = 'month';
                         input.value = new Date().toISOString().slice(0, 7);
                     } catch (err) {
-                        // último recurso: rellenar texto con YYYY-MM
+                        // ultimo recurso: rellenar texto con YYYY-MM
                         const input = document.getElementById('mesInput');
                         if (input) input.value = new Date().toISOString().slice(0, 7);
                     }
@@ -236,11 +236,11 @@ async function descargarPorRango(tipo) {
                     Swal.showValidationMessage('Debes seleccionar un mes');
                     return false;
                 }
-                // Normalizar a YYYY-MM (si se seleccionó una fecha completa, tomar los primeros 7 caracteres)
+                // Normalizar a YYYY-MM (si se selecciono una fecha completa, tomar los primeros 7 caracteres)
                 const m = val.toString().slice(0, 7);
                 const parts = m.split('-');
                 if (parts.length !== 2 || parts[0].length !== 4) {
-                    Swal.showValidationMessage('Formato de mes inválido');
+                    Swal.showValidationMessage('Formato de mes invalido');
                     return false;
                 }
                 return m;
@@ -299,7 +299,7 @@ async function descargarPorRango(tipo) {
             },
             preConfirm: (value) => {
                 if (!value || value < 2020 || value > 2030) {
-                    Swal.showValidationMessage('Por favor ingresa un año válido entre 2020 y 2030');
+                    Swal.showValidationMessage('Por favor ingresa un año valido entre 2020 y 2030');
                     return false;
                 }
                 return value;
@@ -346,7 +346,7 @@ async function descargarPorRango(tipo) {
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-            alertaNinja('success', 'Éxito', `Informe ${tipo} descargado correctamente.`);
+            alertaNinja('success', 'Exito', `Informe ${tipo} descargado correctamente.`);
         } else {
             // Si no es PDF, puede ser un error en JSON
             const errorData = await res.json();
@@ -359,14 +359,14 @@ async function descargarPorRango(tipo) {
         alertaNinja('error', 'Error', 'No se pudo generar o descargar el informe.');
     }
 };
-// Reemplazar la función de generar informe diario
+// Reemplazar la funcion de generar informe diario
 $('#genDayBtn').click(() => {
     Swal.fire({
         title: '¿Generar informe diario consolidado?',
-        text: 'Se creará un único informe con todos los pedidos de hoy.',
+        text: 'Se creara un unico informe con todos los pedidos de hoy.',
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: 'Sí, generar',
+        confirmButtonText: 'Si, generar',
         cancelButtonText: 'Cancelar',
         background: '#000',
         color: '#fff',
@@ -383,10 +383,10 @@ $('#genDayBtn').click(() => {
                 const data = await response.json();
                 
                 if (data.success) {
-                    alertaNinja('success', 'Éxito', data.msg);
+                    alertaNinja('success', 'Exito', data.msg);
                     // Actualizar la vista con el nuevo informe
                     await actualizarVistaDespuesDeGenerar();
-                    // Descargar automáticamente el informe recién creado
+                    // Descargar automaticamente el informe recien creado
                     if (data.informe_id) {
                         setTimeout(() => {
                             window.open(`/descargar_informe/${data.informe_id}`, '_blank');
@@ -413,7 +413,7 @@ $('#genDayBtn').click(() => {
                             await actualizarVistaDespuesDeGenerar();
                         });
                     } else {
-                        alertaNinja('warning', 'Atención', data.msg);
+                        alertaNinja('warning', 'Atencion', data.msg);
                     }
                 }
             } catch (error) {
@@ -436,7 +436,7 @@ flatpickr("#datePicker", {
     }
 });
 
-// 🔍 Buscar automáticamente al seleccionar fecha
+// 🔍 Buscar automaticamente al seleccionar fecha
 async function buscarPorFecha(fecha) {
     const resultBox = document.getElementById('resultEmpleado');
     try {
@@ -468,16 +468,16 @@ async function buscarPorFecha(fecha) {
         }
     } catch (error) {
         console.error("❌ Error al buscar informes por fecha:", error);
-        alertaNinja('error', 'Error', 'No se pudo realizar la búsqueda por fecha.');
+        alertaNinja('error', 'Error', 'No se pudo realizar la busqueda por fecha.');
     }
 }
-// 📋 Cargar último informe automáticamente al iniciar la página
+// 📋 Cargar ultimo informe automaticamente al iniciar la pagina
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("🔄 Cargando último informe...");
+    console.log("🔄 Cargando ultimo informe...");
     cargarUltimoInforme();
 });
 
-// 🔄 Función para cargar el último informe
+// 🔄 Funcion para cargar el ultimo informe
 async function cargarUltimoInforme() {
     try {
         const res = await fetch('/obtener_ultimo_informe');
@@ -492,7 +492,7 @@ async function cargarUltimoInforme() {
                     <div class="informe-card">
                         <p><span>ID Informe:</span> ${inf.id_informe}</p>
                         <p><span>ID Pedido:</span> ${inf.id_inf_pedido || 'Consolidado'}</p>
-                        <p><span>Fecha de creación:</span> ${new Date(inf.fecha_creacion).toLocaleString('es-CO')}</p>
+                        <p><span>Fecha de creacion:</span> ${new Date(inf.fecha_creacion).toLocaleString('es-CO')}</p>
                         <p><span>Tipo:</span> ${inf.tipo === 'diario_consolidado' ? 'Informe Diario Consolidado' : 'Individual'}</p>
                         <button class="download-button" onclick="descargarInforme(${inf.id_informe})">
                             Descargar PDF
@@ -501,15 +501,15 @@ async function cargarUltimoInforme() {
                 </div>
             `;
         } else {
-            resultBox.innerHTML = '<p>No hay informes generados aún.</p>';
+            resultBox.innerHTML = '<p>No hay informes generados aun.</p>';
         }
     } catch (error) {
-        console.error("❌ Error al cargar último informe:", error);
+        console.error("❌ Error al cargar ultimo informe:", error);
         document.getElementById('resultEmpleado').innerHTML = '<p>Error al cargar informes.</p>';
     }
 }
 
-// 🔄 Función para actualizar la vista después de generar un nuevo informe
+// 🔄 Funcion para actualizar la vista despues de generar un nuevo informe
 async function actualizarVistaDespuesDeGenerar() {
     await cargarUltimoInforme();
 }
@@ -520,9 +520,9 @@ $('#downloadSemBtn').click(() => descargarPorRango('semana'));
 $('#downloadMesBtn').click(() => descargarPorRango('mes'));
 $('#downloadAnioBtn').click(() => descargarPorRango('anio'));
 
-// Función de debug para probar la búsqueda
+// Funcion de debug para probar la busqueda
 window.probarBusqueda = async function(id) {
-    console.log("🧪 Probando búsqueda con ID:", id);
+    console.log("🧪 Probando busqueda con ID:", id);
     try {
         const res = await fetch('/buscar_informe', {
             method: 'POST',

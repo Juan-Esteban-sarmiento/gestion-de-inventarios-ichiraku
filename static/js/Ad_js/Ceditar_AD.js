@@ -101,7 +101,7 @@ eliminarBtn.addEventListener('click', async function() {
 
 // 🔑 Recuperar contraseña (mantiene Swal para entradas)
 async function recuperarContrasena() {
-  const { value: nombre } = await Swal.fire({
+  const { value: nombre } = await alertaNinjaFire({
     title: 'Recuperar contraseña',
     input: 'text',
     inputLabel: 'Ingresa tu nombre de usuario (Administrador)',
@@ -109,8 +109,6 @@ async function recuperarContrasena() {
     showCancelButton: true,
     confirmButtonText: 'Continuar',
     cancelButtonText: 'Cancelar',
-    confirmButtonColor: '#e60000',
-    cancelButtonColor: '#888',
     preConfirm: (value) => {
       if (!value || value.trim() === '') {
         Swal.showValidationMessage('Debes ingresar tu nombre de usuario');
@@ -122,7 +120,7 @@ async function recuperarContrasena() {
   if (!nombre) return;
 
   // 1️⃣ Pedir teléfono
-  const { value: telefono } = await Swal.fire({
+  const { value: telefono } = await alertaNinjaFire({
     title: 'Recuperar contraseña',
     input: 'text',
     inputLabel: 'Ingresa el número de teléfono donde recibirás el código',
@@ -130,8 +128,6 @@ async function recuperarContrasena() {
     showCancelButton: true,
     confirmButtonText: 'Enviar código',
     cancelButtonText: 'Cancelar',
-    confirmButtonColor: '#e60000',
-    cancelButtonColor: '#888',
     preConfirm: (value) => {
       if (!value || value.trim() === '') {
         Swal.showValidationMessage('Debes ingresar un número de teléfono válido');
@@ -164,7 +160,7 @@ async function recuperarContrasena() {
     alertaNinja('success', 'Código enviado', 'Revisa tu teléfono para ver el código.');
 
     // 3️⃣ Token recibido
-    const { value: token } = await Swal.fire({
+    const { value: token } = await alertaNinjaFire({
       title: 'Verificación',
       input: 'text',
       inputLabel: 'Ingresa el código recibido',
@@ -172,8 +168,6 @@ async function recuperarContrasena() {
       showCancelButton: true,
       confirmButtonText: 'Validar código',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#e60000',
-      cancelButtonColor: '#888',
       preConfirm: (value) => {
         if (!value || value.trim().length < 4) {
           Swal.showValidationMessage('Debes ingresar el código recibido');
@@ -185,7 +179,7 @@ async function recuperarContrasena() {
     if (!token) return;
 
     // 4️⃣ Nueva contraseña
-    const { value: nuevaContrasena } = await Swal.fire({
+    const { value: nuevaContrasena } = await alertaNinjaFire({
       title: 'Nueva contraseña',
       input: 'password',
       inputLabel: 'Ingresa tu nueva contraseña',
@@ -194,8 +188,6 @@ async function recuperarContrasena() {
       showCancelButton: true,
       confirmButtonText: 'Actualizar contraseña',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#e60000',
-      cancelButtonColor: '#888',
       preConfirm: (value) => {
         if (!value || value.length < 6) {
           Swal.showValidationMessage('Debe tener al menos 6 caracteres');

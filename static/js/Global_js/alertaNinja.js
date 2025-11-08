@@ -10,44 +10,20 @@ function alertaNinja(icon, title, text) {
 
   Swal.fire({
     icon: icon,
-    title: `<span style="font-family:njnaruto; color:#fff; font-size:24px;">${title}</span>`,
+    title: `<span style="color:#fff; font-size:24px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">${title}</span>`,
     text: text || '',
+    // keep these as options in case callers override
     background: '#000',
     color: '#fff',
     iconColor: iconColors[icon] || '#ff2a2a',
     confirmButtonColor: '#e60000',
-    confirmButtonText: '<span style="font-family:njnaruto;">Aceptar</span>',
+    confirmButtonText: 'Aceptar',
     buttonsStyling: false,
     showClass: {
       popup: 'swal2-show-custom'
     },
     hideClass: {
       popup: 'swal2-hide-custom'
-    },
-    didRender: () => {
-      const btn = Swal.getConfirmButton();
-      if (btn) {
-        btn.style.background = '#e60000';
-        btn.style.color = '#fff';
-        btn.style.fontWeight = 'bold';
-        btn.style.border = '2px solid #ff0000';
-        btn.style.borderRadius = '10px';
-        btn.style.padding = '8px 18px';
-        btn.style.cursor = 'pointer';
-        btn.style.transition = 'all 0.3s ease';
-        btn.style.boxShadow = '0 0 10px rgba(255, 0, 0, 0.4)';
-        
-        btn.addEventListener('mouseenter', () => {
-          btn.style.background = '#ff0000';
-          btn.style.boxShadow = '0 0 15px rgba(255, 0, 0, 0.6)';
-          btn.style.transform = 'scale(1.05)';
-        });
-        btn.addEventListener('mouseleave', () => {
-          btn.style.background = '#e60000';
-          btn.style.boxShadow = '0 0 10px rgba(255, 0, 0, 0.4)';
-          btn.style.transform = 'scale(1)';
-        });
-      }
     }
   });
 }
@@ -71,3 +47,67 @@ style.innerHTML = `
   }
 `;
 document.head.appendChild(style);
+
+// Add global CSS overrides for SweetAlert2 to ensure consistency even when code calls Swal.fire directly
+const globalCss = document.createElement('style');
+globalCss.innerHTML = `
+  /* Popup background and text */
+  .swal2-container .swal2-popup {
+    background: #000 !important;
+    color: #fff !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.6) !important;
+  }
+  .swal2-title {
+    color: #fff !important;
+    font-size: 20px !important;
+    margin-bottom: 8px !important;
+  }
+  .swal2-html-container, .swal2-content {
+    color: #ddd !important;
+    font-size: 14px !important;
+  }
+  .swal2-popup .swal2-icon {
+    box-shadow: none !important;
+  }
+  .swal2-confirm {
+    background: #e60000 !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    border: 2px solid #ff0000 !important;
+    border-radius: 10px !important;
+    padding: 8px 18px !important;
+    box-shadow: 0 0 10px rgba(255,0,0,0.35) !important;
+  }
+  .swal2-confirm:hover {
+    background: #ff0000 !important;
+    box-shadow: 0 0 15px rgba(255,0,0,0.6) !important;
+    transform: scale(1.03);
+  }
+  .swal2-cancel {
+    background: #444 !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    padding: 6px 14px !important;
+    border: none !important;
+  }
+`;
+document.head.appendChild(globalCss);
+
+// Helper: call SweetAlert with alertaNinja defaults merged with any options (useful for input modals)
+function alertaNinjaFire(options) {
+  const defaults = {
+    background: '#000',
+    color: '#fff',
+    showClass: { popup: 'swal2-show-custom' },
+    hideClass: { popup: 'swal2-hide-custom' },
+    buttonsStyling: false,
+    confirmButtonColor: '#e60000'
+  };
+  const opts = Object.assign({}, defaults, options);
+  return Swal.fire(opts);
+}
+
+// Expose helper globally so other scripts can call alertaNinjaFire(...) for input dialogs
+window.alertaNinjaFire = alertaNinjaFire;

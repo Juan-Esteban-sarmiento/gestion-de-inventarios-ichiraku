@@ -52,12 +52,6 @@
           <section class="search-box">
               <h2>Lista de avisos</h2>
 
-              <!-- Barra de filtros -->
-              <div class="filters">
-                  <input type="date" class="filter-input">
-                  <input type="text" class="filter-input" placeholder="Buscar ...">
-              </div>
-
               <div class="notifications-list">
                 {% for noti in notificaciones %}
                 <div class="notification-item {% if noti.tipo == 'prioritaria' %}prioritaria{% endif %}" 
@@ -69,12 +63,6 @@
                         {{ noti.mensaje }} <br>
                         <small>{{ noti.fecha[:10] }}</small>
                     </span>
-
-                    <div class="notification-buttons">
-                        {% if not noti.leido %}
-                        <button class="btn-prioritaria">Prioritaria</button>
-                        {% endif %}
-                    </div>
                 </div>
                 {% else %}
                 <p style="text-align:center; color:white;">No hay avisos disponibles</p>

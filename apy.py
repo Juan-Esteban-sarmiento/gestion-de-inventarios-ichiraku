@@ -21,6 +21,8 @@ from functools import wraps
 from flask import session, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 from twilio.rest import Client
+import logging
+from twilio.base.exceptions import TwilioRestException
 
 # ==============================================================================
 # CONFIGURACIÓN INICIAL Y VARIABLES DE ENTORNO
@@ -37,6 +39,8 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 twilio_client = Client(TWILIO_SID, TWILIO_AUTH)
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 tokens_temporales = {}
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_KEY"))
@@ -126,7 +130,7 @@ def generar_notificaciones_caducidad():
                 .execute()
 
             if not noti_existente.data:
-                mensaje = f"⚠️ El producto '{nombre_producto}' (ID: {item['id_producto']}) caduca el {item['fecha_caducidad']} | Cantidad: {item['cantidad']}"
+                mensaje = f" El producto '{nombre_producto}' (ID: {item['id_producto']}) caduca el {item['fecha_caducidad']} | Cantidad: {item['cantidad']}"
                 print(f"   📢 Creando notificación: {mensaje}")
                 
                 supabase.table("notificaciones").insert({
@@ -298,7 +302,7 @@ def Ad_Inicio():
             if mensaje is not None and str(mensaje).strip() != "":
                 todas_filtradas.append(n)
             else:
-                print(f"⚠️ Notificación filtrada por mensaje vacío: ID {n.get('id_notificaciones')}")
+                print(f" Notificación filtrada por mensaje vacío: ID {n.get('id_notificaciones')}")
         
         print(f"📊 Notificaciones después de filtrar: {len(todas_filtradas)}")
         
@@ -321,7 +325,7 @@ def Ad_Inicio():
             try:
                 locale.setlocale(locale.LC_TIME, "es_CO.utf8")
             except:
-                print("⚠️ No se pudo configurar locale español")
+                print(" No se pudo configurar locale español")
 
         # Formatear fechas
         for noti in todas_filtradas:
@@ -336,7 +340,7 @@ def Ad_Inicio():
                     
                     noti["fecha_formateada"] = fecha_obj.strftime("%d de %B de %Y, %I:%M %p").capitalize()
                 except Exception as date_error:
-                    print(f"⚠️ Error al formatear fecha {noti['fecha']}: {date_error}")
+                    print(f" Error al formatear fecha {noti['fecha']}: {date_error}")
                     noti["fecha_formateada"] = noti["fecha"]
 
         # Preparar notificaciones para mostrar (máximo 3)
@@ -660,7 +664,7 @@ def crear_informe_consolidado(pedidos, fecha):
             .execute().data
         
         if informe_existente:
-            print("⚠️ Ya existe un informe para hoy")
+            print(" Ya existe un informe para hoy")
             return False
         
         # Crear nuevo informe consolidado
@@ -759,7 +763,7 @@ def generar_pdf_consolidado(informe_id, pedidos):
                         })
                         
             except Exception as e:
-                print(f"⚠️ Error procesando pedido {pedido['id_pedido']}: {e}")
+                print(f" Error procesando pedido {pedido['id_pedido']}: {e}")
                 continue
 
         # Tabla de resumen ejecutivo
@@ -910,7 +914,7 @@ def descargar_informe_consolidado_individual(id_informe):
         # Encabezado
         encabezado = Table([
             [Paragraph("<font size=20 color='#e63900'><b>🍜 Ichiraku - Informe Diario Consolidado</b></font>", styles['Normal']),
-             Paragraph(f"<font color='#555'>#{informe_id}</font>", styles['Normal'])]
+                Paragraph(f"<font color='#555'>#{informe_id}</font>", styles['Normal'])]
         ], colWidths=[400, 100])
         encabezado.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, -1), colors.whitesmoke),
@@ -955,7 +959,7 @@ def descargar_informe_consolidado_individual(id_informe):
                         categorias_totales['Sin categoría'] = categorias_totales.get('Sin categoría', 0) + detalle['cantidad']
                         
             except Exception as e:
-                print(f"⚠️ Error procesando pedido {pedido['id_pedido']}: {e}")
+                print(f" Error procesando pedido {pedido['id_pedido']}: {e}")
                 continue
 
         # Tabla de resumen
@@ -1003,7 +1007,7 @@ def descargar_informe_consolidado_individual(id_informe):
                     hora
                 ])
             except Exception as e:
-                print(f"⚠️ Error en tabla para pedido {pedido['id_pedido']}: {e}")
+                print(f" Error en tabla para pedido {pedido['id_pedido']}: {e}")
                 continue
 
         dt = Table(table_data, colWidths=[80, 150, 80, 80])
@@ -1054,7 +1058,7 @@ def generar_informe_diario():
             .execute()
         
         if informe_existente.data:
-            print("⚠️ Ya existe un informe para hoy")
+            print(" Ya existe un informe para hoy")
             # Retornar el ID del informe existente para poder descargarlo
             informe_id = informe_existente.data[0]['id_informe']
             return jsonify({
@@ -1498,14 +1502,13 @@ def descargar_informes_rango():
                                 })
                                 
             except Exception as e:
-                print(f"⚠️ Error procesando informe {inf['id_informe']}: {e}")
+                print(f" Error procesando informe {inf['id_informe']}: {e}")
                 continue
 
         # Tabla de resumen general
         resumen_data = [
             ["📅 Período", f"{fecha_inicio_obj.strftime('%d/%m/%Y')} - {fecha_fin_obj.strftime('%d/%m/%Y')}"],
             ["📦 Total de Pedidos", str(total_pedidos)],
-            ["🍜 Total de Platos Servidos", str(total_productos)],
             ["📋 Total de Informes", str(len(informes.data))],
             ["🏪 Locales Activos", str(len(locales_participantes))],
             ["📍 Locales", ", ".join(locales_participantes) if locales_participantes else "No especificado"]
@@ -1524,32 +1527,6 @@ def descargar_informes_rango():
         elements.append(resumen_table)
         elements.append(Spacer(1, 25))
 
-        # ==================== DISTRIBUCIÓN POR CATEGORÍA ====================
-        if categorias_totales:
-            elements.append(Paragraph("<b><font color='#e63900' size=14>📈 DISTRIBUCIÓN POR TIPO DE PLATO</font></b>", styles['Heading2']))
-            
-            cat_data = [["Tipo de Plato", "Cantidad Servida", "Porcentaje"]]
-            for cat, cant in sorted(categorias_totales.items(), key=lambda x: x[1], reverse=True):
-                porcentaje = (cant / total_productos) * 100 if total_productos > 0 else 0
-                cat_data.append([
-                    cat,
-                    f"{cant} platos",
-                    f"{porcentaje:.1f}%"
-                ])
-            
-            cat_table = Table(cat_data, colWidths=[200, 150, 150])
-            cat_table.setStyle(TableStyle([
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e63900")),
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
-                ("FONTSIZE", (0, 0), (-1, -1), 9),
-                ("PADDING", (0, 0), (-1, -1), 6),
-            ]))
-            elements.append(cat_table)
-            elements.append(Spacer(1, 25))
 
         # ==================== DETALLE POR DÍA ====================
         if todos_productos_detallados:
@@ -1886,33 +1863,56 @@ def enviar_token_recuperacion():
             return jsonify({"success": False, "msg": "El número de teléfono no es válido (debe tener 10 dígitos)."}), 400
 
         client = Client(TWILIO_SID, TWILIO_AUTH)
-        verification = client.verify.v2.services(VERIFY_SID).verifications.create(
-            to=f"+57{telefono}",
-            channel="sms"
-        )
-        print(f"✅ Token enviado a +57{telefono}")
-        return jsonify({"success": True, "msg": "Código enviado correctamente."})
+        try:
+            verification = client.verify.v2.services(VERIFY_SID).verifications.create(
+                to=f"+57{telefono}",
+                channel="sms"
+            )
+            logger.info("✅ Token enviado a +57%s - SID: %s", telefono, getattr(verification, 'sid', ''))
+            return jsonify({"success": True, "msg": "Código enviado correctamente."})
+        except TwilioRestException as tre:
+            # Manejo específico de errores de Twilio (por ejemplo: número no verificado en cuentas de prueba)
+            logger.debug("TwilioRestException al enviar verificación: %s", tre)
+            msg = str(tre).lower()
+            if "unverified" in msg or "not verified" in msg or "cannot send messages to unverified numbers" in msg:
+                return jsonify({"success": False, "msg": "El número no está verificado o no está permitido por Twilio."}), 400
+            # Mensaje genérico para otros errores de Twilio
+            return jsonify({"success": False, "msg": "No se pudo enviar el SMS. Verifica el número e inténtalo más tarde."}), 500
     except Exception as e:
-        print(f"❌ Error en enviar_token_recuperacion: {e}")
-        return jsonify({"success": False, "msg": str(e)}), 500
+        logger.exception("❌ Error en enviar_token_recuperacion: %s", e)
+        return jsonify({"success": False, "msg": "Error interno al procesar la solicitud."}), 500
 
 @app.route("/validar_token", methods=["POST"])
 def validar_token():
     try:
         data = request.get_json()
         nombre = data.get("nombre")
-        telefono = data.get("telefono")
+        telefono = data.get("telefono", "").strip()
         token = data.get("token")
         nueva_contrasena = data.get("nueva_clave")
 
         if not (telefono and token and nueva_contrasena):
             return jsonify({"success": False, "msg": "Todos los campos son obligatorios."}), 400
 
+        # Normalizar número similar a enviar_token_recuperacion
+        telefono = telefono.replace(" ", "")
+        if telefono.startswith("+57"):
+            telefono = telefono[3:]
+        elif telefono.startswith("57"):
+            telefono = telefono[2:]
+
         client = Client(TWILIO_SID, TWILIO_AUTH)
-        verfification_check = client.verify.v2.services(VERIFY_SID).verification_checks.create(
-            to=f"+57{telefono}",
-            code=token
-        )
+        try:
+            verfification_check = client.verify.v2.services(VERIFY_SID).verification_checks.create(
+                to=f"+57{telefono}",
+                code=token
+            )
+        except TwilioRestException as tre:
+            logger.debug("TwilioRestException en verificación de código: %s", tre)
+            msg = str(tre).lower()
+            if "unverified" in msg or "not verified" in msg:
+                return jsonify({"success": False, "msg": "El número no está verificado en Twilio o no está permitido por la cuenta de Twilio."}), 400
+            return jsonify({"success": False, "msg": "No se pudo validar el código por un error del servicio de mensajería."}), 500
 
         if verfification_check.status != "approved":
             return jsonify({"success": False, "msg": "Código inválido o expirado."}), 400
@@ -1924,8 +1924,8 @@ def validar_token():
 
         return jsonify({"success": True, "msg": "Contraseña actualizada correctamente."})
     except Exception as e:
-        print(f"❌ Error en validar_token: {e}")
-        return jsonify({"success": False, "msg": str(e)}), 500
+        logger.exception("❌ Error en validar_token: %s", e)
+        return jsonify({"success": False, "msg": "Error interno al validar el token."}), 500
 
 # ==============================================================================
 # RUTAS DE EMPLEADO - INICIO Y GESTIÓN
@@ -1964,7 +1964,7 @@ def Em_Inicio():
             if mensaje is not None and str(mensaje).strip() != "":
                 todas_filtradas.append(n)
             else:
-                print(f"⚠️ Notificación filtrada por mensaje vacío: ID {n.get('id_notificaciones')}")
+                print(f" Notificación filtrada por mensaje vacío: ID {n.get('id_notificaciones')}")
         
         print(f"📊 Notificaciones después de filtrar: {len(todas_filtradas)}")
         
@@ -1987,7 +1987,7 @@ def Em_Inicio():
             try:
                 locale.setlocale(locale.LC_TIME, "es_CO.utf8")
             except:
-                print("⚠️ No se pudo configurar locale español")
+                print(" No se pudo configurar locale español")
 
         # Formatear fechas
         for noti in todas_filtradas:
@@ -2002,7 +2002,7 @@ def Em_Inicio():
                     
                     noti["fecha_formateada"] = fecha_obj.strftime("%d de %B de %Y, %I:%M %p").capitalize()
                 except Exception as date_error:
-                    print(f"⚠️ Error al formatear fecha {noti['fecha']}: {date_error}")
+                    print(f" Error al formatear fecha {noti['fecha']}: {date_error}")
                     noti["fecha_formateada"] = noti["fecha"]
 
         # Preparar notificaciones para mostrar (máximo 3)
