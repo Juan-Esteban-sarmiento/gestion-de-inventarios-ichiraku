@@ -44,7 +44,6 @@
     <section class="notification-box">
       <div class="notification-header">
         <h2>Avisos recientes</h2>
-        <span><a href="{{ url_for('Em_Rordenes') }}" class="ver-mas">Ver más</a></span>
       </div>
 
       <div class="notification-body">
@@ -62,10 +61,6 @@
           {% endfor %}
 
           {% if restantes > 0 %}
-          <div class="extra-info">
-            Hay {{ restantes }} aviso{{ 's' if restantes > 1 else '' }} más  
-            Da clic en <a href="{{ url_for('Em_Rordenes') }}" class="link-ver">Ver más</a> para verlos.
-          </div>
           {% endif %}
         {% else %}
           <p>No hay avisos recientes</p>
