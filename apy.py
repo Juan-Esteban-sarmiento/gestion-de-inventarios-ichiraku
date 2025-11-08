@@ -454,37 +454,35 @@ def editar_empleado(cedula):
     try:
         data = request.get_json()
         nombre = data.get("nombre")
-        nueva_cedula = data.get("cedula")
         telefono = data.get("telefono")
-        if not (nombre and nueva_cedula and telefono):
-            return jsonify({"success": False, "msg": "Todos los campos son obligatorios."}), 400
+        
+        # Validaciones
+        if not nombre:
+            return jsonify({"success": False, "msg": "El nombre es obligatorio."}), 400
+        
+        if not telefono:
+            return jsonify({"success": False, "msg": "El número de contacto es obligatorio."}), 400
+        
+        # Verificar si el empleado existe
+        empleado_existente = supabase.table("empleados").select("*").eq("cedula", cedula).execute()
+        
+        if not empleado_existente.data:
+            return jsonify({"success": False, "msg": "Empleado no encontrado."}), 404
+        
+        # Actualizar empleado
         response = supabase.table("empleados").update({
             "nombre": nombre,
-            "cedula": int(nueva_cedula),
-            "telefono": str(telefono),
+            "telefono": telefono
         }).eq("cedula", cedula).execute()
-        if hasattr(response, "data") and response.data:
+        
+        if response.data:
             return jsonify({"success": True, "msg": "Empleado actualizado correctamente."}), 200
         else:
             return jsonify({"success": False, "msg": "No se pudo actualizar el empleado."}), 500
+            
     except Exception as e:
         print("❌ Error al editar empleado:", e)
-        return jsonify({"success": False, "msg": f"Error en el servidor: {e}"}), 500
-
-@app.route("/eliminar_empleado/<cedula>", methods=["DELETE"])
-def eliminar_empleado(cedula):
-    try:
-        verificar = supabase.table("empleados").select("*").eq("cedula", cedula).execute()
-        if not verificar.data:
-            return jsonify({"success": False, "msg": "Empleado no encontrado."}), 404
-        eliminar = supabase.table("empleados").delete().eq("cedula", cedula).execute()
-        if hasattr(eliminar, "data") and eliminar.data:
-            return jsonify({"success": True, "msg": "Empleado eliminado correctamente."}), 200
-        else:
-            return jsonify({"success": False, "msg": "No se pudo eliminar el empleado."}), 500
-    except Exception as e:
-        print("Error al eliminar empleado:", e)
-        return jsonify({"success": False, "msg": "Error en el servidor"}), 500
+        return jsonify({"success": False, "msg": "Error interno del servidor."}), 500
 
 @app.route("/cambiar_estado_empleado/<int:cedula>", methods=["POST"])
 def cambiar_estado_empleado(cedula):

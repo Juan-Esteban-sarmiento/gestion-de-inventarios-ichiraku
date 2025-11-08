@@ -88,7 +88,7 @@ async function cargarEmpleados(termino = "") {
             </div>
           </div>
           <div class="empleado-actions">
-            <button onclick="editarEmpleado('${emp.cedula}', '${emp.nombre}', '${emp.numero_contacto}', '${emp.contrasena || ''}')">Editar</button>
+            <button onclick="editarEmpleado('${emp.cedula}', '${emp.nombre}', '${emp.telefono}', '${emp.contrasena || ''}')">Editar</button>
             <button onclick="${emp.habilitado ? `desabilitarEmpleado('${emp.cedula}')` : `habilitarEmpleado('${emp.cedula}')`}">${emp.habilitado ? 'Deshabilitar' : 'Habilitar'}</button>
           </div>
         </div>
@@ -103,14 +103,14 @@ async function cargarEmpleados(termino = "") {
   }
 }
 
-// ✏️ Editar empleado
+// ✏️ Editar empleado - VERSIÓN CORREGIDA
 function editarEmpleado(cedula, nombre, telefono) {
   Swal.fire({
     title: '<span style="font-family:njnaruto; color:#fff;">Editar empleado</span>',
     html: `
-      <input id="editNombre" class="swal2-input" placeholder="Nombre" value="${nombre}">
-      <input id="editCedula" class="swal2-input" placeholder="Cedula" value="${cedula}" disabled>
-      <input id="editContacto" class="swal2-input" placeholder="Numero de contacto" value="${telefono}" disabled>
+      <input id="editNombre" class="swal2-input" placeholder="Nombre" value="${nombre || ''}">
+      <input id="editCedula" class="swal2-input" placeholder="Cédula" value="${cedula || ''}" disabled>
+      <input id="editContacto" class="swal2-input" placeholder="Número de contacto" value="${telefono || ''}">
     `,
     confirmButtonText: '<span style="font-family:njnaruto;">Guardar</span>',
     showCancelButton: true,
@@ -120,26 +120,43 @@ function editarEmpleado(cedula, nombre, telefono) {
     confirmButtonColor: '#ff0000ff',
     cancelButtonColor: '#ff0000ff',
     preConfirm: () => {
+      const nombre = document.getElementById("editNombre").value.trim();
+      const telefono = document.getElementById("editContacto").value.trim();
+      
+      if (!nombre) {
+        Swal.showValidationMessage('El nombre es obligatorio');
+        return false;
+      }
+      if (!telefono) {
+        Swal.showValidationMessage('El número de contacto es obligatorio');
+        return false;
+      }
+      
       return {
-        nombre: document.getElementById("editNombre").value,
-        cedula: document.getElementById("editCedula").value,
-        telefono: document.getElementById("editContacto").value,
+        nombre: nombre,
+        telefono: telefono
       };
     }
   }).then(async (result) => {
     if (result.isConfirmed) {
       const data = result.value;
-      const response = await fetch(`/editar_empleado/${cedula}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      });
-      const resData = await response.json();
-      if (resData.success) {
-        alertaNinja('success', 'Empleado actualizado', resData.msg);
-        await cargarEmpleados("");
-      } else {
-        alertaNinja('error', 'Error al actualizar', resData.msg);
+      try {
+        const response = await fetch(`/editar_empleado/${cedula}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        
+        const resData = await response.json();
+        if (resData.success) {
+          alertaNinja('success', 'Empleado actualizado', resData.msg);
+          await cargarEmpleados("");
+        } else {
+          alertaNinja('error', 'Error al actualizar', resData.msg);
+        }
+      } catch (error) {
+        console.error("Error al editar empleado:", error);
+        alertaNinja('error', 'Error del servidor', 'No se pudo actualizar el empleado');
       }
     }
   });
