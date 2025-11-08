@@ -58,8 +58,6 @@
                   <span>{{ pedido.fecha_pedido|format_fecha }}</span>
                 </div>
                 <div>
-                  <span>Cliente: {{ pedido.cliente_nombre or 'Desconocido' }}</span>
-                  <span>Local: {{ pedido.local or 'N/A' }}</span>
                   <span>Estado: {{ pedido.estado }}</span>
                 </div>
                 <button class="toggle-btn" onclick="toggleDetallePedido('{{ pedido.id_pedido }}')">
