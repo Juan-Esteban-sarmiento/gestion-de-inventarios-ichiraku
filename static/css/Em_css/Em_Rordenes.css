@@ -49,6 +49,26 @@
   margin-left: 5px;
 }
 
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[disabled] {
+  background: black;
+  color: white;
+  cursor: not-allowed;
+}
+
+#cantidad {
+  pointer-events: none;
+}
+
 /* --- INPUT DE FECHA --- */
 input[type="date"] {
   width: 90%;

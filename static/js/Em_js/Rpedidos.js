@@ -42,7 +42,7 @@ async function buscarProductos(termino = null) {
                     <h3>${prod.nombre}</h3>
                     <p>Categoria: ${prod.categoria}</p>
                     <p>Unidad: ${prod.unidad}</p>
-                    <input type="number" min="1" value="1" id="cantidad-${prod.id_producto}">
+                    <input type="number" min="1" max="1000" value="1" id="cantidad-${prod.id_producto}" title="Cantidad máxima: 1000 ${prod.unidad}">
                     <button onclick="agregarCarrito(${prod.id_producto}, '${prod.nombre.replace(/'/g, "\\'")}', '${prod.categoria.replace(/'/g, "\\'")}', '${prod.unidad.replace(/'/g, "\\'")}')">Agregar al Carrito</button>
                 `;
                 container.appendChild(card);
@@ -65,13 +65,25 @@ function agregarCarrito(id, nombre, categoria, unidad) {
 
     if (cantidad <= 0) {
         showMessage("Cantidad debe ser mayor que 0.", "error");
+        cantidadInput.value = 1;
+        return;
+    }
+
+    if (cantidad > 1000) {
+        showMessage("La cantidad máxima permitida es 1000 " + unidad + ".", "error");
+        cantidadInput.value = 1000;
         return;
     }
 
     const existingItemIndex = carrito.findIndex(item => item.Id_Producto === id);
 
     if (existingItemIndex > -1) {
-        carrito[existingItemIndex].Cantidad += cantidad;
+        const nuevaCantidad = carrito[existingItemIndex].Cantidad + cantidad;
+        if (nuevaCantidad > 1000) {
+            showMessage(`La cantidad total de ${nombre} no puede exceder 1000 ${unidad}. Cantidad actual: ${carrito[existingItemIndex].Cantidad}`, "error");
+            return;
+        }
+        carrito[existingItemIndex].Cantidad = nuevaCantidad;
         showMessage(`Cantidad de ${nombre} actualizada: ${carrito[existingItemIndex].Cantidad}`, "success");
     } else {
         carrito.push({

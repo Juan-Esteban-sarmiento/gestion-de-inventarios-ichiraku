@@ -14,7 +14,9 @@ function autocompletarFormulario(idPedido, idProducto, nombre, categoria, cantid
     document.getElementById("id_producto").value = idProducto;
     document.getElementById("nombre_producto").value = nombre;
     document.getElementById("categoria").value = categoria;
-    document.getElementById("cantidad").value = cantidad;
+    const cantidadInput = document.getElementById("cantidad");
+    cantidadInput.value = cantidad;
+    cantidadInput.dataset.fixed = String(cantidad);
     document.getElementById("unidad").value = unidad;
 
     const fechaFila = document.getElementById(`fecha_caducidad-${idPedido}-${idProducto}`);
@@ -62,6 +64,22 @@ document.addEventListener("DOMContentLoaded", () => {
     cargarConfirmaciones();
     marcarPedidosRecibidos();
 
+    const cantidadInput = document.getElementById("cantidad");
+    if (cantidadInput) {
+        cantidadInput.readOnly = true;
+        cantidadInput.disabled = true;
+        cantidadInput.setAttribute("tabindex","-1");
+        cantidadInput.addEventListener("focus", (e) => { e.target.blur(); });
+        cantidadInput.addEventListener("keydown", (e) => {
+            e.preventDefault();
+        });
+        cantidadInput.addEventListener("wheel", (e) => { e.preventDefault(); }, { passive: false });
+        cantidadInput.addEventListener("input", (e) => {
+            const fixed = e.target.dataset.fixed || e.target.value;
+            e.target.value = fixed;
+        });
+    }
+
     const form = document.getElementById("recepcionForm");
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -69,10 +87,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const idPedido = document.getElementById("id_pedido").value;
         const idProducto = document.getElementById("id_producto").value;
         const fechaCad = document.getElementById("fecha_caducidad").value;
-        const cantidad = document.getElementById("cantidad").value;
+        const cantidadInput = document.getElementById("cantidad");
+        const cantidad = parseInt(cantidadInput.value) || 0;
 
         if(!idPedido || !idProducto || !fechaCad || !cantidad){
             alertaNinja('warning','Campos incompletos','Selecciona un producto y completa los campos.');
+            return;
+        }
+
+        if (cantidad < 1 || cantidad > 1000) {
+            alertaNinja('error','Cantidad inválida','La cantidad debe estar entre 1 y 1000.');
+            cantidadInput.value = cantidad < 1 ? 1 : 1000;
             return;
         }
 

@@ -1,34 +1,20 @@
 import os
-import base64
-import csv
-import calendar
 import io
-import random
-import string
 import locale
-from urllib import response
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
-from io import StringIO
-from flask import Flask, flash, jsonify, render_template, request, redirect, url_for, session, make_response
-from db import add_empleado, get_db_connection
-from supabase import create_client, Client
+from flask import Flask, jsonify, render_template, request, redirect, url_for, session, make_response
+from supabase import create_client
 from dotenv import load_dotenv
-from datetime import datetime , timedelta, date
+from datetime import datetime, timedelta, date
 from functools import wraps
-from flask import session, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
-from twilio.rest import Client
+from twilio.rest import Client as TwilioClient
 import logging
+import re
 from twilio.base.exceptions import TwilioRestException
-import requests
-import json
-
-# ==============================================================================
-# CONFIGURACIÓN INICIAL Y VARIABLES DE ENTORNO
-# ==============================================================================
 
 load_dotenv()
 
@@ -38,31 +24,26 @@ TWILIO_PHONE = os.getenv("TWILIO_PHONE_NUMBER")
 VERIFY_SID = os.getenv("VERIFY_SERVICE_SID")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-twilio_client = Client(TWILIO_SID, TWILIO_AUTH)
+twilio_client = TwilioClient(TWILIO_SID, TWILIO_AUTH)
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
-tokens_temporales = {}
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_KEY"))
+supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY or SUPABASE_KEY)
 
 app = Flask(__name__)
-app.secret_key = '123456789'
+app.secret_key = os.getenv('FLASK_SECRET_KEY') or os.urandom(32)
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+    SESSION_COOKIE_SECURE=(os.getenv('SESSION_COOKIE_SECURE', 'False').lower() == 'true')
+)
 
-# ==============================================================================
-# FILTROS Y FUNCIONES AUXILIARES
-# ==============================================================================
-
-def enviar_token_sms(numero):
-    token = str(random.randint(100000, 999999))
-    mensaje = twilio_client.messages.create(
-        body=f"Tu código de verificación es: {token}",
-        from_=TWILIO_PHONE,
-        to=f"+57{numero}"
-    )
-    print(f"✅ SMS enviado a {numero}. SID: {mensaje.sid}")
-    return token
+def is_valid_image(file):
+    if not file:
+        return False
+    return file.mimetype in ('image/jpeg', 'image/png')
 
 @app.template_filter('format_fecha')
 def format_fecha(value):
@@ -87,16 +68,10 @@ def login_requerido(rol=None):
 
 def generar_notificaciones_caducidad():
     try:
-        print(f"🕐 Iniciando generación de notificaciones - {datetime.now()}")
         hoy = datetime.now().date()
         limite = hoy + timedelta(days=3)
         
-        print(f"📅 Hoy: {hoy}, Límite: {limite}")
-        
-        # Verificar conexión a Supabase
-        print("🔌 Probando conexión a Supabase...")
         test_connection = supabase.table("inventario").select("count", count="exact").execute()
-        print(f"✅ Conexión OK. Total registros en inventario: {test_connection.count}")
         
         proximos = supabase.table("inventario") \
             .select("id_inventario, id_producto, cantidad, fecha_caducidad") \
@@ -104,17 +79,11 @@ def generar_notificaciones_caducidad():
             .lte("fecha_caducidad", limite.isoformat()) \
             .execute()
 
-        print(f"🔍 Productos próximos a caducar: {len(proximos.data)}")
-        
         if not proximos.data:
-            print("ℹ️ No hay productos próximos a caducar")
             return
             
         notificaciones_creadas = 0
         for item in proximos.data:
-            print(f"📦 Procesando: ID {item['id_inventario']}, Producto {item['id_producto']}, Caduca {item['fecha_caducidad']}")
-            
-            # Obtener nombre del producto
             producto = supabase.table("productos") \
                 .select("nombre") \
                 .eq("id_producto", item["id_producto"]) \
@@ -122,9 +91,7 @@ def generar_notificaciones_caducidad():
                 .execute()
                 
             nombre_producto = producto.data["nombre"] if producto.data else "Nombre no encontrado"
-            print(f"   Producto: {nombre_producto}")
 
-            # Verificar si ya existe notificación
             noti_existente = supabase.table("notificaciones") \
                 .select("id_notificaciones") \
                 .eq("id_inventario", item["id_inventario"]) \
@@ -133,7 +100,6 @@ def generar_notificaciones_caducidad():
 
             if not noti_existente.data:
                 mensaje = f" El producto '{nombre_producto}' (ID: {item['id_producto']}) caduca el {item['fecha_caducidad']} | Cantidad: {item['cantidad']}"
-                print(f"   📢 Creando notificación: {mensaje}")
                 
                 supabase.table("notificaciones").insert({
                     "id_inventario": item["id_inventario"],
@@ -143,13 +109,9 @@ def generar_notificaciones_caducidad():
                     "fecha": datetime.now().isoformat()
                 }).execute()
                 notificaciones_creadas += 1
-            else:
-                print(f"   ✅ Notificación ya existe")
 
-        print(f"✅ Notificaciones generadas: {notificaciones_creadas}")
-        
     except Exception as e:
-        print("❌ Error al generar notificaciones:", e)
+        print("Error al generar notificaciones:", e)
         import traceback
         traceback.print_exc()
 
@@ -162,7 +124,6 @@ def eliminar_notificaciones_caducadas():
             .execute()
 
         if not caducados.data:
-            print("✅ No hay productos caducados hoy.")
             return
 
         ids_caducados = [item["id_inventario"] for item in caducados.data]
@@ -174,10 +135,8 @@ def eliminar_notificaciones_caducadas():
             .delete() \
             .in_("id_inventario", ids_caducados) \
             .execute()
-        print(f"🗑️ Notificaciones eliminadas: {len(res_notif.data)}")
-        print(f"💀 Productos eliminados: {len(res_inv.data)}")
     except Exception as e:
-        print("❌ Error al eliminar notificaciones o productos caducados:", e)
+        print("Error al eliminar notificaciones o productos caducados:", e)
 
 def insertar_informe(id_pedido):
     existente = supabase.table("informe").select("id_inf_pedido").eq("id_inf_pedido", id_pedido).execute().data
@@ -188,11 +147,6 @@ def insertar_informe(id_pedido):
         }).execute()
         return True
     return False
-
-
-# ==============================================================================
-# RUTAS PRINCIPALES Y AUTENTICACIÓN
-# ==============================================================================
 
 @app.route('/')
 def index():
@@ -246,7 +200,7 @@ def login():
             else:
                 return jsonify({"success": False, "msg": "Rol no válido."}),400
         except Exception as e:
-            print("❌ Error durante el login:", e)
+            print("Error durante el login:", e)
             return jsonify({"success": False, "msg": "Error en el servidor."}),500
     return render_template("login.html")
 
@@ -257,7 +211,7 @@ def get_locales():
         locales = response.data
         return jsonify({"success": True, "locales": locales})
     except Exception as e:
-        print("❌ Error al obtener locales:", e)
+        print("Error al obtener locales:", e)
         return jsonify({"success": False, "msg": "Error al obtener locales"})
 
 @app.route('/logout')
@@ -269,73 +223,45 @@ def logout():
     response.headers['Expires'] = '0'
     return response
 
-# ==============================================================================
-# RUTAS DE ADMINISTRADOR - INICIO Y GESTIÓN
-# ==============================================================================
-
 @app.route('/Ad_Inicio', methods=['GET', 'POST'])
 @login_requerido(rol='Administrador')
 def Ad_Inicio():
     try:
-        print("=== AD_INICIO EJECUTÁNDOSE ===")
-        
-        # Generar notificaciones de caducidad
         generar_notificaciones_caducidad()
         eliminar_notificaciones_caducadas()
         
-        # CONSULTA CORREGIDA: Obtener notificaciones de la base de datos
         try:
-            print("🔍 Buscando notificaciones en la base de datos...")
             todas_response = supabase.table("notificaciones").select("*").order("fecha", desc=True).execute()
             todas = todas_response.data if todas_response.data else []
-            print(f"✅ Notificaciones encontradas en BD: {len(todas)}")
-            
-            # DEBUG: Mostrar todas las notificaciones obtenidas
-            for i, noti in enumerate(todas):
-                print(f"  📋 {i+1}. ID: {noti.get('id_notificaciones')} - Mensaje: {noti.get('mensaje')} - Fecha: {noti.get('fecha')}")
-                
         except Exception as db_error:
-            print(f"❌ Error al consultar notificaciones: {db_error}")
+            print(f"Error al consultar notificaciones: {db_error}")
             todas = []
 
-        # Filtrar notificaciones vacías (pero ser más permisivo)
         todas_filtradas = []
         for n in todas:
             mensaje = n.get("mensaje", "")
-            # Solo filtrar si el mensaje está completamente vacío o es None
             if mensaje is not None and str(mensaje).strip() != "":
                 todas_filtradas.append(n)
-            else:
-                print(f" Notificación filtrada por mensaje vacío: ID {n.get('id_notificaciones')}")
-        
-        print(f"📊 Notificaciones después de filtrar: {len(todas_filtradas)}")
-        
-        # AGREGAR NOTIFICACIÓN DE PRUEBA SOLO SI NO HAY NOTIFICACIONES REALES
+
         if not todas_filtradas:
-            print("ℹ️ No hay notificaciones reales, agregando de prueba")
             notificacion_prueba = {
-                "mensaje": "🔔 NOTIFICACIÓN DE PRUEBA - Sistema funcionando",
+                "mensaje": "NOTIFICACIÓN DE PRUEBA - Sistema funcionando",
                 "fecha_formateada": datetime.now().strftime("%d de %B de %Y, %I:%M %p"),
                 "leido": False
             }
             todas_filtradas.append(notificacion_prueba)
-        else:
-            print("✅ Usando notificaciones reales de la base de datos")
 
-        # Configurar locale para formato en español
         try:
             locale.setlocale(locale.LC_TIME, "es_ES.utf8")
         except:
             try:
                 locale.setlocale(locale.LC_TIME, "es_CO.utf8")
             except:
-                print(" No se pudo configurar locale español")
+                pass
 
-        # Formatear fechas
         for noti in todas_filtradas:
             if noti.get("fecha") and not noti.get("fecha_formateada"):
                 try:
-                    # Manejar diferentes formatos de fecha
                     fecha_str = noti["fecha"]
                     if 'T' in fecha_str:
                         fecha_obj = datetime.fromisoformat(fecha_str.replace('Z', '+00:00'))
@@ -344,18 +270,13 @@ def Ad_Inicio():
                     
                     noti["fecha_formateada"] = fecha_obj.strftime("%d de %B de %Y, %I:%M %p").capitalize()
                 except Exception as date_error:
-                    print(f" Error al formatear fecha {noti['fecha']}: {date_error}")
+                    print(f"Error al formatear fecha {noti['fecha']}: {date_error}")
                     noti["fecha_formateada"] = noti["fecha"]
 
-        # Preparar notificaciones para mostrar (máximo 3)
         notificaciones = todas_filtradas[:3]
         total_notificaciones = len(todas_filtradas)
         restantes = max(0, total_notificaciones - 3)
 
-        print(f"📤 Enviando al template: {len(notificaciones)} notificaciones de {total_notificaciones} totales")
-        print(f"🔢 Restantes: {restantes}")
-
-        # Crear respuesta con headers para evitar cache
         http_response = make_response(render_template(
             "Ad_templates/Ad_Inicio.html",
             notificaciones=notificaciones,
@@ -368,17 +289,13 @@ def Ad_Inicio():
         return http_response
         
     except Exception as e:
-        print(f"❌ Error crítico al cargar página de inicio: {e}")
+        print(f"Error crítico al cargar página de inicio: {e}")
         import traceback
         traceback.print_exc()
         return render_template("Ad_templates/Ad_Inicio.html", 
                              notificaciones=[], 
                              restantes=0, 
                              total_notificaciones=0), 500
-
-# ==============================================================================
-# GESTIÓN DE EMPLEADOS (ADMIN)
-# ==============================================================================
 
 @app.route('/Ad_Rempleados', methods=['GET', 'POST'])
 @login_requerido(rol='Administrador')
@@ -388,48 +305,159 @@ def Ad_Rempleados():
 @app.route('/registrar_empleado', methods=['POST'])
 @login_requerido(rol='Administrador')
 def registrar_empleado():
-    nombre = request.form.get('nombre')
-    cedula = request.form.get('cedula')
-    contrasena = request.form.get('contrasena')
-    telefono = request.form.get('contacto')
-    foto = request.files.get('foto')
-
-    if not (nombre and cedula and contrasena and telefono):
-        return jsonify({"success": False, "msg": "Todos los campos son obligatorios."})
-
-    contrasena_hash = generate_password_hash(contrasena)
-    foto_url = None
-
-    if foto:
-        try:
-            filename = f"empleados/{cedula}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
-            upload_response = supabase.storage.from_("Fotos").upload(filename, foto.read())
-            if hasattr(upload_response, "error") and upload_response.error:
-                print("❌ Error al subir imagen:", upload_response.error)
-                return jsonify({"success": False, "msg": "Error al subir la foto al servidor."})
-            foto_url = f"{SUPABASE_URL}/storage/v1/object/public/Fotos/{filename}"
-        except Exception as e:
-            print("❌ Error durante la subida de la foto:", e)
-            return jsonify({"success": False, "msg": "Error al procesar la imagen."})
-
     try:
+        nombre = request.form.get('nombre')
+        cedula = request.form.get('cedula')
+        contrasena = request.form.get('contrasena')
+        telefono = request.form.get('contacto')
+        foto = request.files.get('foto')
+
+        print(f"📝 Datos recibidos: nombre={nombre}, cedula={cedula}, telefono={telefono}")
+
+        if not (nombre and cedula and contrasena and telefono):
+            return jsonify({"success": False, "msg": "Todos los campos son obligatorios."})
+
+        nombre_limpio = nombre.strip()
+        if len(nombre_limpio) < 2 or len(nombre_limpio) > 100:
+            return jsonify({"success": False, "msg": "El nombre debe tener entre 2 y 100 caracteres."})
+        
+        if not re.fullmatch(r"^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$", nombre_limpio):
+            return jsonify({"success": False, "msg": "El nombre solo puede contener letras y espacios."})
+        
+        if not re.search(r"[AEIOUÁÉÍÓÚaeiouáéíóú]", nombre_limpio):
+            return jsonify({"success": False, "msg": "El nombre debe contener vocales."})
+
+        # Validar cédula
+        try:
+            cedula_int = int(cedula)
+            if cedula_int < 10000 or cedula_int > 999999999999999:
+                return jsonify({"success": False, "msg": "La cédula debe tener entre 5 y 15 dígitos."})
+        except ValueError:
+            return jsonify({"success": False, "msg": "La cédula debe contener solo números."})
+
+        # Validar teléfono
+        try:
+            telefono_int = int(telefono)
+            if telefono_int < 1000000 or telefono_int > 999999999999999:
+                return jsonify({"success": False, "msg": "El teléfono debe tener entre 7 y 15 dígitos."})
+        except ValueError:
+            return jsonify({"success": False, "msg": "El teléfono debe contener solo números."})
+
+        # Validar contraseña
+        if not re.fullmatch(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,64}$", contrasena):
+            return jsonify({"success": False, "msg": "La contraseña debe tener al menos 8 caracteres, incluir una minúscula, una mayúscula, un número y un símbolo."})
+
+        # NORMALIZAR DATOS
+        nombre_normalizado = re.sub(r"\s+", " ", nombre_limpio).strip().title()
+        telefono_str = str(telefono).strip()
+
+        print(f"🔍 Validando duplicados: nombre='{nombre_normalizado}', cedula={cedula_int}, telefono={telefono_str}")
+
+        # VERIFICAR DUPLICADOS - MÁS ROBUSTO
+        # 1. Verificar cédula
+        print("🔍 Verificando cédula...")
+        existente_cedula = supabase.table("empleados").select("cedula, nombre").eq("cedula", cedula_int).execute()
+        print(f"📋 Resultado cédula: {existente_cedula.data}")
+        
+        if existente_cedula.data:
+            empleado_existente = existente_cedula.data[0]
+            return jsonify({
+                "success": False, 
+                "msg": f"El ID {cedula} ya está registrado a nombre de: {empleado_existente.get('nombre', 'N/A')}"
+            })
+
+        # 2. Verificar nombre (case-insensitive)
+        print("🔍 Verificando nombre...")
+        # Primero buscar exactamente igual
+        existente_nombre_exacto = supabase.table("empleados").select("cedula, nombre").ilike("nombre", nombre_normalizado).execute()
+        print(f"📋 Resultado nombre exacto: {existente_nombre_exacto.data}")
+        
+        if existente_nombre_exacto.data:
+            empleado_existente = existente_nombre_exacto.data[0]
+            return jsonify({
+                "success": False, 
+                "msg": f"El nombre '{nombre_normalizado}' ya está registrado con el ID: {empleado_existente.get('cedula', 'N/A')}"
+            })
+
+        # 3. Verificar teléfono
+        print("🔍 Verificando teléfono...")
+        existente_telefono = supabase.table("empleados").select("cedula, nombre, telefono").eq("telefono", telefono_str).execute()
+        print(f"📋 Resultado teléfono: {existente_telefono.data}")
+        
+        if existente_telefono.data:
+            empleado_existente = existente_telefono.data[0]
+            return jsonify({
+                "success": False, 
+                "msg": f"El teléfono {telefono_str} ya está registrado a nombre de: {empleado_existente.get('nombre', 'N/A')} (ID: {empleado_existente.get('cedula', 'N/A')})"
+            })
+
+        # Si pasó todas las validaciones, proceder con el registro
+        print("✅ Todas las validaciones pasadas, procediendo con registro...")
+
+        contrasena_hash = generate_password_hash(contrasena)
+        foto_url = None
+
+        if foto:
+            if not is_valid_image(foto):
+                return jsonify({"success": False, "msg": "Formato de imagen no permitido."}), 400
+            try:
+                filename = f"empleados/{cedula}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
+                file_bytes = foto.read()
+                upload_response = supabase.storage.from_("Fotos").upload(filename, file_bytes)
+                if hasattr(upload_response, "error") and upload_response.error:
+                    print("❌ Error al subir imagen:", upload_response.error)
+                    return jsonify({"success": False, "msg": "Error al subir la foto al servidor."})
+                foto_url = f"{SUPABASE_URL}/storage/v1/object/public/Fotos/{filename}"
+                print("✅ Foto subida exitosamente")
+            except Exception as e:
+                print("❌ Error durante la subida de la foto:", e)
+                return jsonify({"success": False, "msg": "Error al procesar la imagen."})
+
+        # DATOS PARA INSERTAR
         data = {
-            "cedula": int(cedula),
-            "nombre": nombre,
-            "telefono": str(telefono),
+            "cedula": cedula_int,
+            "nombre": nombre_normalizado,
+            "telefono": telefono_str,
             "contrasena": contrasena_hash,
-            "foto": foto_url
+            "foto": foto_url,
+            "habilitado": True
         }
+
+        print(f"💾 Insertando datos: {data}")
+
         response = supabase.table("empleados").insert(data).execute()
+        
+        print(f"📡 Respuesta de Supabase: {response}")
+
         if hasattr(response, "data") and response.data:
-            return jsonify({"success": True, "msg": f"Empleado {nombre} registrado correctamente."})
+            print("✅ Empleado registrado exitosamente")
+            return jsonify({"success": True, "msg": f"Empleado {nombre_normalizado} registrado correctamente."})
         else:
+            print("❌ No se pudo registrar el empleado")
             return jsonify({"success": False, "msg": "No se pudo registrar el empleado. Verifica los datos."})
+            
     except Exception as e:
-        print("❌ Error inesperado al registrar:", e)
-        return jsonify({"success": False, "msg": f"Error al registrar empleado: {e}"})
+        print(f"❌ ERROR GENERAL: {str(e)}")
+        print(f"❌ TIPO DE ERROR: {type(e)}")
+        import traceback
+        traceback.print_exc()
+        
+        # Capturar error de duplicado de Supabase
+        error_str = str(e)
+        if "23505" in error_str or "duplicate" in error_str.lower():
+            if "cedula" in error_str.lower():
+                return jsonify({"success": False, "msg": "El ID ya está registrado en el sistema."})
+            elif "telefono" in error_str.lower():
+                return jsonify({"success": False, "msg": "El teléfono ya está registrado en el sistema."})
+            elif "nombre" in error_str.lower():
+                return jsonify({"success": False, "msg": "El nombre ya está registrado en el sistema."})
+            else:
+                return jsonify({"success": False, "msg": "El registro ya existe en el sistema."})
+        else:
+            return jsonify({"success": False, "msg": "Error inesperado al registrar empleado."})
 
 @app.route("/buscar_empleado", methods=["POST"])
+@login_requerido(rol='Administrador')
 def buscar_empleado():
     try:
         data = request.get_json()
@@ -446,30 +474,39 @@ def buscar_empleado():
         else:
             return jsonify({"success": True, "empleados": []})
     except Exception as e:
-        print("❌ Error en búsqueda de empleado:", e)
+        print("Error en búsqueda de empleado:", e)
         return jsonify({"success": False, "msg": "Error en el servidor"})
 
 @app.route("/editar_empleado/<int:cedula>", methods=["PUT"])
+@login_requerido(rol='Administrador')
 def editar_empleado(cedula):
     try:
         data = request.get_json()
         nombre = data.get("nombre")
         telefono = data.get("telefono")
         
-        # Validaciones
         if not nombre:
             return jsonify({"success": False, "msg": "El nombre es obligatorio."}), 400
+
+        nombre_limpio = nombre.strip()
+        if len(nombre_limpio) < 2 or len(nombre_limpio) > 100:
+            return jsonify({"success": False, "msg": "El nombre debe tener entre 2 y 100 caracteres."}), 400
         
         if not telefono:
             return jsonify({"success": False, "msg": "El número de contacto es obligatorio."}), 400
+
+        try:
+            telefono_int = int(telefono)
+            if telefono_int < 1000000 or telefono_int > 999999999999999:
+                return jsonify({"success": False, "msg": "El teléfono debe tener entre 7 y 15 dígitos."}), 400
+        except ValueError:
+            return jsonify({"success": False, "msg": "El teléfono debe contener solo números."}), 400
         
-        # Verificar si el empleado existe
         empleado_existente = supabase.table("empleados").select("*").eq("cedula", cedula).execute()
         
         if not empleado_existente.data:
             return jsonify({"success": False, "msg": "Empleado no encontrado."}), 404
         
-        # Actualizar empleado
         response = supabase.table("empleados").update({
             "nombre": nombre,
             "telefono": telefono
@@ -481,10 +518,11 @@ def editar_empleado(cedula):
             return jsonify({"success": False, "msg": "No se pudo actualizar el empleado."}), 500
             
     except Exception as e:
-        print("❌ Error al editar empleado:", e)
+        print("Error al editar empleado:", e)
         return jsonify({"success": False, "msg": "Error interno del servidor."}), 500
 
 @app.route("/cambiar_estado_empleado/<int:cedula>", methods=["POST"])
+@login_requerido(rol='Administrador')
 def cambiar_estado_empleado(cedula):
     try:
         data = request.get_json()
@@ -498,12 +536,8 @@ def cambiar_estado_empleado(cedula):
         else:
             return jsonify({"success": False, "msg": "No se encontró el empleado."}), 404
     except Exception as e:
-        print("❌ Error al cambiar estado del producto:", e)
+        print("Error al cambiar estado del producto:", e)
         return jsonify({"success": False, "msg": f"Error en servidor: {e}"}), 500
-
-# ==============================================================================
-# GESTIÓN DE PRODUCTOS (ADMIN)
-# ==============================================================================
 
 @app.route('/Ad_Rproductos', methods=['GET', 'POST'])
 @login_requerido(rol='Administrador')
@@ -511,6 +545,7 @@ def Ad_Rproductos():
     return render_template("Ad_templates/Ad_Rproductos.html")
 
 @app.route('/registrar_producto', methods=['POST'])
+@login_requerido(rol='Administrador')
 def registrar_producto():
     nombre = request.form.get('nombre')
     categoria = request.form.get('categoria')
@@ -519,6 +554,18 @@ def registrar_producto():
 
     if not (nombre and categoria and unidad):
         return jsonify({"success": False, "msg": "Todos los campos son obligatorios."})
+
+    nombre_limpio = nombre.strip()
+    if len(nombre_limpio) < 2 or len(nombre_limpio) > 100:
+        return jsonify({"success": False, "msg": "El nombre del producto debe tener entre 2 y 100 caracteres."})
+
+    categoria_limpia = categoria.strip()
+    if len(categoria_limpia) < 1 or len(categoria_limpia) > 50:
+        return jsonify({"success": False, "msg": "La categoría debe tener entre 1 y 50 caracteres."})
+
+    unidad_limpia = unidad.strip()
+    if len(unidad_limpia) < 1 or len(unidad_limpia) > 20:
+        return jsonify({"success": False, "msg": "La unidad debe tener entre 1 y 20 caracteres."})
 
     try:
         data = {
@@ -533,21 +580,23 @@ def registrar_producto():
             return jsonify({"success": False, "msg": "Error al registrar producto."})
         producto_id = response.data[0]["id_producto"]
     except Exception as e:
-        print("❌ Error al insertar producto:", e)
+        print("Error al insertar producto:", e)
         return jsonify({"success": False, "msg": f"Error en servidor: {e}"})
 
     foto_url = None
     if foto:
+        if not is_valid_image(foto):
+            return jsonify({"success": False, "msg": "Formato de imagen no permitido."}), 400
         try:
             filename = f"productos/{producto_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
             upload_response = supabase.storage.from_("Fotos").upload(filename, foto.read())
             if hasattr(upload_response, "error") and upload_response.error:
-                print("❌ Error al subir imagen:", upload_response.error)
+                print("Error al subir imagen:", upload_response.error)
                 return jsonify({"success": False, "msg": "Error al subir imagen."})
             foto_url = f"{SUPABASE_URL}/storage/v1/object/public/Fotos/{filename}"
             supabase.table("productos").update({"foto": foto_url}).eq("id_producto", producto_id).execute()
         except Exception as e:
-            print("❌ Error al subir foto:", e)
+            print("Error al subir foto:", e)
             return jsonify({"success": False, "msg": "Error al subir foto."})
 
     return jsonify({
@@ -558,6 +607,7 @@ def registrar_producto():
     })
 
 @app.route("/buscar_producto", methods=["POST"])
+@login_requerido(rol='Administrador')
 def buscar_producto():
     try:
         data = request.get_json()
@@ -578,10 +628,11 @@ def buscar_producto():
             return jsonify({"success": False, "msg": "No se encontraron productos", "productos": []})
         return jsonify({"success": True, "productos": productos_filtrados})
     except Exception as e:
-        print("❌ Error en búsqueda de producto:", e)
+        print("Error en búsqueda de producto:", e)
         return jsonify({"success": False, "msg": "Error en servidor"}), 500
 
 @app.route("/obtener_proximo_id",methods=["GET"])
+@login_requerido(rol='Administrador')
 def obtener_proximo_id():
     try:
         response = supabase.table("productos").select("id_producto").order("id_producto", desc=True).limit(1).execute()
@@ -592,10 +643,11 @@ def obtener_proximo_id():
             proximo_id = 1
         return jsonify({"success": True, "proximo_id": proximo_id})
     except Exception as e:
-        print("❌ Error al obtener próximo ID de producto:", e)
+        print("Error al obtener próximo ID de producto:", e)
         return jsonify({"success": False, "msg": "Error en servidor"}), 500
 
 @app.route("/editar_producto/<int:id_producto>", methods=["PUT"])
+@login_requerido(rol='Administrador')
 def editar_producto(id_producto):
     try:
         data = request.get_json()
@@ -604,20 +656,34 @@ def editar_producto(id_producto):
         unidad = data.get("unidad")
         if not (nombre and categoria and unidad):
             return jsonify({"success": False, "msg": "Todos los campos son obligatorios."}), 400
+
+        nombre_limpio = nombre.strip()
+        if len(nombre_limpio) < 2 or len(nombre_limpio) > 100:
+            return jsonify({"success": False, "msg": "El nombre del producto debe tener entre 2 y 100 caracteres."}), 400
+
+        categoria_limpia = categoria.strip()
+        if len(categoria_limpia) < 1 or len(categoria_limpia) > 50:
+            return jsonify({"success": False, "msg": "La categoría debe tener entre 1 y 50 caracteres."}), 400
+
+        unidad_limpia = unidad.strip()
+        if len(unidad_limpia) < 1 or len(unidad_limpia) > 20:
+            return jsonify({"success": False, "msg": "La unidad debe tener entre 1 y 20 caracteres."}), 400
+
         response = supabase.table("productos").update({
-            "nombre": nombre,
-            "categoria": categoria,
-            "unidad": unidad
+            "nombre": nombre_limpio,
+            "categoria": categoria_limpia,
+            "unidad": unidad_limpia
         }).eq("id_producto", id_producto).execute()
         if hasattr(response, "data") and response.data:
             return jsonify({"success": True, "msg": "Producto actualizado correctamente."})
         else:
             return jsonify({"success": False, "msg": "No se pudo actualizar el producto."}), 500
     except Exception as e:
-        print("❌ Error al editar producto:", e)
+        print("Error al editar producto:", e)
         return jsonify({"success": False, "msg": f"Error en servidor: {e}"}), 500
 
 @app.route("/cambiar_estado_producto/<int:id_producto>", methods=["POST"])
+@login_requerido(rol='Administrador')
 def cambiar_estado_producto(id_producto):
     try:
         data = request.get_json()
@@ -631,18 +697,13 @@ def cambiar_estado_producto(id_producto):
         else:
             return jsonify({"success": False, "msg": "No se encontró el producto."}), 404
     except Exception as e:
-        print("❌ Error al cambiar estado del producto:", e)
+        print("Error al cambiar estado del producto:", e)
         return jsonify({"success": False, "msg": f"Error en servidor: {e}"}), 500
-
-# ==============================================================================
-# GESTIÓN DE INFORMES (ADMIN)
-# ==============================================================================
 
 @app.route('/Ad_Dinformes', methods=['GET'])
 @login_requerido(rol='Administrador')
 def Ad_Dinformes():
     try:
-        # Obtener el último informe para mostrarlo en el template
         ultimo_informe = None
         informes = supabase.table("informe").select("*").order("id_informe", desc=True).limit(1).execute()
         
@@ -651,12 +712,11 @@ def Ad_Dinformes():
         
         return render_template("Ad_templates/Ad_Dinformes.html", ultimo_informe=ultimo_informe)
     except Exception as e:
-        print("❌ Error al cargar página de informes:", e)
+        print("Error al cargar página de informes:", e)
         return render_template("Ad_templates/Ad_Dinformes.html", ultimo_informe=None)
 
 def crear_informe_consolidado(pedidos, fecha):
     try:
-        # Verificar si ya existe un informe para hoy
         fecha_inicio = f"{fecha}T00:00:00"
         fecha_fin = f"{fecha}T23:59:59"
         
@@ -666,26 +726,22 @@ def crear_informe_consolidado(pedidos, fecha):
             .execute().data
         
         if informe_existente:
-            print(" Ya existe un informe para hoy")
             return False
         
-        # Crear nuevo informe consolidado
         nuevo_informe = {
             "fecha_creacion": datetime.now().isoformat(),
             "tipo": "diario_consolidado",
             "total_pedidos": len(pedidos)
         }
         
-        # Insertar en la base de datos
         result = supabase.table("informe").insert(nuevo_informe).execute()
         
         if result.data:
-            print(f"✅ Informe consolidado creado con {len(pedidos)} pedidos")
             return True
         return False
         
     except Exception as e:
-        print("❌ Error al crear informe consolidado:", e)
+        print("Error al crear informe consolidado:", e)
         return False
 
 def generar_pdf_consolidado(informe_id, pedidos):
@@ -696,39 +752,33 @@ def generar_pdf_consolidado(informe_id, pedidos):
         styles = getSampleStyleSheet()
         elements = []
 
-        # ==================== ENCABEZADO ====================
         elements.append(Paragraph(
-            "<font size=18 color='#e63900'><b>🍜 ICHIRAKU RAMEN - INFORME DIARIO</b></font>", 
+            "<font size=18 color='#e63900'><b>INFORME DIARIO</b></font>", 
             styles['Heading1']
         ))
         elements.append(Paragraph(
-            f"<b>ID Informe:</b> #{informe_id} | <b>Fecha:</b> {datetime.now().strftime('%d/%m/%Y')}", 
+            f"ID Informe: #{informe_id} | Fecha: {datetime.now().strftime('%d/%m/%Y')}", 
             styles['Normal']
         ))
         
-        # Línea decorativa
         elements.append(Spacer(1, 10))
         elements.append(Table([[""]], colWidths=[500], style=[
             ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#e63900")),
         ]))
         elements.append(Spacer(1, 20))
 
-        # ==================== RESUMEN EJECUTIVO ====================
-        elements.append(Paragraph("<b><font color='#e63900' size=14>📊 RESUMEN DEL DÍA</font></b>", styles['Heading2']))
+        elements.append(Paragraph("<b><font color='#e63900' size=14>RESUMEN DEL DÍA</font></b>", styles['Heading2']))
         
         total_productos = 0
         categorias_totales = {}
         locales_participantes = set()
         productos_detallados = []
 
-        # Procesar todos los pedidos para obtener estadísticas
         for pedido in pedidos:
             try:
-                # Obtener detalles del pedido
                 detalles = supabase.table("detalle_pedido").select("id_producto, cantidad")\
                     .eq("id_pedido", pedido["id_pedido"]).execute().data
                 
-                # Obtener información del local
                 inventario_result = supabase.table("inventario").select("id_local")\
                     .eq("id_inventario", pedido["id_inventario"]).execute()
                 
@@ -740,11 +790,9 @@ def generar_pdf_consolidado(informe_id, pedidos):
                         local_nombre = local_result.data[0]['nombre']
                         locales_participantes.add(local_nombre)
                 
-                # Procesar cada detalle del pedido
                 for detalle in detalles:
                     total_productos += detalle['cantidad']
                     
-                    # Obtener información del producto
                     producto_result = supabase.table("productos").select("nombre, categoria, unidad")\
                         .eq("id_producto", detalle['id_producto']).execute()
                     
@@ -753,7 +801,6 @@ def generar_pdf_consolidado(informe_id, pedidos):
                         cat = producto.get('categoria', 'Sin categoría')
                         categorias_totales[cat] = categorias_totales.get(cat, 0) + detalle['cantidad']
                         
-                        # Agregar a lista detallada
                         productos_detallados.append({
                             'pedido_id': pedido['id_pedido'],
                             'local': local_nombre,
@@ -765,19 +812,17 @@ def generar_pdf_consolidado(informe_id, pedidos):
                         })
                         
             except Exception as e:
-                print(f" Error procesando pedido {pedido['id_pedido']}: {e}")
                 continue
 
-        # Tabla de resumen ejecutivo
         hora_primero = min([datetime.fromisoformat(p["fecha_pedido"]).strftime("%H:%M") for p in pedidos]) if pedidos else "N/A"
         hora_ultimo = max([datetime.fromisoformat(p["fecha_pedido"]).strftime("%H:%M") for p in pedidos]) if pedidos else "N/A"
         
         resumen_data = [
-            ["🗓️ Fecha", datetime.now().strftime("%d/%m/%Y")],
-            ["📦 Total de Pedidos", str(len(pedidos))],
-            ["⏰ Horario de Actividad", f"{hora_primero} - {hora_ultimo}"],
-            ["🏪 Locales Activos", str(len(locales_participantes))],
-            ["📍 Locales", ", ".join(locales_participantes) if locales_participantes else "No especificado"]
+            ["Fecha", datetime.now().strftime("%d/%m/%Y")],
+            ["Total de Pedidos", str(len(pedidos))],
+            ["Horario de Actividad", f"{hora_primero} - {hora_ultimo}"],
+            ["Locales Activos", str(len(locales_participantes))],
+            ["Locales", ", ".join(locales_participantes) if locales_participantes else "No especificado"]
         ]
         
         resumen_table = Table(resumen_data, colWidths=[180, 320])
@@ -793,11 +838,9 @@ def generar_pdf_consolidado(informe_id, pedidos):
         elements.append(resumen_table)
         elements.append(Spacer(1, 25))
 
-        # ==================== DETALLE DE PEDIDOS ====================
-        elements.append(Paragraph("<b><font color='#e63900' size=14>📋 DETALLE DE PEDIDOS</font></b>", styles['Heading2']))
+        elements.append(Paragraph("<b><font color='#e63900' size=14>DETALLE DE PEDIDOS</font></b>", styles['Heading2']))
         elements.append(Spacer(1, 10))
 
-        # Agrupar productos por pedido
         pedidos_agrupados = {}
         for producto in productos_detallados:
             pedido_id = producto['pedido_id']
@@ -811,15 +854,12 @@ def generar_pdf_consolidado(informe_id, pedidos):
             pedidos_agrupados[pedido_id]['productos'].append(producto)
             pedidos_agrupados[pedido_id]['total_platos'] += producto['cantidad']
 
-        # Generar tabla para cada pedido
         for pedido_id, info in pedidos_agrupados.items():
-            # Encabezado del pedido
             elements.append(Paragraph(
-                f"<b>🍱 Pedido #{pedido_id}</b> | 🏪 {info['local']} | 🕒 {info['hora']} | 🍜 {info['total_platos']} platos", 
+                f"Pedido #{pedido_id} | {info['local']} | {info['hora']} | {info['total_platos']} platos", 
                 styles['Heading3']
             ))
             
-            # Tabla de productos del pedido
             table_data = [["Plato", "Categoría", "Cantidad"]]
             
             for prod in info['productos']:
@@ -843,7 +883,6 @@ def generar_pdf_consolidado(informe_id, pedidos):
             elements.append(pedido_table)
             elements.append(Spacer(1, 15))
 
-        # ==================== PIE DE PÁGINA ====================
         elements.append(Spacer(1, 20))
         elements.append(Table([[""]], colWidths=[500], style=[
             ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#e63900"))
@@ -853,30 +892,26 @@ def generar_pdf_consolidado(informe_id, pedidos):
         footer_text = f"""
         <para alignment='center'>
         <font size=8 color='#666'>
-        <b>🍜 Ichiraku Ramen - Sistema de Gestión</b><br/>
+        <b>Sistema de Gestión</b><br/>
         Informe generado automáticamente el {datetime.now().strftime('%d/%m/%Y a las %H:%M')}<br/>
-        © 2025 Ichiraku Ramen - Todos los derechos reservados
+        Todos los derechos reservados
         </font>
         </para>
         """
         elements.append(Paragraph(footer_text, styles['Normal']))
 
-        # Generar el PDF
         doc.build(elements)
         buffer.seek(0)
         return buffer
         
     except Exception as e:
-        print("❌ Error al generar PDF consolidado:", e)
+        print("Error al generar PDF consolidado:", e)
         import traceback
         traceback.print_exc()
         return None
 
 def descargar_informe_consolidado_individual(id_informe):
     try:
-        print(f"📊 Generando PDF consolidado individual para informe {id_informe}")
-        
-        # Obtener el informe consolidado
         informe_result = supabase.table("informe").select("*").eq("id_informe", id_informe).execute()
         if not informe_result.data:
             return jsonify({"success": False, "msg": "Informe consolidado no encontrado"}), 404
@@ -885,14 +920,12 @@ def descargar_informe_consolidado_individual(id_informe):
         fecha_creacion = datetime.fromisoformat(informe["fecha_creacion"])
         fecha = fecha_creacion.date()
         
-        # Obtener todos los pedidos del día del informe
         pedidos_hoy = supabase.table("pedido").select("*").execute().data
         pedidos_hoy = [p for p in pedidos_hoy if datetime.fromisoformat(p["fecha_pedido"]).date() == fecha]
         
         if not pedidos_hoy:
             return jsonify({"success": False, "msg": "No hay pedidos para esta fecha."})
         
-        # Generar PDF
         buffer = generar_pdf_consolidado(id_informe, pedidos_hoy)
         if not buffer:
             return jsonify({"success": False, "msg": "Error al generar el PDF consolidado."})
@@ -903,139 +936,15 @@ def descargar_informe_consolidado_individual(id_informe):
         return response
         
     except Exception as e:
-        print(f"❌ Error al descargar informe consolidado individual {id_informe}: {e}")
+        print(f"Error al descargar informe consolidado individual {id_informe}: {e}")
         return jsonify({"success": False, "msg": f"Error: {e}"})
 
-    try:
-        buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=letter,
-                                leftMargin=40, rightMargin=40, topMargin=50, bottomMargin=40)
-        styles = getSampleStyleSheet()
-        elements = []
-
-        # Encabezado
-        encabezado = Table([
-            [Paragraph("<font size=20 color='#e63900'><b>🍜 Ichiraku - Informe Diario Consolidado</b></font>", styles['Normal']),
-                Paragraph(f"<font color='#555'>#{informe_id}</font>", styles['Normal'])]
-        ], colWidths=[400, 100])
-        encabezado.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, -1), colors.whitesmoke),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ]))
-        elements.append(encabezado)
-        elements.append(Spacer(1, 15))
-
-        # Información general
-        hoy = datetime.now().strftime("%d/%m/%Y")
-        total_productos = 0
-        categorias_totales = {}
-        locales_participantes = set()
-
-        for pedido in pedidos:
-            try:
-                # Obtener detalles del pedido
-                detalles = supabase.table("detalle_pedido").select("id_producto, cantidad")\
-                    .eq("id_pedido", pedido["id_pedido"]).execute().data
-                
-                # Obtener información del local de forma segura
-                inventario_result = supabase.table("inventario").select("id_local")\
-                    .eq("id_inventario", pedido["id_inventario"]).execute()
-                
-                if inventario_result.data:
-                    local_result = supabase.table("locales").select("nombre")\
-                        .eq("id_local", inventario_result.data[0]["id_local"]).execute()
-                    
-                    if local_result.data:
-                        locales_participantes.add(local_result.data[0]['nombre'])
-                
-                # Contar productos y categorías
-                for detalle in detalles:
-                    total_productos += detalle['cantidad']
-                    producto_result = supabase.table("productos").select("categoria")\
-                        .eq("id_producto", detalle['id_producto']).execute()
-                    
-                    if producto_result.data:
-                        cat = producto_result.data[0].get('categoria', 'Sin categoría')
-                        categorias_totales[cat] = categorias_totales.get(cat, 0) + detalle['cantidad']
-                    else:
-                        categorias_totales['Sin categoría'] = categorias_totales.get('Sin categoría', 0) + detalle['cantidad']
-                        
-            except Exception as e:
-                print(f" Error procesando pedido {pedido['id_pedido']}: {e}")
-                continue
-
-        # Tabla de resumen
-        info_table = [
-            ["Fecha:", hoy],
-            ["Total de pedidos:", str(len(pedidos))],
-            ["Total de productos:", str(total_productos)],
-            ["Locales participantes:", ", ".join(locales_participantes) if locales_participantes else "No especificado"]
-        ]
-        
-        t = Table(info_table, colWidths=[150, 350])
-        t.setStyle(TableStyle([
-            ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-            ("GRID", (0, 0), (-1, -1), 0.25, colors.lightgrey),
-            ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
-        ]))
-        elements.append(t)
-        elements.append(Spacer(1, 20))
-
-        # Detalle de pedidos
-        elements.append(Paragraph("<b><font color='#e63900' size=14>Detalle de Pedidos del Día</font></b>", styles['Heading2']))
-        
-        table_data = [["ID Pedido", "Local", "Productos", "Hora"]]
-        for pedido in pedidos:
-            try:
-                inventario_result = supabase.table("inventario").select("id_local")\
-                    .eq("id_inventario", pedido["id_inventario"]).execute()
-                
-                local_nombre = "No especificado"
-                if inventario_result.data:
-                    local_result = supabase.table("locales").select("nombre")\
-                        .eq("id_local", inventario_result.data[0]["id_local"]).execute()
-                    if local_result.data:
-                        local_nombre = local_result.data[0]['nombre']
-                
-                detalles = supabase.table("detalle_pedido").select("id_producto, cantidad")\
-                    .eq("id_pedido", pedido["id_pedido"]).execute().data
-                
-                hora = datetime.fromisoformat(pedido["fecha_pedido"]).strftime("%H:%M")
-                
-                table_data.append([
-                    str(pedido["id_pedido"]),
-                    local_nombre,
-                    str(len(detalles)),
-                    hora
-                ])
-            except Exception as e:
-                print(f" Error en tabla para pedido {pedido['id_pedido']}: {e}")
-                continue
-
-        dt = Table(table_data, colWidths=[80, 150, 80, 80])
-        dt.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e63900")),
-            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-            ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-        ]))
-        elements.append(dt)
-
-        doc.build(elements)
-        buffer.seek(0)
-        return buffer
-        
-    except Exception as e:
-        print("❌ Error al generar PDF consolidado:", e)
-        return None
-
 @app.route('/generar_informe_diario', methods=['POST'])
+@login_requerido(rol='Administrador')
 def generar_informe_diario():
     try:
         hoy = datetime.now().date()
-        print(f"📅 Generando informe para: {hoy}")
         
-        # Obtener TODOS los pedidos del día actual
         todos_pedidos = supabase.table("pedido").select("*").execute()
         
         if not todos_pedidos.data:
@@ -1044,12 +953,9 @@ def generar_informe_diario():
         pedidos_hoy = [p for p in todos_pedidos.data 
                       if datetime.fromisoformat(p["fecha_pedido"]).date() == hoy]
         
-        print(f"📊 Pedidos encontrados hoy: {len(pedidos_hoy)}")
-        
         if not pedidos_hoy:
             return jsonify({"success": False, "msg": "No hay pedidos registrados para hoy."})
         
-        # Verificar si ya existe un informe para hoy
         fecha_inicio = f"{hoy}T00:00:00"
         fecha_fin = f"{hoy}T23:59:59"
         
@@ -1060,8 +966,6 @@ def generar_informe_diario():
             .execute()
         
         if informe_existente.data:
-            print(" Ya existe un informe para hoy")
-            # Retornar el ID del informe existente para poder descargarlo
             informe_id = informe_existente.data[0]['id_informe']
             return jsonify({
                 "success": False, 
@@ -1069,20 +973,17 @@ def generar_informe_diario():
                 "informe_id": informe_id
             })
         
-        # Crear nuevo informe consolidado
         nuevo_informe = {
             "fecha_creacion": datetime.now().isoformat(),
             "tipo": "diario_consolidado",
             "total_pedidos": len(pedidos_hoy),
-            "id_inf_pedido": None  # Importante: dejar como None para informes consolidados
+            "id_inf_pedido": None
         }
         
-        print(f"💾 Insertando nuevo informe: {nuevo_informe}")
         result = supabase.table("informe").insert(nuevo_informe).execute()
         
         if result.data:
             informe_id = result.data[0]['id_informe']
-            print(f"✅ Informe consolidado creado: ID {informe_id}")
             
             return jsonify({
                 "success": True, 
@@ -1090,17 +991,16 @@ def generar_informe_diario():
                 "informe_id": informe_id
             })
         else:
-            print("❌ Error al insertar informe")
             return jsonify({"success": False, "msg": "No se pudo guardar el informe en la base de datos."})
             
     except Exception as e:
-        print(f"❌ Error al generar informe diario: {e}")
+        print(f"Error al generar informe diario: {e}")
         return jsonify({"success": False, "msg": f"Error: {str(e)}"})
 
 @app.route('/obtener_ultimo_informe', methods=['GET'])
+@login_requerido(rol='Administrador')
 def obtener_ultimo_informe():
     try:
-        # Obtener el último informe ordenado por ID descendente
         informes = supabase.table("informe").select("*").order("id_informe", desc=True).limit(1).execute()
         
         if informes.data:
@@ -1109,10 +1009,11 @@ def obtener_ultimo_informe():
             return jsonify({"success": False, "msg": "No hay informes generados."})
             
     except Exception as e:
-        print("❌ Error al obtener último informe:", e)
+        print("Error al obtener último informe:", e)
         return jsonify({"success": False, "msg": f"Error: {e}"})
 
 @app.route('/buscar_informe', methods=['POST'])
+@login_requerido(rol='Administrador')
 def buscar_informe():
     try:
         data = request.get_json()
@@ -1128,15 +1029,15 @@ def buscar_informe():
             return jsonify({"success": False, "msg": "Debes ingresar un ID o una fecha."})
         return jsonify({"success": True, "informes": informes}) if informes else jsonify({"success": False, "msg": "No se encontraron informes."})
     except Exception as e:
-        print("❌ Error al buscar informe:", e)
+        print("Error al buscar informe:", e)
         return jsonify({"success": False, "msg": f"Error: {e}"})
     
 @app.route('/descargar_informe_diario_consolidado', methods=['GET'])
+@login_requerido(rol='Administrador')
 def descargar_informe_diario_consolidado():
     try:
         hoy = datetime.now().date()
         
-        # Buscar el informe consolidado de hoy
         fecha_inicio = f"{hoy}T00:00:00"
         fecha_fin = f"{hoy}T23:59:59"
         
@@ -1149,11 +1050,9 @@ def descargar_informe_diario_consolidado():
         if not informe:
             return jsonify({"success": False, "msg": "No hay informe diario generado para hoy."})
         
-        # Obtener todos los pedidos de hoy
         pedidos_hoy = supabase.table("pedido").select("*").execute().data
         pedidos_hoy = [p for p in pedidos_hoy if datetime.fromisoformat(p["fecha_pedido"]).date() == hoy]
         
-        # Generar PDF
         buffer = generar_pdf_consolidado(informe['id_informe'], pedidos_hoy)
         if not buffer:
             return jsonify({"success": False, "msg": "Error al generar el PDF."})
@@ -1164,29 +1063,22 @@ def descargar_informe_diario_consolidado():
         return response
         
     except Exception as e:
-        print("❌ Error al descargar informe diario:", e)
+        print("Error al descargar informe diario:", e)
         return jsonify({"success": False, "msg": f"Error: {e}"})
 
-
 @app.route('/descargar_informe/<int:id_informe>', methods=['GET'])
+@login_requerido(rol='Administrador')
 def descargar_informe(id_informe):
     try:
-        print(f"🔍 Descargando informe ID: {id_informe}")
-        
-        # Obtener el informe
         informe_result = supabase.table("informe").select("*").eq("id_informe", id_informe).execute()
         if not informe_result.data:
             return jsonify({"success": False, "msg": "Informe no encontrado"}), 404
         
         informe = informe_result.data[0]
-        print(f"✅ Informe encontrado: {informe}")
         
-        # Verificar si es un informe consolidado
         if informe.get("tipo") == "diario_consolidado":
-            print("📊 Es un informe consolidado, redirigiendo...")
             return descargar_informe_consolidado_individual(id_informe)
         
-        # Si es un informe individual, continuar con la lógica original
         if not informe.get("id_inf_pedido"):
             return jsonify({"success": False, "msg": "Este informe no está asociado a un pedido"}), 404
         
@@ -1196,7 +1088,6 @@ def descargar_informe(id_informe):
         
         pedido = pedido_result.data[0]
         
-        # Resto de la lógica original para informes individuales...
         inventario_result = supabase.table("inventario").select("id_local").eq("id_inventario", pedido["id_inventario"]).execute()
         if not inventario_result.data:
             return jsonify({"success": False, "msg": "Inventario no encontrado"}), 404
@@ -1234,7 +1125,7 @@ def descargar_informe(id_informe):
 
         encabezado = Table(
             [[
-                Paragraph("<font size=20 color='#e63900'><b>🍜 Ichiraku - Informe de Pedido</b></font>", styles['Normal']),
+                Paragraph("<font size=20 color='#e63900'><b>Informe de Pedido</b></font>", styles['Normal']),
                 Paragraph(f"<font color='#555'>#{informe['id_informe']}</font>", styles['Normal'])
             ]],
             colWidths=[400, 100]
@@ -1307,7 +1198,7 @@ def descargar_informe(id_informe):
 
         elements.append(Spacer(1, 30))
         elements.append(Table(
-            [[Paragraph("<font size=8 color='#666'>Sistema de gestión Ichiraku © 2025</font>", styles['Normal'])]],
+            [[Paragraph("<font size=8 color='#666'>Sistema de gestión</font>", styles['Normal'])]],
             colWidths=[540],
             style=[('ALIGN', (0, 0), (-1, -1), 'CENTER')]
         ))
@@ -1320,10 +1211,11 @@ def descargar_informe(id_informe):
         return response
         
     except Exception as e:
-        print(f"❌ Error al generar PDF para informe {id_informe}: {e}")
+        print(f"Error al generar PDF para informe {id_informe}: {e}")
         return jsonify({"success": False, "msg": f"Error al generar informe PDF: {e}"})
 
 @app.route('/descargar_informes_rango', methods=['POST'])
+@login_requerido(rol='Administrador')
 def descargar_informes_rango():
     try:
         data = request.get_json()
@@ -1331,16 +1223,12 @@ def descargar_informes_rango():
         fecha_inicio = data.get("fecha_inicio")
         fecha_fin = data.get("fecha_fin")
         
-        print(f"📅 Generando informe {tipo} desde {fecha_inicio} hasta {fecha_fin}")
-        
-        # Validar que tenemos los datos necesarios
         if not tipo:
             return jsonify({"success": False, "msg": "Tipo de informe no especificado."})
         
         if not fecha_inicio or not fecha_fin:
             return jsonify({"success": False, "msg": "Fechas de rango no especificadas."})
 
-        # Obtener informes del rango de fechas
         informes = supabase.table("informe") \
             .select("*") \
             .gte("fecha_creacion", fecha_inicio) \
@@ -1351,16 +1239,12 @@ def descargar_informes_rango():
         if not informes.data:
             return jsonify({"success": False, "msg": "No se encontraron informes en el rango especificado."})
 
-        print(f"📊 Encontrados {len(informes.data)} informes en el rango")
-
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter,
                                 leftMargin=30, rightMargin=30, topMargin=40, bottomMargin=40)
         styles = getSampleStyleSheet()
         elements = []
 
-        # ==================== ENCABEZADO ====================
-        # Título según el tipo
         if tipo == "semana":
             titulo = "INFORME SEMANAL CONSOLIDADO"
         elif tipo == "mes":
@@ -1370,27 +1254,24 @@ def descargar_informes_rango():
         else:
             titulo = "INFORME CONSOLIDADO"
 
-        elements.append(Paragraph(f"<font size=18 color='#e63900'><b>🍜 {titulo}</b></font>", styles['Heading1']))
+        elements.append(Paragraph(f"<font size=18 color='#e63900'><b>{titulo}</b></font>", styles['Heading1']))
         
-        # Información del rango de fechas
         fecha_inicio_obj = datetime.fromisoformat(fecha_inicio.replace('T', ' '))
         fecha_fin_obj = datetime.fromisoformat(fecha_fin.replace('T', ' '))
         
         elements.append(Paragraph(
-            f"<b>Período:</b> {fecha_inicio_obj.strftime('%d/%m/%Y')} - {fecha_fin_obj.strftime('%d/%m/%Y')}",
+            f"Período: {fecha_inicio_obj.strftime('%d/%m/%Y')} - {fecha_fin_obj.strftime('%d/%m/%Y')}",
             styles['Normal']
         ))
-        elements.append(Paragraph(f"<b>Total de informes:</b> {len(informes.data)}", styles['Normal']))
+        elements.append(Paragraph(f"Total de informes: {len(informes.data)}", styles['Normal']))
         
-        # Línea decorativa
         elements.append(Spacer(1, 10))
         elements.append(Table([[""]], colWidths=[500], style=[
             ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#e63900")),
         ]))
         elements.append(Spacer(1, 20))
 
-        # ==================== RESUMEN GENERAL ====================
-        elements.append(Paragraph("<b><font color='#e63900' size=14>📊 RESUMEN GENERAL</font></b>", styles['Heading2']))
+        elements.append(Paragraph("<b><font color='#e63900' size=14>RESUMEN GENERAL</font></b>", styles['Heading2']))
         
         total_pedidos = 0
         total_productos = 0
@@ -1398,25 +1279,20 @@ def descargar_informes_rango():
         locales_participantes = set()
         todos_productos_detallados = []
 
-        # Procesar TODOS los informes para obtener estadísticas consolidadas
         for inf in informes.data:
             try:
-                # Si es un informe consolidado, obtener pedidos del día
                 if inf.get("tipo") == "diario_consolidado":
                     fecha_inf = datetime.fromisoformat(inf["fecha_creacion"]).date()
                     
-                    # Obtener todos los pedidos de ese día
                     pedidos_dia = supabase.table("pedido").select("*").execute().data
                     pedidos_dia = [p for p in pedidos_dia if datetime.fromisoformat(p["fecha_pedido"]).date() == fecha_inf]
                     
                     total_pedidos += len(pedidos_dia)
                     
-                    # Procesar cada pedido del día
                     for pedido in pedidos_dia:
                         detalles = supabase.table("detalle_pedido").select("id_producto, cantidad")\
                             .eq("id_pedido", pedido["id_pedido"]).execute().data
                         
-                        # Obtener información del local
                         inventario_result = supabase.table("inventario").select("id_local")\
                             .eq("id_inventario", pedido["id_inventario"]).execute()
                         
@@ -1428,11 +1304,9 @@ def descargar_informes_rango():
                                 local_nombre = local_result.data[0]['nombre']
                                 locales_participantes.add(local_nombre)
                         
-                        # Procesar cada detalle del pedido
                         for detalle in detalles:
                             total_productos += detalle['cantidad']
                             
-                            # Obtener información del producto
                             producto_result = supabase.table("productos").select("nombre, categoria, unidad")\
                                 .eq("id_producto", detalle['id_producto']).execute()
                             
@@ -1441,7 +1315,6 @@ def descargar_informes_rango():
                                 cat = producto.get('categoria', 'Sin categoría')
                                 categorias_totales[cat] = categorias_totales.get(cat, 0) + detalle['cantidad']
                                 
-                                # Agregar a lista detallada
                                 todos_productos_detallados.append({
                                     'fecha': fecha_inf.strftime("%d/%m/%Y"),
                                     'informe_id': inf['id_informe'],
@@ -1454,7 +1327,6 @@ def descargar_informes_rango():
                                     'hora': datetime.fromisoformat(pedido["fecha_pedido"]).strftime("%H:%M")
                                 })
                 
-                # Si es un informe individual
                 elif inf.get("id_inf_pedido"):
                     total_pedidos += 1
                     
@@ -1465,7 +1337,6 @@ def descargar_informes_rango():
                         detalles = supabase.table("detalle_pedido").select("id_producto, cantidad")\
                             .eq("id_pedido", pedido["id_pedido"]).execute().data
                         
-                        # Obtener información del local
                         inventario_result = supabase.table("inventario").select("id_local")\
                             .eq("id_inventario", pedido["id_inventario"]).execute()
                         
@@ -1477,11 +1348,9 @@ def descargar_informes_rango():
                                 local_nombre = local_result.data[0]['nombre']
                                 locales_participantes.add(local_nombre)
                         
-                        # Procesar cada detalle del pedido
                         for detalle in detalles:
                             total_productos += detalle['cantidad']
                             
-                            # Obtener información del producto
                             producto_result = supabase.table("productos").select("nombre, categoria, unidad")\
                                 .eq("id_producto", detalle['id_producto']).execute()
                             
@@ -1490,7 +1359,6 @@ def descargar_informes_rango():
                                 cat = producto.get('categoria', 'Sin categoría')
                                 categorias_totales[cat] = categorias_totales.get(cat, 0) + detalle['cantidad']
                                 
-                                # Agregar a lista detallada
                                 todos_productos_detallados.append({
                                     'fecha': datetime.fromisoformat(inf["fecha_creacion"]).strftime("%d/%m/%Y"),
                                     'informe_id': inf['id_informe'],
@@ -1504,16 +1372,14 @@ def descargar_informes_rango():
                                 })
                                 
             except Exception as e:
-                print(f" Error procesando informe {inf['id_informe']}: {e}")
                 continue
 
-        # Tabla de resumen general
         resumen_data = [
-            ["📅 Período", f"{fecha_inicio_obj.strftime('%d/%m/%Y')} - {fecha_fin_obj.strftime('%d/%m/%Y')}"],
-            ["📦 Total de Pedidos", str(total_pedidos)],
-            ["📋 Total de Informes", str(len(informes.data))],
-            ["🏪 Locales Activos", str(len(locales_participantes))],
-            ["📍 Locales", ", ".join(locales_participantes) if locales_participantes else "No especificado"]
+            ["Período", f"{fecha_inicio_obj.strftime('%d/%m/%Y')} - {fecha_fin_obj.strftime('%d/%m/%Y')}"],
+            ["Total de Pedidos", str(total_pedidos)],
+            ["Total de Informes", str(len(informes.data))],
+            ["Locales Activos", str(len(locales_participantes))],
+            ["Locales", ", ".join(locales_participantes) if locales_participantes else "No especificado"]
         ]
         
         resumen_table = Table(resumen_data, colWidths=[180, 320])
@@ -1529,12 +1395,9 @@ def descargar_informes_rango():
         elements.append(resumen_table)
         elements.append(Spacer(1, 25))
 
-
-        # ==================== DETALLE POR DÍA ====================
         if todos_productos_detallados:
-            elements.append(Paragraph("<b><font color='#e63900' size=14>📋 DETALLE POR DÍA</font></b>", styles['Heading2']))
+            elements.append(Paragraph("<b><font color='#e63900' size=14>DETALLE POR DÍA</font></b>", styles['Heading2']))
             
-            # Agrupar por fecha
             productos_por_fecha = {}
             for prod in todos_productos_detallados:
                 fecha = prod['fecha']
@@ -1542,12 +1405,10 @@ def descargar_informes_rango():
                     productos_por_fecha[fecha] = []
                 productos_por_fecha[fecha].append(prod)
             
-            # Ordenar fechas
             for fecha in sorted(productos_por_fecha.keys(), reverse=True):
-                elements.append(Paragraph(f"<b>🗓️ {fecha}</b>", styles['Heading3']))
+                elements.append(Paragraph(f"{fecha}", styles['Heading3']))
                 elements.append(Spacer(1, 8))
                 
-                # Agrupar por pedido en esta fecha
                 pedidos_fecha = {}
                 for prod in productos_por_fecha[fecha]:
                     pedido_id = prod['pedido_id']
@@ -1561,14 +1422,12 @@ def descargar_informes_rango():
                     pedidos_fecha[pedido_id]['productos'].append(prod)
                     pedidos_fecha[pedido_id]['total_platos'] += prod['cantidad']
                 
-                # Mostrar cada pedido de esta fecha
                 for pedido_id, info in pedidos_fecha.items():
                     elements.append(Paragraph(
-                        f"<b>🍱 Pedido #{pedido_id}</b> | 🏪 {info['local']} | 🕒 {info['hora']} | 🍜 {info['total_platos']} platos", 
+                        f"Pedido #{pedido_id} | {info['local']} | {info['hora']} | {info['total_platos']} platos", 
                         styles['Normal']
                     ))
                     
-                    # Tabla de productos del pedido
                     table_data = [["Plato", "Categoría", "Cantidad"]]
                     for prod in info['productos']:
                         table_data.append([
@@ -1593,7 +1452,6 @@ def descargar_informes_rango():
                 
                 elements.append(Spacer(1, 15))
 
-        # ==================== PIE DE PÁGINA ====================
         elements.append(Spacer(1, 20))
         elements.append(Table([[""]], colWidths=[500], style=[
             ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#e63900"))
@@ -1603,16 +1461,15 @@ def descargar_informes_rango():
         footer_text = f"""
         <para alignment='center'>
         <font size=8 color='#666'>
-        <b>🍜 Ichiraku Ramen - Sistema de Gestión</b><br/>
+        <b>Sistema de Gestión</b><br/>
         Informe {tipo} generado automáticamente el {datetime.now().strftime('%d/%m/%Y a las %H:%M')}<br/>
         Período: {fecha_inicio_obj.strftime('%d/%m/%Y')} - {fecha_fin_obj.strftime('%d/%m/%Y')}<br/>
-        © 2025 Ichiraku Ramen - Todos los derechos reservados
+        Todos los derechos reservados
         </font>
         </para>
         """
         elements.append(Paragraph(footer_text, styles['Normal']))
 
-        # Generar PDF
         doc.build(elements)
         buffer.seek(0)
 
@@ -1622,15 +1479,11 @@ def descargar_informes_rango():
         return response
         
     except Exception as e:
-        print(f"❌ Error al generar informe unificado {tipo}: {e}")
+        print(f"Error al generar informe unificado {tipo}: {e}")
         import traceback
         traceback.print_exc()
         return jsonify({"success": False, "msg": f"Error: {e}"})
     
-# ==============================================================================
-# GESTIÓN DE NOTIFICACIONES (ADMIN)
-# ==============================================================================
-
 @app.route('/Ad_Pnotificaciones', methods=['GET'])
 @login_requerido(rol='Administrador')
 def Ad_Pnotificaciones():
@@ -1643,13 +1496,10 @@ def Ad_Pnotificaciones():
     return render_template("Ad_templates/Ad_Pnotificaciones.html", notificaciones=notificaciones.data)
 
 @app.route('/marcar_prioritaria/<int:id>', methods=['POST'])
+@login_requerido(rol='Administrador')
 def marcar_prioritaria(id):
     supabase.table("notificaciones").update({"tipo": "prioritaria"}).eq("id_notificaciones", id).execute()
     return jsonify({"success": True})
-
-# ==============================================================================
-# GESTIÓN DE LOCALES (ADMIN)
-# ==============================================================================
 
 @app.route('/Ad_Rlocales', methods=['GET', 'POST'])
 @login_requerido(rol='Administrador')
@@ -1657,6 +1507,7 @@ def Ad_Rlocales():
     return render_template("Ad_templates/Ad_Rlocales.html")
 
 @app.route('/registrar_local', methods=['POST'])
+@login_requerido(rol='Administrador')
 def registrar_local():
     nombre = request.form.get('nombre')
     direccion = request.form.get('direccion')
@@ -1665,6 +1516,21 @@ def registrar_local():
 
     if not (nombre and direccion and id_local):
         return jsonify({"success": False, "msg": "Todos los campos son obligatorios."})
+
+    nombre_limpio = nombre.strip()
+    if len(nombre_limpio) < 2 or len(nombre_limpio) > 100:
+        return jsonify({"success": False, "msg": "El nombre del local debe tener entre 2 y 100 caracteres."})
+
+    direccion_limpia = direccion.strip()
+    if len(direccion_limpia) < 5 or len(direccion_limpia) > 200:
+        return jsonify({"success": False, "msg": "La dirección debe tener entre 5 y 200 caracteres."})
+
+    try:
+        id_local_int = int(id_local)
+        if id_local_int < 1:
+            return jsonify({"success": False, "msg": "El ID del local debe ser un número positivo."})
+    except ValueError:
+        return jsonify({"success": False, "msg": "El ID del local debe ser un número válido."})
 
     try:
         existing = supabase.table("locales").select("*").eq("id_local", id_local).execute()
@@ -1676,15 +1542,17 @@ def registrar_local():
 
     foto_url = None
     if foto:
+        if not is_valid_image(foto):
+            return jsonify({"success": False, "msg": "Formato de imagen no permitido."}), 400
         try:
             filename = f"locales/{id_local}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
             upload_response = supabase.storage.from_("Fotos").upload(filename, foto.read())
             if hasattr(upload_response, "error") and upload_response.error:
-                print("❌ Error al subir imagen:", upload_response.error)
+                print("Error al subir imagen:", upload_response.error)
                 return jsonify({"success": False, "msg": "Error al subir imagen."})
             foto_url = f"{SUPABASE_URL}/storage/v1/object/public/Fotos/{filename}"
         except Exception as e:
-            print("❌ Error al subir foto:", e)
+            print("Error al subir foto:", e)
             return jsonify({"success": False, "msg": "Error al procesar la foto."})
 
     try:
@@ -1700,10 +1568,11 @@ def registrar_local():
         else:
             return jsonify({"success": False, "msg": "Error al registrar local."})
     except Exception as e:
-        print("❌ Error inesperado al registrar local:", e)
+        print("Error inesperado al registrar local:", e)
         return jsonify({"success": False, "msg": "Error en el servidor."})
 
 @app.route('/obtener_siguiente_id_local', methods=['GET'])
+@login_requerido(rol='Administrador')
 def obtener_siguiente_id_local():
     try:
         response = supabase.table("locales").select("id_local").order("id_local", desc=True).limit(1).execute()
@@ -1714,10 +1583,11 @@ def obtener_siguiente_id_local():
             siguiente_id = 1
         return jsonify({"success": True, "siguiente_id": siguiente_id})
     except Exception as e:
-        print("❌ Error al obtener siguiente ID:", e)
+        print("Error al obtener siguiente ID:", e)
         return jsonify({"success": False, "msg": "Error al calcular el ID."})
 
 @app.route("/buscar_local", methods=["POST"])
+@login_requerido(rol='Administrador')
 def buscar_local():
     data = request.get_json()
     termino = data.get("termino", "").strip()
@@ -1734,10 +1604,11 @@ def buscar_local():
         else:
             return jsonify({"success": False, "msg": "No se encontraron locales."})
     except Exception as e:
-        print("❌ Error en búsqueda de local:", e)
+        print("Error en búsqueda de local:", e)
         return jsonify({"success": False, "msg": "Error en el servidor"})
 
 @app.route("/editar_local/<int:id_local>", methods=["PUT"])
+@login_requerido(rol='Administrador')
 def editar_local(id_local):
     try:
         data = request.get_json()
@@ -1745,19 +1616,29 @@ def editar_local(id_local):
         direccion = data.get("direccion")
         if not (nombre and direccion):
             return jsonify({"success": False, "msg": "Todos los campos son obligatorios."}), 400
+
+        nombre_limpio = nombre.strip()
+        if len(nombre_limpio) < 2 or len(nombre_limpio) > 100:
+            return jsonify({"success": False, "msg": "El nombre del local debe tener entre 2 y 100 caracteres."}), 400
+
+        direccion_limpia = direccion.strip()
+        if len(direccion_limpia) < 5 or len(direccion_limpia) > 200:
+            return jsonify({"success": False, "msg": "La dirección debe tener entre 5 y 200 caracteres."}), 400
+
         response = supabase.table("locales").update({
-            "nombre": nombre,
-            "direccion": direccion
+            "nombre": nombre_limpio,
+            "direccion": direccion_limpia
         }).eq("id_local", id_local).execute()
         if response.data:
             return jsonify({"success": True, "msg": "Local actualizado correctamente."})
         else:
             return jsonify({"success": False, "msg": "No se pudo actualizar el local."})
     except Exception as e:
-        print("❌ Error al editar local:", e)
+        print("Error al editar local:", e)
         return jsonify({"success": False, "msg": "Error en el servidor"})
 
 @app.route("/cambiar_estado_local/<int:id_local>", methods=["POST"])
+@login_requerido(rol='Administrador')
 def cambiar_estado_local(id_local):
     try:
         data = request.get_json()
@@ -1771,12 +1652,8 @@ def cambiar_estado_local(id_local):
         else:
             return jsonify({"success": False, "msg": "No se encontró el Local."}), 404
     except Exception as e:
-        print("❌ Error al cambiar estado del Local:", e)
+        print("Error al cambiar estado del Local:", e)
         return jsonify({"success": False, "msg": f"Error en servidor: {e}"}), 500
-
-# ==============================================================================
-# GESTIÓN DE PERFIL ADMINISTRADOR
-# ==============================================================================
 
 @app.route("/Ad_Ceditar", methods=["GET", "POST"])
 @login_requerido(rol='Administrador')
@@ -1810,7 +1687,7 @@ def Ad_Ceditar():
             else:
                 return jsonify({"success": False, "msg": "No se pudo actualizar el usuario."}), 500
     except Exception as e:
-        print("❌ Error en Ad_Ceditar:", e)
+        print("Error en Ad_Ceditar:", e)
         return jsonify({"success": False, "msg": "Error en el servidor"}), 500
 
 @app.route('/Ad_Ceditar_foto', methods=['POST', 'DELETE'])
@@ -1822,7 +1699,9 @@ def Ad_Ceditar_foto():
             foto = request.files.get('foto')
             if not foto:
                 return jsonify({"success": False, "msg": "No se envió ninguna foto"}), 400
-            file_name = f"admin_{cedula}_{foto.filename}"
+            if not is_valid_image(foto):
+                return jsonify({"success": False, "msg": "Formato de imagen no permitido."}), 400
+            file_name = f"admin_{cedula}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
             file_bytes = foto.read()
             upload_response = supabase.storage.from_("fotos_admin").upload(file_name, file_bytes)
             if hasattr(upload_response, "error") and upload_response.error:
@@ -1844,7 +1723,7 @@ def Ad_Ceditar_foto():
             default_url = url_for("static", filename="image/default.png")
             return jsonify({"success": True, "photo_url": default_url}), 200
     except Exception as e:
-        print("❌ Error en Ad_Ceditar_foto:", e)
+        print("Error en Ad_Ceditar_foto:", e)
         return jsonify({"success": False, "msg": str(e)}), 500
 
 @app.route("/enviar_token_recuperacion", methods=["POST"])
@@ -1864,24 +1743,21 @@ def enviar_token_recuperacion():
         if not telefono.isdigit() or len(telefono) != 10:
             return jsonify({"success": False, "msg": "El número de teléfono no es válido (debe tener 10 dígitos)."}), 400
 
-        client = Client(TWILIO_SID, TWILIO_AUTH)
+        client = TwilioClient(TWILIO_SID, TWILIO_AUTH)
         try:
             verification = client.verify.v2.services(VERIFY_SID).verifications.create(
                 to=f"+57{telefono}",
                 channel="sms"
             )
-            logger.info("✅ Token enviado a +57%s - SID: %s", telefono, getattr(verification, 'sid', ''))
+            logger.info("Token enviado a +57%s - SID: %s", telefono, getattr(verification, 'sid', ''))
             return jsonify({"success": True, "msg": "Código enviado correctamente."})
         except TwilioRestException as tre:
-            # Manejo específico de errores de Twilio (por ejemplo: número no verificado en cuentas de prueba)
-            logger.debug("TwilioRestException al enviar verificación: %s", tre)
             msg = str(tre).lower()
             if "unverified" in msg or "not verified" in msg or "cannot send messages to unverified numbers" in msg:
                 return jsonify({"success": False, "msg": "El número no está verificado o no está permitido por Twilio."}), 400
-            # Mensaje genérico para otros errores de Twilio
             return jsonify({"success": False, "msg": "No se pudo enviar el SMS. Verifica el número e inténtalo más tarde."}), 500
     except Exception as e:
-        logger.exception("❌ Error en enviar_token_recuperacion: %s", e)
+        logger.exception("Error en enviar_token_recuperacion: %s", e)
         return jsonify({"success": False, "msg": "Error interno al procesar la solicitud."}), 500
 
 @app.route("/validar_token", methods=["POST"])
@@ -1896,14 +1772,13 @@ def validar_token():
         if not (telefono and token and nueva_contrasena):
             return jsonify({"success": False, "msg": "Todos los campos son obligatorios."}), 400
 
-        # Normalizar número similar a enviar_token_recuperacion
         telefono = telefono.replace(" ", "")
         if telefono.startswith("+57"):
             telefono = telefono[3:]
         elif telefono.startswith("57"):
             telefono = telefono[2:]
 
-        client = Client(TWILIO_SID, TWILIO_AUTH)
+        client = TwilioClient(TWILIO_SID, TWILIO_AUTH)
         try:
             verfification_check = client.verify.v2.services(VERIFY_SID).verification_checks.create(
                 to=f"+57{telefono}",
@@ -1926,76 +1801,48 @@ def validar_token():
 
         return jsonify({"success": True, "msg": "Contraseña actualizada correctamente."})
     except Exception as e:
-        logger.exception("❌ Error en validar_token: %s", e)
+        logger.exception("Error en validar_token: %s", e)
         return jsonify({"success": False, "msg": "Error interno al validar el token."}), 500
-
-# ==============================================================================
-# RUTAS DE EMPLEADO - INICIO Y GESTIÓN
-# ==============================================================================
 
 @app.route('/Em_Inicio', methods=['GET', 'POST'])
 @login_requerido(rol='Empleado')
 def Em_Inicio():
     try:
-        print("=== EM_INICIO EJECUTÁNDOSE ===")
-        
-        # Generar notificaciones de caducidad
         generar_notificaciones_caducidad()
         eliminar_notificaciones_caducadas()
         
-        # CONSULTA CORREGIDA: Obtener notificaciones de la base de datos
         try:
-            print("🔍 Buscando notificaciones en la base de datos (Empleado)...")
             todas_response = supabase.table("notificaciones").select("*").order("fecha", desc=True).execute()
             todas = todas_response.data if todas_response.data else []
-            print(f"✅ Notificaciones encontradas en BD: {len(todas)}")
-            
-            # DEBUG: Mostrar todas las notificaciones obtenidas
-            for i, noti in enumerate(todas):
-                print(f"  📋 {i+1}. ID: {noti.get('id_notificaciones')} - Mensaje: {noti.get('mensaje')} - Fecha: {noti.get('fecha')}")
-                
         except Exception as db_error:
-            print(f"❌ Error al consultar notificaciones: {db_error}")
+            print(f"Error al consultar notificaciones: {db_error}")
             todas = []
 
-        # Filtrar notificaciones vacías (pero ser más permisivo)
         todas_filtradas = []
         for n in todas:
             mensaje = n.get("mensaje", "")
-            # Solo filtrar si el mensaje está completamente vacío o es None
             if mensaje is not None and str(mensaje).strip() != "":
                 todas_filtradas.append(n)
-            else:
-                print(f" Notificación filtrada por mensaje vacío: ID {n.get('id_notificaciones')}")
-        
-        print(f"📊 Notificaciones después de filtrar: {len(todas_filtradas)}")
-        
-        # AGREGAR NOTIFICACIÓN DE PRUEBA SOLO SI NO HAY NOTIFICACIONES REALES
+
         if not todas_filtradas:
-            print("ℹ️ No hay notificaciones reales, agregando de prueba")
             notificacion_prueba = {
-                "mensaje": "🔔 BIENVENIDO/AL SISTEMA - Notificaciones aparecerán aquí",
+                "mensaje": "BIENVENIDO/AL SISTEMA - Notificaciones aparecerán aquí",
                 "fecha_formateada": datetime.now().strftime("%d de %B de %Y, %I:%M %p"),
                 "leido": False
             }
             todas_filtradas.append(notificacion_prueba)
-        else:
-            print("✅ Usando notificaciones reales de la base de datos")
 
-        # Configurar locale para formato en español
         try:
             locale.setlocale(locale.LC_TIME, "es_ES.utf8")
         except:
             try:
                 locale.setlocale(locale.LC_TIME, "es_CO.utf8")
             except:
-                print(" No se pudo configurar locale español")
+                pass
 
-        # Formatear fechas
         for noti in todas_filtradas:
             if noti.get("fecha") and not noti.get("fecha_formateada"):
                 try:
-                    # Manejar diferentes formatos de fecha
                     fecha_str = noti["fecha"]
                     if 'T' in fecha_str:
                         fecha_obj = datetime.fromisoformat(fecha_str.replace('Z', '+00:00'))
@@ -2004,18 +1851,13 @@ def Em_Inicio():
                     
                     noti["fecha_formateada"] = fecha_obj.strftime("%d de %B de %Y, %I:%M %p").capitalize()
                 except Exception as date_error:
-                    print(f" Error al formatear fecha {noti['fecha']}: {date_error}")
+                    print(f"Error al formatear fecha {noti['fecha']}: {date_error}")
                     noti["fecha_formateada"] = noti["fecha"]
 
-        # Preparar notificaciones para mostrar (máximo 3)
         notificaciones = todas_filtradas[:3]
         total_notificaciones = len(todas_filtradas)
         restantes = max(0, total_notificaciones - 3)
 
-        print(f"📤 Enviando al template: {len(notificaciones)} notificaciones de {total_notificaciones} totales")
-        print(f"🔢 Restantes: {restantes}")
-
-        # Crear respuesta con headers para evitar cache
         http_response = make_response(render_template(
             "Em_templates/Em_Inicio.html",
             notificaciones=notificaciones,
@@ -2028,7 +1870,7 @@ def Em_Inicio():
         return http_response
         
     except Exception as e:
-        print(f"❌ Error crítico al cargar página de inicio del empleado: {e}")
+        print(f"Error crítico al cargar página de inicio del empleado: {e}")
         import traceback
         traceback.print_exc()
         return render_template("Em_templates/Em_Inicio.html", 
@@ -2036,16 +1878,13 @@ def Em_Inicio():
                              restantes=0, 
                              total_notificaciones=0), 500
 
-# ==============================================================================
-# GESTIÓN DE PEDIDOS (EMPLEADO)
-# ==============================================================================
-
 @app.route('/Em_Rpedido', methods=['GET', 'POST'])
 @login_requerido(rol='Empleado')
 def Em_Rpedido():
     return render_template("Em_templates/Em_Rpedido.html")
 
 @app.route("/registrar_pedido", methods=["POST"])
+@login_requerido(rol='Empleado')
 def registrar_pedido():
     if not session.get("logged_in") or session.get("role") != "Empleado":
         return jsonify({"success": False, "msg": "No autorizado"}), 401
@@ -2070,8 +1909,12 @@ def registrar_pedido():
 
             try:
                 id_producto = int(id_producto)
-            except ValueError:
-                id_producto = str(id_producto)
+                cantidad = int(cantidad)
+            except (ValueError, TypeError):
+                continue
+
+            if cantidad < 1 or cantidad > 1000:
+                continue
 
             inv = supabase.table("inventario").insert({
                 "id_local": id_local,
@@ -2115,10 +1958,11 @@ def registrar_pedido():
             "msg": f"Pedido #{id_pedido} registrado con éxito con {len(productos)} productos."
         })
     except Exception as e:
-        print("❌ Error al registrar pedido:", e)
+        print("Error al registrar pedido:", e)
         return jsonify({"success": False, "msg": f"Error en el servidor: {str(e)}"}), 500
 
 @app.route("/buscar_producto_empleado", methods=["POST"])
+@login_requerido(rol='Empleado')
 def buscar_producto_empleado():
     try:
         data = request.get_json()
@@ -2137,12 +1981,8 @@ def buscar_producto_empleado():
 
         return jsonify({"success": True, "productos": productos})
     except Exception as e:
-        print("❌ Error en búsqueda de producto (empleado):", e)
+        print("Error en búsqueda de producto (empleado):", e)
         return jsonify({"success": False, "msg": "Error al obtener productos"}), 500
-
-# ==============================================================================
-# RECEPCIÓN DE PEDIDOS (EMPLEADO)
-# ==============================================================================
 
 @app.route('/Em_Rordenes', methods=['GET', 'POST'])
 @login_requerido(rol='Empleado')
@@ -2167,6 +2007,9 @@ def Em_Rordenes():
                 fecha_cad_dt = datetime.fromisoformat(fecha_caducidad).date()
             except Exception as e:
                 return jsonify({"success": False, "msg": f"Error de tipo: {e}"}), 400
+
+            if cantidad < 1 or cantidad > 1000:
+                return jsonify({"success": False, "msg": "La cantidad debe estar entre 1 y 1000."}), 400
 
             hoy = date.today()
             if fecha_cad_dt <= hoy:
@@ -2237,10 +2080,6 @@ def actualizar_estado():
         traceback.print_exc()
         return jsonify({"success": False, "msg": str(e)}), 500
 
-# ==============================================================================
-# HISTORIAL DE PEDIDOS (EMPLEADO)
-# ==============================================================================
-
 @app.route('/Em_Hordenes', methods=['GET'])
 @login_requerido(rol='Empleado')
 def Em_Hordenes():
@@ -2270,12 +2109,8 @@ def Em_Hordenes():
 
         return render_template("Em_templates/Em_Hordenes.html", pedidos=pedidos)
     except Exception as e:
-        print("❌ Error al cargar historial de órdenes:", e)
+        print("Error al cargar historial de órdenes:", e)
         return render_template("Em_templates/Em_Hordenes.html", pedidos=[])
-
-# ==============================================================================
-# GESTIÓN DE PERFIL EMPLEADO
-# ==============================================================================
 
 @app.route("/Em_Ceditar", methods=["GET", "POST"])
 @login_requerido(rol='Empleado')
@@ -2309,7 +2144,7 @@ def Em_Ceditar():
             else:
                 return jsonify({"success": False, "msg": "No se pudo actualizar el perfil."}), 500
     except Exception as e:
-        print("❌ Error en Em_Ceditar:", e)
+        print("Error en Em_Ceditar:", e)
         return jsonify({"success": False, "msg": "Error en el servidor"}), 500
 
 @app.route('/Em_Ceditar_foto', methods=['POST', 'DELETE'])
@@ -2321,6 +2156,8 @@ def Em_Ceditar_foto():
             foto = request.files.get('foto')
             if not foto:
                 return jsonify({"success": False, "msg": "No se envió ninguna foto"}), 400
+            if not is_valid_image(foto):
+                return jsonify({"success": False, "msg": "Formato de imagen no permitido."}), 400
             file_name = f"empleado_{cedula}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
             file_bytes = foto.read()
             upload_response = supabase.storage.from_("Fotos").upload(file_name, file_bytes)
@@ -2343,12 +2180,8 @@ def Em_Ceditar_foto():
             default_url = url_for("static", filename="image/default.png")
             return jsonify({"success": True, "photo_url": default_url}), 200
     except Exception as e:
-        print("❌ Error en Em_Ceditar_foto:", e)
+        print("Error en Em_Ceditar_foto:", e)
         return jsonify({"success": False, "msg": str(e)}), 500
-
-# ==============================================================================
-# RECUPERACIÓN DE CONTRASEÑA EMPLEADO
-# ==============================================================================
 
 @app.route("/Em_enviar_token_recuperacion", methods=["POST"])
 def Em_enviar_token_recuperacion():
@@ -2371,7 +2204,7 @@ def Em_enviar_token_recuperacion():
         client.verify.v2.services(VERIFY_SID).verifications.create(to=f"+57{telefono}", channel="sms")
         return jsonify({"success": True, "msg": "Código enviado correctamente."})
     except Exception as e:
-        print(f"❌ Error en Em_enviar_token_recuperacion: {e}")
+        print(f"Error en Em_enviar_token_recuperacion: {e}")
         return jsonify({"success": False, "msg": str(e)}), 500
 
 @app.route("/Em_validar_token", methods=["POST"])
@@ -2391,7 +2224,7 @@ def Em_validar_token():
         elif telefono.startswith("57"):
             telefono = telefono[2:]
 
-        client = Client(TWILIO_SID, TWILIO_AUTH)
+        client = TwilioClient(TWILIO_SID, TWILIO_AUTH)
         verification_check = client.verify.v2.services(VERIFY_SID).verification_checks.create(
             to=f"+57{telefono}",
             code=token
@@ -2419,12 +2252,13 @@ def Em_validar_token():
 
         return jsonify({"success": True, "msg": "Contraseña actualizada correctamente."})
     except Exception as e:
-        print(f"❌ Error en Em_validar_token: {e}")
+        print(f"Error en Em_validar_token: {e}")
         return jsonify({"success": False, "msg": str(e)}), 500
 
-# ==============================================================================
-# EJECUCIÓN PRINCIPAL
-# ==============================================================================
-
 if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    app.run(
+        debug=(os.getenv('FLASK_DEBUG', 'False').lower() == 'true'),
+        host=os.getenv('HOST', '127.0.0.1'),
+        port=int(os.getenv('PORT', '5000'))
+    )
+```

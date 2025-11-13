@@ -4,34 +4,150 @@ window.addEventListener('pageshow', function (event) {
 });
 
 // 🧾 Registro de empleado
+// 🧾 Registro de empleado - VERSIÓN MEJORADA CON MANEJO DE ERRORES
+// 🧾 Registro de empleado - VERSIÓN FINAL CORREGIDA
 document.getElementById('registerForm').addEventListener('submit', async function (e) {
   e.preventDefault();
+  
+  const nombre = document.getElementById('nombre').value.trim();
+  const cedula = document.getElementById('cedula').value.trim();
+  const contrasena = document.getElementById('contrasena').value.trim();
+  const contacto = document.getElementById('contacto').value.trim();
 
-  const formData = new FormData();
-  formData.append("nombre", document.getElementById('nombre').value);
-  formData.append("cedula", document.getElementById('cedula').value);
-  formData.append("contrasena", document.getElementById('contrasena').value);
-  formData.append("contacto", document.getElementById('contacto').value);
-
-  const fotoFile = document.getElementById('foto').files[0];
-  if (fotoFile) formData.append("foto", fotoFile);
+  // Mostrar loading
+  const submitBtn = document.querySelector('#registerForm button[type="submit"]');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...';
+  submitBtn.disabled = true;
 
   try {
-    const response = await fetch('/registrar_empleado', { method: 'POST', body: formData });
+    console.log('🔄 Iniciando validaciones...');
+
+    // Validación de nombre
+    const nombreRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/;
+    const tieneVocal = /[AEIOUÁÉÍÓÚaeiouáéíóú]/;
+    
+    if (!nombre) {
+      alertaNinja('warning','Campo requerido','El nombre es obligatorio.');
+      document.getElementById('nombre').focus();
+      return;
+    }
+    
+    if (nombre.length < 2 || nombre.length > 100) {
+      alertaNinja('warning','Nombre inválido','El nombre debe tener entre 2 y 100 caracteres.');
+      document.getElementById('nombre').focus();
+      return;
+    }
+    
+    if (!nombreRegex.test(nombre)) {
+      alertaNinja('warning','Nombre inválido','El nombre solo puede contener letras y espacios.');
+      document.getElementById('nombre').focus();
+      return;
+    }
+    
+    if (!tieneVocal.test(nombre)) {
+      alertaNinja('warning','Nombre inválido','El nombre debe contener al menos una vocal.');
+      document.getElementById('nombre').focus();
+      return;
+    }
+
+    // Validación de cédula/ID
+    if (!cedula) {
+      alertaNinja('warning','Campo requerido','El ID es obligatorio.');
+      document.getElementById('cedula').focus();
+      return;
+    }
+    
+    if (!/^\d{5,15}$/.test(cedula)) {
+      alertaNinja('warning','ID inválido','El ID debe tener entre 5 y 15 dígitos numéricos.');
+      document.getElementById('cedula').focus();
+      return;
+    }
+
+    // Validación de contraseña
+    if (!contrasena) {
+      alertaNinja('warning','Campo requerido','La contraseña es obligatoria.');
+      document.getElementById('contrasena').focus();
+      return;
+    }
+    
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,64}$/.test(contrasena)) {
+      alertaNinja('warning','Contraseña insegura','Debe tener 8+ caracteres, minúscula, mayúscula, número y símbolo.');
+      document.getElementById('contrasena').focus();
+      return;
+    }
+
+    // Validación de teléfono
+    if (!contacto) {
+      alertaNinja('warning','Campo requerido','El teléfono es obligatorio.');
+      document.getElementById('contacto').focus();
+      return;
+    }
+    
+    if (!/^\d{7,15}$/.test(contacto)) {
+      alertaNinja('warning','Teléfono inválido','El teléfono debe tener entre 7 y 15 dígitos.');
+      document.getElementById('contacto').focus();
+      return;
+    }
+
+    console.log('✅ Validaciones frontend pasadas, enviando datos...');
+
+    const formData = new FormData();
+    formData.append("nombre", nombre);
+    formData.append("cedula", cedula);
+    formData.append("contrasena", contrasena);
+    formData.append("contacto", contacto);
+
+    const fotoFile = document.getElementById('foto').files[0];
+    if (fotoFile) {
+      formData.append("foto", fotoFile);
+    }
+
+    const response = await fetch('/registrar_empleado', { 
+      method: 'POST', 
+      body: formData 
+    });
+    
     const data = await response.json();
+    console.log('📨 Respuesta del servidor:', data);
 
     if (data.success) {
-      alertaNinja('success', 'Registrado correctamente', data.msg || 'Empleado agregado exitosamente');
+      alertaNinja('success', '✅ Registrado correctamente', data.msg);
+      // Limpiar formulario
       document.getElementById('registerForm').reset();
-      setTimeout(() => window.location.reload(), 1000);
+      document.getElementById('previewFoto').style.display = 'none';
+      // Recargar lista de empleados
+      await cargarEmpleados("");
     } else {
-      alertaNinja('error', 'Error en registro', data.msg || 'No se pudo registrar el empleado');
+      console.log('❌ Error del servidor:', data.msg);
+      
+      // Manejar diferentes tipos de errores
+      if (data.msg.includes("ID") && data.msg.includes("registrado")) {
+        alertaNinja('error', '❌ ID duplicado', data.msg);
+        document.getElementById('cedula').focus();
+        document.getElementById('cedula').select();
+      } else if (data.msg.includes("nombre") && data.msg.includes("registrado")) {
+        alertaNinja('error', '❌ Nombre duplicado', data.msg);
+        document.getElementById('nombre').focus();
+        document.getElementById('nombre').select();
+      } else if (data.msg.includes("teléfono") && data.msg.includes("registrado")) {
+        alertaNinja('error', '❌ Teléfono duplicado', data.msg);
+        document.getElementById('contacto').focus();
+        document.getElementById('contacto').select();
+      } else {
+        alertaNinja('error', '❌ Error en registro', data.msg);
+      }
     }
+
   } catch (error) {
-    alertaNinja('error', 'Error del servidor', 'Ocurrio un problema al registrar el empleado');
+    console.error('💥 Error en el registro:', error);
+    alertaNinja('error', '❌ Error de conexión', 'No se pudo conectar con el servidor. Verifique su conexión.');
+  } finally {
+    // Restaurar botón
+    submitBtn.innerHTML = originalText;
+    submitBtn.disabled = false;
   }
 });
-
 // 📸 Vista previa de la foto
 document.getElementById('foto').addEventListener('change', function () {
   const file = this.files[0];
