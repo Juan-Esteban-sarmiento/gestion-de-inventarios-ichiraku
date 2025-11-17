@@ -12,9 +12,27 @@ document.getElementById('registerProductForm').addEventListener('submit', async 
     alertaNinja('warning', 'Campos incompletos', 'Debes llenar todos los campos antes de registrar el producto');
     return;
   }
+  const nombreRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ()\-'/&.,%+]+$/;
+  if (nombre.length < 2 || nombre.length > 100) {
+    alertaNinja('warning', 'Nombre inválido', 'Debe tener entre 2 y 100 caracteres');
+    return;
+  }
+  if (/\s{2,}/.test(nombre)) {
+    alertaNinja('warning', 'Nombre inválido', 'No debe incluir espacios dobles');
+    return;
+  }
+  if (/\d/.test(nombre)) {
+    alertaNinja('warning', 'Nombre inválido', 'El nombre no debe contener números ni cantidades');
+    return;
+  }
+  if (!nombreRegex.test(nombre)) {
+    alertaNinja('warning', 'Nombre inválido', 'Contiene caracteres no permitidos');
+    return;
+  }
+  const nombreNormalizado = nombre.replace(/\s+/g, ' ').trim().split(' ').map((w,i,arr)=>{const lw=w.toLowerCase();const small=['de','del','la','el','y','o','en','con','para','por','a','al','un','una','los','las','sus'];return (small.includes(lw)&&i>0&&i<arr.length-1)?lw:lw.charAt(0).toUpperCase()+lw.slice(1)}).join(' ');
 
   const formData = new FormData();
-  formData.append("nombre", nombre);
+  formData.append("nombre", nombreNormalizado);
   formData.append("categoria", categoria);
   formData.append("unidad", unidad);
   formData.append("serial", serial);
@@ -150,12 +168,18 @@ function editarProducto(id_producto, nombre, categoria, unidad) {
     confirmButtonColor: '#e60000',
     cancelButtonColor: '#ff0000ff',
     preConfirm: () => {
-      return {
-        nombre: document.getElementById("editNombre").value,
-        nueva_id: id_producto,
-        categoria: document.getElementById("editCategoria").value,
-        unidad: document.getElementById("editUnidad").value
-      };
+      const nombre = document.getElementById("editNombre").value.trim();
+      const categoria = document.getElementById("editCategoria").value.trim();
+      const unidad = document.getElementById("editUnidad").value.trim();
+      const nombreRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ()\-\'\/&.,%+]+$/;
+      if (!nombre) { Swal.showValidationMessage('El nombre es obligatorio'); return false; }
+      if (nombre.length < 2 || nombre.length > 100) { Swal.showValidationMessage('El nombre debe tener entre 2 y 100 caracteres'); return false; }
+      if (/\s{2,}/.test(nombre)) { Swal.showValidationMessage('El nombre no debe tener espacios dobles'); return false; }
+      if (/\d/.test(nombre)) { Swal.showValidationMessage('El nombre no debe contener números ni cantidades'); return false; }
+      if (!nombreRegex.test(nombre)) { Swal.showValidationMessage('Caracteres no permitidos en el nombre'); return false; }
+      if (!categoria || !unidad) { Swal.showValidationMessage('Categoría y unidad son obligatorias'); return false; }
+      const nombreNormalizado = nombre.replace(/\s+/g,' ').trim().split(' ').map((w,i,arr)=>{const lw=w.toLowerCase();const small=['de','del','la','el','y','o','en','con','para','por','a','al','un','una','los','las','sus'];return (small.includes(lw)&&i>0&&i<arr.length-1)?lw:lw.charAt(0).toUpperCase()+lw.slice(1)}).join(' ');
+      return { nombre: nombreNormalizado, nueva_id: id_producto, categoria, unidad };
     }
   }).then(async (result) => {
     if (result.isConfirmed) {

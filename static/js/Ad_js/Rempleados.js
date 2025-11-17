@@ -58,8 +58,8 @@ document.getElementById('registerForm').addEventListener('submit', async functio
       return;
     }
     
-    if (!/^\d{5,15}$/.test(cedula)) {
-      alertaNinja('warning','ID inválido','El ID debe tener entre 5 y 15 dígitos numéricos.');
+    if (!/^\d{5,10}$/.test(cedula)) {
+      alertaNinja('warning','ID inválido','El ID debe tener entre 5 y 10 dígitos numéricos.');
       document.getElementById('cedula').focus();
       return;
     }
