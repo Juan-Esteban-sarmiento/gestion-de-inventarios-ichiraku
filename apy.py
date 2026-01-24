@@ -1,7 +1,7 @@
 import os
 import io
 import locale
-from tkinter import Image
+
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
