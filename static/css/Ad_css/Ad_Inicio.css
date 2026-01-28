@@ -1,210 +1,113 @@
-@font-face {
-  font-family: 'njnaruto';
-  src: url('../../fonts/njnaruto.ttf') format('truetype');
-}
+/* ============================================
+   AD_INICIO - COMFORT DARK (REFINED)
+   ============================================ */
 
-/* =============== CONTENIDO GENERAL =============== */
-.content {
-  padding: 40px;
-  position: relative;
-  font-family: 'njnaruto', sans-serif;
-  color: #fff;
-}
-
-/* =============== ENCABEZADO DE BIENVENIDA =============== */
-.box-welcome {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 30px;
-  position: relative;
-  margin-left: 480px;
-  text-align: center;
-}
-
-/* =============== CONTENEDOR DE NOTIFICACIONES =============== */
 .notification-box {
-  background: linear-gradient(180deg, #0a0a0a 0%, #121212 100%);
-  border: 2px solid #ff0000;
+  width: 100%;
+  max-width: 800px;
+  background: rgba(10, 10, 10, 0.7);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
   border-radius: 20px;
-  padding: 28px;
-  width: 760px;
-  max-width: 90%;
-  position: relative;
-  box-shadow: 0 0 18px rgba(255, 0, 0, 0.25);
-  transition: all 0.3s ease-in-out;
-  margin-top: 120px;
+  padding: 35px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  animation: fadeInUp 0.7s ease-out;
 }
 
-.notification-box:hover {
-  box-shadow: 0 0 28px rgba(255, 0, 0, 0.45);
-  transform: translateY(-2px);
-}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
 
-/* =============== CABECERA =============== */
-.notification-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 22px;
-  color: #fff;
-  letter-spacing: 1px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(255, 0, 0, 0.4);
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .notification-header h2 {
-  text-shadow: 0 0 8px rgba(255, 0, 0, 0.7);
-  font-size: 24px;
-  margin: 0;
-  /* Usar fuente legible para encabezados de notificaciones */
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-weight: 700;
+  font-family: var(--font-primary) !important;
+  text-align: center;
+  color: #fff;
+  font-size: 1.5rem;
+  margin-bottom: 25px;
+  letter-spacing: 1px;
 }
 
-.notification-header .ver-mas {
-  color: #ff3c3c;
-  text-decoration: none;
-  font-weight: bold;
-  transition: color 0.3s ease, text-shadow 0.3s ease;
-}
-
-.notification-header .ver-mas:hover {
-  color: #ffffff;
-  text-shadow: 0 0 10px #ff0000;
-}
-
-/* =============== LISTA DE NOTIFICACIONES =============== */
-.notification-body {
-  margin-top: 22px;
-  font-size: 16px;
-}
-
-/* Tarjeta individual */
 .notification-item {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  background: linear-gradient(145deg, #181818, #0d0d0d);
-  border: 1px solid #ff0000;
-  border-radius: 14px;
-  padding: 14px 18px;
-  color: #fff;
-  transition: all 0.3s ease;
-  margin-bottom: 16px;
-  box-shadow: inset 0 0 8px rgba(255, 0, 0, 0.3);
+  align-items: center;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border-left: 3px solid var(--red-brand);
+  padding: 15px 20px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  transition: transform 0.3s;
 }
 
 .notification-item:hover {
-  background: linear-gradient(145deg, #202020, #101010);
-  transform: scale(1.03);
-  box-shadow: 0 0 14px rgba(255, 0, 0, 0.4);
+  transform: translateX(5px);
+  background: rgba(255, 255, 255, 0.04);
 }
 
-/* Icono de campana */
 .icon-left {
-  width: 30px;
-  height: 30px;
-  flex-shrink: 0;
-  filter: drop-shadow(0 0 4px rgba(255, 0, 0, 0.8));
+  width: 28px !important;
+  height: 28px !important;
+  filter: drop-shadow(0 0 5px var(--red-glow));
 }
 
-/* Texto principal */
 .notification-text strong {
-  color: #ffffff;
-  font-size: 17px;
-  display: block;
-  margin-bottom: 4px;
-  text-shadow: none;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-weight: 700;
-}
-
-.notification-text small {
-  color: #ff7777;
-  font-size: 13px;
-  opacity: 0.85;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-/* Fecha dentro de la tarjeta de aviso en la página de inicio */
-.fecha-notificacion {
-  margin-top: 6px;
-  color: #dcdcdc;
-  font-size: 13px;
-  font-weight: 500;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  text-transform: capitalize; /* convierte 'DE' a 'De' para mejor lectura */
-  opacity: 0.9;
-}
-
-/* =============== INFO EXTRA =============== */
-.extra-info {
-  margin-top: 14px;
-  margin-top: 14px;
-  color: #ffeeee; /* tono más suave que el rojo puro */
-  font-style: normal;
+  font-family: var(--font-secondary);
+  color: var(--text-bright);
   font-size: 14px;
-  text-align: center;
-  text-shadow: none;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-weight: 600;
-  display: inline-block;
-  padding: 6px 10px;
-  border-radius: 10px;
-  background: rgba(255, 0, 0, 0.06); /* pequeño fondo para separarlo del card */
 }
 
-/* Estilo específico para el enlace dentro de .extra-info (botón pequeño) */
-.extra-info .link-ver {
-  display: inline-block;
-  margin-left: 6px;
-  background: #ff3c3c;
-  color: #fff !important;
-  font-weight: 700;
-  text-decoration: none;
-  padding: 6px 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
+.fecha-notificacion {
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-top: 4px;
 }
 
-.extra-info .link-ver:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.28);
-}
-
-/* Mantener un estilo genérico para .link-ver en otros contextos si se usa */
-.link-ver {
-  color: #ffffff;
-  font-weight: bold;
-  text-decoration: none;
-  transition: color 0.3s ease, text-shadow 0.3s ease;
-}
-
-.link-ver:hover {
-  color: #fff;
-  text-shadow: 0 0 10px #ff0000;
-}
-
-/* =============== LOGO CENTRAL =============== */
+/* Logo decorativo inferior (Derecha y Circular) */
 .logo-main {
-  position: absolute;
-  left: 940px;
-  top: 190px;
+  position: fixed;
+  bottom: 50px;
+  right: 50px;
+  /* Movido a la derecha solicitado */
+  opacity: 0.3;
+  z-index: 10;
+  pointer-events: none;
+  animation: breathingLogo 4s ease-in-out infinite;
 }
 
 .logo-main img {
-  width: 600px;
-  height: 600px;
-  border-radius: 50%;
-  border: 4px solid #fff;
-  box-shadow: 0 0 28px rgba(255, 0, 0, 0.5);
-  transition: transform 0.35s ease, box-shadow 0.35s ease;
+  width: 140px !important;
+  height: 140px !important;
+  border-radius: 50% !important;
+  /* Forzar circular solicitado */
+  object-fit: cover;
+  border: 2.5px solid var(--red-brand);
+  /* Borde para resaltar forma */
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.6);
+  filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.3));
 }
 
-.logo-main img:hover {
-  transform: rotate(3deg) scale(1.04);
-  box-shadow: 0 0 35px rgba(255, 0, 0, 0.7);
+@keyframes breathingLogo {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.25;
+    filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.2));
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 0.4;
+    filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.5));
+  }
 }

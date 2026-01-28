@@ -1,170 +1,262 @@
-/* 🌸 Tipografías principales */
+/* 🖋️ Registro de Fuentes */
+@font-face {
+    font-family: 'njnaruto';
+    src: url('../../fonts/njnaruto.ttf') format('truetype');
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
 
-/* --- Fondo y estructura general --- */
+:root {
+    --font-primary: 'njnaruto', sans-serif;
+    --font-secondary: 'Montserrat', sans-serif;
+
+    /* 🎨 Colores Base (Suaves para la vista) */
+    --bg-dark: #050505;
+    --text-main: #dddddd;
+    --text-bright: #ffffff;
+    --red-brand: #b30000;
+    --glass-bg: rgba(10, 10, 10, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.08);
+}
+
+/* ============================================
+   BASE GLOBAL
+   ============================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
-  margin: 0;
-  font-family: 'Montserrat', sans-serif;
-  background: url('../../image/fondo.png') repeat;
-  background-size: cover;
-  display: flex;
-  min-height: 100vh;
-  color: #fff;
+    font-family: var(--font-secondary);
+    background: url('../../image/admin_bg.png') no-repeat center center fixed;
+    background-size: cover;
+    /*dizsplay: flex;*/
+    min-height: 100vh;
+    color: var(--text-main);
+    overflow-x: hidden;
 }
 
-/* --- Layout general --- */
-.layout {
-  display: flex;
-  width: 100%;
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.95) 100%);
+    z-index: -1;
 }
 
-/* --- Contenido principal --- */
-.main-content {
-  flex: 1;
-  padding: 40px 60px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow-y: auto;
-}
-
-/* --- Encabezado principal --- */
-.welcome-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 40px;
-}
-
+/* 🖋️ Títulos Grandes (Fuente de Naruto) */
+h1,
 .welcome-title {
-  text-align: center;
-  font-size: 85px;
-  margin: 0;
-  letter-spacing: 3px;
-  text-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
-  font-family: 'njnaruto';
-  color: #fff;
-  animation: glow 3s ease-in-out infinite alternate;
+    font-family: var(--font-primary) !important;
+    text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
-/* --- Efecto luminoso para el título --- */
-@keyframes glow {
-  from { text-shadow: 0 0 10px red, 0 0 20px red; }
-  to { text-shadow: 0 0 25px #ff7b00, 0 0 50px #ff1a1a; }
-}
-
-/* --- Sidebar --- */
+/* ============================================
+   SIDEBAR (CONSERVADOR Y ELEGANTE)
+   ============================================ */
 .sidebar {
-  width: 250px;
-  background: linear-gradient(180deg, #000 80%, #1a0000 100%);
-  border-right: 3px solid red;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 25px 15px;
-  box-shadow: 3px 0 20px rgba(255, 0, 0, 0.25);
-  position: relative;
-  z-index: 5;
+    width: 240px;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    border-right: 1px solid rgba(255, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    padding: 30px 15px;
+    z-index: 100;
+    height: 100vh;
+    position: fixed;
 }
 
-/* --- Logo --- */
+.sidebar .logo {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
 .sidebar .logo img {
-  width: 130px;
-  margin-bottom: 40px;
-  transition: transform 0.3s ease, filter 0.3s ease;
-  filter: drop-shadow(0 0 10px rgba(255,0,0,0.3));
+    width: 105px;
+    height: 105px;
+    border-radius: 50% !important;
+    /* 🔥 FORZAR CIRCULAR 🔥 */
+    object-fit: cover;
+    border: 2px solid var(--red-brand);
+    padding: 3px;
+    background: #000;
+    box-shadow: 0 0 20px rgba(179, 0, 0, 0.3);
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .sidebar .logo img:hover {
-  transform: scale(1.08);
-  filter: drop-shadow(0 0 15px rgba(255,0,0,0.5));
+    transform: scale(1.08) rotate(5deg);
+    box-shadow: 0 0 30px rgba(179, 0, 0, 0.5);
 }
 
-/* --- Menú de botones --- */
 .menu {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-/* --- Botones del menú --- */
 .menu-button {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 15px 18px;
-  width: 90%;
-  background: rgba(255, 0, 0, 0.05);
-  border: 2px solid transparent;
-  border-radius: 12px;
-  color: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 17px;
-  justify-content: flex-start;
-  font-family: 'njnaruto';
-  text-transform: uppercase;
-  letter-spacing: 1px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: rgba(255, 255, 255, 0.6);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
 }
 
 .menu-button img {
-  width: 35px;
-  height: auto;
-  transition: transform 0.3s ease, filter 0.3s ease;
-  filter: drop-shadow(0 0 6px rgba(255,0,0,0.4));
-}
-
-.menu-button:hover img {
-  transform: scale(1.15);
-  filter: drop-shadow(0 0 10px rgba(255,0,0,0.6));
+    width: 18px;
+    opacity: 0.5;
+    filter: invert(1);
 }
 
 .menu-button:hover,
 .menu-button.active {
-  border: 2px solid #fff;
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
-  background-color: rgba(255, 0, 0, 0.15);
-  transform: translateY(-2px);
+    background: rgba(255, 0, 0, 0.1);
+    color: #fff;
+    border-color: rgba(255, 0, 0, 0.3);
 }
 
-/* --- Botón de cerrar sesión --- */
+.menu-button.active img,
+.menu-button:hover img {
+    opacity: 1;
+}
+
 .logout-btn {
-  margin-top: auto;
-  margin-bottom: 10px;
-  padding: 15px 35px;
-  background: linear-gradient(90deg, red, #ff3300);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-family: 'njnaruto';
-  letter-spacing: 1px;
+    margin-top: auto;
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    color: #ff4d4d;
+    padding: 12px;
+    border-radius: 8px;
+    font-family: var(--font-primary);
+    cursor: pointer;
+    text-align: center;
 }
 
 .logout-btn:hover {
-  background: linear-gradient(90deg, #ff4d4d, #ff1a1a);
-  box-shadow: 0 0 15px red;
-  transform: translateY(-3px);
+    background: var(--red-brand);
+    color: #fff;
 }
 
-/* --- Responsive --- */
-@media (max-width: 900px) {
-  .sidebar {
-    width: 200px;
-    padding: 20px 10px;
-  }
+/* ============================================
+   CONTENIDO (ESCALA Y CONTROL)
+   ============================================ */
+.content,
+.main-content {
+    margin-left: 240px;
+    /* Offset for fixed sidebar */
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
 
-  .welcome-title {
-    font-size: 55px;
-  }
+.welcome-title {
+    font-size: clamp(30px, 5vw, 60px);
+    color: var(--text-bright);
+    text-shadow: 2px 2px 0px var(--red-brand);
+    margin-bottom: 20px;
+    text-align: center;
+}
 
-  .menu-button {
-    font-size: 15px;
+/* ============================================
+   GLOBAL IMAGE & ICON CONTROLS (ANTI-GIGANTE)
+   ============================================ */
+
+/* Iconos de botones e interfaz */
+.icon,
+.icon-left {
+    width: 20px !important;
+    height: 20px !important;
+    object-fit: contain;
+}
+
+/* Imágenes en listados (Personal, Locales, etc) */
+.empleado-card img,
+.local-card img,
+.producto-card img,
+.result-box img {
+    width: 50px !important;
+    height: 50px !important;
+    min-width: 50px !important;
+    min-height: 50px !important;
+    max-width: 50px !important;
+    max-height: 50px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    border: 1.5px solid var(--red-brand);
+    background: #000;
+}
+
+/* Imágenes de Producto (Formato Cuadrado) */
+.producto-card img {
+    border-radius: 10px !important;
+}
+
+/* Vista previa de carga de fotos */
+#previewFoto,
+#previewFotoProducto,
+#previewFotoLocal {
+    width: 80px !important;
+    height: 80px !important;
+    max-width: 80px !important;
+    max-height: 80px !important;
+    border-radius: 12px !important;
+    object-fit: cover !important;
+    border: 2px dashed var(--red-brand);
+    margin-top: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Inputs Globales */
+input,
+select,
+textarea {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: #fff;
     padding: 12px;
-  }
+    border-radius: 8px;
+    outline: none;
+}
+
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 0, 0, 0.2);
+    }
+
+    .content,
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+    }
+
+    .menu {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .menu-button {
+        width: auto;
+        font-size: 11px;
+    }
 }

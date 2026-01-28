@@ -1,97 +1,100 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Ceditar.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
-  <meta charset="UTF-8">
-  <title>Ichiraku Ramen - Administrador de usuario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Ceditar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+    <meta charset="UTF-8">
+    <title>Ichiraku Ramen - Administrador de usuario</title>
 </head>
+
 <body>
 
-  <div class="layout">
-      <div class="sidebar">
-          <div class="logo">
-            <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
-          </div>
+    <div class="layout">
+        <div class="sidebar">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
+            </div>
 
-          <nav class="menu">
-              <button onclick="window.location.href='{{ url_for('Ad_Inicio') }}'" class="menu-button">
-                <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
-              </button>
-              <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
-                <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Personal"> Personal
-              </button>
-              <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
-                <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
-              </button>
-              <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button">
-                <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reportes
-              </button>
-              <button onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'" class="menu-button">
-                <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> locales
-              </button>
-              <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
-                <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Avisos"> Avisos
-              </button>
-              <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button active">
-                <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> Usuario
-              </button>
-          </nav>
-          <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
-      </div>
-
-      <main class="main-content">
-          <div class="welcome-box">
-              <h1 class="welcome-title">Panel de administrador</h1>
-          </div>
-
-      <div class="form-container">
-        <!-- Formulario editable -->
-        <form method="POST" class="edit-form" id="editarForm">
-          <label for="id">ID:</label>
-          <input type="text" id="id" name="id" value="{{ user.Cedula }}" disabled>
-
-          <label for="Nombre">Nombre:</label>
-          <input type="text" id="Nombre" name="Nombre" value="{{ user.Nombre }}" required>
-
-          <button type="button" class="profile-btn-c" onclick="recuperarContrasena()">Cambiar clave</button>
-
-        </form>
-
-        <!-- Foto -->
-        <div class="profile-section">
-          <img src="{{ user.photo_url if user.photo_url else url_for('static', filename='image/default.png') }}"
-             alt="Foto de usuario"
-             onerror="this.onerror=null; this.src='{{ url_for('static', filename='image/default-user.png') }}';">
-
-          <button class="profile-btn">Subir/Cambiar foto</button>
-          <button class="profile-btn delete">Eliminar foto</button>
+            <nav class="menu">
+                <button onclick="window.location.href='{{ url_for('Ad_Inicio') }}'" class="menu-button">
+                    <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
+                </button>
+                <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
+                    <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Personal"> Personal
+                </button>
+                <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
+                    <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
+                </button>
+                <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button">
+                    <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reportes
+                </button>
+                <button onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'" class="menu-button">
+                    <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> locales
+                </button>
+                <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
+                    <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Avisos"> Avisos
+                </button>
+                <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button active">
+                    <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> Usuario
+                </button>
+            </nav>
+            <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
         </div>
-      </div>
-      </main>
-  </div>
 
+        <main class="main-content">
+            <div class="welcome-box">
+                <h1 class="welcome-title">Panel de administrador</h1>
+            </div>
 
-  <!-- Modal -->
-  <div id="modal" class="modal">
-    <div class="modal-content">
-      <p id="modal-text"></p>
-      <button onclick="cerrarModal()">Aceptar</button>
+            <div class="form-container">
+                <!-- Formulario editable -->
+                <form method="POST" class="edit-form" id="editarForm">
+                    <label for="id">ID:</label>
+                    <input type="text" id="id" name="id" value="{{ user.Cedula }}" disabled>
+
+                    <label for="Nombre">Nombre:</label>
+                    <input type="text" id="Nombre" name="Nombre" value="{{ user.Nombre }}" required>
+
+                    <button type="button" class="profile-btn-c" onclick="recuperarContrasena()">Cambiar clave</button>
+
+                </form>
+
+                <!-- Foto -->
+                <div class="profile-section">
+                    <img src="{{ user.photo_url if user.photo_url else url_for('static', filename='image/default.png') }}"
+                        alt="Foto de usuario"
+                        onerror="this.onerror=null; this.src='{{ url_for('static', filename='image/default-user.png') }}';">
+
+                    <button class="profile-btn">Subir/Cambiar foto</button>
+                    <button class="profile-btn delete">Eliminar foto</button>
+                </div>
+            </div>
+        </main>
     </div>
-  </div>
 
-  {% with messages = get_flashed_messages(with_categories=true) %}
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <p id="modal-text"></p>
+            <button onclick="cerrarModal()">Aceptar</button>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-      <script>
+    <script>
         window.onload = () => {
-          mostrarModal("{{ messages[0][1] }}", "{{ messages[0][0] }}");
+            mostrarModal("{{ messages[0][1] }}", "{{ messages[0][0] }}");
         };
-      </script>
+    </script>
     {% endif %}
-  {% endwith %}
+    {% endwith %}
 
 </body>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{ url_for('static', filename='js/Global_js/alertaNinja.js') }}"></script>
 <script src="{{ url_for('static', filename='js/Ad_js/Ceditar_AD.js') }}"></script>
+
 </html>

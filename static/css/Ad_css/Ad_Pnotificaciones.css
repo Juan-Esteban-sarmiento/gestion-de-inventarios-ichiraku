@@ -1,141 +1,159 @@
-/* Fuente personalizada */
-@font-face {
-  font-family: 'njnaruto';
-  src: url('../../fonts/njnaruto.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
+/* ============================================
+   AD_PNOTIFICACIONES - INFO-ONLY REDESIGN
+   ============================================ */
 
-/* --- CONTENEDOR PRINCIPAL --- */
 .notification-container {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  width: 100%;
-  margin-top: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeInScale 0.7s ease-out;
 }
 
-/* --- CAJA CENTRAL --- */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* --- EL TABLÓN DE ANUNCIOS (VENTANA PRINCIPAL) --- */
 .search-box {
-  width: 65%;
-  background-color: black;
-  border: 2px solid red;
-  border-radius: 15px;
-  padding: 25px 30px;
-  color: white;
-  min-height: 400px;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+    width: 95%;
+    max-width: 1000px;
+    background: rgba(10, 10, 10, 0.8);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+
+    /* 🔴 Contorno Rojo Premium */
+    border: 1.5px solid rgba(255, 0, 0, 0.4);
+    border-radius: 30px;
+
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
 }
 
-/* --- TÍTULO --- */
 .search-box h2 {
-  text-align: center;
-  font-size: 24px;
-  border-bottom: 2px solid red;
-  padding-bottom: 10px;
-  margin-bottom: 25px;
-  /* Usar fuente legible para títulos */
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--font-primary) !important;
+    text-align: left;
+    color: #fff;
+    font-size: 1.6rem;
+    letter-spacing: 2px;
+    margin-bottom: 35px;
+    border-bottom: 1px solid rgba(255, 0, 0, 0.2);
+    padding-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
 }
 
-/* --- FILTROS --- */
-.filters {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-bottom: 25px;
-}
-
-.filters input {
-  flex: 1;
-  max-width: 45%;
-  padding: 10px;
-  border: 2px solid red;
-  border-radius: 8px;
-  background: black;
-  color: white;
-  font-size: 15px;
-  text-align: center;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-/* --- LISTA DE NOTIFICACIONES --- */
+/* --- LISTA DE AVISOS (FLUIDA Y LIMPIA) --- */
 .notifications-list {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 15px;
-  flex: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow-y: auto;
+    padding-right: 10px;
 }
 
-/* --- ITEM DE NOTIFICACIÓN --- */
+/* Row Individual */
 .notification-item {
-  width: 90%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border: 2px solid red;
-  border-radius: 12px;
-  padding: 10px 15px;
-  background: black;
-  color: white;
-  transition: all 0.2s ease-in-out;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 20px 25px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
 }
 
 .notification-item:hover {
-  transform: scale(1.03);
-  background: #1a1a1a;
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 0, 0, 0.3);
+    transform: translateX(5px);
 }
 
-/* --- TEXTO E ICONOS --- */
-.notification-text {
-  flex: 1;
-  margin: 0 10px;
-  text-align: left;
-  font-size: 16px;
-  /* Texto de notificaciones legible */
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  line-height: 1.35;
-  font-weight: 600;
-  color: #fff;
-}
-
-.icon-left {
-  width: 30px;
-  height: 30px;
-}
-
-/* --- BOTONES --- */
-.notification-buttons {
-  display: flex;
-  gap: 10px;
-}
-
-.notification-buttons button {
-  padding: 5px 10px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.btn-prioritaria {
-  background-color: red;
-  color: white;
-  box-shadow: 0 0 5px red;
-}
-
-/* --- ESTADOS --- */
+/* Indicador de Prioridad sutil */
 .notification-item.prioritaria {
-  border-color: red;
-  background-color: #330000;
-  box-shadow: 0 0 10px red;
+    border-left: 4px solid var(--red-brand);
+    background: linear-gradient(90deg, rgba(255, 0, 0, 0.04) 0%, transparent 100%);
 }
 
-.notification-item.resuelta {
-  opacity: 0.5;
-  background-color: #1a1a1a;
+/* Iconos (Garantía de tamaño) */
+.icon-left {
+    width: 26px !important;
+    height: 26px !important;
+    opacity: 0.7;
+    filter: drop-shadow(0 0 5px rgba(255, 0, 0, 0.2));
+}
+
+/* Texto de la Notificación */
+.notification-text {
+    font-family: var(--font-secondary);
+    color: #ddd;
+    font-size: 15px;
+    line-height: 1.5;
+    flex: 1;
+}
+
+.notification-text br {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.notification-text small {
+    display: inline-block;
+    margin-top: 6px;
+    color: var(--text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Scrollbar Personalizado */
+.notifications-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notifications-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.notifications-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+.notifications-list::-webkit-scrollbar-thumb:hover {
+    background: var(--red-brand);
+}
+
+/* Sin botones como se solicitó */
+.btn-prioritaria {
+    display: none !important;
+}
+
+@media (max-width: 768px) {
+    .search-box {
+        padding: 25px;
+    }
+
+    .notification-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
 }

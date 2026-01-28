@@ -1,305 +1,198 @@
-@font-face {
-  font-family: 'njnaruto';
-  src: url('../../fonts/njnaruto.ttf') format('truetype');
-}
+/* ============================================
+   AD_DINFORMES - TOTAL ARCHITECTURAL REDESIGN
+   ============================================ */
 
-/* --- Fondo y fuente --- */
-body {
-  font-family: 'njnaruto', sans-serif;
-  color: #fff;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  background: url('../../img/fondo_ichiraku.png') repeat;
-}
-
-/* --- Layout principal --- */
-.layout {
-  display: flex;
-  width: 100%;
-  min-height: 100vh;
-}
-
-/* --- Sidebar --- */
-.sidebar {
-  width: 250px;
-  background: rgba(0, 0, 0, 0.9);
-  padding: 20px;
-  border-right: 3px solid #e63900;
-}
-
-/* --- Contenido principal --- */
+/* 1. Limpieza de conflicto con main-content */
 .main-content {
-  flex: 1;
-  padding: 40px 60px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+    margin-left: 240px;
+    /* Margen para sidebar fijo */
+    width: calc(100% - 240px);
+    min-height: 100vh;
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
 }
 
-/* --- Caja de búsqueda --- */
+/* 2. BARRA DE BUSQUEDA - ESTILO PREMIUM CAPSULA */
 .search-box {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: rgba(0, 0, 0, 0.85);
-  border: 2px solid #e63900;
-  border-radius: 12px;
-  padding: 15px 25px;
-  gap: 20px;
-  flex-wrap: wrap;
-  width: 80%;
-  max-width: 800px;
-  box-shadow: 0 0 15px rgba(230, 57, 0, 0.2);
-  margin-bottom: 25px;
+    width: 90%;
+    max-width: 900px;
+    background: rgba(15, 15, 15, 0.85);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 0, 0, 0.4);
+    border-radius: 50px;
+    /* Estilo capsula */
+    padding: 10px 10px 10px 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    margin-bottom: 60px;
+    display: flex;
+    align-items: center;
+}
+
+.search-box form {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
 }
 
 .search-box input {
-  background: rgba(0, 0, 0, 0.9);
-  color: #fff;
-  font-weight: bold;
-  border: 2px solid #e63900;
-  border-radius: 10px;
-  padding: 10px 15px;
-  text-align: center;
-  transition: all 0.3s ease;
-  font-family: 'njnaruto';
-  width: 200px;
-  font-size: 1rem;
-  outline: none;
-  height: 40px;
+    background: transparent !important;
+    border: none !important;
+    color: #fff !important;
+    padding: 10px !important;
+    font-family: var(--font-secondary);
+    font-size: 14px;
+    outline: none !important;
+    flex: 1;
+    margin-bottom: 0 !important;
 }
 
-.search-box input::placeholder {
-  color: #fff;
-  opacity: 0.8;
-}
-
-.search-box input:focus {
-  border-color: #fff;
-  box-shadow: 0 0 10px #e63900;
-}
-
+/* FIX BOTON BUSCAR DAÑADO */
 .search-box button {
-  background-color: #e63900;
-  border: none;
-  color: white;
-  font-family: 'njnaruto';
-  border-radius: 10px;
-  padding: 10px 20px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.3s;
-  height: 40px;
+    background: var(--red-brand) !important;
+    color: #ffffff !important;
+    /* Texto blanco forzado */
+    border: none !important;
+    border-radius: 40px !important;
+    padding: 12px 35px !important;
+    font-family: var(--font-secondary) !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    text-transform: uppercase !important;
+    font-size: 13px !important;
+    transition: 0.3s !important;
 }
 
 .search-box button:hover {
-  background-color: #ff4d00;
-  transform: scale(1.05);
+    background: #e60000 !important;
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
 }
 
-/* --- Contenedor de resultados --- */
+/* 3. ZONA DE RESULTADOS - ELIMINANDO EL "EFECTO ESQUINA" */
 .result-box {
-  background: rgba(0, 0, 0, 0.92);
-  margin: 25px 0;
-  padding: 25px;
-  border: 2px dashed #e63900;
-  border-radius: 14px;
-  width: 90%;
-  max-width: 1100px;
-  box-shadow: 0 2px 15px rgba(230, 57, 0, 0.2);
-  color: #fff;
-  font-size: 1.2rem;
-  min-height: 150px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 25px;
-  overflow-y: auto;
+    width: 95%;
+    max-width: 1000px;
+    min-height: 400px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed rgba(255, 0, 0, 0.2);
+    border-radius: 40px;
+    margin-bottom: 50px;
+
+    /* CENTRADO ABSOLUTO */
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 40px;
 }
 
-/* Scroll personalizado */
-.result-box::-webkit-scrollbar {
-  width: 8px;
-}
-
-.result-box::-webkit-scrollbar-thumb {
-  background-color: #e63900;
-  border-radius: 10px;
-}
-
-.result-box::-webkit-scrollbar-track {
-  background-color: #1a1a1a;
-}
-
-/* --- Tarjeta individual del informe --- */
+/* Tarjeta de Informe Individual */
 .informe-card {
-  background: rgba(0, 0, 0, 0.9);
-  border: 2px dashed #e63900;
-  border-radius: 18px;
-  padding: 20px 25px;
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  text-align: center;
-  box-shadow: 0 0 15px rgba(230, 57, 0, 0.25);
-  transition: all 0.3s ease;
-  min-width: 280px;
-  max-width: 340px;
+    background: linear-gradient(145deg, rgba(20, 20, 20, 0.9), rgba(10, 10, 10, 0.9));
+    border: 1.5px solid rgba(255, 0, 0, 0.4);
+    border-radius: 30px;
+    padding: 40px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    text-align: left;
 }
 
-/* Hover con efecto Ichiraku */
-.informe-card:hover {
-  transform: translateY(-5px);
-  border-color: #fff;
-  background: rgba(230, 57, 0, 0.15);
-  box-shadow: 0 0 25px rgba(230, 57, 0, 0.4);
-}
-
-/* Etiquetas internas */
 .informe-card p {
-  margin: 8px 0;
-  font-size: 1.1rem;
-  width: 100%;
+    font-family: var(--font-secondary);
+    color: #ccc;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    padding-bottom: 10px;
 }
 
 .informe-card p span {
-  color: #e63900;
-  font-size: 1rem;
-  text-shadow: 1px 1px 2px #000;
-  display: block;
-  margin-bottom: 5px;
+    color: var(--red-brand);
+    text-transform: uppercase;
+    font-weight: 800;
+    font-size: 11px;
+    display: block;
+    margin-bottom: 5px;
 }
 
-/* Botón dentro de la tarjeta */
+/* Botón de descarga dentro de la tarjeta */
 .informe-card .download-button {
-  margin-top: 15px;
-  width: 100%;
-  background: #111;
-  border: 2px solid #e63900;
-  border-radius: 10px;
-  color: #fff;
-  padding: 12px 0;
-  font-family: 'njnaruto';
-  font-size: 1rem;
-  cursor: pointer;
-  transition: 0.3s;
-  box-shadow: 0 0 10px rgba(230, 57, 0, 0.2);
+    margin-top: 10px;
+    width: 100%;
+    justify-content: center;
 }
 
-.informe-card .download-button:hover {
-  background: #e63900;
-  border-color: #fff;
-  transform: scale(1.05);
-}
-
-/* --- Contenedor de botones de descarga --- */
+/* 4. BARRA DE ACCION INFERIOR */
 .download-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin-top: 20px;
-  width: 90%;
-  max-width: 1100px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding-bottom: 60px;
 }
 
-.download-container .download-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 12px 20px;
-  background: #111;
-  border: 2px solid #e63900;
-  border-radius: 10px;
-  color: #fff;
-  font-family: 'njnaruto';
-  font-size: 1rem;
-  cursor: pointer;
-  transition: 0.3s;
-  box-shadow: 0 0 10px rgba(230, 57, 0, 0.25);
-  min-width: 200px;
+.download-button {
+    background: rgba(10, 10, 10, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #aaa;
+    border-radius: 15px;
+    padding: 15px 25px;
+    font-family: var(--font-secondary) !important;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: 0.4s;
+    text-transform: uppercase;
 }
 
-.download-container .download-button img {
-  width: 20px;
-  height: 20px;
-  filter: brightness(0) invert(1);
+.download-button img {
+    width: 18px !important;
+    height: 18px !important;
+    filter: grayscale(100%) brightness(1.5);
+    transition: 0.3s;
 }
 
-.download-container .download-button:hover {
-  background: #e63900;
-  border-color: #fff;
-  transform: scale(1.05);
+.download-button:hover {
+    background: var(--red-brand);
+    border-color: #ff3333;
+    color: #fff;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-/* --- Responsivo --- */
+.download-button:hover img {
+    filter: brightness(0) invert(1);
+}
+
+/* Ajustes Móvil */
 @media (max-width: 1024px) {
-  .main-content {
-    padding: 30px 25px;
-  }
-  
-  .informe-card {
-    flex: 1 1 calc(50% - 25px);
-  }
-}
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
 
-@media (max-width: 768px) {
-  .layout {
-    flex-direction: column;
-  }
-  
-  .sidebar {
-    width: 100%;
-    border-right: none;
-    border-bottom: 3px solid #e63900;
-  }
-  
-  .main-content {
-    padding: 20px;
-  }
-  
-  .search-box {
-    width: 95%;
-    flex-direction: column;
-  }
-  
-  .search-box input {
-    width: 100%;
-    margin: 5px 0;
-  }
-  
-  .informe-card {
-    flex: 1 1 100%;
-  }
-  
-  .download-container .download-button {
-    min-width: 150px;
-    font-size: 0.9rem;
-  }
-}
+    .search-box {
+        border-radius: 20px;
+        padding: 20px;
+    }
 
-@media (max-width: 480px) {
-  .welcome-title {
-    font-size: 1.8rem;
-  }
-  
-  .search-box input,
-  .search-box button {
-    width: 100%;
-  }
-  
-  .download-container {
-    flex-direction: column;
-    width: 100%;
-  }
-  
-  .download-container .download-button {
-    width: 100%;
-  }
+    .search-box form {
+        flex-direction: column;
+    }
+
+    .search-box button {
+        width: 100%;
+    }
 }

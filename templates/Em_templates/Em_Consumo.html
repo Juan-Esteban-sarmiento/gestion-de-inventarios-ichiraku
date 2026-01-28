@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Rpedido.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+    <meta charset="UTF-8">
+    <title>Ichiraku Ramen - Registrar Consumo</title>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
+        </div>
+        <nav class="menu">
+            <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
+            </button>
+
+            <button onclick="window.location.href='{{ url_for('Em_Consumo') }}'" class="menu-button active">
+                <img src="{{ url_for('static', filename='image/ramen.png') }}" alt="Consumo"> Consumo
+            </button>
+
+            <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Recibir pedidos"> Recibir pedidos
+            </button>
+            <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Realizar pedidos"> Realizar
+                pedidos
+            </button>
+            <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Historial pedidos"> Historial
+                pedidos
+            </button>
+            <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> usuario
+            </button>
+        </nav>
+        <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar Sesión</button>
+    </div>
+
+    <main class="content">
+        <div id="messageArea"></div>
+
+        <div class="box-welcome">
+            <h1 class="welcome-title">Registrar Consumo / Venta</h1>
+            <p style="color:#aaa;">Selecciona los productos y la cantidad consumida en el local.</p>
+        </div>
+
+        <div class="order-panel">
+            <!-- Sección de búsqueda -->
+            <div class="product-selection-section">
+                <div class="order-header">
+                    <span>Buscar Productos</span>
+                </div>
+                <div class="search-controls">
+                    <input type="text" id="searchTerm" placeholder="Nombre del producto...">
+                    <button class="confirm-btn" onclick="buscarProductos()">Buscar</button>
+                </div>
+
+                <!-- Grid de productos -->
+                <div id="productos-container" class="productos-grid">
+                    <!-- Cargados vía JS -->
+                </div>
+            </div>
+
+            <!-- Sección de consumo seleccionado (como un carrito, pero para consumir) -->
+            <div class="pedido-box">
+                <h2>🔥 Consumo Actual</h2>
+                <ul id="consumo-lista">
+                    <!-- Items seleccionados -->
+                </ul>
+                <button class="confirm-btn" onclick="confirmarConsumo()">Registrar Gasto</button>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ url_for('static', filename='js/Global_js/alertaNinja.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/Em_js/Consumo.js') }}"></script>
+</body>
+
+</html>

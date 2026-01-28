@@ -6,215 +6,167 @@ window.onload = () => {
   });
 };
 
-function validarFormulario(e) {
+function validarFormulario() {
   let cambios = false;
   document.querySelectorAll("input").forEach(input => {
-    if (input.value !== originalValues[input.id]) {
-      cambios = true;
-    }
+    if (input.value !== originalValues[input.id]) cambios = true;
   });
   return cambios;
 }
 
-document.getElementById("editarForm").addEventListener("submit", async function(e) {
+document.getElementById("editarForm").addEventListener("submit", async function (e) {
   e.preventDefault();
   if (!validarFormulario()) {
-    alertaNinja("warning", "Sin cambios", "No se han realizado modificaciones.");
+    alertaNinja("warning", "Sin cambios", "No se han realizado modificaciones en tu perfil.");
     return;
   }
 
   const formData = new FormData(this);
   const data = {
-    Nombre: formData.get("Nombre"),
-    Contrasena: formData.get("Contrasena")
+    Nombre: formData.get("Nombre")
   };
 
   try {
     let response = await fetch("/Ad_Ceditar", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      },
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
       body: JSON.stringify(data)
     });
-
-    let result;
-    try {
-      result = await response.json();
-    } catch (e) {
-      let text = await response.text();
-      return;
-    }
-
+    let result = await response.json();
     if (result.success) {
-      alertaNinja("success", "Actualización exitosa", "Usuario actualizado correctamente.");
+      alertaNinja("success", "¡Guardado!", "Tu información ha sido actualizada.");
+      originalValues["Nombre"] = data.Nombre; // Sincronizar para evitar alertas de cambios falsas
     } else {
-      alertaNinja("error", "Error", "No se pudo actualizar el usuario.");
+      alertaNinja("error", "Error", result.msg || "No se pudo actualizar.");
     }
   } catch (err) {
-    console.error("Error en la petición:", err);
-    alertaNinja("error", "Error", "No se pudo conectar con el servidor.");
+    alertaNinja("error", "Fallo de conexión", "No se pudo conectar con el servidor.");
   }
 });
 
-// 🖼 Subir foto
+// 🖼 Subir/Cambiar foto
 const subirBtn = document.querySelector('.profile-btn:not(.delete)');
 const fileInput = document.createElement('input');
-fileInput.type = 'file';
-fileInput.accept = 'image/*';
-fileInput.style.display = 'none';
+fileInput.type = 'file'; fileInput.accept = 'image/*'; fileInput.style.display = 'none';
 document.body.appendChild(fileInput);
 
 subirBtn.addEventListener('click', () => fileInput.click());
 
-fileInput.addEventListener('change', async function() {
+fileInput.addEventListener('change', async function () {
   const formData = new FormData();
   formData.append('foto', fileInput.files[0]);
-  let response = await fetch('/Ad_Ceditar_foto', {
-    method: 'POST',
-    body: formData
-  });
-  let result = await response.json();
-  if (result.success) {
-    document.querySelector('.profile-section img').src = result.photo_url;
-    alertaNinja('success', 'Foto actualizada', 'Tu foto de perfil ha sido cambiada.');
-  } else {
-    alertaNinja('error', 'Error', 'No se pudo subir la foto.');
-  }
+  try {
+    let response = await fetch('/Ad_Ceditar_foto', { method: 'POST', body: formData });
+    let result = await response.json();
+    if (result.success) {
+      document.querySelector('.profile-section img').src = result.photo_url;
+      alertaNinja('success', 'Foto actualizada', 'Tu nueva foto de perfil está lista.');
+    } else {
+      alertaNinja('error', 'Error', 'No se pudo subir la imagen.');
+    }
+  } catch (e) { alertaNinja('error', 'Error', 'Fallo al cargar la foto.'); }
 });
 
-// 🗑 Eliminar foto
+// 🗑 Eliminar foto con CONFIRMACIÓN solicitado
 const eliminarBtn = document.querySelector('.profile-btn.delete');
-eliminarBtn.addEventListener('click', async function() {
-  let response = await fetch('/Ad_Ceditar_foto', {
-    method: 'DELETE'
+eliminarBtn.addEventListener('click', async function () {
+  const confirmacion = await alertaNinjaFire({
+    icon: 'warning',
+    title: '¿Eliminar foto?',
+    text: 'Esta acción no se puede deshacer. ¿Estás seguro?',
+    showCancelButton: true,
+    confirmButtonText: 'SÍ, BORRAR',
+    cancelButtonText: 'CANCELAR'
   });
-  let result = await response.json();
-  if (result.success) {
-    document.querySelector('.profile-section img').src = result.photo_url;
-    alertaNinja('success', 'Foto eliminada', 'Tu foto de perfil fue eliminada correctamente.');
-  } else {
-    alertaNinja('error', 'Error', 'No se pudo eliminar la foto.');
+
+  if (confirmacion.isConfirmed) {
+    try {
+      let response = await fetch('/Ad_Ceditar_foto', { method: 'DELETE' });
+      let result = await response.json();
+      if (result.success) {
+        document.querySelector('.profile-section img').src = result.photo_url;
+        alertaNinja('success', 'Foto eliminada', 'Se ha restaurado la imagen por defecto.');
+      } else {
+        alertaNinja('error', 'Error', 'No se pudo eliminar la foto.');
+      }
+    } catch (e) { alertaNinja('error', 'Fallo', 'Error de conexión.'); }
   }
 });
 
-// 🔑 Recuperar contraseña (mantiene Swal para entradas)
+// 🔑 Recuperar/Cambiar contraseña
 async function recuperarContrasena() {
   const { value: nombre } = await alertaNinjaFire({
-    title: 'Recuperar contraseña',
+    title: 'Seguridad',
     input: 'text',
-    inputLabel: 'Ingresa tu nombre de usuario (Administrador)',
-    inputPlaceholder: 'Ejemplo: admin1',
+    inputLabel: 'Nombre de usuario Administrador',
+    inputPlaceholder: 'Ingresa tu usuario...',
     showCancelButton: true,
-    confirmButtonText: 'Continuar',
-    cancelButtonText: 'Cancelar',
-    preConfirm: (value) => {
-      if (!value || value.trim() === '') {
-        Swal.showValidationMessage('Debes ingresar tu nombre de usuario');
-      }
-      return value;
-    }
+    confirmButtonText: 'CONTINUAR',
+    cancelButtonText: 'CANCELAR'
   });
 
   if (!nombre) return;
 
-  // 1️⃣ Pedir teléfono
   const { value: telefono } = await alertaNinjaFire({
-    title: 'Recuperar contraseña',
+    title: 'Recuperación',
     input: 'text',
-    inputLabel: 'Ingresa el número de teléfono donde recibirás el código',
-    inputPlaceholder: 'Ejemplo: 3001234567',
+    inputLabel: 'Número de teléfono (WhatsApp)',
+    inputPlaceholder: 'Ej: 3001234567',
     showCancelButton: true,
-    confirmButtonText: 'Enviar código',
-    cancelButtonText: 'Cancelar',
-    preConfirm: (value) => {
-      if (!value || value.trim() === '') {
-        Swal.showValidationMessage('Debes ingresar un número de teléfono válido');
-      }
-      return value;
-    }
+    confirmButtonText: 'ENVIAR CÓDIGO',
+    cancelButtonText: 'VOLVER'
   });
 
   if (!telefono) return;
 
   try {
-    // 2️⃣ Enviar token
-    let telefonoFormateado = telefono.trim();
-    if (!telefonoFormateado.startsWith('+57')) {
-      telefonoFormateado = '+57' + telefonoFormateado;
-    }
+    let tFormateado = telefono.trim();
+    if (!tFormateado.startsWith('+57')) tFormateado = '+57' + tFormateado;
 
     const res = await fetch("/enviar_token_recuperacion", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ telefono: telefonoFormateado })
+      body: JSON.stringify({ telefono: tFormateado })
     });
-
     const data = await res.json();
+    if (!data.success) return alertaNinja('error', 'Error', data.msg);
 
-    if (!data.success) {
-      return alertaNinja('error', 'Error', data.msg);
-    }
+    alertaNinja('success', 'Código Enviado', 'Revisa tu WhatsApp para ver el código.');
 
-    alertaNinja('success', 'Código enviado', 'Revisa tu teléfono para ver el código.');
-
-    // 3️⃣ Token recibido
     const { value: token } = await alertaNinjaFire({
       title: 'Verificación',
       input: 'text',
-      inputLabel: 'Ingresa el código recibido',
-      inputPlaceholder: 'Ejemplo: 123456',
+      inputLabel: 'Código de 6 dígitos',
+      inputPlaceholder: '123456',
       showCancelButton: true,
-      confirmButtonText: 'Validar código',
-      cancelButtonText: 'Cancelar',
-      preConfirm: (value) => {
-        if (!value || value.trim().length < 4) {
-          Swal.showValidationMessage('Debes ingresar el código recibido');
-        }
-        return value;
-      }
+      confirmButtonText: 'VALIDAR',
+      cancelButtonText: 'CANCELAR'
     });
 
     if (!token) return;
 
-    // 4️⃣ Nueva contraseña
     const { value: nuevaContrasena } = await alertaNinjaFire({
-      title: 'Nueva contraseña',
+      title: 'Nueva Clave',
       input: 'password',
-      inputLabel: 'Ingresa tu nueva contraseña',
+      inputLabel: 'Nueva contraseña segura',
       inputPlaceholder: '********',
-      inputAttributes: { minlength: 6 },
       showCancelButton: true,
-      confirmButtonText: 'Actualizar contraseña',
-      cancelButtonText: 'Cancelar',
-      preConfirm: (value) => {
-        if (!value || value.length < 6) {
-          Swal.showValidationMessage('Debe tener al menos 6 caracteres');
-        }
-        return value;
-      }
+      confirmButtonText: 'ACTUALIZAR',
+      cancelButtonText: 'CANCELAR'
     });
 
     if (!nuevaContrasena) return;
 
-    // 5️⃣ Validar token y actualizar
     const resp = await fetch("/validar_token", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre, telefono, token, nueva_clave: nuevaContrasena })
     });
-
     const resultado = await resp.json();
-
     if (resultado.success) {
-      alertaNinja('success', 'Éxito', 'Tu contraseña se actualizó correctamente.');
+      alertaNinja('success', '¡Éxito!', 'Tu contraseña ha sido cambiada.');
     } else {
-      alertaNinja('error', 'Error', resultado.msg);
+      alertaNinja('error', 'Código Inválido', resultado.msg);
     }
-
-  } catch (err) {
-    console.error("Error en la petición:", err);
-    alertaNinja('error', 'Error', 'No se pudo conectar con el servidor.');
-  }
+  } catch (err) { alertaNinja('error', 'Fallo', 'Error al procesar la clave.'); }
 }

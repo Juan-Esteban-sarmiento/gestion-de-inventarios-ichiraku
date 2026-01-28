@@ -1,83 +1,86 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Ichiraku Ramen Panel de inicio</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Inicio.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+    <meta charset="UTF-8">
+    <title>Ichiraku Ramen Panel de inicio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Inicio.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
 </head>
+
 <body>
-  <div class="sidebar">
-    <div class="logo">
-      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
+    <div class="sidebar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
+        </div>
+
+        <nav class="menu">
+            <button onclick="window.location.href='{{ url_for('Ad_Inicio') }}'" class="menu-button active">
+                <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
+            </button>
+            <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Personal"> Personal
+            </button>
+            <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
+            </button>
+            <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reportes
+            </button>
+            <button onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> Locales
+            </button>
+            <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Avisos"> Avisos
+            </button>
+            <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Usuario"> Usuario
+            </button>
+        </nav>
+
+        <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
     </div>
 
-    <nav class="menu">
-      <button onclick="window.location.href='{{ url_for('Ad_Inicio') }}'" class="menu-button active">
-        <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
-      </button>
-      <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
-        <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Personal"> Personal
-      </button>
-      <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
-        <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
-      </button>
-      <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button">
-        <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reportes
-      </button>
-      <button onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'" class="menu-button">
-        <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> Locales
-      </button>
-      <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
-        <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Avisos"> Avisos
-      </button>
-      <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
-        <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Usuario"> Usuario
-      </button>
-    </nav>
+    <main class="content">
+        <div class="box-welcome">
+            <h1 class="welcome-title">Bienvenido</h1>
+        </div>
 
-    <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
-  </div>
-
-  <main class="content">
-    <div class="box-welcome">
-      <h1 class="welcome-title">Bienvenido</h1>
-    </div>
-
-    <section class="notification-box">
-      <div class="notification-header">
-        <h2>Avisos recientes</h2>
-      </div>
-
-      <div class="notification-body">
-        {% if notificaciones %}
-          {% for noti in notificaciones %}
-          <div class="notification-item">
-            <img src="{{ url_for('static', filename='image/campana.png') }}" class="icon-left" alt="Aviso">
-            <div class="notification-text">
-              <strong>{{ noti['mensaje'] }}</strong><br>
-              <div class="fecha-notificacion">
-                 {{ noti['fecha_formateada'] }}
-              </div>
+        <section class="notification-box">
+            <div class="notification-header">
+                <h2>Avisos recientes</h2>
             </div>
-          </div>
-          {% endfor %}
 
-          {% if restantes > 0 %}
-          <div class="extra-info">
-            Hay {{ restantes }} aviso{{ 's' if restantes > 1 else '' }} mas  
-            Da clic en <a href="{{ url_for('Ad_Pnotificaciones') }}" class="link-ver">Ver mas</a> para verlos
-          </div>
-          {% endif %}
-        {% else %}
-          <p>No hay avisos recientes</p>
-        {% endif %}
-      </div>
-    </section>
+            <div class="notification-body">
+                {% if notificaciones %}
+                {% for noti in notificaciones %}
+                <div class="notification-item">
+                    <img src="{{ url_for('static', filename='image/campana.png') }}" class="icon-left" alt="Aviso">
+                    <div class="notification-text">
+                        <strong>{{ noti['mensaje'] }}</strong><br>
+                        <div class="fecha-notificacion">
+                            {{ noti['fecha_formateada'] }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
 
-    <div class="logo-main">
-      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Ramen">
-    </div>
-  </main>
+                {% if restantes > 0 %}
+                <div class="extra-info">
+                    Hay {{ restantes }} aviso{{ 's' if restantes > 1 else '' }} mas
+                    Da clic en <a href="{{ url_for('Ad_Pnotificaciones') }}" class="link-ver">Ver mas</a> para verlos
+                </div>
+                {% endif %}
+                {% else %}
+                <p>No hay avisos recientes</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <div class="logo-main">
+            <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Ramen">
+        </div>
+    </main>
 </body>
+
 </html>
