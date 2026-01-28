@@ -1,218 +1,216 @@
-/* Ajustes: quitar transparencias, fondo negro y todo dentro de .order-box (caja) */
-:root{
-  --bg-dark: #000000; /* fondo general negro */
-  --panel: #0b0b0c;
-  --accent: #ff1a1a;
-  --accent-weak: #ff4c4c;
-  --muted: #cfcfcf;
-  --panel-contrast: #070707;
-}
+/* ============================================
+   EM_HORDENES - PREMIUM HISTORY DESIGN
+   ============================================ */
 
-/* Fuentes */
-@font-face {
-  font-family: 'njnaruto';
-  src: url('../../fonts/njnaruto.ttf') format('truetype');
-}
-
-*{box-sizing:border-box}
-
-/* Fondo general: negro sólido */
-body {
-  background: var(--bg-dark);
-  color: #fff;
-  font-family: 'njnaruto', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  margin: 0;
-  padding: 0;
-}
-
-/* ==================== CONTENEDOR PRINCIPAL ==================== */
-/* Ajusta espacio para la barra lateral y centra el contenido */
-.content {
-  padding: 48px 28px;
-  margin-left: 240px; /* ancho aproximado del sidebar */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-  gap: 18px;
-  transition: margin 0.2s ease;
-}
-
-/* CAJA PRINCIPAL: caja negra sólida que contiene todo */
 .order-box {
-  background: #000; /* caja totalmente negra */
-  border: 1px solid rgb(255, 0, 0); /* borde rojo sutil para contraste */
-  border-radius: 14px;
-  padding: 28px;
   width: 100%;
   max-width: 1100px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-  margin-top: 8px; /* separación extra entre título y caja */
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 35px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  animation: fadeInUp 0.7s ease-out;
 }
 
-/* Contenedor del título fuera de la caja */
-.box-welcome{
-  width: 100%;
-  max-width: 1100px; /* coincide con .order-box */
-  margin: 12px 0 6px; /* espacio entre título y caja */
-  text-align: center;
-  padding: 0 12px;
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.welcome-title {
-  font-size: 2.6rem;
-  color: var(--accent);
-  margin: 0;
-  letter-spacing: 1.5px;
-  line-height: 1;
-  text-shadow: none;
-}
-
-/* ==================== BUSCADOR ==================== */
+/* Buscador Estilizado */
 .search-box {
   display: flex;
-  gap: 12px;
-  background: #0a0a0a;
-  border-radius: 12px;
-  padding: 10px;
-  margin-bottom: 20px;
-  width: 100%;
+  gap: 15px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 15px;
+  margin-bottom: 30px;
   align-items: center;
-  border: 1px solid rgba(255,26,26,0.08);
 }
 
 .ninja-input {
   flex: 1;
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.04);
-  background: #050505;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 12px 18px;
+  border-radius: 12px;
   color: #fff;
-  font-size: 14px;
-  min-height:42px;
+  font-family: var(--font-secondary);
+  transition: 0.3s;
 }
 
-.ninja-input::placeholder { color: rgba(255,255,255,0.35) }
-
 .ninja-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 8px rgba(255,26,26,0.06);
-  outline: none;
+  border-color: var(--red-brand);
+  background: rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 15px rgba(179, 0, 0, 0.2);
 }
 
 .ninja-btn {
-  background: linear-gradient(180deg,var(--accent),var(--accent-weak));
-  border: none;
+  background: linear-gradient(135deg, #8b0000 0%, #b30000 100%);
   color: #fff;
-  padding: 10px 16px;
-  border-radius: 10px;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 12px;
   font-weight: 700;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-  min-height:42px;
+  transition: 0.3s;
 }
 
-/* ==================== CONTENEDOR DE TARJETAS ==================== */
-.order-container{
+.ninja-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.2);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+/* Contenedor de Órdenes */
+.order-container {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin-top: 6px;
+  gap: 20px;
 }
 
-/* ==================== TARJETAS ==================== */
+/* Tarjetas de Órdenes */
 .order-card {
-  background: #050505;
-  border-left: 4px solid rgba(255,26,26,0.9);
-  border-radius: 10px;
-  padding: 14px 16px;
-  width: 100%;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.6);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  padding: 20px;
+  transition: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .order-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 18px 28px rgba(0,0,0,0.7);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(179, 0, 0, 0.4);
 }
 
 .order-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
   flex-wrap: wrap;
-  color: var(--muted);
+  gap: 15px;
 }
 
 .order-card-header strong {
-  font-size: 1rem;
-  color: var(--accent);
-  display:block;
+  font-family: var(--font-primary);
+  color: var(--red-brand);
+  font-size: 1.2rem;
+  letter-spacing: 1px;
 }
 
-/* Botón de acción */
-.toggle-btn {
-  background: transparent;
-  border: 1px solid rgba(255,26,26,0.95);
-  color: #fff;
-  border-radius: 10px;
-  padding: 6px 12px;
-  cursor: pointer;
+.order-card-header span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.estado-label {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 5px 15px;
+  border-radius: 20px;
+  border: 1px solid var(--glass-border);
+  font-size: 11px;
+  text-transform: uppercase;
   font-weight: 700;
-  transition: background 0.12s, transform 0.12s;
+  color: #fff;
 }
 
-.toggle-btn:hover {
-  background: rgba(255,26,26,0.04);
-  transform: translateY(-2px);
-}
-
-/* ==================== DETALLES (colapsable) ==================== */
+/* Detalles del Producto */
 .order-card-body {
-  display: none; /* se controla por JS */
-  margin-top: 8px;
-  border-top: 1px dashed rgba(255,255,255,0.03);
-  padding-top: 12px;
-  gap:8px;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  display: none;
+  /* Controlado por JS */
 }
 
 .producto-detalle {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 10px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 10px;
-  margin-bottom: 6px;
-  font-size: 0.95rem;
-  padding: 10px;
-  background: #0a0a0a;
-  border-radius: 8px;
-  border: 1px solid rgba(255,26,26,0.04);
-  color: var(--muted);
+  font-size: 13px;
 }
 
-/* ==================== TEXTO SIN PEDIDOS ==================== */
-.no-orders {
-  text-align: center;
-  color: var(--accent);
-  font-size: 1.1rem;
-  padding: 36px 0;
+/* Botón Toggle */
+.toggle-btn {
+  background: transparent;
+  border: 1.5px solid var(--red-brand);
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-/* ==================== RESPONSIVE ==================== */
-@media (max-width: 1024px){
-  .content { margin-left: 200px; padding: 30px; }
-  .welcome-title { font-size: 2.2rem; }
+.toggle-btn:hover {
+  background: var(--red-brand);
 }
 
-@media (max-width: 768px){
-  .content { margin-left: 0; padding: 18px; }
-  .order-box { padding: 16px; width: 100%; max-width: 980px; }
-  .search-box { flex-direction: column; gap:10px; align-items: stretch; }
-  .ninja-input, .ninja-btn { width: 100%; min-height:44px; }
-  .welcome-title { font-size: 1.7rem; }
-  .order-card { padding: 12px; }
-  .producto-detalle { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+/* Logo Respiratorio */
+.logo-main {
+  position: fixed;
+  bottom: 50px;
+  right: 50px;
+  opacity: 0.3;
+  pointer-events: none;
+  animation: breathingLogo 4s ease-in-out infinite;
+}
+
+.logo-main img {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 2.5px solid var(--red-brand);
+  background: #000;
+  padding: 4px;
+  filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.3));
+}
+
+@keyframes breathingLogo {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.25;
+    filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.2));
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 0.4;
+    filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.5));
+  }
+}
+
+/* Mobile Adaptation */
+@media (max-width: 768px) {
+  .search-box {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .logo-main {
+    display: none;
+  }
+
+  .order-box {
+    padding: 20px;
+  }
 }

@@ -90,17 +90,17 @@ function eliminarDelConsumo(index) {
 
 async function confirmarConsumo() {
     if (carritoConsumo.length === 0) {
-        alertaNinja("warning", "Vacío", "No has seleccionado productos para consumir.");
+        alertaNinja("warning", "VACIO", "No has seleccionado productos para consumir.");
         return;
     }
 
     Swal.fire({
-        title: '¿Registrar consumo?',
+        title: '<span style="font-family:njnaruto;">REGISTRAR GASTO</span>',
         text: "Se descontará del inventario de tu sucursal.",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#e60000',
-        confirmButtonText: 'Sí, registrar'
+        confirmButtonText: 'REGISTRAR'
     }).then(async (result) => {
         if (result.isConfirmed) {
             // Enviar uno por uno o en lote. El backend actual soporta uno por uno.
@@ -129,11 +129,11 @@ async function confirmarConsumo() {
             }
 
             if (errores === 0) {
-                alertaNinja("success", "Éxito", "Consumo registrado correctamente.");
+                alertaNinja("success", "EXITO", "Consumo registrado correctamente.");
                 carritoConsumo = [];
                 renderizarConsumo();
             } else {
-                alertaNinja("warning", "Atención", `Se registraron algunos productos, pero hubo ${errores} errores.`);
+                alertaNinja("warning", "AVISO", `Se registraron algunos productos, pero hubo ${errores} errores.`);
             }
         }
     });

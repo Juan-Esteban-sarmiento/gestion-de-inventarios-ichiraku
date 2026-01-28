@@ -39,10 +39,10 @@ function cargarConfirmaciones() {
     Object.keys(data).forEach(key => {
         const [idPedido, idProducto] = key.split("-");
         const fila = document.querySelector(`#detalles-${idPedido} #prod-${idPedido}-${idProducto}`);
-        if(fila) {
+        if (fila) {
             fila.classList.add("confirmado");
             const btn = fila.querySelector(".btn-registro");
-            if(btn){ btn.disabled=true; btn.innerText="✅ Confirmado"; }
+            if (btn) { btn.disabled = true; btn.innerText = "✅ Confirmado"; }
         }
     });
 }
@@ -53,9 +53,9 @@ function marcarPedidosRecibidos() {
         const estadoTexto = pedido.querySelector("p strong")?.parentElement?.textContent || "";
         if (estadoTexto.includes("Recibido")) {
             pedido.classList.add("recibido");
-            pedido.querySelectorAll(".btn-registro").forEach(btn => { btn.disabled=true; btn.innerText="✅ Confirmado"; });
+            pedido.querySelectorAll(".btn-registro").forEach(btn => { btn.disabled = true; btn.innerText = "✅ Confirmado"; });
             const detalles = pedido.querySelector(".productos-detalle");
-            if(detalles) detalles.style.display="none";
+            if (detalles) detalles.style.display = "none";
         }
     });
 }
@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (cantidadInput) {
         cantidadInput.readOnly = true;
         cantidadInput.disabled = true;
-        cantidadInput.setAttribute("tabindex","-1");
+        cantidadInput.setAttribute("tabindex", "-1");
         cantidadInput.addEventListener("focus", (e) => { e.target.blur(); });
         cantidadInput.addEventListener("keydown", (e) => {
             e.preventDefault();
@@ -90,57 +90,57 @@ document.addEventListener("DOMContentLoaded", () => {
         const cantidadInput = document.getElementById("cantidad");
         const cantidad = parseInt(cantidadInput.value) || 0;
 
-        if(!idPedido || !idProducto || !fechaCad || !cantidad){
-            alertaNinja('warning','Campos incompletos','Selecciona un producto y completa los campos.');
+        if (!idPedido || !idProducto || !fechaCad || !cantidad) {
+            alertaNinja('warning', 'Campos incompletos', 'Selecciona un producto y completa los campos.');
             return;
         }
 
         if (cantidad < 1 || cantidad > 1000) {
-            alertaNinja('error','Cantidad inválida','La cantidad debe estar entre 1 y 1000.');
+            alertaNinja('error', 'CANTIDAD INVALIDA', 'La cantidad debe estar entre 1 y 1000.');
             cantidadInput.value = cantidad < 1 ? 1 : 1000;
             return;
         }
 
-        try{
+        try {
             const response = await fetch("/Em_Rordenes", {
-                method:"POST",
-                headers: {"Content-Type":"application/json"},
-                body: JSON.stringify({id_pedido:idPedido,id_producto:idProducto,cantidad:cantidad,fecha_caducidad:fechaCad})
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id_pedido: idPedido, id_producto: idProducto, cantidad: cantidad, fecha_caducidad: fechaCad })
             });
 
             const result = await response.json();
-            if(result.success){
+            if (result.success) {
                 const row = document.querySelector(`#detalles-${idPedido} #prod-${idPedido}-${idProducto}`);
                 row.classList.add("confirmado");
                 const btn = row.querySelector(".btn-registro");
-                if(btn){ btn.disabled=true; btn.innerText="✅ Confirmado"; }
+                if (btn) { btn.disabled = true; btn.innerText = "✅ Confirmado"; }
 
-                guardarConfirmado(idPedido,idProducto);
+                guardarConfirmado(idPedido, idProducto);
 
                 // Mostrar boton solo si todos los productos estan confirmados
                 const allRows = document.querySelectorAll(`#detalles-${idPedido} tbody tr`);
-                const allConfirmed = Array.from(allRows).every(r=>r.classList.contains("confirmado"));
-                if(allConfirmed) mostrarBotonConfirmarPedido(idPedido);
+                const allConfirmed = Array.from(allRows).every(r => r.classList.contains("confirmado"));
+                if (allConfirmed) mostrarBotonConfirmarPedido(idPedido);
 
-                alertaNinja('success','Producto confirmado','Producto registrado correctamente.');
+                alertaNinja('success', 'Producto confirmado', 'Producto registrado correctamente.');
             } else {
-                alertaNinja('error','Error',result.msg || 'No se pudo confirmar el producto.');
+                alertaNinja('error', 'Error', result.msg || 'No se pudo confirmar el producto.');
             }
-        } catch(err){
-            console.error("Error al confirmar producto:",err);
-            alertaNinja('error','Error','No se pudo conectar con el servidor.');
+        } catch (err) {
+            console.error("Error al confirmar producto:", err);
+            alertaNinja('error', 'Error', 'No se pudo conectar con el servidor.');
         }
     });
 });
 
-function mostrarBotonConfirmarPedido(idPedido){
+function mostrarBotonConfirmarPedido(idPedido) {
     const pedidoDiv = document.getElementById(`pedido-${idPedido}`);
     const allRows = pedidoDiv.querySelectorAll("tbody tr");
     const allConfirmed = Array.from(allRows).every(r => r.classList.contains("confirmado"));
 
-    if(allConfirmed && !pedidoDiv.querySelector(".btn-confirmar-pedido")){
+    if (allConfirmed && !pedidoDiv.querySelector(".btn-confirmar-pedido")) {
         const btn = document.createElement("button");
-        btn.classList.add("btn","btn-confirmar-pedido");
+        btn.classList.add("btn", "btn-confirmar-pedido");
         btn.innerText = "Confirmar pedido completo";
         btn.onclick = () => confirmarPedidoCompleto(idPedido);
         pedidoDiv.appendChild(btn);
@@ -149,7 +149,7 @@ function mostrarBotonConfirmarPedido(idPedido){
 
 function confirmarPedidoCompleto(idPedido) {
     if (!idPedido || isNaN(idPedido)) {
-        alertaNinja('error','Error','id_pedido invalido.');
+        alertaNinja('error', 'Error', 'id_pedido invalido.');
         return;
     }
 
@@ -171,8 +171,8 @@ function confirmarPedidoCompleto(idPedido) {
         try {
             const response = await fetch("/actualizar_estado", {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({id_pedido: Number(idPedido)})
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id_pedido: Number(idPedido) })
             });
 
             const data = await response.json();
@@ -186,20 +186,20 @@ function confirmarPedidoCompleto(idPedido) {
 
                 eliminarConfirmacionesDePedido(idPedido);
 
-                alertaNinja('success','Pedido confirmado','Todos los productos fueron recibidos.');
+                alertaNinja('success', 'Pedido confirmado', 'Todos los productos fueron recibidos.');
             } else {
-                alertaNinja('error','Error', data.msg || 'No se pudo actualizar el estado.');
+                alertaNinja('error', 'Error', data.msg || 'No se pudo actualizar el estado.');
             }
         } catch (err) {
             console.error("Error al actualizar pedido:", err);
-            alertaNinja('error','Error','No se pudo conectar con el servidor.');
+            alertaNinja('error', 'Error', 'No se pudo conectar con el servidor.');
         }
     });
 }
 
 // 🧹 Eliminar confirmaciones de un pedido
-function eliminarConfirmacionesDePedido(idPedido){
-    const data=JSON.parse(localStorage.getItem("confirmaciones"))||{};
-    for(const key in data) if(key.startsWith(`${idPedido}-`)) delete data[key];
-    localStorage.setItem("confirmaciones",JSON.stringify(data));
+function eliminarConfirmacionesDePedido(idPedido) {
+    const data = JSON.parse(localStorage.getItem("confirmaciones")) || {};
+    for (const key in data) if (key.startsWith(`${idPedido}-`)) delete data[key];
+    localStorage.setItem("confirmaciones", JSON.stringify(data));
 }

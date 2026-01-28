@@ -1,40 +1,43 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Rpedido.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+  <script src="{{ url_for('static', filename='js/Global_js/session_timeout.js') }}"></script>
   <meta charset="UTF-8">
   <title>Ichiraku Ramen - Realizar Pedido</title>
 </head>
+
 <body>
   <div class="sidebar">
-      <div class="logo">
-        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
-      </div>
-      <nav class="menu">
-          <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button">
-            <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
-          </button>
-          <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button">
-            <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Recibir pedidos"> Recibir pedidos
-          </button>
-          <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button active">
-            <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Realizar pedidos"> Realizar pedidos
-          </button>
-          <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button">
-            <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Historial pedidos"> Historial pedidos
-          </button>
-          <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
-            <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> usuario
-          </button>
-        </nav>
-    <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesin</button>
+    <div class="logo">
+      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
+    </div>
+    <nav class="menu">
+      <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Consumo') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/ramen.png') }}" alt="Consumo"> Consumo
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Recibir pedidos"> Recibir pedidos
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button active">
+        <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Realizar pedidos"> Realizar pedidos
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Historial pedidos"> Historial pedidos
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> usuario
+      </button>
+    </nav>
+    <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
   </div>
 
   <main class="content">
-    <!-- Área para mensajes (alertas) -->
-    <div id="messageArea"></div>
-
     <div class="box-welcome">
       <h1 class="welcome-title">Realizar Pedido</h1>
     </div>
@@ -64,11 +67,15 @@
         </ul>
         <button class="confirm-btn" onclick="enviarPedido()">Confirmar Pedido</button>
       </div>
-    </div>
+      <!-- Logo circular respiratorio -->
+      <div class="logo-main">
+        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Ramen">
+      </div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="{{ url_for('static', filename='js/Global_js/alertaNinja.js') }}"></script>
   <script src="{{ url_for('static', filename='js/Em_js/Rpedidos.js') }}"></script>
 </body>
+
 </html>

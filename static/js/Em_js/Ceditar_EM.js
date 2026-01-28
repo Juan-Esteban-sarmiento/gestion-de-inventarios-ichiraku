@@ -1,59 +1,50 @@
-// ==========================
-// Guardar valores originales
-// ==========================
+/* ============================================
+   🎴 CEDITAR_EM.JS - PREMIUM LOGIC REFINEMENT
+   ============================================ */
+
+/**
+ * Guarda los valores originales para detectar cambios y evitar peticiones innecesarias.
+ */
 const originalValues = {};
 
 window.addEventListener("load", () => {
   document.querySelectorAll("input").forEach(input => {
-    originalValues[input.id] = input.value;
+    if (input.id) originalValues[input.id] = input.value;
   });
 });
 
-// ==========================
-// Modal
-// ==========================
-function mostrarModal(mensaje, tipo = "success") {
-  const modalText = document.getElementById("modal-text");
-  modalText.textContent = mensaje;
-  modalText.className = tipo;
-  document.getElementById("modal").style.display = "flex";
-}
-
-function cerrarModal() {
-  document.getElementById("modal").style.display = "none";
-}
-
-// ==========================
-// Validar formulario
-// ==========================
+/**
+ * Valida si ha habido cambios en los campos editables.
+ */
 function validarFormulario() {
   let cambios = false;
-  document.querySelectorAll("input").forEach(input => {
-    if (input.value !== originalValues[input.id]) cambios = true;
+  document.querySelectorAll("input:not([readonly])").forEach(input => {
+    if (input.id && input.value !== originalValues[input.id]) {
+      cambios = true;
+    }
   });
   return cambios;
 }
 
-// ==========================
-// Enviar formulario
-// ==========================
+// ============================================
+// 📁 ACTUALIZACIÓN DE PERFIL (NOMBRE/DATOS)
+// ============================================
 const editarForm = document.getElementById("editarForm");
-editarForm?.addEventListener("submit", async function(e) {
+editarForm?.addEventListener("submit", async function (e) {
   e.preventDefault();
 
   if (!validarFormulario()) {
-    mostrarModal("No se han hecho cambios", "error");
+    alertaNinja("warning", "SIN CAMBIOS", "No has modificado ningún campo.");
     return;
   }
 
   const formData = new FormData(this);
   const data = {
-    Nombre: formData.get("Nombre"),
-    Contrasena: formData.get("Contrasena")
+    Nombre: formData.get("Nombre")
   };
 
   try {
-    const response = await fetch("/Ad_Ceditar", {
+    const response = await fetch("/Ad_Ceditar", { // Se asume que el backend gestiona el rol por sesión
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -62,30 +53,31 @@ editarForm?.addEventListener("submit", async function(e) {
       body: JSON.stringify(data)
     });
 
-    const result = await response.json().catch(async () => {
-      console.error("Error parseando JSON:", await response.text());
-      return;
-    });
+    const result = await response.json();
 
     if (result?.success) {
-      mostrarModal("Usuario actualizado correctamente", "success");
+      alertaNinja("success", "ÉXITO", "Tu perfil ha sido actualizado correctamente.");
+      // Actualizar originales
+      document.querySelectorAll("input").forEach(input => {
+        if (input.id) originalValues[input.id] = input.value;
+      });
     } else {
-      mostrarModal("Error al actualizar", "error");
+      alertaNinja("error", "ERROR", result.msg || "No se pudo actualizar el perfil.");
     }
   } catch (err) {
     console.error("Error en la petición:", err);
-    mostrarModal("Error en la conexión", "error");
+    alertaNinja("error", "ERROR DE CONEXIÓN", "No se pudo contactar con el servidor.");
   }
 });
 
-// ==========================
-// Subir / Eliminar foto
-// ==========================
+// ============================================
+// 📸 GESTIÓN DE FOTO DE PERFIL
+// ============================================
 const profileImg = document.querySelector(".profile-section img");
 const subirBtn = document.querySelector(".profile-btn:not(.delete)");
 const eliminarBtn = document.querySelector(".profile-btn.delete");
 
-// Crear input oculto
+// Input oculto para carga de archivos
 const fileInput = document.createElement("input");
 fileInput.type = "file";
 fileInput.accept = "image/*";
@@ -101,30 +93,44 @@ fileInput.addEventListener("change", async () => {
   const formData = new FormData();
   formData.append("foto", fileInput.files[0]);
 
+  // Alerta de carga
+  alertaNinja("info", "CARGANDO", "Subiendo tu nueva foto...");
+
   try {
     const response = await fetch("/Em_Ceditar_foto", { method: "POST", body: formData });
 
     if (response.status === 401) {
-      Swal.fire('Sesión expirada', 'Por favor vuelve a iniciar sesión', 'warning')
-      .then(() => window.location.href = '/login');
+      alertaNinja("warning", "SESIÓN EXPIRADA", "Por favor ingresa de nuevo.")
+        .then(() => window.location.href = '/login');
       return;
     }
 
     const data = await response.json();
     if (data.success) {
       profileImg.src = data.photo_url;
-      Swal.fire('Éxito', 'Foto actualizada correctamente', 'success');
+      alertaNinja("success", "ESTILO SHINOBI", "Tu foto ha sido actualizada.");
     } else {
-      throw new Error(data.msg || "Error desconocido");
+      throw new Error(data.msg || "Error al subir la imagen.");
     }
   } catch (error) {
     console.error("Error:", error);
-    Swal.fire('Error', error.message || 'No se pudo subir la foto', 'error');
+    alertaNinja("error", "ERROR", error.message || "No se pudo actualizar la foto.");
   }
 });
 
 // Eliminar foto
 eliminarBtn?.addEventListener("click", async () => {
+  const confirmacion = await alertaNinjaFire({
+    title: '¿ELIMINAR FOTO?',
+    text: "Tu perfil volverá a la imagen por defecto.",
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'ELIMINAR',
+    cancelButtonText: 'CANCELAR'
+  });
+
+  if (!confirmacion.isConfirmed) return;
+
   try {
     const response = await fetch("/Em_Ceditar_foto", {
       method: "DELETE",
@@ -132,59 +138,54 @@ eliminarBtn?.addEventListener("click", async () => {
     });
 
     if (response.status === 401) {
-      Swal.fire('Sesión expirada', 'Por favor vuelve a iniciar sesión', 'warning')
-      .then(() => window.location.href = '/login');
+      window.location.href = '/login';
       return;
     }
 
     const data = await response.json();
     if (data.success) {
-      profileImg.src = data.photo_url;
-      Swal.fire('Éxito', 'Foto eliminada correctamente', 'success');
+      profileImg.src = "/static/image/default.png";
+      alertaNinja("success", "MODIFICADO", "Has eliminado tu foto de perfil.");
     } else {
-      throw new Error(data.msg || "Error desconocido");
+      throw new Error(data.msg || "Error al eliminar.");
     }
   } catch (error) {
     console.error("Error:", error);
-    Swal.fire('Error', error.message || 'No se pudo eliminar la foto', 'error');
+    alertaNinja("error", "ERROR", "No se pudo borrar la foto.");
   }
 });
 
-// ==========================
-// Recuperar contraseña (global)
-// ==========================
-window.recuperarContrasena = async function() {
+// ============================================
+// 🔑 RECUPERACIÓN / CAMBIO DE CLAVE (NINJA FLOW)
+// ============================================
+window.recuperarContrasena = async function () {
   try {
-    const { value: nombre } = await Swal.fire({
-      title: 'Recuperar contraseña',
+    // 1. Nombre de Usuario
+    const { value: nombre } = await alertaNinjaFire({
+      title: 'RECUPERAR CLAVE',
       input: 'text',
-      inputLabel: 'Ingresa tu nombre de usuario',
-      inputPlaceholder: 'Ejemplo: admin1',
+      inputLabel: 'Nombre de usuario',
+      inputPlaceholder: 'Ingresa tu ID o usuario...',
       showCancelButton: true,
-      confirmButtonText: 'Continuar',
-      cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#e60000',
-      cancelButtonColor: '#888',
+      confirmButtonText: 'SIGUIENTE',
       preConfirm: (value) => {
-        if (!value || value.trim() === '') Swal.showValidationMessage('Debes ingresar tu nombre de usuario');
+        if (!value || value.trim() === '') Swal.showValidationMessage('Campo obligatorio');
         return value;
       }
     });
 
     if (!nombre) return;
 
-    const { value: telefono } = await Swal.fire({
-      title: 'Recuperar contraseña',
+    // 2. Teléfono
+    const { value: telefono } = await alertaNinjaFire({
+      title: 'VERIFICACIÓN',
       input: 'text',
-      inputLabel: 'Ingresa tu número de teléfono',
-      inputPlaceholder: 'Ejemplo: 3001234567',
+      inputLabel: 'Número de WhatsApp',
+      inputPlaceholder: 'Ej: 3001234567',
       showCancelButton: true,
-      confirmButtonText: 'Enviar código',
-      cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#e60000',
-      cancelButtonColor: '#888',
+      confirmButtonText: 'ENVIAR CÓDIGO',
       preConfirm: (value) => {
-        if (!value || value.trim() === '') Swal.showValidationMessage('Debes ingresar un número de teléfono válido');
+        if (!value || value.trim() === '') Swal.showValidationMessage('Número inválido');
         return value;
       }
     });
@@ -194,64 +195,65 @@ window.recuperarContrasena = async function() {
     let telefonoFormateado = telefono.trim();
     if (!telefonoFormateado.startsWith("+57")) telefonoFormateado = "+57" + telefonoFormateado;
 
+    // 3. Enviar Token
     const res = await fetch("/enviar_token_recuperacion", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ telefono: telefonoFormateado })
     });
-    const data = await res.json();
-    if (!data.success) return Swal.fire('❌ Error', data.msg, 'error');
+    const dataStatus = await res.json();
+    if (!dataStatus.success) return alertaNinja("error", "FALLIDO", dataStatus.msg);
 
-    await Swal.fire('✅ Código enviado', 'Revisa tu teléfono para ver el código de verificación.', 'success');
+    await alertaNinja("success", "CÓDIGO ENVIADO", "Revisa tu WhatsApp.");
 
-    const { value: token } = await Swal.fire({
-      title: 'Verificación',
+    // 4. Validar Código
+    const { value: token } = await alertaNinjaFire({
+      title: 'VALIDAR CÓDIGO',
       input: 'text',
-      inputLabel: 'Ingresa el código recibido',
-      inputPlaceholder: 'Ejemplo: 123456',
+      inputLabel: 'Código de 6 dígitos',
+      inputPlaceholder: '123456',
       showCancelButton: true,
-      confirmButtonText: 'Validar código',
-      cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#e60000',
-      cancelButtonColor: '#888',
+      confirmButtonText: 'VALIDAR',
       preConfirm: (value) => {
-        if (!value || value.trim().length < 4) Swal.showValidationMessage('Debes ingresar el código recibido');
+        if (!value || value.trim().length < 4) Swal.showValidationMessage('Código corto');
         return value;
       }
     });
 
     if (!token) return;
 
-    const { value: nuevaContrasena } = await Swal.fire({
-      title: 'Nueva contraseña',
+    // 5. Nueva Clave
+    const { value: nuevaContrasena } = await alertaNinjaFire({
+      title: 'NUEVA CLAVE',
       input: 'password',
-      inputLabel: 'Ingresa tu nueva contraseña',
+      inputLabel: 'Mínimo 6 caracteres',
       inputPlaceholder: '********',
-      inputAttributes: { minlength: 6 },
       showCancelButton: true,
-      confirmButtonText: 'Actualizar contraseña',
-      cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#e60000',
-      cancelButtonColor: '#888',
+      confirmButtonText: 'ACTUALIZAR',
       preConfirm: (value) => {
-        if (!value || value.length < 6) Swal.showValidationMessage('La contraseña debe tener al menos 6 caracteres');
+        if (!value || value.length < 6) Swal.showValidationMessage('Clave muy corta');
         return value;
       }
     });
 
     if (!nuevaContrasena) return;
 
-    const resp = await fetch("/Em_validar_token", {
+    // 6. Confirmar Final
+    const respFinal = await fetch("/Em_validar_token", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre, telefono, token, nueva_clave: nuevaContrasena })
     });
-    const resultado = await resp.json();
-    if (resultado.success) Swal.fire('🎉 Éxito', 'Contraseña actualizada correctamente', 'success');
-    else Swal.fire('❌ Error', resultado.msg, 'error');
+    const finalResult = await respFinal.json();
+
+    if (finalResult.success) {
+      alertaNinja("success", "SHINOBI", "¡Contraseña actualizada con éxito!");
+    } else {
+      alertaNinja("error", "ERROR", finalResult.msg);
+    }
 
   } catch (err) {
-    console.error("Error en la recuperación de contraseña:", err);
-    Swal.fire('❌ Error', 'No se pudo conectar con el servidor', 'error');
+    console.error("Error en flujo de recuperación:", err);
+    alertaNinja("error", "CRÍTICO", "No se pudo completar el proceso.");
   }
 };

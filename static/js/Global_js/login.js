@@ -1,42 +1,40 @@
-// 🎴 ALERTA LOGIN TIPO NOTIFICACIÓN
+// 🎴 ALERTA LOGIN TIPO NOTIFICACIÓN (PREMIUM STYLED)
 function alertaLoginNotif(icon, title, message) {
     Swal.fire({
-        toast: true,               // Tipo notificación
-        position: 'top-end',       // Esquina superior derecha
-        showConfirmButton: false,  // Sin botón
-        timer: 2000,               // Desaparece sola en 2s
-        timerProgressBar: true,    // Barra de progreso
-        icon: icon,                // "success", "error", "warning", "info"
-        title: title,
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        icon: icon,
+        title: `<span style="color:#fff; font-weight:700; font-family:'Montserrat', sans-serif;">${title}</span>`,
         text: message || "",
-        background: "#1a1a1a",
-        color: "#fff",
-        iconColor: icon === "success" ? "#00ff99" : icon === "error" ? "#ff3333" : "#ffcc00",
-        showClass: {
-            popup: 'swal2-toast-show'
+        background: 'rgba(15, 15, 15, 0.95)',
+        color: '#ccc',
+        iconColor: icon === "success" ? "#ff0000" : icon === "error" ? "#8b0000" : "#e60000",
+        customClass: {
+            popup: 'ninja-swal-toast-popup',
+            htmlContainer: 'ninja-swal-text'
         },
-        hideClass: {
-            popup: 'swal2-toast-hide'
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer);
+            toast.addEventListener('mouseleave', Swal.resumeTimer);
         }
     });
 }
 
-// Animaciones personalizadas para notificación
+// Estilos extra para los toasts en el login
 const styleNotif = document.createElement("style");
 styleNotif.innerHTML = `
-  .swal2-toast-show {
-    animation: toastFadeIn 0.4s ease-out forwards;
+  .ninja-swal-toast-popup {
+    border: 1px solid rgba(255, 0, 0, 0.4) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+    backdrop-filter: blur(10px) !important;
   }
-  .swal2-toast-hide {
-    animation: toastFadeOut 0.3s ease-in forwards;
-  }
-  @keyframes toastFadeIn {
-    0% { transform: translateY(-20px); opacity: 0; }
-    100% { transform: translateY(0); opacity: 1; }
-  }
-  @keyframes toastFadeOut {
-    0% { transform: translateY(0); opacity: 1; }
-    100% { transform: translateY(-20px); opacity: 0; }
+  .ninja-swal-text {
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 13px !important;
   }
 `;
 document.head.appendChild(styleNotif);
@@ -52,14 +50,14 @@ async function login(event) {
 
     // Validaciones
     if (!id || !password || !role) {
-        alertaLoginNotif("warning", "Campos incompletos", "Por favor completa todos los campos.");
+        alertaLoginNotif("warning", "DATOS INCOMPLETOS", "Por favor completa todos los campos.");
         return false;
     }
 
     if (role === "Empleado") {
         branch = document.getElementById("branch").value;
         if (!branch) {
-            alertaLoginNotif("warning", "Sucursal requerida", "Por favor selecciona una sucursal.");
+            alertaLoginNotif("warning", "LOCAL REQUERIDO", "Por favor selecciona una sucursal.");
             return false;
         }
     }
@@ -74,17 +72,17 @@ async function login(event) {
         const data = await res.json();
 
         if (data.success) {
-            alertaLoginNotif("success", "Bienvenido", data.msg || "Inicio de sesión exitoso");
+            alertaLoginNotif("success", "BIENVENIDO", data.msg || "Inicio de sesión exitoso");
             setTimeout(() => {
                 window.location.href = data.redirect || "/";
             }, 1000);
         } else {
-            alertaLoginNotif("error", "Error", data.msg || "Usuario o contraseña incorrecta");
+            alertaLoginNotif("error", "ERROR", data.msg || "Usuario o contraseña incorrecta");
         }
 
     } catch (err) {
         console.error(err);
-        alertaLoginNotif("error", "Error", "Ocurrió un problema al intentar conectarse.");
+        alertaLoginNotif("error", "ERROR", "Ocurrió un problema al intentar conectarse.");
     }
 }
 
@@ -134,3 +132,22 @@ async function cargarLocales() {
         console.error("Error al cargar locales:", err);
     }
 }
+
+// 🕒 Detectar si la sesión se cerró por inactividad
+function checkSessionTimeout() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('timeout') === '1') {
+        // Usar la alerta Premium ya estandarizada
+        alertaNinja('info', 'SESION CERRADA', 'Tu sesion ha expirado por inactividad. Por favor, ingresa de nuevo.');
+
+        // Limpiar la URL para evitar que el mensaje se repita al recargar
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', checkSessionTimeout);
+} else {
+    checkSessionTimeout();
+}
+

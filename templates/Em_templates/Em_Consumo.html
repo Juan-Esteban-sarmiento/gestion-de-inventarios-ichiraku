@@ -2,8 +2,9 @@
 <html lang="es">
 
 <head>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Rpedido.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Consumo.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+    <script src="{{ url_for('static', filename='js/Global_js/session_timeout.js') }}"></script>
     <meta charset="UTF-8">
     <title>Ichiraku Ramen - Registrar Consumo</title>
 </head>
@@ -37,7 +38,7 @@
                 <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> usuario
             </button>
         </nav>
-        <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar Sesión</button>
+        <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
     </div>
 
     <main class="content">
@@ -73,6 +74,11 @@
                 </ul>
                 <button class="confirm-btn" onclick="confirmarConsumo()">Registrar Gasto</button>
             </div>
+        </div>
+
+        <!-- Logo circular respiratorio -->
+        <div class="logo-main">
+            <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Ramen">
         </div>
     </main>
 

@@ -42,7 +42,7 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     const data = await response.json();
 
     if (data.success) {
-      alertaNinja('success', '¡Éxito!', 'Personal registrado correctamente.');
+      alertaNinja('success', 'EXITO', 'Personal registrado correctamente.');
       document.getElementById('registerForm').reset();
       document.getElementById('previewFoto').style.display = 'none';
       await cargarEmpleados("");
@@ -134,7 +134,7 @@ function editarEmpleado(cedula, nombre, telefono) {
         });
         const res = await response.json();
         if (res.success) {
-          alertaNinja('success', '¡Actualizado!', 'Los datos han sido guardados.');
+          alertaNinja('success', 'ACTUALIZADO', 'Los datos han sido guardados.');
           await cargarEmpleados("");
         } else { alertaNinja('error', 'Error', res.msg); }
       } catch (e) { alertaNinja('error', 'Error', 'Fallo en la conexión.'); }
@@ -146,10 +146,10 @@ function editarEmpleado(cedula, nombre, telefono) {
 async function desabilitarEmpleado(cedula) {
   const res = await alertaNinjaFire({
     icon: 'warning',
-    title: '¿Desactivar Empleado?',
-    text: 'El usuario ya no podrá acceder al sistema.',
+    title: 'DESACTIVAR USUARIO',
+    text: 'El usuario ya no podra acceder al sistema.',
     showCancelButton: true,
-    confirmButtonText: 'SÍ, DESACTIVAR',
+    confirmButtonText: 'DESACTIVAR',
     cancelButtonText: 'VOLVER'
   });
 
@@ -161,7 +161,7 @@ async function desabilitarEmpleado(cedula) {
     });
     const data = await response.json();
     if (data.success) {
-      alertaNinja('success', 'Desactivado', 'Estado cambiado correctamente.');
+      alertaNinja('success', 'DESACTIVADO', 'Estado cambiado correctamente.');
       await cargarEmpleados();
     }
   }
@@ -171,10 +171,10 @@ async function desabilitarEmpleado(cedula) {
 async function habilitarEmpleado(cedula) {
   const res = await alertaNinjaFire({
     icon: 'question',
-    title: '¿Activar Empleado?',
-    text: 'El usuario recuperará el acceso al sistema.',
+    title: 'ACTIVAR USUARIO',
+    text: 'El usuario recuperara el acceso al sistema.',
     showCancelButton: true,
-    confirmButtonText: 'SÍ, ACTIVAR',
+    confirmButtonText: 'ACTIVAR',
     cancelButtonText: 'VOLVER'
   });
 
@@ -186,7 +186,7 @@ async function habilitarEmpleado(cedula) {
     });
     const data = await response.json();
     if (data.success) {
-      alertaNinja('success', 'Activado', 'Estado cambiado correctamente.');
+      alertaNinja('success', 'ACTIVADO', 'Estado cambiado correctamente.');
       await cargarEmpleados();
     }
   }

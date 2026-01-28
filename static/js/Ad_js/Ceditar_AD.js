@@ -34,7 +34,7 @@ document.getElementById("editarForm").addEventListener("submit", async function 
     });
     let result = await response.json();
     if (result.success) {
-      alertaNinja("success", "¡Guardado!", "Tu información ha sido actualizada.");
+      alertaNinja("success", "GUARDADO", "Tu información ha sido actualizada.");
       originalValues["Nombre"] = data.Nombre; // Sincronizar para evitar alertas de cambios falsas
     } else {
       alertaNinja("error", "Error", result.msg || "No se pudo actualizar.");
@@ -72,10 +72,10 @@ const eliminarBtn = document.querySelector('.profile-btn.delete');
 eliminarBtn.addEventListener('click', async function () {
   const confirmacion = await alertaNinjaFire({
     icon: 'warning',
-    title: '¿Eliminar foto?',
+    title: 'BORRAR FOTO',
     text: 'Esta acción no se puede deshacer. ¿Estás seguro?',
     showCancelButton: true,
-    confirmButtonText: 'SÍ, BORRAR',
+    confirmButtonText: 'BORRAR',
     cancelButtonText: 'CANCELAR'
   });
 
@@ -108,12 +108,12 @@ async function recuperarContrasena() {
   if (!nombre) return;
 
   const { value: telefono } = await alertaNinjaFire({
-    title: 'Recuperación',
+    title: 'RECUPERACION',
     input: 'text',
     inputLabel: 'Número de teléfono (WhatsApp)',
     inputPlaceholder: 'Ej: 3001234567',
     showCancelButton: true,
-    confirmButtonText: 'ENVIAR CÓDIGO',
+    confirmButtonText: 'ENVIAR CODIGO',
     cancelButtonText: 'VOLVER'
   });
 
@@ -134,7 +134,7 @@ async function recuperarContrasena() {
     alertaNinja('success', 'Código Enviado', 'Revisa tu WhatsApp para ver el código.');
 
     const { value: token } = await alertaNinjaFire({
-      title: 'Verificación',
+      title: 'VERIFICACION',
       input: 'text',
       inputLabel: 'Código de 6 dígitos',
       inputPlaceholder: '123456',
@@ -164,7 +164,7 @@ async function recuperarContrasena() {
     });
     const resultado = await resp.json();
     if (resultado.success) {
-      alertaNinja('success', '¡Éxito!', 'Tu contraseña ha sido cambiada.');
+      alertaNinja('success', 'EXITO', 'Tu contraseña ha sido cambiada.');
     } else {
       alertaNinja('error', 'Código Inválido', resultado.msg);
     }

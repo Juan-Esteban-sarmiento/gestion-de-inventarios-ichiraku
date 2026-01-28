@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Historial de Pedidos - Ichiraku</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Hordenes.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+  <script src="{{ url_for('static', filename='js/Global_js/session_timeout.js') }}"></script>
 </head>
+
 <body>
   <div class="sidebar">
     <div class="logo">
@@ -14,6 +17,9 @@
     <nav class="menu">
       <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button">
         <img src="{{ url_for('static', filename='image/casita.png') }}"> Inicio
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Consumo') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/ramen.png') }}"> Consumo
       </button>
       <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button">
         <img src="{{ url_for('static', filename='image/caja.png') }}"> Recibir pedidos
@@ -42,48 +48,58 @@
     <div class="order-box">
       <!-- 🔍 Barra de búsqueda simplificada -->
       <form class="search-box" id="formBuscar" method="GET" action="{{ url_for('Em_Hordenes') }}">
-        <input type="number" name="id_pedido" id="buscarId" class="ninja-input" placeholder="ID del pedido" value="{{ request.args.get('id_pedido', '') }}">
-        <input type="date" name="fecha" id="buscarFecha" class="ninja-input" value="{{ request.args.get('fecha', '') }}">
+        <input type="number" name="id_pedido" id="buscarId" class="ninja-input" placeholder="ID del pedido"
+          value="{{ request.args.get('id_pedido', '') }}">
+        <input type="date" name="fecha" id="buscarFecha" class="ninja-input"
+          value="{{ request.args.get('fecha', '') }}">
         <button type="submit" class="ninja-btn">Buscar</button>
       </form>
 
       <!-- BOX que envuelve todas las órdenes -->
       <div class="order-container">
         {% if pedidos %}
-          {% for pedido in pedidos %}
-            <div class="order-card" id="pedido-{{ pedido.id_pedido }}">
-              <div class="order-card-header">
-                <div>
-                  <strong>Pedido #{{ pedido.id_pedido }}</strong>
-                  <span>{{ pedido.fecha_pedido|format_fecha }}</span>
-                </div>
-                <div>
-                  <span>Estado: {{ pedido.estado }}</span>
-                </div>
-                <button class="toggle-btn" onclick="toggleDetallePedido('{{ pedido.id_pedido }}')">
-                  Ver detalles
-                </button>
-              </div>
-              <div class="order-card-body" id="detalle-{{ pedido.id_pedido }}">
-                {% for detalle in pedido.detalle_pedido %}
-                  <div class="producto-detalle">
-                    <span>Producto: {{ detalle.productos.nombre }}</span>
-                    <span>Categoría: {{ detalle.productos.categoria }}</span>
-                    <span>Cantidad: {{ detalle.cantidad }}</span>
-                    <span>Unidad: {{ detalle.productos.unidad }}</span>
-                  </div>
-                {% endfor %}
-              </div>
+        {% for pedido in pedidos %}
+        <div class="order-card" id="pedido-{{ pedido.id_pedido }}">
+          <div class="order-card-header">
+            <div>
+              <strong>Pedido #{{ pedido.id_pedido }}</strong>
+              <span>{{ pedido.fecha_pedido|format_fecha }}</span>
             </div>
-          {% endfor %}
+            <div>
+              <span>Estado: {{ pedido.estado }}</span>
+            </div>
+            <button class="toggle-btn" onclick="toggleDetallePedido('{{ pedido.id_pedido }}')">
+              Ver detalles
+            </button>
+          </div>
+          <div class="order-card-body" id="detalle-{{ pedido.id_pedido }}">
+            {% for detalle in pedido.detalle_pedido %}
+            <div class="producto-detalle">
+              <span>Producto: {{ detalle.productos.nombre }}</span>
+              <span>Categoria: {{ detalle.productos.categoria }}</span>
+              <span>Cantidad: {{ detalle.cantidad }}</span>
+              <span>Unidad: {{ detalle.productos.unidad }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
         {% else %}
-          <div class="no-orders"><p>No hay pedidos confirmados 💤</p></div>
+        <div class="no-orders">
+          <p>No hay pedidos confirmados 💤</p>
+        </div>
         {% endif %}
       </div>
     </div> <!-- /.order-box -->
+
+    <!-- Logo circular respiratorio -->
+    <div class="logo-main">
+      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Ramen">
+    </div>
   </main>
 
   <!-- arreglado: script tag correcto -->
   <script src="{{ url_for('static', filename='js/Em_js/Hordenes.js') }}"></script>
 </body>
+
 </html>

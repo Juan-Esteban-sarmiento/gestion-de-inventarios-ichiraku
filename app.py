@@ -39,8 +39,17 @@ app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',
     SESSION_COOKIE_SECURE=(os.getenv('SESSION_COOKIE_SECURE', 'False').lower() == 'true'),
-    PERMANENT_SESSION_LIFETIME=timedelta(minutes=30)  # ⏳ Sesión expira en 30 minutos
+    PERMANENT_SESSION_LIFETIME=timedelta(minutes=30)  # ⏳ Sesion expira en 30 minutos
 )
+
+@app.after_request
+def add_header(response):
+    # Prevenir cache en rutas protegidas para evitar retroceso despues de logout
+    if not request.path.startswith('/static'):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
 
 def is_valid_image(file):
     if not file:
@@ -176,6 +185,7 @@ def login():
                 admin_user = query.data[0]
                 if not check_password_hash(admin_user['contrasena'], password):
                     return jsonify({"success": False, "msg": "Contraseña incorrecta."}),401
+                session.permanent = True
                 session['logged_in'] = True
                 session['role'] = 'Administrador'
                 session['cedula'] = admin_user.get('id', usuario)
@@ -234,7 +244,11 @@ def get_locales():
 @app.route('/logout')
 def logout():
     session.clear()
-    response = redirect(url_for('login'))
+    timeout = request.args.get('timeout')
+    target = url_for('login')
+    if timeout:
+        target += f"?timeout={timeout}"
+    response = redirect(target)
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'

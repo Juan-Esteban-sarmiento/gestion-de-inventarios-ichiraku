@@ -14,19 +14,19 @@ document.getElementById('registerProductForm').addEventListener('submit', async 
   }
   const nombreRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ()\-'/&.,%+]+$/;
   if (nombre.length < 2 || nombre.length > 100) {
-    alertaNinja('warning', 'Nombre inválido', 'Debe tener entre 2 y 100 caracteres');
+    alertaNinja('warning', 'NOMBRE INVALIDO', 'Debe tener entre 2 y 100 caracteres');
     return;
   }
   if (/\s{2,}/.test(nombre)) {
-    alertaNinja('warning', 'Nombre inválido', 'No debe incluir espacios dobles');
+    alertaNinja('warning', 'NOMBRE INVALIDO', 'No debe incluir espacios dobles');
     return;
   }
   if (/\d/.test(nombre)) {
-    alertaNinja('warning', 'Nombre inválido', 'El nombre no debe contener números ni cantidades');
+    alertaNinja('warning', 'NOMBRE INVALIDO', 'El nombre no debe contener números ni cantidades');
     return;
   }
   if (!nombreRegex.test(nombre)) {
-    alertaNinja('warning', 'Nombre inválido', 'Contiene caracteres no permitidos');
+    alertaNinja('warning', 'NOMBRE INVALIDO', 'Contiene caracteres no permitidos');
     return;
   }
   const nombreNormalizado = nombre.replace(/\s+/g, ' ').trim().split(' ').map((w, i, arr) => { const lw = w.toLowerCase(); const small = ['de', 'del', 'la', 'el', 'y', 'o', 'en', 'con', 'para', 'por', 'a', 'al', 'un', 'una', 'los', 'las', 'sus']; return (small.includes(lw) && i > 0 && i < arr.length - 1) ? lw : lw.charAt(0).toUpperCase() + lw.slice(1) }).join(' ');
@@ -47,7 +47,7 @@ document.getElementById('registerProductForm').addEventListener('submit', async 
     const data = await response.json();
 
     if (data.success) {
-      alertaNinja('success', '¡Éxito!', 'Producto registrado correctamente.');
+      alertaNinja('success', 'EXITO', 'Producto registrado correctamente.');
       document.getElementById('registerProductForm').reset();
       document.getElementById('previewFotoProducto').style.display = "none";
       await cargarProductos(); // Recarga dinámica en lugar de forzar reload tosco
@@ -142,7 +142,7 @@ function editarProducto(id_producto, nombre, categoria, unidad) {
     title: 'Editar Producto',
     html: `
       <input id="editNombre" class="swal2-input ninja-swal-input" placeholder="Nombre" value="${nombre}">
-      <input id="editCategoria" class="swal2-input ninja-swal-input" placeholder="Categoría" value="${categoria}">
+      <input id="editCategoria" class="swal2-input ninja-swal-input" placeholder="Categoria" value="${categoria}">
       <input id="editUnidad" class="swal2-input ninja-swal-input" placeholder="Unidad" value="${unidad}">
       <label style="display:block; margin-top:15px; color:#aaa; font-size:11px; text-transform:uppercase;">Cambiar foto (opcional)</label>
       <input type="file" id="editFoto" class="swal2-file ninja-swal-input" accept="image/*">
@@ -175,7 +175,7 @@ function editarProducto(id_producto, nombre, categoria, unidad) {
         });
         const res = await response.json();
         if (res.success) {
-          alertaNinja('success', '¡Actualizado!', 'Producto guardado correctamente.');
+          alertaNinja('success', 'ACTUALIZADO', 'Producto guardado correctamente.');
           await cargarProductos();
         } else { alertaNinja('error', 'Error', res.msg); }
       } catch (e) { alertaNinja('error', 'Fallo', 'No se pudo conectar.'); }
@@ -226,10 +226,10 @@ document.getElementById("buscarProducto").addEventListener("keydown", async func
 async function deshabilitarProducto(id_producto) {
   const res = await alertaNinjaFire({
     icon: 'warning',
-    title: '¿Desactivar Producto?',
-    text: 'El producto no aparecerá en el inventario activo.',
+    title: 'DESACTIVAR',
+    text: 'El producto no aparecera en el inventario activo.',
     showCancelButton: true,
-    confirmButtonText: 'SÍ, DESACTIVAR',
+    confirmButtonText: 'DESACTIVAR',
     cancelButtonText: 'VOLVER'
   });
 
@@ -241,7 +241,7 @@ async function deshabilitarProducto(id_producto) {
     });
     const data = await response.json();
     if (data.success) {
-      alertaNinja('success', 'Desactivado', 'Estado cambiado correctamente.');
+      alertaNinja('success', 'DESACTIVADO', 'Estado cambiado correctamente.');
       await cargarProductos();
     }
   }
@@ -251,10 +251,10 @@ async function deshabilitarProducto(id_producto) {
 async function habilitarProducto(id_producto) {
   const res = await alertaNinjaFire({
     icon: 'question',
-    title: '¿Activar Producto?',
-    text: 'El producto volverá a estar disponible para el inventario.',
+    title: 'ACTIVAR',
+    text: 'El producto volvera a estar disponible para el inventario.',
     showCancelButton: true,
-    confirmButtonText: 'SÍ, ACTIVAR',
+    confirmButtonText: 'ACTIVAR',
     cancelButtonText: 'VOLVER'
   });
 
@@ -266,7 +266,7 @@ async function habilitarProducto(id_producto) {
     });
     const data = await response.json();
     if (data.success) {
-      alertaNinja('success', 'Activado', 'Estado cambiado correctamente.');
+      alertaNinja('success', 'ACTIVADO', 'Estado cambiado correctamente.');
       await cargarProductos();
     }
   }

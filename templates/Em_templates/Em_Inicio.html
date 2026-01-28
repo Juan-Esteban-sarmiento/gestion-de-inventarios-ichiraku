@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Ichiraku Ramen - Panel de Empleado</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Inicio.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+  <script src="{{ url_for('static', filename='js/Global_js/session_timeout.js') }}"></script>
 </head>
+
 <body>
   <!-- ====== SIDEBAR ====== -->
   <div class="sidebar">
@@ -16,6 +19,9 @@
     <nav class="menu">
       <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button active">
         <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Consumo') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/ramen.png') }}" alt="Consumo"> Consumo
       </button>
       <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button">
         <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Recibir pedidos"> Recibir pedidos
@@ -48,29 +54,31 @@
 
       <div class="notification-body">
         {% if notificaciones %}
-          {% for noti in notificaciones %}
-          <div class="notification-item">
-            <img src="{{ url_for('static', filename='image/campana.png') }}" class="icon-left" alt="Aviso">
-            <div class="notification-text">
-              <strong>{{ noti.mensaje }}</strong><br>
-              <div class="fecha-notificacion">
-                {{ noti.fecha_formateada }}
-              </div>
+        {% for noti in notificaciones %}
+        <div class="notification-item">
+          <img src="{{ url_for('static', filename='image/campana.png') }}" class="icon-left" alt="Aviso">
+          <div class="notification-text">
+            <strong>{{ noti.mensaje }}</strong><br>
+            <div class="fecha-notificacion">
+              {{ noti.fecha_formateada }}
             </div>
           </div>
-          {% endfor %}
+        </div>
+        {% endfor %}
 
-          {% if restantes > 0 %}
-          {% endif %}
+        {% if restantes > 0 %}
+        {% endif %}
         {% else %}
-          <p>No hay avisos recientes</p>
+        <p>No hay avisos recientes</p>
         {% endif %}
       </div>
     </section>
 
+    <!-- Logo circular respiratorio (Igual al admin) -->
     <div class="logo-main">
       <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Ramen">
     </div>
   </main>
 </body>
+
 </html>

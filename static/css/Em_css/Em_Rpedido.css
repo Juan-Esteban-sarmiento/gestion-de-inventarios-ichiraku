@@ -1,436 +1,216 @@
-@font-face {
-  font-family: 'njnaruto';
-  src: url('../../fonts/njnaruto.ttf') format('truetype');
-}
+/* ============================================
+   EM_RPEDIDO - PREMIUM OPERATIONAL DESIGN
+   ============================================ */
 
-/* ------------------ Contenedor principal ------------------ */
-.content {
-  padding: 40px;
-  flex-grow: 1;
-  min-height: 92vh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* ------------------ Bienvenida ------------------ */
-.welcome-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  margin-bottom: 20px;
-}
-
-.welcome-title {
-  color: white;
-  font-family: 'njnaruto';
-  font-size: 3em;
-  text-align: center;
-  width: 100%;
-  text-shadow: 0 0 8px red;
-}
-
-/* ------------------ Panel de pedido ------------------ */
 .order-panel {
   display: flex;
-  gap: 25px;
-  padding: 25px;
-  max-width: 1400px;
-  width: 95%;
-  min-height: 500px;
-  max-height: 80vh;
-  border-radius: 12px;
-  background-color: #000;
-  border: 2px solid red;
-  color: white;
-  font-family: 'njnaruto';
-  overflow: hidden;
-  flex-wrap: wrap;
-  box-shadow: 0 0 25px rgba(255, 0, 0, 0.2);
+  gap: 30px;
+  width: 100%;
+  max-width: 1440px;
+  align-items: stretch;
+  animation: fadeInUp 0.7s ease-out;
 }
 
-/* ------------------ Sección de productos ------------------ */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Glassmorphism Containers */
+.product-selection-section,
+.pedido-box {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 30px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  color: var(--text-main);
+}
+
 .product-selection-section {
-  flex: 3;
+  flex: 2.5;
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+.pedido-box {
+  flex: 1;
+  max-height: 75vh;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  max-height: calc(80vh - 120px);
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-right: 10px;
-  box-sizing: border-box;
 }
 
-/* ------------------ Cabecera y búsqueda ------------------ */
-.order-header {
+/* Subtitles */
+.order-header,
+h2 {
+  font-family: var(--font-primary);
+  color: var(--text-bright);
+  font-size: 1.3rem;
+  margin-bottom: 25px;
   text-align: center;
-  font-weight: bold;
-  margin-bottom: 10px;
-  font-size: 1.5em;
-  border-bottom: 1px solid red;
-  padding-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
+/* Search Controls */
 .search-controls {
   display: flex;
-  gap: 12px;
-  margin-bottom: 15px;
-  align-items: center;
-  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 30px;
 }
 
 .search-controls input {
-  flex-grow: 1;
-  min-width: 180px;
-  padding: 10px;
-  border: 1px solid red;
-  border-radius: 6px;
-  background: #111;
-  color: white;
-  font-size: 1em;
-  box-shadow: 0 0 10px rgba(255, 0, 0, 0.1);
-  transition: all 0.3s;
-}
-
-.search-controls input:focus {
-  outline: none;
-  border-color: #ff4d4d;
-  box-shadow: 0 0 12px red;
-}
-
-.search-controls .confirm-btn,
-.search-controls .show-all-btn {
-  flex-shrink: 0;
-  padding: 10px 15px;
-  font-family: 'njnaruto';
-  font-size: 0.95em;
-  cursor: pointer;
-  border-radius: 6px;
+  flex: 1;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+  padding: 12px 20px;
+  border-radius: 12px;
+  color: #fff;
   transition: 0.3s;
-  white-space: nowrap;
 }
 
-/* Botones */
-.search-controls .confirm-btn {
-  background: black;
-  border: 2px solid red;
-  color: white;
-  box-shadow: 0 0 12px rgba(255, 0, 0, 0.3);
-}
-
-.search-controls .confirm-btn:hover {
-  background: red;
-  color: black;
-  box-shadow: 0 0 18px red;
-}
-
-.search-controls .show-all-btn {
-  background: #004400;
-  border: 2px solid #32CD32;
-  color: white;
-  box-shadow: 0 0 10px rgba(50, 205, 50, 0.2);
-}
-
-.search-controls .show-all-btn:hover {
-  background: #32CD32;
-  color: black;
-  box-shadow: 0 0 15px #32CD32;
-}
-
-/* ------------------ Grilla de productos ------------------ */
+/* Product Grid */
 .productos-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  min-height: 0;
-  padding-bottom: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
 }
 
-/* Tarjetas */
+/* Glass Cards */
 .card {
-  background: #0d0d0d;
-  border: 2px solid red;
-  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
   padding: 15px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 420px;
-  box-sizing: border-box;
   text-align: center;
-  color: white;
-  transition: transform 0.2s, box-shadow 0.3s;
+  transition: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 0 20px red;
+  transform: translateY(-8px);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--red-brand);
+  box-shadow: 0 10px 30px rgba(179, 0, 0, 0.2);
 }
 
 .card img {
   width: 100%;
   height: 140px;
   object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 10px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .card h3 {
-  font-size: 1.2em;
+  font-size: 16px;
+  color: #fff;
   margin-bottom: 5px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .card p {
-  font-size: 0.9em;
-  color: #ccc;
-  margin-bottom: 5px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
 }
 
 .card input[type="number"] {
-  width: 80px;
-  margin: 10px auto;
-  padding: 5px;
-  border: 1px solid red;
-  border-radius: 5px;
+  width: 70px;
   background: #000;
-  color: white;
+  border: 1px solid var(--glass-border);
+  padding: 8px;
+  border-radius: 8px;
+  color: #fff;
   text-align: center;
+  margin-bottom: 15px;
 }
 
+/* Buttons */
+.confirm-btn,
 .card button {
-  background: black;
-  border: 2px solid red;
-  color: white;
-  padding: 8px 12px;
-  border-radius: 5px;
+  background: linear-gradient(135deg, #8b0000 0%, #b30000 100%);
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 11px;
   cursor: pointer;
-  font-family: 'njnaruto';
   transition: 0.3s;
 }
 
+.confirm-btn:hover,
 .card button:hover {
-  background: red;
-  color: black;
+  filter: brightness(1.2);
+  transform: scale(1.02);
 }
 
-/* ------------------ Carrito ------------------ */
-.pedido-box {
-  flex: 1;
-  background: #0a0a0a;
-  border: 2px solid red;
-  border-radius: 10px;
-  padding: 15px;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  max-height: calc(80vh - 40px);
-  overflow: hidden;
-  box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.2);
-}
-
-.pedido-box h2 {
-  text-align: center;
-  margin-bottom: 15px;
-  font-size: 1.4em;
-  border-bottom: 1px solid red;
-  padding-bottom: 10px;
-}
-
-.pedido-box ul {
+/* Cart List */
+#pedido-lista {
   list-style: none;
-  padding: 0;
-  margin: 0;
   overflow-y: auto;
-  flex-grow: 1;
+  flex: 1;
   padding-right: 5px;
 }
 
-.pedido-box li {
+#pedido-lista li {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px dashed #333;
-  font-size: 0.95em;
+  font-size: 13px;
 }
 
-.pedido-box li:last-child {
-  border-bottom: none;
-}
-
-.pedido-box li button {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  font-size: 1.2em;
-}
-
-.pedido-box li button:hover {
-  color: red;
-}
-
-.confirm-btn {
-  width: 100%;
-  margin-top: 20px;
-  padding: 15px 30px;
-  border: 2px solid red;
-  background-color: black;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1.2em;
-  font-family: 'njnaruto';
-  transition: 0.3s;
-}
-
-.confirm-btn:hover {
-  background-color: red;
-  color: black;
-  box-shadow: 0 0 20px red;
-}
-
-/* ------------------ Scrollbar estilo ninja ------------------ */
-.productos-grid::-webkit-scrollbar,
-.product-selection-section::-webkit-scrollbar,
-.pedido-box ul::-webkit-scrollbar {
-  width: 10px;
-}
-
-.productos-grid::-webkit-scrollbar-track,
-.product-selection-section::-webkit-scrollbar-track,
-.pedido-box ul::-webkit-scrollbar-track {
-  background: linear-gradient(180deg, #000 0%, #111 100%);
-  border-radius: 10px;
-}
-
-.productos-grid::-webkit-scrollbar-thumb,
-.product-selection-section::-webkit-scrollbar-thumb,
-.pedido-box ul::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, red 0%, #660000 100%);
-  border-radius: 10px;
-  border: 2px solid #111;
-  box-shadow: 0 0 10px red;
-}
-
-.productos-grid::-webkit-scrollbar-thumb:hover,
-.product-selection-section::-webkit-scrollbar-thumb:hover,
-.pedido-box ul::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #ff4d4d 0%, #b30000 100%);
-  box-shadow: 0 0 15px #ff4d4d;
-}
-
-/* Firefox */
-.product-selection-section,
-.pedido-box ul,
-.productos-grid {
-  scrollbar-width: thin;
-  scrollbar-color: red black;
-}
-
-/* ------------------ Responsive ------------------ */
-@media (max-width: 1200px) {
-  .productos-grid {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  }
-}
-
-@media (max-width: 768px) {
-  .order-panel {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 20px;
-  }
-
-  .search-controls {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
-
-  .search-controls input,
-  .search-controls .confirm-btn,
-  .search-controls .show-all-btn {
-    width: 100%;
-  }
-
-  .productos-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  }
-
-  .card {
-    height: 280px;
-  }
-
-  .card img {
-    height: 120px;
-  }
-}
-
-@media (max-width: 480px) {
-  .welcome-title {
-    font-size: 2em;
-  }
-
-  .order-panel {
-    padding: 10px;
-    margin: 10px auto;
-  }
-
-  .card {
-    padding: 10px;
-    height: 260px;
-  }
-
-  .card h3 {
-    font-size: 1em;
-  }
-
-  .card p {
-    font-size: 0.8em;
-  }
-
-  .card button {
-    padding: 6px 10px;
-    font-size: 0.9em;
-  }
-
-  .pedido-box h2 {
-    font-size: 1.2em;
-  }
-
-  .pedido-box li {
-    font-size: 0.9em;
-  }
-
-  .confirm-btn {
-    padding: 12px 20px;
-    font-size: 1em;
-  }
-}
-
-/* ------------------ Mensajes ------------------ */
-#messageArea {
+/* Logo respiratorio */
+.logo-main {
   position: fixed;
-  top: 20px;
-  right: 20px;
-  padding: 15px;
-  border-radius: 5px;
-  color: white;
-  font-weight: bold;
-  z-index: 1000;
-  display: none;
-  min-width: 300px;
-  box-shadow: 0 0 12px rgba(0,0,0,0.4);
+  bottom: 50px;
+  right: 50px;
+  opacity: 0.3;
+  pointer-events: none;
+  animation: breathingLogo 4s ease-in-out infinite;
 }
-#messageArea.success { background-color: green; }
-#messageArea.error { background-color: red; }
+
+.logo-main img {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 2px solid var(--red-brand);
+  background: #000;
+  padding: 4px;
+}
+
+@keyframes breathingLogo {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.25;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 0.4;
+  }
+}
+
+/* Mobile */
+@media (max-width: 1100px) {
+  .order-panel {
+    flex-direction: column;
+  }
+
+  .logo-main {
+    display: none;
+  }
+}

@@ -4,7 +4,7 @@
 }
 
 /* ============================================
-   ESTILOS PREMIUM - INSPIRADOS EN MOCKUP
+   ESTILOS PREMIUM - RESPONSIVE ICHIRAKU 2.0
    ============================================ */
 * {
     margin: 0;
@@ -17,7 +17,8 @@ body {
     background-color: #050505;
     color: #fff;
     min-height: 100vh;
-    overflow: hidden;
+    /* Evitar el scroll si no es necesario, pero permitirlo en pantallas pequeñas */
+    overflow-x: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -36,77 +37,82 @@ body {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.92) 0%, rgba(20, 0, 0, 0.7) 100%);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.94) 0%, rgba(30, 0, 0, 0.75) 100%);
 }
 
+/* Contenedor principal flexible */
 .content {
     width: 100%;
-    padding: 20px;
+    min-height: 100vh;
+    padding: 40px 20px;
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 10;
 }
 
+/* Ocultar lado izquierdo (reservado para futuras expansiones) */
 .left-side {
     display: none;
 }
 
-/* 💎 LA TARJETA DE LOGIN (ESTILO MOCKUP) */
-.login-box {
+.right-side {
     width: 100%;
-    max-width: 440px;
-    padding: 60px 45px;
-    background: rgba(20, 20, 20, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 💎 LA TARJETA DE LOGIN (REDENSIFICADA PARA EVITAR SCROLL) */
+.login-box {
+    width: 95%;
+    max-width: 420px;
+    /* Ajuste de padding dinámico pero más compacto */
+    padding: clamp(20px, 3vh, 40px) clamp(20px, 4vw, 40px);
+    background: rgba(10, 10, 10, 0.75);
     backdrop-filter: blur(25px);
     -webkit-backdrop-filter: blur(25px);
 
-    /* Borde con brillo neón sutil */
-    border: 1px solid rgba(255, 0, 0, 0.4);
-    border-radius: 28px;
+    border: 1.5px solid rgba(255, 0, 0, 0.4);
+    border-radius: 30px;
 
-    /* Sombra del mockup: resplandor rojo + profundidad negra */
     box-shadow:
-        0 0 30px rgba(255, 0, 0, 0.15),
-        0 30px 60px rgba(0, 0, 0, 0.8),
-        inset 0 0 1px 1px rgba(255, 255, 255, 0.05);
+        0 0 40px rgba(255, 0, 0, 0.15),
+        0 40px 80px rgba(0, 0, 0, 0.8);
 
     position: relative;
     text-align: center;
-
-    /* Animación de entrada */
-    animation: cardEntrance 1s cubic-bezier(0.2, 1, 0.2, 1) forwards;
+    animation: cardEntrance 0.8s cubic-bezier(0.2, 1, 0.2, 1) forwards;
 }
 
 @keyframes cardEntrance {
     0% {
         opacity: 0;
-        transform: translateY(40px) scale(0.9);
-        filter: blur(10px);
+        transform: translateY(20px) scale(0.98);
     }
 
     100% {
         opacity: 1;
         transform: translateY(0) scale(1);
-        filter: blur(0);
     }
 }
 
-/* Header */
+/* Header & Logo - Más compactos */
 .header-box {
-    margin-bottom: 40px;
+    margin-bottom: clamp(15px, 2vh, 30px);
 }
 
 .logo img {
-    width: 100px;
-    height: 100px;
+    width: clamp(60px, 8vh, 90px);
+    /* Tamaño basado en altura para no empujar el box */
+    height: auto;
+    aspect-ratio: 1/1;
     border-radius: 50%;
     border: 2px solid #ff0000;
-    box-shadow: 0 0 25px rgba(255, 0, 0, 0.4);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
     background: #000;
-    margin-bottom: 20px;
-    transition: 0.5s;
-    animation: logoFloat 3s ease-in-out infinite;
+    margin-bottom: 10px;
+    animation: logoFloat 4s ease-in-out infinite;
 }
 
 @keyframes logoFloat {
@@ -114,39 +120,45 @@ body {
     0%,
     100% {
         transform: translateY(0);
+        filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.3));
     }
 
     50% {
-        transform: translateY(-8px);
-        filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.6));
+        transform: translateY(-5px);
+        filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.5));
     }
 }
 
 .title {
     font-family: 'njnaruto', sans-serif;
-    font-size: 1.8rem;
+    font-size: clamp(1.2rem, 1.8vw, 1.6rem);
+    /* Un poco más pequeño */
     color: #fff;
-    letter-spacing: 2px;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    letter-spacing: 1px;
 }
 
-/* Captura de datos */
+/* Formulario - Reducir márgenes */
 .form-group {
-    margin-bottom: 25px;
+    margin-bottom: clamp(12px, 1.5vh, 20px);
     text-align: left;
     opacity: 0;
+    transform: translateY(10px);
     animation: fadeIn 0.5s ease forwards;
 }
 
 .form-group:nth-child(1) {
-    animation-delay: 0.4s;
+    animation-delay: 0.3s;
 }
 
 .form-group:nth-child(2) {
-    animation-delay: 0.5s;
+    animation-delay: 0.4s;
 }
 
 .form-group:nth-child(3) {
+    animation-delay: 0.5s;
+}
+
+.form-group:nth-child(4) {
     animation-delay: 0.6s;
 }
 
@@ -155,104 +167,94 @@ body {
         opacity: 1;
         transform: translateY(0);
     }
-
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
 }
 
 label {
     font-family: 'njnaruto', sans-serif;
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 8px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 10px;
     display: block;
-    letter-spacing: 1px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
 }
 
 input,
 select {
     width: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    /* Un poco más oscuro */
-    border: 1.5px solid rgba(255, 255, 255, 0.15);
-    padding: 14px 18px;
-    border-radius: 12px;
-    color: #fff;
-    font-size: 15px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    outline: none;
-    appearance: none;
-    /* Quitar flecha nativa */
+    background: rgba(0, 0, 0, 0.5) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 15px 20px !important;
+    border-radius: 12px !important;
+    color: #fff !important;
+    font-size: 15px !important;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none !important;
 }
 
-/* Flecha personalizada para el select */
 select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23ff4b2b' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23ff0000' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 15px center;
-    padding-right: 45px;
+    background-position: right 20px center;
+    appearance: none;
 }
 
-/* 🎨 ARREGLO PARA LAS OPCIONES DEL SELECT (VISIBILIDAD) */
 select option {
-    background-color: #151515;
-    /* Fondo oscuro sólido */
+    background-color: #111;
     color: #fff;
-    /* Texto blanco */
-    padding: 12px;
 }
 
 input:focus,
 select:focus {
-    background: rgba(255, 0, 0, 0.05);
-    border-color: #ff0000;
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.2);
-    transform: scale(1.02);
+    background: rgba(255, 0, 0, 0.05) !important;
+    border-color: #ff0000 !important;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
+    transform: scale(1.01);
 }
 
-/* Botón Conectar Estilizado */
+/* Botón Conectar - Un poco más compacto */
 .btn {
     width: 100%;
-    margin-top: 15px;
-    padding: 16px;
-    background: linear-gradient(90deg, #b30000 0%, #ff0000 50%, #b30000 100%);
+    margin-top: 10px;
+    padding: clamp(12px, 2vh, 18px);
+    background: linear-gradient(90deg, #8b0000 0%, #ff0000 50%, #8b0000 100%);
     background-size: 200% auto;
     color: #fff;
     border: none;
-    border-radius: 12px;
+    border-radius: 14px;
     font-family: 'njnaruto', sans-serif;
-    font-size: 1.2rem;
-    letter-spacing: 2px;
+    font-size: clamp(1rem, 2vh, 1.3rem);
+    letter-spacing: 1px;
     cursor: pointer;
     transition: 0.5s;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
     opacity: 0;
     animation: fadeIn 0.5s ease forwards 0.8s;
 }
 
 .btn:hover {
     background-position: right center;
-    box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
-    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 0 35px rgba(255, 0, 0, 0.5);
+    transform: translateY(-2px);
 }
 
-/* Naruto interactivo */
+/* --- NARUTO DINÁMICO (ANCLA CORREGIDA) --- */
 .naruto {
     position: absolute;
-    right: -55px;
-    bottom: -45px;
-    width: 150px;
+    /* Anclar a píxeles fijos respecto al box para que no baile al redimensionar */
+    right: -40px;
+    bottom: -30px;
+    width: clamp(80px, 15vh, 130px);
     z-index: 20;
     pointer-events: none;
-    filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.8));
+    filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.9));
     animation: narutoIntro 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards 1s;
 }
 
 @keyframes narutoIntro {
     0% {
-        transform: translate(30px, 30px) scale(0);
+        transform: translate(40px, 40px) scale(0);
         opacity: 0;
     }
 
@@ -263,31 +265,109 @@ select:focus {
 }
 
 /* ============================================
-   RESPONSIVE
+   RESPONSIVE QUERIES - STAGED SCALING
    ============================================ */
-@media (max-width: 500px) {
-    .login-box {
-        padding: 40px 30px;
-        max-width: 92%;
+
+/* Stage 1: Resoluciones menores a 1280x720 (Laptop estándar / Baja Res) */
+@media (max-width: 1280px),
+(max-height: 720px) {
+    .naruto {
+        display: none !important;
     }
 
-    .naruto {
-        width: 110px;
-        right: -25px;
-        bottom: -25px;
+    /* Ocultar Naruto como se solicitó */
+
+    .login-box {
+        max-width: 380px;
+        padding: 30px;
+        border-radius: 24px;
     }
 
     .title {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
+    }
+
+    .logo img {
+        width: 70px;
+        height: 70px;
+    }
+
+    input,
+    select {
+        padding: 12px 15px !important;
+        font-size: 14px !important;
+    }
+
+    .btn {
+        padding: 15px;
+        font-size: 1.1rem;
     }
 }
 
-@media (max-height: 650px) {
+/* Stage 2: Pantallas tipo Tablet / Móvil */
+@media (max-width: 768px) {
+    .content {
+        padding: 30px 15px;
+    }
+
+    .login-box {
+        max-width: 100%;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    }
+}
+
+/* Stage 3: Pantallas muy pequeñas o Mobiles Portrait */
+@media (max-width: 480px) {
+    .login-box {
+        padding: 25px 20px;
+        border-radius: 20px;
+    }
+
+    .header-box {
+        margin-bottom: 20px;
+    }
+
+    .title {
+        font-size: 1.1rem;
+    }
+}
+
+/* Stage 4: Pantalla muy corta (Landscape en móviles) */
+@media (max-height: 600px) {
     body {
         overflow-y: auto;
+        align-items: flex-start;
     }
 
     .content {
+        min-height: auto;
         padding: 40px 20px;
+    }
+
+    .header-box {
+        margin-bottom: 15px;
+    }
+
+    .logo img {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+/* Ultra-Wide support */
+@media (min-width: 2000px) {
+    .login-box {
+        max-width: 500px;
+        padding: 60px;
+    }
+
+    .title {
+        font-size: 2rem;
+    }
+
+    .naruto {
+        width: 150px;
+        right: -60px;
+        bottom: -40px;
     }
 }

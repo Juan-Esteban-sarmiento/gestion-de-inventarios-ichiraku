@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Recibir pedidos</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Rordenes.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+  <script src="{{ url_for('static', filename='js/Global_js/session_timeout.js') }}"></script>
 </head>
+
 <body>
   <!-- Sidebar -->
   <div class="sidebar">
@@ -15,6 +18,9 @@
     <nav class="menu">
       <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button">
         <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Consumo') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/ramen.png') }}" alt="Consumo"> Consumo
       </button>
       <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button active">
         <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Recibir pedidos"> Recibir pedidos
@@ -35,26 +41,28 @@
   <!-- Contenido principal -->
   <main class="content">
     <div class="box-welcome">
-      <h1 class="welcome-title">Panel de empleado</h1>
+      <h1 class="welcome-title">Recibir Pedidos</h1>
     </div>
 
     <div class="employee-container">
       <!-- Izquierda: Formulario -->
       <section class="register-box">
-        <h2>Registrar recepción</h2>
+        <h2>Registrar recepcion</h2>
         <form id="recepcionForm" method="POST" action="{{ url_for('Em_Rordenes') }}">
 
           <input type="hidden" name="id_pedido" id="id_pedido">
           <input type="hidden" id="id_producto" name="id_producto">
 
           <label>Nombre producto</label>
-          <input type="text" id="nombre_producto" name="nombre_producto" placeholder="Nombre del producto..." required readonly>
+          <input type="text" id="nombre_producto" name="nombre_producto" placeholder="Nombre del producto..." required
+            readonly>
 
-          <label>Categoría</label>
-          <input type="text" id="categoria" name="categoria" placeholder="Categoría..." required readonly>
+          <label>Categoria</label>
+          <input type="text" id="categoria" name="categoria" placeholder="Categoria..." required readonly>
 
           <label>Cantidad</label>
-          <input type="number" id="cantidad" name="cantidad" min="1" max="1000" placeholder="Cantidad..." readonly disabled inputmode="none" tabindex="-1">
+          <input type="number" id="cantidad" name="cantidad" min="1" max="1000" placeholder="Cantidad..." readonly
+            disabled inputmode="none" tabindex="-1">
 
           <label>Unidad</label>
           <input type="text" id="unidad" name="unidad" placeholder="Unidad..." readonly>
@@ -67,60 +75,66 @@
           </div>
         </form>
       </section>
-      
+
       <section class="search-box">
         <h2>Pedidos pendientes</h2>
         <div class="pedido-lista">
           {% for id_pedido, pedido in pedidos.items() %}
-            <div class="pedido-item" id="pedido-{{ id_pedido }}">
-              <h3>Pedido #{{ id_pedido }}</h3>
-              <p><strong>Estado:</strong> {{ pedido.info.estado }}</p>
-              <p><strong>Fecha:</strong> {{ pedido.info.fecha_pedido }}</p>
+          <div class="pedido-item" id="pedido-{{ id_pedido }}">
+            <h3>Pedido #{{ id_pedido }}</h3>
+            <p><strong>Estado:</strong> {{ pedido.info.estado }}</p>
+            <p><strong>Fecha:</strong> {{ pedido.info.fecha_pedido }}</p>
 
-              <button class="btn" onclick="toggleDetalles('{{ id_pedido }}')">Seleccionar</button>
+            <button class="btn" onclick="toggleDetalles('{{ id_pedido }}')">Seleccionar</button>
 
-              <!-- Contenedor oculto para los productos -->
-              <div class="productos-detalle" id="detalles-{{ id_pedido }}" style="display:none; margin-top:10px;">
-                <table class="tabla-productos">
-                  <thead>
-                    <tr>
-                      <th>Producto</th>
-                      <th>Categoría</th>
-                      <th>Cantidad</th>
-                      <th>Unidad</th>
-                      <th>Acción</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                      {% for prod in pedido.productos %}
-                      <tr id="prod-{{ id_pedido }}-{{ prod.id_producto }}">
-                        <td>{{ prod.productos.nombre }}</td>
-                        <td>{{ prod.productos.categoria }}</td>
-                        <td>{{ prod.cantidad }}</td>
-                        <td>{{ prod.productos.unidad }}</td>
-                        <td>
-                          <input type="date" id="fecha_caducidad-{{id_pedido}}-{{prod.id_producto}}" style="display:none;">
-                          <button class="btn-registro"
-                            onclick="autocompletarFormulario('{{ id_pedido }}', '{{ prod.id_producto }}', '{{ prod.productos.nombre }}', '{{ prod.productos.categoria }}', '{{ prod.cantidad }}', '{{ prod.productos.unidad }}')">
-                            Registrar producto
-                          </button>
-                        </td>
-                      </tr>
-                      {% endfor %}
-                  </tbody>
-                </table>
-              </div>
+            <!-- Contenedor oculto para los productos -->
+            <div class="productos-detalle" id="detalles-{{ id_pedido }}" style="display:none; margin-top:10px;">
+              <table class="tabla-productos">
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th>Categoria</th>
+                    <th>Cantidad</th>
+                    <th>Unidad</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for prod in pedido.productos %}
+                  <tr id="prod-{{ id_pedido }}-{{ prod.id_producto }}">
+                    <td>{{ prod.productos.nombre }}</td>
+                    <td>{{ prod.productos.categoria }}</td>
+                    <td>{{ prod.cantidad }}</td>
+                    <td>{{ prod.productos.unidad }}</td>
+                    <td>
+                      <input type="date" id="fecha_caducidad-{{id_pedido}}-{{prod.id_producto}}" style="display:none;">
+                      <button class="btn-registro"
+                        onclick="autocompletarFormulario('{{ id_pedido }}', '{{ prod.id_producto }}', '{{ prod.productos.nombre }}', '{{ prod.productos.categoria }}', '{{ prod.cantidad }}', '{{ prod.productos.unidad }}')">
+                        Registrar producto
+                      </button>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
             </div>
+          </div>
           {% else %}
-            <p>No hay pedidos pendientes.</p>
+          <p>No hay pedidos pendientes.</p>
           {% endfor %}
         </div>
       </section>
     </div>
+
+    <!-- Logo circular respiratorio -->
+    <div class="logo-main">
+      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Ramen">
+    </div>
   </main>
-  
+
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="{{ url_for('static', filename='js/Global_js/alertaNinja.js') }}"></script>
   <script src="{{ url_for('static', filename='js/Em_js/Rordenes.js') }}"></script>
 </body>
+
 </html>

@@ -28,7 +28,7 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     const data = await response.json();
 
     if (data.success) {
-      alertaNinja('success', '¡Éxito!', 'Punto de venta registrado correctamente.');
+      alertaNinja('success', 'EXITO', 'Punto de venta registrado correctamente.');
       document.getElementById('registerForm').reset();
       document.getElementById('previewFotoLocal').style.display = 'none';
       await cargarLocales(""); // Recarga dinámica suave
@@ -115,7 +115,7 @@ function editarLocal(id_local, nombre, direccion) {
       });
       const res = await response.json();
       if (res.success) {
-        alertaNinja('success', '¡Actualizado!', 'Datos del punto de venta guardados.');
+        alertaNinja('success', 'ACTUALIZADO', 'Datos del punto de venta guardados.');
         await cargarLocales("");
       } else { alertaNinja('error', 'Error', res.msg); }
     }
@@ -126,10 +126,10 @@ function editarLocal(id_local, nombre, direccion) {
 async function deshabilitarLocal(id_local) {
   const confirm = await alertaNinjaFire({
     icon: 'warning',
-    title: '¿Desactivar Local?',
+    title: 'DESACTIVAR',
     text: 'Este punto de venta ya no podrá registrar pedidos.',
     showCancelButton: true,
-    confirmButtonText: 'SÍ, DESACTIVAR',
+    confirmButtonText: 'DESACTIVAR',
     cancelButtonText: 'CANCELAR'
   });
 
@@ -151,10 +151,10 @@ async function deshabilitarLocal(id_local) {
 async function habilitarLocal(id_local) {
   const confirm = await alertaNinjaFire({
     icon: 'question',
-    title: '¿Activar Local?',
+    title: 'ACTIVAR',
     text: 'Habilitarás de nuevo este punto de venta.',
     showCancelButton: true,
-    confirmButtonText: 'SÍ, ACTIVAR',
+    confirmButtonText: 'ACTIVAR',
     cancelButtonText: 'CANCELAR'
   });
 

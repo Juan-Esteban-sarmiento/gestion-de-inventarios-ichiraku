@@ -133,7 +133,7 @@ async function ejecutarDescargaRango(tipo, inicio, fin) {
             const a = document.createElement('a'); a.href = url;
             a.download = `reporte_${tipo}_ichiraku.pdf`;
             a.click();
-            alertaNinja('success', '¡Completado!', 'El reporte se ha descargado.');
+            alertaNinja('success', 'COMPLETADO', 'El reporte se ha descargado.');
         } else {
             const data = await res.json();
             alertaNinja('warning', 'Sin datos', data.msg);
@@ -148,7 +148,7 @@ $('#genDayBtn').click(async () => {
         title: 'Informe Diario',
         text: '¿Generar el reporte consolidado de ventas de hoy?',
         showCancelButton: true,
-        confirmButtonText: 'SÍ, GENERAR',
+        confirmButtonText: 'GENERAR',
         cancelButtonText: 'CANCELAR'
     });
 
@@ -160,7 +160,7 @@ $('#genDayBtn').click(async () => {
             });
             const data = await response.json();
             if (data.success) {
-                alertaNinja('success', '¡Éxito!', data.msg);
+                alertaNinja('success', 'EXITO', data.msg);
                 await cargarUltimoInforme();
                 if (data.informe_id) window.open(`/descargar_informe/${data.informe_id}`, '_blank');
             } else if (data.informe_id) {

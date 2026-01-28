@@ -234,6 +234,37 @@ textarea {
     outline: none;
 }
 
+/* ============================================
+   🌊 NINJA SHINOBI SCROLLBAR (GLOBAL)
+   ============================================ */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--red-brand) 0%, #660000 100%);
+    border-radius: 10px;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #ff0000;
+    box-shadow: 0 0 10px var(--red-brand);
+}
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--red-brand) transparent;
+}
+
+
 @media (max-width: 1024px) {
     .sidebar {
         width: 100%;

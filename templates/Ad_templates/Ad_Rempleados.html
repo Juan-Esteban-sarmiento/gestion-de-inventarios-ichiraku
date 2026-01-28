@@ -4,6 +4,7 @@
 <head>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Rempleados.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+    <script src="{{ url_for('static', filename='js/Global_js/session_timeout.js') }}"></script>
 
     <meta charset="UTF-8">
     <title>Ichiraku Ramen Administrador de personal</title>
@@ -38,12 +39,12 @@
                 <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> Usuario
             </button>
         </nav>
-        <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesión</button>
+        <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
     </div>
 
     <main class="main-content">
         <div class="welcome-box">
-            <h1 class="welcome-title">Panel de administración</h1>
+            <h1 class="welcome-title">Panel de administracion</h1>
 
             <div class="employee-container">
 
@@ -59,8 +60,8 @@
                         <label>Clave</label>
                         <input type="password" id="contrasena" placeholder="Clave">
 
-                        <label>Número de contacto</label>
-                        <input type="text" id="contacto" placeholder="Número de contacto">
+                        <label>Numero de contacto</label>
+                        <input type="text" id="contacto" placeholder="Numero de contacto">
 
                         <div class="form-actions">
                             <button type="submit" class="btn">
@@ -92,7 +93,7 @@
                         autocomplete="off">
 
                     <div id="resultEmpleado" class="result-box">
-                        <p>No se ha realizado ninguna búsqueda</p>
+                        <p>No se ha realizado ninguna busqueda</p>
                     </div>
                 </section>
 
