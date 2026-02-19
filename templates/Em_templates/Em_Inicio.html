@@ -12,8 +12,18 @@
 <body>
   <!-- ====== SIDEBAR ====== -->
   <div class="sidebar">
-    <div class="logo">
-      <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
+    <div class="user-profile">
+      <img src="{{ session.get('foto') or url_for('static', filename='image/default.png') }}" alt="Foto"
+        class="user-avatar"
+        onerror="this.onerror=null; this.src='{{ url_for('static', filename='image/default.png') }}';">
+      <span class="user-name">{{ session.get('nombre', 'Usuario') }}</span>
+      <span class="user-role">{{ session.get('role', '') }}</span>
+      {% if session.get('role') == 'Empleado' %}
+      <div class="branch-badge">
+        <span class="branch-icon">📍</span>
+        <span class="branch-name">{{ session.get('branch_name', 'Sin local') }}</span>
+      </div>
+      {% endif %}
     </div>
 
     <nav class="menu">

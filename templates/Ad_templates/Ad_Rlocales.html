@@ -12,8 +12,12 @@
 <body>
 
     <div class="sidebar">
-        <div class="logo">
-            <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Logo Ichiraku">
+        <div class="user-profile">
+            <img src="{{ session.get('foto') or url_for('static', filename='image/default.png') }}" alt="Foto"
+                class="user-avatar"
+                onerror="this.onerror=null; this.src='{{ url_for('static', filename='image/default.png') }}';">
+            <span class="user-name">{{ session.get('nombre', 'Usuario') }}</span>
+            <span class="user-role">{{ session.get('role', '') }}</span>
         </div>
 
         <nav class="menu">

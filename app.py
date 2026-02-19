@@ -190,6 +190,7 @@ def login():
                 session['role'] = 'Administrador'
                 session['cedula'] = admin_user.get('id', usuario)
                 session['nombre'] = admin_user.get('nombre', '')
+                session['foto'] = admin_user.get('foto', '')
                 return jsonify({"success": True, "msg": f"Bienvenido, {admin_user.get('nombre', '')}", "redirect": url_for('Ad_Inicio')})
 
             elif role == "Empleado":
@@ -212,6 +213,7 @@ def login():
                 session['role'] = 'Empleado'
                 session['cedula'] = empleado.get('cedula', usuario)
                 session['nombre'] = empleado.get('nombre', '')
+                session['foto'] = empleado.get('foto', '')
                 session['branch'] = int(branch)
 
                 # 🏦 Obtener nombre de la sucursal
@@ -277,20 +279,22 @@ def registrar_consumo():
         if not id_sucursal:
              return jsonify({"success": False, "msg": "Error de sesión: Sucursal no definida."}), 403
 
+        # Obtener nombre del producto para el historial
+        producto_info = supabase.table("productos").select("nombre, unidad").eq("id_producto", id_producto).execute()
+        nombre_producto = producto_info.data[0].get("nombre", "Desconocido") if producto_info.data else "Desconocido"
+        unidad_producto = producto_info.data[0].get("unidad", "") if producto_info.data else ""
+
         # Buscar si hay stock
         inventario = supabase.table("inventario").select("id_inventario, cantidad").eq("id_producto", id_producto).eq("id_local", id_sucursal).execute()
         
         if not inventario.data:
              return jsonify({"success": False, "msg": "No hay stock de este producto en tu sucursal."}), 400
         
-        # Lógica FIFO o simple reducción (asumiremos simple por ahora, o reducción del primero que encuentre)
-        # Para simplificar, reducimos del primer lote encontrado o sumamos stock. 
-        # NOTA: El sistema actual parece manejar lotes por fecha caducidad. Deberíamos consumir del más antiguo.
-        # Mejor query: ordenar por fecha caducidad asc
-        
+        # Lógica FIFO: consumir del lote más antiguo primero (ordenado por fecha_caducidad asc)
         lotes = supabase.table("inventario").select("*").eq("id_producto", id_producto).eq("id_local", id_sucursal).order("fecha_caducidad").execute()
         
         restante = cantidad_int
+        consumido_real = 0
         
         for lote in lotes.data:
             cant_lote = lote['cantidad']
@@ -303,12 +307,29 @@ def registrar_consumo():
                     supabase.table("inventario").delete().eq("id_inventario", id_inv).execute()
                 else:
                     supabase.table("inventario").update({"cantidad": nueva_cant}).eq("id_inventario", id_inv).execute()
+                consumido_real += restante
                 restante = 0
                 break
             else:
                 # Consumimos todo el lote y seguimos
                 supabase.table("inventario").delete().eq("id_inventario", id_inv).execute()
+                consumido_real += cant_lote
                 restante -= cant_lote
+
+        # Registrar en historial de consumos
+        try:
+            supabase.table("consumos").insert({
+                "id_producto": int(id_producto),
+                "nombre_producto": nombre_producto,
+                "cantidad": consumido_real,
+                "unidad": unidad_producto,
+                "id_local": int(id_sucursal),
+                "id_empleado": session.get('cedula'),
+                "nombre_empleado": session.get('nombre', 'Desconocido'),
+                "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }).execute()
+        except Exception as log_err:
+            print("Advertencia: No se pudo registrar en historial de consumos:", log_err)
                 
         if restante > 0:
              return jsonify({"success": True, "msg": f"Se consumió todo el stock, pero faltaron {restante} unidades."})
@@ -318,6 +339,59 @@ def registrar_consumo():
     except Exception as e:
         print("Error en registrar_consumo:", e)
         return jsonify({"success": False, "msg": "Error del servidor."}), 500
+
+
+@app.route('/historial_consumo_hoy', methods=['GET'])
+@login_requerido(rol='Empleado')
+def historial_consumo_hoy():
+    try:
+        id_sucursal = session.get('branch')
+        if not id_sucursal:
+            return jsonify({"success": False, "msg": "Sucursal no definida."}), 403
+
+        hoy = datetime.now().strftime("%Y-%m-%d")
+
+        consumos = supabase.table("consumos") \
+            .select("*") \
+            .eq("id_local", id_sucursal) \
+            .gte("fecha", f"{hoy} 00:00:00") \
+            .lte("fecha", f"{hoy} 23:59:59") \
+            .order("fecha", desc=True) \
+            .execute()
+
+        registros = consumos.data or []
+
+        return jsonify({"success": True, "consumos": registros})
+
+    except Exception as e:
+        print("Error en historial_consumo_hoy:", e)
+        return jsonify({"success": False, "msg": "Error al obtener historial."}), 500
+
+
+@app.route('/stock_producto_sucursal', methods=['POST'])
+@login_requerido(rol='Empleado')
+def stock_producto_sucursal():
+    """Retorna el stock disponible de un producto en la sucursal del empleado."""
+    try:
+        data = request.get_json()
+        id_producto = data.get('id_producto')
+        id_sucursal = session.get('branch')
+
+        if not (id_producto and id_sucursal):
+            return jsonify({"success": False, "stock": 0})
+
+        inv = supabase.table("inventario") \
+            .select("cantidad") \
+            .eq("id_producto", id_producto) \
+            .eq("id_local", id_sucursal) \
+            .execute()
+
+        total = sum(lote.get("cantidad", 0) for lote in (inv.data or []))
+        return jsonify({"success": True, "stock": total})
+
+    except Exception as e:
+        print("Error en stock_producto_sucursal:", e)
+        return jsonify({"success": False, "stock": 0})
 
 @app.route('/Ad_Inicio', methods=['GET', 'POST'])
 @login_requerido(rol='Administrador')
@@ -1014,7 +1088,7 @@ def generar_pdf_consolidado(informe_id, pedidos):
                     if not id_producto:
                         continue
 
-                    total_productos += cantidad_detalle
+                    total_productos += int(cantidad_detalle)
                     
                     try:
                         producto_result = supabase.table("productos").select("nombre, categoria, unidad")\
@@ -1729,7 +1803,7 @@ def descargar_informes_rango():
                             if not id_producto:
                                 continue
 
-                            total_productos += cantidad_detalle
+                            total_productos += int(cantidad_detalle)
                             
                             producto_result = supabase.table("productos").select("nombre, categoria, unidad")\
                                 .eq("id_producto", id_producto).execute()
@@ -2752,7 +2826,7 @@ def Em_enviar_token_recuperacion():
         if not telefono.isdigit() or len(telefono) != 10:
             return jsonify({"success": False, "msg": "Número de teléfono no válido."}), 400
 
-        client = Client(TWILIO_SID, TWILIO_AUTH)
+        client = TwilioClient(TWILIO_SID, TWILIO_AUTH)
         client.verify.v2.services(VERIFY_SID).verifications.create(to=f"+57{telefono}", channel="sms")
         return jsonify({"success": True, "msg": "Código enviado correctamente."})
     except Exception as e:

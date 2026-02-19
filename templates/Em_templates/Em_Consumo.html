@@ -11,9 +11,20 @@
 
 <body>
     <div class="sidebar">
-        <div class="logo">
-            <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Logo">
+        <div class="user-profile">
+            <img src="{{ session.get('foto') or url_for('static', filename='image/default.png') }}" alt="Foto"
+                class="user-avatar"
+                onerror="this.onerror=null; this.src='{{ url_for('static', filename='image/default.png') }}';">
+            <span class="user-name">{{ session.get('nombre', 'Usuario') }}</span>
+            <span class="user-role">{{ session.get('role', '') }}</span>
+            {% if session.get('role') == 'Empleado' %}
+            <div class="branch-badge">
+                <span class="branch-icon"></span>
+                <span class="branch-name">{{ session.get('branch_name', 'Sin local') }}</span>
+            </div>
+            {% endif %}
         </div>
+
         <nav class="menu">
             <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button">
                 <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
@@ -44,20 +55,22 @@
     <main class="content">
         <div id="messageArea"></div>
 
+        <!-- Header -->
         <div class="box-welcome">
             <h1 class="welcome-title">Registrar Consumo / Venta</h1>
-            <p style="color:#aaa;">Selecciona los productos y la cantidad consumida en el local.</p>
+            <p class="welcome-subtitle">Selecciona los productos y la cantidad consumida en el local.</p>
         </div>
 
+        <!-- Panel principal -->
         <div class="order-panel">
-            <!-- Sección de búsqueda -->
+            <!-- Sección de búsqueda de productos -->
             <div class="product-selection-section">
                 <div class="order-header">
                     <span>Buscar Productos</span>
                 </div>
                 <div class="search-controls">
                     <input type="text" id="searchTerm" placeholder="Nombre del producto...">
-                    <button class="confirm-btn" onclick="buscarProductos()">Buscar</button>
+                    <button class="confirm-btn search-btn" onclick="buscarProductos()">Buscar</button>
                 </div>
 
                 <!-- Grid de productos -->
@@ -66,13 +79,46 @@
                 </div>
             </div>
 
-            <!-- Sección de consumo seleccionado (como un carrito, pero para consumir) -->
+            <!-- Carrito de consumo -->
             <div class="pedido-box">
-                <h2>🔥 Consumo Actual</h2>
+                <div class="pedido-header">
+                    <h2>Consumo Actual</h2>
+                    <span class="consumo-badge" id="consumo-count">0</span>
+                </div>
                 <ul id="consumo-lista">
-                    <!-- Items seleccionados -->
+                    <li class="empty-cart">
+                        <p>Agrega productos para registrar consumo</p>
+                    </li>
                 </ul>
-                <button class="confirm-btn" onclick="confirmarConsumo()">Registrar Gasto</button>
+                <button class="confirm-btn register-btn" onclick="confirmarConsumo()">Registrar Gasto</button>
+            </div>
+        </div>
+
+        <!-- Historial del Día -->
+        <div class="historial-section">
+            <div class="historial-header">
+                <h2>Consumos de Hoy</h2>
+                <button class="refresh-btn" onclick="cargarHistorialHoy()" title="Refrescar">↻</button>
+            </div>
+
+            <div class="historial-table-wrapper">
+                <table class="historial-table">
+                    <thead>
+                        <tr>
+                            <th>Hora</th>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Unidad</th>
+                            <th>Empleado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historial-tbody">
+                    </tbody>
+                </table>
+
+                <div id="historial-empty" class="empty-state" style="display: flex;">
+                    <p>No hay consumos registrados hoy</p>
+                </div>
             </div>
         </div>
 
