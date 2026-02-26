@@ -30,15 +30,17 @@
                 <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
             </button>
 
-            <button onclick="window.location.href='{{ url_for('Em_Consumo') }}'" class="menu-button active">
-                <img src="{{ url_for('static', filename='image/ramen.png') }}" alt="Consumo"> Consumo
+            <button onclick="window.location.href='{{ url_for('Em_Consumo') }}' " class="menu-button active">
+                <img src="{{ url_for('static', filename='image/consumer.png') }}" alt="Informes"> Consumo
             </button>
-
+            <button onclick="window.location.href='{{ url_for('Em_Inventario') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Inventario"> Inventario
+            </button>
             <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button">
-                <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Recibir pedidos"> Recibir pedidos
+                <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Informes"> Pedidos
             </button>
             <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button">
-                <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Realizar pedidos"> Realizar
+                <img src="{{ url_for('static', filename='image/online-sale.png') }}" alt="Realizar pedidos"> Realizar
                 pedidos
             </button>
             <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button">
@@ -46,7 +48,7 @@
                 pedidos
             </button>
             <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
-                <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> usuario
+                <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Usuario"> Usuario
             </button>
         </nav>
         <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
@@ -57,40 +59,60 @@
 
         <!-- Header -->
         <div class="box-welcome">
-            <h1 class="welcome-title">Registrar Consumo / Venta</h1>
-            <p class="welcome-subtitle">Selecciona los productos y la cantidad consumida en el local.</p>
+            <h1 class="welcome-title">Registrar Venta de Platos</h1>
         </div>
 
         <!-- Panel principal -->
         <div class="order-panel">
-            <!-- Sección de búsqueda de productos -->
+            <!-- Sección 1: Búsqueda de Platos (Recetas) -->
             <div class="product-selection-section">
                 <div class="order-header">
-                    <span>Buscar Productos</span>
+                    <span>Buscar Platos</span>
                 </div>
                 <div class="search-controls">
-                    <input type="text" id="searchTerm" placeholder="Nombre del producto...">
+                    <input type="text" id="searchTerm" placeholder="Nombre del plato...">
                     <button class="confirm-btn search-btn" onclick="buscarProductos()">Buscar</button>
                 </div>
 
-                <!-- Grid de productos -->
+                <!-- Grid de platos -->
                 <div id="productos-container" class="productos-grid">
                     <!-- Cargados vía JS -->
                 </div>
             </div>
 
-            <!-- Carrito de consumo -->
+            <!-- Sección 2: Carrito de Consumo con Desglose -->
             <div class="pedido-box">
                 <div class="pedido-header">
-                    <h2>Consumo Actual</h2>
+                    <h2>Platos Seleccionados</h2>
                     <span class="consumo-badge" id="consumo-count">0</span>
                 </div>
                 <ul id="consumo-lista">
                     <li class="empty-cart">
-                        <p>Agrega productos para registrar consumo</p>
+                        <p>Agrega platos para registrar consumo</p>
                     </li>
                 </ul>
-                <button class="confirm-btn register-btn" onclick="confirmarConsumo()">Registrar Gasto</button>
+                <button class="confirm-btn register-btn" onclick="confirmarConsumo()">Registrar Venta</button>
+            </div>
+
+            <!-- Sección 3: Comparativa de Inventario -->
+            <div class="comparativa-box">
+                <div class="pedido-header">
+                    <h2>Análisis Comparativo</h2>
+                </div>
+                <div class="comparativa-content">
+                    <table class="comparativa-table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Consumo Hoy</th>
+                                <th>Stock Actual</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparativa-tbody">
+                            <!-- Cargado vía JS -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 

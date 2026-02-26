@@ -3,8 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Ichiraku Ramen - Administración productos</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Rproductos.css') }}">
+    <title>Ichiraku Ramen - Recetarios</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Recetarios.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
     <script src="{{ url_for('static', filename='js/Global_js/session_timeout.js') }}"></script>
 </head>
@@ -27,10 +27,10 @@
             <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
                 <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Personal"> Personal
             </button>
-            <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button active">
+            <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
                 <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
             </button>
-            <button onclick="window.location.href='{{ url_for('Ad_Recetarios') }}'" class="menu-button">
+            <button onclick="window.location.href='{{ url_for('Ad_Recetarios') }}'" class="menu-button active">
                 <img src="{{ url_for('static', filename='image/ramen.png') }}" alt="Recetas"> Recetarios
             </button>
             <button onclick="window.location.href='{{ url_for('Ad_Inventario') }}'" class="menu-button">
@@ -58,71 +58,78 @@
             <h1 class="welcome-title">Panel de administracion</h1>
         </div>
 
-        <div class="product-container">
+        <div class="recipes-container">
 
-            <!-- Caja izquierda: formulario -->
+            <!-- Formulario de creación (Caja Izquierda) -->
             <section class="register-box">
-                <h2>Registrar producto</h2>
-                <form id="registerProductForm" novalidate>
-                    <label for="nombreProducto">Nombre producto</label>
-                    <input type="text" id="nombreProducto" placeholder="Nombre producto" required>
+                <h2>Registrar Receta</h2>
+                <form id="registerRecipeForm" novalidate>
+                    <label for="nombreReceta">Nombre del Plato</label>
+                    <input type="text" id="nombreReceta" placeholder="Ej: Ramen Tonkotsu" required>
 
-                    <!-- 🔹 Categoria como SELECT -->
-                    <label for="categoriaProducto">Categoria producto</label>
-                    <select id="categoriaProducto" required>
-                        <option value="">Seleccione una categoria</option>
-                    </select>
+                    <label for="descripcionReceta">Descripción</label>
+                    <textarea id="descripcionReceta" placeholder="Breve descripción del plato..."></textarea>
 
-                    <label for="unidadProducto">Unidad</label>
-                    <select id="unidadProducto" required disabled>
-                        <option value="">Seleccione una categoria primero</option>
-                    </select>
+                    <div class="ingredients-header">
+                        <h3>Ingredientes</h3>
+                        <button type="button" class="btn-add-ingredient" id="btnAddIngredient">
+                            + Agregar
+                        </button>
+                    </div>
 
-                    <label for="serialProducto">Serial producto</label>
-                    <input type="text" id="serialProducto" placeholder="Serial" readonly>
-                    <small class="form-text text-muted">El serial se coloca automaticamente</small>
+                    <div id="ingredientsList" class="ingredients-list">
+                        <!-- Filas de ingredientes dinámicas -->
+                    </div>
 
                     <div class="form-actions">
                         <button type="submit" class="btn">
                             <img class="icon" src="{{ url_for('static', filename='image/mas.png') }}" alt="mas" />
-                            Registrar
+                            Guardar
                         </button>
 
-                        <input type="file" id="fotoProducto" accept="image/*" style="display:none;">
-                        <img id="previewFotoProducto" src="" alt="Vista previa"
-                            style="display:none; max-width:100px; margin-top:10px; border:1px solid #ccc; border-radius:5px;">
+                        <input type="file" id="fotoReceta" accept="image/*" style="display:none;">
 
                         <button type="button" class="btn secondary"
-                            onclick="document.getElementById('fotoProducto').click()">
+                            onclick="document.getElementById('fotoReceta').click()">
                             <img class="icon" src="{{ url_for('static', filename='image/subir.png') }}" alt="subir" />
-                            Subir foto
+                            Foto
                         </button>
                     </div>
+                    <img id="previewFotoReceta" src="" alt="Vista previa"
+                        style="display:none; margin: 15px auto 0; border: 2px dashed var(--red-brand); border-radius: 12px; width: 80px; height: 80px; object-fit: cover;">
                 </form>
             </section>
 
-            <!-- Caja derecha: búsqueda -->
-            <section class="search-box">
-                <h2>Lista productos</h2>
-
-                <!-- Input de búsqueda -->
-                <label for="buscarProducto" class="sr-only">Buscar producto</label>
-                <input type="text" id="buscarProducto" placeholder="Buscar por nombre o serial" autocomplete="off">
-
-                <!-- Resultados -->
-                <div id="resultProducto" class="result-box">
-                    <p>No se ha realizado ninguna busqueda</p>
+            <!-- Lista de recetas (Caja Derecha) -->
+            <section class="list-box">
+                <h2>Lista de Recetas</h2>
+                <div id="recipesList" class="result-box">
+                    {% if recetas %}
+                    {% for receta in recetas %}
+                    <div class="recipe-card">
+                        <img src="{{ receta.foto or url_for('static', filename='image/default_food.png') }}"
+                            alt="{{ receta.nombre }}" class="recipe-img">
+                        <div class="recipe-info">
+                            <h3>{{ receta.nombre }}</h3>
+                            <p>{{ receta.descripcion }}</p>
+                            <span class="badge {{ 'enabled' if receta.habilitado else 'disabled' }}">
+                                {{ 'Activa' if receta.habilitado else 'Inactiva' }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p>No hay recetas registradas.</p>
+                    {% endif %}
                 </div>
             </section>
 
         </div>
-        <div id="registerMsg" style="color: green; margin-top: 10px;"></div>
-
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ url_for('static', filename='js/Global_js/alertaNinja.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/Ad_js/Rproductos.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/Ad_js/Ad_Recetarios.js') }}"></script>
 </body>
 
 </html>

@@ -20,7 +20,7 @@
       <span class="user-role">{{ session.get('role', '') }}</span>
       {% if session.get('role') == 'Empleado' %}
       <div class="branch-badge">
-        <span class="branch-icon">📍</span>
+        <span class="branch-icon"></span>
         <span class="branch-name">{{ session.get('branch_name', 'Sin local') }}</span>
       </div>
       {% endif %}
@@ -30,20 +30,23 @@
       <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button">
         <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
       </button>
-      <button onclick="window.location.href='{{ url_for('Em_Consumo') }}'" class="menu-button">
-        <img src="{{ url_for('static', filename='image/ramen.png') }}" alt="Consumo"> Consumo
+      <button onclick="window.location.href='{{ url_for('Em_Consumo') }}' " class="menu-button">
+        <img src="{{ url_for('static', filename='image/consumer.png') }}" alt="Informes"> Consumo
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Inventario') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Inventario"> Inventario
       </button>
       <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button active">
-        <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Recibir pedidos"> Recibir pedidos
+        <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Informes"> Pedidos
       </button>
       <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button">
-        <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Realizar pedidos"> Realizar pedidos
+        <img src="{{ url_for('static', filename='image/online-sale.png') }}" alt="Realizar pedidos"> Realizar pedidos
       </button>
       <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button">
         <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Historial pedidos"> Historial pedidos
       </button>
       <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
-        <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> Usuario
+        <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Usuario"> Usuario
       </button>
     </nav>
     <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>

@@ -1,0 +1,86 @@
+/* Mismos estilos que el administrador para consistencia, pero simplificados para empleado */
+:root {
+    --primary-red: #e60000;
+    --dark-bg: #0d0d1a;
+    --glass-bg: rgba(26, 26, 46, 0.8);
+    --text-white: #ffffff;
+    --border-red: rgba(230, 0, 0, 0.3);
+}
+
+body {
+    background-color: var(--dark-bg);
+    color: var(--text-white);
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.content {
+    padding: 2rem;
+    margin-left: 260px;
+}
+
+
+.inventory-controls {
+    margin-bottom: 2rem;
+}
+
+input {
+    background: var(--glass-bg);
+    border: 1px solid var(--border-red);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    outline: none;
+    width: 300px;
+}
+
+input:focus {
+    border-color: var(--primary-red);
+}
+
+.table-container {
+    background: var(--glass-bg);
+    border-radius: 15px;
+    border: 1px solid var(--border-red);
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+th {
+    background: rgba(230, 0, 0, 0.1);
+    color: var(--primary-red);
+    padding: 15px;
+}
+
+td {
+    padding: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.status-badge.ok {
+    background: rgba(0, 255, 0, 0.1);
+    color: #00ff00;
+}
+
+.status-badge.warning {
+    background: rgba(255, 165, 0, 0.1);
+    color: #ffa500;
+}
+
+.low-stock {
+    color: #ffa500;
+    font-weight: bold;
+}

@@ -126,6 +126,73 @@ def generar_notificaciones_caducidad():
         import traceback
         traceback.print_exc()
 
+def generar_notificaciones_stock_bajo():
+    try:
+        # 1. Obtener todos los productos habilitados que tengan un stock mínimo definido
+        # Nota: Si falla por columna inexistente, capturamos el error
+        try:
+            productos_res = supabase.table("productos").select("id_producto, nombre, unidad").eq("habilitado", True).execute()
+            productos = productos_res.data or []
+        except Exception as e:
+            print("Error al consultar tabla productos (posible falta columna stock_minimo):", e)
+            return
+
+        if not productos:
+            return
+
+        locales = supabase.table("locales").select("id_local, nombre").execute().data or []
+        
+        for local in locales:
+            id_l = local["id_local"]
+            nombre_l = local["nombre"]
+            
+            # 2. Obtener todo el inventario de este local
+            inv_res = supabase.table("inventario").select("id_producto, cantidad").eq("id_local", id_l).execute()
+            inv_data = inv_res.data or []
+            
+            # 3. Consolidar stock actual por producto
+            stock_actual_map = {}
+            for item in inv_data:
+                pid = item["id_producto"]
+                stock_actual_map[pid] = stock_actual_map.get(pid, 0) + item["cantidad"]
+            
+            # 4. Comparar cada producto con su umbral
+            for p in productos:
+                pid = p["id_producto"]
+                nombre_p = p["nombre"]
+                unidad_p = p["unidad"]
+                actual = stock_actual_map.get(pid, 0)
+                if actual <= 50:
+                    mensaje = f"⚠️ STOCK BAJO: '{nombre_p}' en {nombre_l}. ACTUAL: {actual} {unidad_p} (Límite: 50)"
+                    
+                    # Evitar duplicados
+                    existente = supabase.table("notificaciones")\
+                        .select("id_notificaciones")\
+                        .eq("tipo", "stock_bajo")\
+                        .ilike("mensaje", f"%{nombre_p}%{nombre_l}%")\
+                        .execute()
+                    
+                    if not existente.data:
+                        supabase.table("notificaciones").insert({
+                            "mensaje": mensaje,
+                            "tipo": "stock_bajo",
+                            "leido": False,
+                            "fecha": datetime.now().isoformat()
+                        }).execute()
+                else:
+                    # Limpiar notificación si el stock se recuperó
+                    supabase.table("notificaciones")\
+                        .delete()\
+                        .eq("tipo", "stock_bajo")\
+                        .ilike("mensaje", f"%{nombre_p}%{nombre_l}%")\
+                        .execute()
+
+    except Exception as e:
+        print("Error al generar notificaciones de stock bajo:", e)
+
+    except Exception as e:
+        print("Error al generar notificaciones de stock bajo:", e)
+
 def eliminar_notificaciones_caducadas():
     try:
         hoy = datetime.now().date()
@@ -268,73 +335,180 @@ def registrar_consumo():
             return jsonify({"success": False, "msg": "Datos incompletos."}), 400
             
         try:
-            cantidad_int = int(cantidad)
-            if cantidad_int <= 0:
+            cantidad_val = float(cantidad)
+            if cantidad_val <= 0:
                 raise ValueError
         except:
-             return jsonify({"success": False, "msg": "Cantidad inválida."}), 400
+            return jsonify({"success": False, "msg": "Cantidad inválida."}), 400
 
-        # Verificar inventario en la sucursal del empleado
         id_sucursal = session.get('branch')
         if not id_sucursal:
-             return jsonify({"success": False, "msg": "Error de sesión: Sucursal no definida."}), 403
+            return jsonify({"success": False, "msg": "Error de sesión: Sucursal no definida."}), 403
 
-        # Obtener nombre del producto para el historial
         producto_info = supabase.table("productos").select("nombre, unidad").eq("id_producto", id_producto).execute()
         nombre_producto = producto_info.data[0].get("nombre", "Desconocido") if producto_info.data else "Desconocido"
-        unidad_producto = producto_info.data[0].get("unidad", "") if producto_info.data else ""
 
-        # Buscar si hay stock
-        inventario = supabase.table("inventario").select("id_inventario, cantidad").eq("id_producto", id_producto).eq("id_local", id_sucursal).execute()
+        # Filtrar solo lotes con stock disponible
+        inventario = supabase.table("inventario").select("*")\
+            .eq("id_producto", id_producto)\
+            .eq("id_local", id_sucursal)\
+            .gt("cantidad", 0)\
+            .order("fecha_caducidad")\
+            .execute()
         
         if not inventario.data:
-             return jsonify({"success": False, "msg": "No hay stock de este producto en tu sucursal."}), 400
+            return jsonify({"success": False, "msg": "No hay stock disponible."}), 400
         
-        # Lógica FIFO: consumir del lote más antiguo primero (ordenado por fecha_caducidad asc)
-        lotes = supabase.table("inventario").select("*").eq("id_producto", id_producto).eq("id_local", id_sucursal).order("fecha_caducidad").execute()
+        restante = cantidad_val
+        detalles_afectados = []
         
-        restante = cantidad_int
-        consumido_real = 0
-        
-        for lote in lotes.data:
+        for lote in inventario.data:
             cant_lote = lote['cantidad']
             id_inv = lote['id_inventario']
             
             if cant_lote >= restante:
-                # Este lote cubre todo
                 nueva_cant = cant_lote - restante
-                if nueva_cant == 0:
-                    supabase.table("inventario").delete().eq("id_inventario", id_inv).execute()
+                # No borrar, solo poner en 0 para mantener integridad referencial
+                if nueva_cant <= 0:
+                    supabase.table("inventario").update({"cantidad": 0}).eq("id_inventario", id_inv).execute()
                 else:
                     supabase.table("inventario").update({"cantidad": nueva_cant}).eq("id_inventario", id_inv).execute()
-                consumido_real += restante
+                
+                detalles_afectados.append({
+                    "id_producto": int(id_producto),
+                    "id_inventario": id_inv,
+                    "cantidad_consumida": restante,
+                    "fecha": datetime.now().isoformat()
+                })
                 restante = 0
                 break
             else:
-                # Consumimos todo el lote y seguimos
-                supabase.table("inventario").delete().eq("id_inventario", id_inv).execute()
-                consumido_real += cant_lote
+                # Poner en 0 en lugar de borrar
+                supabase.table("inventario").update({"cantidad": 0}).eq("id_inventario", id_inv).execute()
+                detalles_afectados.append({
+                    "id_producto": int(id_producto),
+                    "id_inventario": id_inv,
+                    "cantidad_consumida": cant_lote,
+                    "fecha": datetime.now().isoformat()
+                })
                 restante -= cant_lote
 
-        # Registrar en historial de consumos
+        # Historial
         try:
-            supabase.table("consumos").insert({
-                "id_producto": int(id_producto),
-                "nombre_producto": nombre_producto,
-                "cantidad": consumido_real,
-                "unidad": unidad_producto,
-                "id_local": int(id_sucursal),
-                "id_empleado": session.get('cedula'),
-                "nombre_empleado": session.get('nombre', 'Desconocido'),
-                "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            cons_res = supabase.table("consumo").insert({
+                "fecha": datetime.now().isoformat(),
+                "cantidad_platos": 1,
+                "observacion": f"Consumo manual: {nombre_producto} (Cant: {cantidad_val})"
             }).execute()
-        except Exception as log_err:
-            print("Advertencia: No se pudo registrar en historial de consumos:", log_err)
-                
-        if restante > 0:
-             return jsonify({"success": True, "msg": f"Se consumió todo el stock, pero faltaron {restante} unidades."})
-        
+            
+            if cons_res.data:
+                id_c = cons_res.data[0]["id_consumo"]
+                for det in detalles_afectados:
+                    det["id_consumo"] = id_c
+                    supabase.table("consumo_detalle").insert(det).execute()
+        except: pass
+
         return jsonify({"success": True, "msg": "Consumo registrado correctamente."})
+    except Exception as e:
+        return jsonify({"success": False, "msg": str(e)})
+
+@app.route('/get_recetas_empleado', methods=['POST'])
+@login_requerido(rol='Empleado')
+def get_recetas_empleado():
+    try:
+        data = request.get_json() or {}
+        termino = data.get("termino", "").strip()
+        query = supabase.table("recetarios").select("*").eq("habilitado", True)
+        if termino:
+            query = query.ilike("nombre", f"%{termino}%")
+        res = query.order("nombre").execute()
+        return jsonify({"success": True, "recetas": res.data or []})
+    except Exception as e:
+        return jsonify({"success": False, "msg": str(e)})
+
+def descontar_stock_fifo(id_producto, cantidad_total, id_local):
+    """Auxiliar para descontar ingredientes"""
+    try:
+        # Filtrar solo lotes con stock disponible
+        lotes = supabase.table("inventario").select("*")\
+            .eq("id_producto", id_producto)\
+            .eq("id_local", id_local)\
+            .gt("cantidad", 0)\
+            .order("fecha_caducidad")\
+            .execute()
+        
+        if not lotes.data: return False, "Sin stock", []
+        
+        disponible = sum(l['cantidad'] for l in lotes.data)
+        if disponible < cantidad_total: return False, f"Solo hay {disponible}", []
+        
+        restante = float(cantidad_total)
+        afectados = []
+        for lote in lotes.data:
+            id_inv = lote['id_inventario']
+            cant_lote = float(lote['cantidad'])
+            
+            if cant_lote >= restante:
+                nueva = cant_lote - restante
+                # No borrar, solo poner en 0
+                if nueva <= 0:
+                    supabase.table("inventario").update({"cantidad": 0}).eq("id_inventario", id_inv).execute()
+                else:
+                    supabase.table("inventario").update({"cantidad": nueva}).eq("id_inventario", id_inv).execute()
+                
+                afectados.append({"id_prod": id_producto, "id_inv": id_inv, "cant": restante})
+                restante = 0
+                break
+            else:
+                # No borrar, solo poner en 0
+                supabase.table("inventario").update({"cantidad": 0}).eq("id_inventario", id_inv).execute()
+                afectados.append({"id_prod": id_producto, "id_inv": id_inv, "cant": cant_lote})
+                restante -= cant_lote
+        return True, "OK", afectados
+    except Exception as e: return False, str(e), []
+
+@app.route('/registrar_consumo_receta', methods=['POST'])
+@login_requerido(rol='Empleado')
+def registrar_consumo_receta():
+    try:
+        data = request.get_json()
+        id_r = data.get('id_receta')
+        cant_p = int(data.get('cantidad', 1))
+        id_l = session.get('branch')
+        
+        receta = supabase.table("recetarios").select("nombre").eq("id_receta", id_r).execute()
+        if not receta.data: return jsonify({"success": False, "msg": "Receta no existe"}), 404
+        
+        detalles = supabase.table("receta_detalle").select("*, productos(nombre, unidad)").eq("id_receta", id_r).execute()
+        if not detalles.data: return jsonify({"success": False, "msg": "Receta vacía"}), 400
+        
+        afectados_total = []
+        for ing in detalles.data:
+            p_name = ing['productos']['nombre'] if ing.get('productos') else ing['id_producto']
+            p_unit = ing['productos']['unidad'] if ing.get('productos') else ""
+            requerido = float(ing["cantidad"]) * cant_p
+            
+            res, msg, aff = descontar_stock_fifo(ing["id_producto"], requerido, id_l)
+            if not res: 
+                # msg ya trae "Sin stock" o "Solo hay X"
+                full_msg = f"Stock insuficiente para '{p_name}'. {msg} {p_unit} (Requerido: {requerido} {p_unit})"
+                return jsonify({"success": False, "msg": full_msg}), 400
+            afectados_total.extend(aff)
+            
+        c_res = supabase.table("consumo").insert({
+            "fecha": datetime.now().isoformat(), "cantidad_platos": cant_p,
+            "id_receta": id_r, "id_local": id_l, "observacion": f"Venta: {cant_p} {receta.data[0]['nombre']}"
+        }).execute()
+        
+        if c_res.data:
+            idc = c_res.data[0]["id_consumo"]
+            for a in afectados_total:
+                supabase.table("consumo_detalle").insert({
+                    "id_consumo": idc, "id_producto": a["id_prod"], "id_inventario": a["id_inv"],
+                    "cantidad_consumida": a["cant"], "fecha": datetime.now().isoformat()
+                }).execute()
+        return jsonify({"success": True, "msg": "¡Venta registrada!"})
+    except Exception as e: return jsonify({"success": False, "msg": str(e)})
 
     except Exception as e:
         print("Error en registrar_consumo:", e)
@@ -351,21 +525,135 @@ def historial_consumo_hoy():
 
         hoy = datetime.now().strftime("%Y-%m-%d")
 
-        consumos = supabase.table("consumos") \
-            .select("*") \
-            .eq("id_local", id_sucursal) \
-            .gte("fecha", f"{hoy} 00:00:00") \
-            .lte("fecha", f"{hoy} 23:59:59") \
-            .order("fecha", desc=True) \
+        # Query joins: consumo_detalle -> consumo and consumo_detalle -> productos
+        # the Supabase python client supports joining via select strings
+        consumos = supabase.table("consumo_detalle") \
+            .select("*, productos(nombre, unidad), consumo(*), inventario(id_local)") \
+            .gte("fecha", f"{hoy}T00:00:00") \
+            .lte("fecha", f"{hoy}T23:59:59") \
             .execute()
 
-        registros = consumos.data or []
+        registros = []
+        if consumos.data:
+            for item in consumos.data:
+                # Filtrar por sucursal si el inventario está disponible
+                if item.get("inventario") and item["inventario"].get("id_local") == id_sucursal:
+                    registros.append({
+                        "id_producto": item["id_producto"],
+                        "nombre_producto": item["productos"]["nombre"] if item.get("productos") else "Desconocido",
+                        "cantidad": item["cantidad_consumida"],
+                        "unidad": item["productos"]["unidad"] if item.get("productos") else "",
+                        "fecha": item["fecha"]
+                    })
 
         return jsonify({"success": True, "consumos": registros})
 
     except Exception as e:
         print("Error en historial_consumo_hoy:", e)
         return jsonify({"success": False, "msg": "Error al obtener historial."}), 500
+
+@app.route('/get_receta_breakdown', methods=['POST'])
+@login_requerido(rol='Empleado')
+def get_receta_breakdown():
+    try:
+        data = request.get_json()
+        id_receta = data.get('id_receta')
+        
+        if not id_receta:
+            return jsonify({"success": False, "msg": "ID de receta no proporcionado."}), 400
+            
+        detalles = supabase.table("receta_detalle") \
+            .select("*, productos(nombre, unidad)") \
+            .eq("id_receta", id_receta) \
+            .execute()
+            
+        if not detalles.data:
+            return jsonify({"success": True, "breakdown": []})
+            
+        breakdown = []
+        for d in detalles.data:
+            breakdown.append({
+                "nombre": d['productos']['nombre'] if d.get('productos') else "Desconocido",
+                "cantidad": d['cantidad'],
+                "unidad": d['productos']['unidad'] if d.get('productos') else ""
+            })
+            
+        return jsonify({"success": True, "breakdown": breakdown})
+    except Exception as e:
+        return jsonify({"success": False, "msg": str(e)}), 500
+
+@app.route('/get_consumo_comparative', methods=['GET'])
+@login_requerido(rol='Empleado')
+def get_consumo_comparative():
+    try:
+        id_local = session.get('branch')
+        if not id_local:
+            return jsonify({"success": False, "msg": "Sucursal no definida."}), 403
+
+        hoy = datetime.now().strftime("%Y-%m-%d")
+        
+        # 1. Obtener consumos de hoy para el local
+        consumos_hoy = supabase.table("consumo_detalle") \
+            .select("id_producto, cantidad_consumida, productos(nombre, unidad), inventario(id_local)") \
+            .gte("fecha", f"{hoy}T00:00:00") \
+            .lte("fecha", f"{hoy}T23:59:59") \
+            .execute()
+
+        agregado_consumo = {}
+        if consumos_hoy.data:
+            for c in consumos_hoy.data:
+                # Filtrar por local
+                if c.get('inventario') and c['inventario'].get('id_local') == id_local:
+                    pid = c['id_producto']
+                    if pid not in agregado_consumo:
+                        agregado_consumo[pid] = {
+                            "nombre": c['productos']['nombre'],
+                            "unidad": c['productos']['unidad'],
+                            "total_consumido": 0
+                        }
+                    agregado_consumo[pid]["total_consumido"] += c['cantidad_consumida']
+
+        # 2. Obtener stock actual para el local
+        inventario = supabase.table("inventario") \
+            .select("id_producto, cantidad") \
+            .eq("id_local", id_local) \
+            .execute()
+            
+        stock_actual = {}
+        if inventario.data:
+            for inv in inventario.data:
+                pid = inv['id_producto']
+                stock_actual[pid] = stock_actual.get(pid, 0) + inv['cantidad']
+
+        # 3. Combinar datos
+        comparativa = []
+        # Asegurar incluir productos que tengan stock pero no consumo hoy, o viceversa
+        todos_pids = set(agregado_consumo.keys()) | set(stock_actual.keys())
+        
+        # Necesitamos nombres para los que solo tienen stock
+        if stock_actual:
+            productos_info = supabase.table("productos").select("id_producto, nombre, unidad").in_("id_producto", list(todos_pids)).execute()
+            p_map = {p['id_producto']: p for p in productos_info.data}
+        else:
+            p_map = {}
+
+        for pid in todos_pids:
+            consumo_data = agregado_consumo.get(pid, {})
+            nombre = consumo_data.get("nombre") or (p_map.get(pid, {}).get("nombre", "Desconocido"))
+            unidad = consumo_data.get("unidad") or (p_map.get(pid, {}).get("unidad", ""))
+            
+            comparativa.append({
+                "id_producto": pid,
+                "nombre": nombre,
+                "unidad": unidad,
+                "consumido": agregado_consumo.get(pid, {}).get("total_consumido", 0),
+                "stock": stock_actual.get(pid, 0)
+            })
+
+        return jsonify({"success": True, "comparativa": comparativa})
+    except Exception as e:
+        print("Error en get_consumo_comparative:", e)
+        return jsonify({"success": False, "msg": str(e)}), 500
 
 
 @app.route('/stock_producto_sucursal', methods=['POST'])
@@ -398,6 +686,7 @@ def stock_producto_sucursal():
 def Ad_Inicio():
     try:
         generar_notificaciones_caducidad()
+        generar_notificaciones_stock_bajo()
         eliminar_notificaciones_caducadas()
         
         try:
@@ -635,7 +924,7 @@ def buscar_empleado():
         if termino:
             response = supabase.table("empleados").select("*").ilike("nombre", f"%{termino}%").execute()
             if not response.data:
-                response = supabase.table("empleados").select("*").ilike("Cedula", f"%{termino}%").execute()
+                response = supabase.table("empleados").select("*").ilike("cedula", f"%{termino}%").execute()
         else:
             response = supabase.table("empleados").select("*").execute()
         empleados = response.data or []
@@ -831,11 +1120,17 @@ def obtener_proximo_id():
 def editar_producto(id_producto):
     try:
         # 📨 Recibir datos como FORMDATA (no JSON)
-        nombre = request.form.get("nombre")
-        categoria = request.form.get("categoria")
-        unidad = request.form.get("unidad")
-        foto = request.files.get("foto")  # 📸 Nueva foto opcional
+        nombre = request.form.get('nombre')
+        categoria = request.form.get('categoria')
+        unidad = request.form.get('unidad')
+        foto = request.files.get('foto')
 
+        update_data = {
+            "nombre": nombre,
+            "categoria": categoria,
+            "unidad": unidad
+        }
+        
         if not (nombre and categoria and unidad):
             return jsonify({"success": False, "msg": "Todos los campos son obligatorios."}), 400
 
@@ -897,6 +1192,272 @@ def cambiar_estado_producto(id_producto):
         print("Error al cambiar estado del producto:", e)
         return jsonify({"success": False, "msg": f"Error en servidor: {e}"}), 500
 
+@app.route('/Ad_Recetarios', methods=['GET'])
+@login_requerido(rol='Administrador')
+def Ad_Recetarios():
+    try:
+        response = supabase.table("recetarios").select("*").order("created_at", desc=True).execute()
+        recetas = response.data or []
+        return render_template("Ad_templates/Ad_Recetarios.html", recetas=recetas)
+    except Exception as e:
+        print("Error en Ad_Recetarios:", e)
+        return render_template("Ad_templates/Ad_Recetarios.html", recetas=[])
+
+@app.route('/get_productos_receta', methods=['GET'])
+@login_requerido(rol='Administrador')
+def get_productos_receta():
+    try:
+        response = supabase.table("productos").select("id_producto, nombre, unidad").eq("habilitado", True).execute()
+        return jsonify({"success": True, "productos": response.data or []})
+    except Exception as e:
+        print("Error en get_productos_receta:", e)
+        return jsonify({"success": False, "msg": str(e)})
+
+@app.route('/registrar_receta', methods=['POST'])
+@login_requerido(rol='Administrador')
+def registrar_receta():
+    try:
+        nombre = request.form.get('nombre')
+        descripcion = request.form.get('descripcion')
+        foto = request.files.get('foto')
+        ingredientes_json = request.form.get('ingredientes')
+
+        if not (nombre and ingredientes_json):
+            return jsonify({"success": False, "msg": "Nombre e ingredientes son obligatorios."})
+
+        import json
+        try:
+            ingredientes = json.loads(ingredientes_json)
+        except Exception as json_err:
+            print("Error decodificando ingredientes JSON:", json_err)
+            return jsonify({"success": False, "msg": "Error en el formato de ingredientes."})
+
+        if not ingredientes or not isinstance(ingredientes, list):
+            return jsonify({"success": False, "msg": "Debe agregar al menos un ingrediente válido."})
+
+        # 1. Insertar en recetarios
+        receta_data = {
+            "nombre": nombre,
+            "descripcion": descripcion,
+            "habilitado": True
+        }
+        
+        insert_res = supabase.table("recetarios").insert(receta_data).execute()
+        
+        if not (hasattr(insert_res, "data") and insert_res.data):
+            error_msg = getattr(insert_res, "error", "Error desconocido al insertar receta")
+            print("Error Supabase (recetarios):", error_msg)
+            return jsonify({"success": False, "msg": "No se pudo crear la base de la receta."})
+        
+        id_receta = insert_res.data[0]["id_receta"]
+
+        # 2. Subir foto si existe
+        foto_url = None
+        if foto and is_valid_image(foto):
+            try:
+                filename = f"recetas/{id_receta}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
+                foto.seek(0) # Asegurar lectura desde el inicio
+                supabase.storage.from_("Fotos").upload(filename, foto.read())
+                foto_url = f"{SUPABASE_URL}/storage/v1/object/public/Fotos/{filename}"
+                supabase.table("recetarios").update({"foto": foto_url}).eq("id_receta", id_receta).execute()
+            except Exception as upload_err:
+                print(f"Error subiendo foto de receta {id_receta}:", upload_err)
+                # No retornamos error aquí para permitir que la receta se guarde sin foto si falla el upload
+
+        # 3. Insertar detalles
+        errores_detalles = []
+        for ing in ingredientes:
+            try:
+                detalle_data = {
+                    "id_receta": id_receta,
+                    "id_producto": int(ing["id_producto"]),
+                    "cantidad": float(ing["cantidad"]),
+                    "unidad": ing.get("unidad", "und")
+                }
+                det_res = supabase.table("receta_detalle").insert(detalle_data).execute()
+                if not (hasattr(det_res, "data") and det_res.data):
+                    errores_detalles.append(f"Producto {ing['id_producto']}")
+            except Exception as det_err:
+                print(f"Error insertando detalle para producto {ing.get('id_producto')}:", det_err)
+                errores_detalles.append(str(ing.get('id_producto')))
+
+        if errores_detalles:
+            return jsonify({
+                "success": True, 
+                "msg": f"Receta creada, pero hubo problemas con algunos ingredientes: {', '.join(errores_detalles)}"
+            })
+
+        return jsonify({"success": True, "msg": "Receta creada exitosamente."})
+
+    except Exception as e:
+        print("Error crítico en registrar_receta:", e)
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "msg": f"Error interno: {str(e)}"})
+
+@app.route('/cambiar_estado_receta/<int:id_receta>', methods=['POST'])
+@login_requerido(rol='Administrador')
+def cambiar_estado_receta(id_receta):
+    try:
+        data = request.get_json()
+        habilitado = data.get("habilitado")
+        supabase.table("recetarios").update({"habilitado": habilitado}).eq("id_receta", id_receta).execute()
+        return jsonify({"success": True, "msg": "Estado de receta actualizado."})
+    except Exception as e:
+        return jsonify({"success": False, "msg": str(e)})
+
+@app.route('/Ad_Inventario')
+@login_requerido(rol='Administrador')
+def Ad_Inventario():
+    try:
+        locales = supabase.table("locales").select("*").execute().data or []
+        return render_template("Ad_templates/Ad_Inventario.html", locales=locales)
+    except Exception as e:
+        print("Error en Ad_Inventario:", e)
+        return render_template("Ad_templates/Ad_Inventario.html", locales=[])
+
+@app.route('/Em_Inventario')
+@login_requerido(rol='Empleado')
+def Em_Inventario():
+    return render_template("Em_templates/Em_Inventario.html")
+
+@app.route('/get_inventario_data', methods=['POST'])
+@login_requerido()
+def get_inventario_data():
+    try:
+        data = request.get_json()
+        id_local = data.get('id_local')
+        if session.get('role') == 'Empleado':
+            id_local = session.get('branch')
+        
+        if not id_local:
+            return jsonify({"success": False, "msg": "Local no especificado."})
+
+        # Query consolidada: agrupar por producto y sumar cantidades
+        # Nota: PostgREST no agrupa fácilmente, lo hacemos en python o con una vista en DB.
+        # Por ahora lo hacemos en python para mayor control.
+        res = supabase.table("inventario").select("cantidad, stock_minimo, productos(id_producto, nombre, unidad, categoria)")\
+            .eq("id_local", id_local).execute()
+        
+        # Agrupar
+        inventario_agrupado = {}
+        for item in (res.data or []):
+            prod = item.get("productos")
+            if not prod: continue
+            pid = prod["id_producto"]
+            if pid not in inventario_agrupado:
+                inventario_agrupado[pid] = {
+                    "id_producto": pid,
+                    "nombre": prod["nombre"],
+                    "unidad": prod["unidad"],
+                    "categoria": prod["categoria"],
+                    "stock": 0,
+                    "minimo": item.get("stock_minimo", 0)
+                }
+            inventario_agrupado[pid]["stock"] += item["cantidad"]
+            # Tomamos el mínimo más alto de los lotes como referencia (o el primero)
+            inventario_agrupado[pid]["minimo"] = max(inventario_agrupado[pid]["minimo"], item.get("stock_minimo", 0))
+            
+        return jsonify({"success": True, "inventario": list(inventario_agrupado.values())})
+    except Exception as e:
+        return jsonify({"success": False, "msg": str(e)})
+
+def obtener_rango_fecha(periodo, fecha_str):
+    try:
+        fecha = datetime.strptime(fecha_str, "%Y-%m-%d")
+        if periodo == "diario":
+            inicio = fecha.replace(hour=0, minute=0, second=0)
+            fin = fecha.replace(hour=23, minute=59, second=59)
+        elif periodo == "semanal":
+            inicio = fecha - timedelta(days=fecha.weekday())
+            inicio = inicio.replace(hour=0, minute=0, second=0)
+            fin = inicio + timedelta(days=6, hours=23, minutes=59, seconds=59)
+        elif periodo == "mensual":
+            inicio = fecha.replace(day=1, hour=0, minute=0, second=0)
+            if fecha.month == 12:
+                proximo_mes = fecha.replace(year=fecha.year + 1, month=1, day=1)
+            else:
+                proximo_mes = fecha.replace(month=fecha.month + 1, day=1)
+            fin = proximo_mes - timedelta(seconds=1)
+        elif periodo == "anual":
+            inicio = fecha.replace(month=1, day=1, hour=0, minute=0, second=0)
+            fin = fecha.replace(month=12, day=31, hour=23, minute=59, second=59)
+        else:
+            inicio = fin = fecha
+        return inicio.isoformat(), fin.isoformat()
+    except:
+        return fecha_str, fecha_str
+
+@app.route('/generar_reporte_personalizado', methods=['POST'])
+@login_requerido(rol='Administrador')
+def generar_reporte_personalizado():
+    try:
+        id_l = request.form.get('id_local')
+        periodo = request.form.get('periodo', 'diario')
+        fecha_base = request.form.get('fecha', datetime.now().strftime("%Y-%m-%d"))
+        
+        if not id_l: return "Error: Local no seleccionado", 400
+        
+        f_ini, f_fin = obtener_rango_fecha(periodo, fecha_base)
+        
+        # 1. Datos de Inventario actual del local
+        inv = supabase.table("inventario").select("cantidad, productos(nombre, unidad, categoria)")\
+            .eq("id_local", id_l).execute().data or []
+        
+        # 2. Datos de Consumo del periodo
+        cons = supabase.table("consumo").select("*, consumo_detalle(*, productos(nombre, unidad))")\
+            .eq("id_local", id_l).gte("fecha", f_ini).lte("fecha", f_fin).execute().data or []
+            
+        local_info = supabase.table("locales").select("nombre").eq("id_local", id_l).execute()
+        nombre_local = local_info.data[0]["nombre"] if local_info.data else "Desconocido"
+
+        # Generar PDF (Simplificado aquí para brevedad, usando estructura similar a consolidado)
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        styles = getSampleStyleSheet()
+        elements = []
+        
+        elements.append(Paragraph(f"REPORTE DE INVENTARIO Y CONSUMO - {nombre_local.upper()}", styles['Title']))
+        elements.append(Paragraph(f"Periodo: {periodo.capitalize()} ({f_ini[:10]} a {f_fin[:10]})", styles['Normal']))
+        elements.append(Spacer(1, 12))
+        
+        # Sección Inventario
+        elements.append(Paragraph("<b>Resumen de Inventario Actual</b>", styles['Heading2']))
+        data_inv = [["Producto", "Categoría", "Unidad", "Stock"]]
+        for i in inv:
+            p = i["productos"]
+            data_inv.append([p["nombre"], p.get("categoria",""), p["unidad"], i["cantidad"]])
+        
+        t_inv = Table(data_inv, colWidths=[200, 100, 80, 70])
+        t_inv.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0),colors.grey),('TEXTCOLOR',(0,0),(-1,0),colors.whitesmoke)]))
+        elements.append(t_inv)
+        elements.append(Spacer(1, 20))
+        
+        # Sección Consumo
+        elements.append(Paragraph("<b>Detalle de Consumos / Ventas en el Periodo</b>", styles['Heading2']))
+        if not cons:
+            elements.append(Paragraph("No se registraron consumos en este rango de fechas.", styles['Normal']))
+        else:
+            data_cons = [["Fecha", "Descripción", "Cantidad"]]
+            for c in cons:
+                fecha_str = str(c.get("fecha", ""))
+                data_cons.append([fecha_str[:16], c.get("observacion", ""), c.get("cantidad_platos", 0)])
+            
+            t_cons = Table(data_cons, colWidths=[120, 260, 70])
+            t_cons.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0),colors.red),('TEXTCOLOR',(0,0),(-1,0),colors.whitesmoke)]))
+            elements.append(t_cons)
+
+        doc.build(elements)
+        buffer.seek(0)
+        
+        response = make_response(buffer.getvalue())
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=Reporte_{nombre_local}_{periodo}.pdf'
+        return response
+        
+    except Exception as e:
+        return f"Error generando reporte: {str(e)}", 500
+
 @app.route('/Ad_Dinformes', methods=['GET'])
 @login_requerido(rol='Administrador')
 def Ad_Dinformes():
@@ -907,10 +1468,16 @@ def Ad_Dinformes():
         if informes.data:
             ultimo_informe = informes.data[0]
         
-        return render_template("Ad_templates/Ad_Dinformes.html", ultimo_informe=ultimo_informe)
+        locales = supabase.table("locales").select("*").execute().data or []
+        today = datetime.now().strftime("%Y-%m-%d")
+        
+        return render_template("Ad_templates/Ad_Dinformes.html", 
+                               ultimo_informe=ultimo_informe, 
+                               locales=locales,
+                               today=today)
     except Exception as e:
         print("Error al cargar página de informes:", e)
-        return render_template("Ad_templates/Ad_Dinformes.html", ultimo_informe=None)
+        return render_template("Ad_templates/Ad_Dinformes.html", ultimo_informe=None, locales=[], today="")
 
 def crear_informe_consolidado(pedidos, fecha):
     try:
@@ -2430,6 +2997,7 @@ def validar_token():
 def Em_Inicio():
     try:
         generar_notificaciones_caducidad()
+        generar_notificaciones_stock_bajo()
         eliminar_notificaciones_caducadas()
         
         try:
@@ -2523,14 +3091,27 @@ def registrar_pedido():
         if not (id_local and productos and isinstance(productos, list) and len(productos) > 0):
             return jsonify({"success": False, "msg": "Datos inválidos"}), 400
 
-        inventarios = []
+        # Corregido: Ya no se inserta en 'inventario' aquí. 
+        # El stock se incrementará solo cuando se RECIBE el pedido en Em_Rordenes.
+
+        # 1. Crear el pedido principal
+        pedido_res = supabase.table("pedido").insert({
+            "cedula": session.get("cedula"),
+            "estado": "Pendiente",
+            "fecha_pedido": datetime.now().isoformat()
+        }).execute()
+
+        if not (pedido_res.data and len(pedido_res.data) > 0):
+            return jsonify({"success": False, "msg": "No se pudo registrar el pedido"}), 500
+
+        id_pedido = pedido_res.data[0]["id_pedido"]
+
+        # 2. Registrar los detalles del pedido
         for prod in productos:
             id_producto = prod.get("Id_Producto")
             cantidad = prod.get("Cantidad")
-            fecha_ingreso = prod.get("Fecha_Ingreso")
-            fecha_caducidad = prod.get("Fecha_Caducidad")
 
-            if not (id_producto and cantidad and fecha_ingreso and fecha_caducidad):
+            if not (id_producto and cantidad):
                 continue
 
             try:
@@ -2539,49 +3120,19 @@ def registrar_pedido():
             except (ValueError, TypeError):
                 continue
 
-            if cantidad < 1 or cantidad > 1000:
-                continue
-
-            inv = supabase.table("inventario").insert({
-                "id_local": id_local,
-                "id_producto": id_producto,
-                "cantidad": cantidad,
-                "stock_minimo": 0
-            }).execute()
-
-            if inv.data:
-                inventarios.append(inv.data[0]["id_inventario"])
-
-        if not inventarios:
-            return jsonify({"success": False, "msg": "No se pudieron registrar inventarios"}), 400
-
-        pedido = supabase.table("pedido").insert({
-            "id_inventario": inventarios[0],
-            "cedula": session.get("cedula")
-        }).execute()
-
-        if not pedido.data:
-            return jsonify({"success": False, "msg": "No se pudo registrar el pedido"}), 500
-
-        id_pedido = pedido.data[0]["id_pedido"]
-
-        for prod in productos:
-            id_producto = prod.get("Id_Producto")
-            try:
-                id_producto = int(id_producto)
-            except ValueError:
-                id_producto = str(id_producto)
+            if cantidad < 1 or cantidad > 500:
+                return jsonify({"success": False, "msg": f"Cantidad inválida para {prod.get('Nombre', 'producto')}. Máximo 500."}), 400
 
             supabase.table("detalle_pedido").insert({
                 "id_pedido": id_pedido,
                 "id_producto": id_producto,
-                "cantidad": prod.get("Cantidad"),
-                "fecha_pedido": prod.get("Fecha_Ingreso")
+                "cantidad": cantidad,
+                "fecha_pedido": datetime.now().isoformat()
             }).execute()
 
         return jsonify({
             "success": True,
-            "msg": f"Pedido #{id_pedido} registrado con éxito con {len(productos)} productos."
+            "msg": f"Pedido #{id_pedido} registrado con éxito. Queda en estado 'Pendiente' hasta su recepción."
         })
     except Exception as e:
         print("Error al registrar pedido:", e)
@@ -2648,21 +3199,26 @@ def Em_Rordenes():
                 .execute()
 
             inventarios = inv_res.data or []
-            if not inventarios:
-                return jsonify({"success": False, "msg": "No existe inventario previo para este producto."}), 400
-
-            inventario_id = inventarios[0]["id_inventario"]
-
+            
             try:
-                supabase.table("inventario").update({
+                # Al recibir, SIEMPRE creamos un nuevo registro (lote) en el inventario
+                # para manejar correctamente las fechas de caducidad (FIFO).
+                supabase.table("inventario").insert({
+                    "id_local": session.get("branch"),
+                    "id_producto": id_producto,
                     "cantidad": cantidad,
                     "fecha_ingreso": hoy.isoformat(),
-                    "fecha_caducidad": fecha_cad_dt.isoformat()
-                }).eq("id_inventario", inventario_id).execute()
+                    "fecha_caducidad": fecha_cad_dt.isoformat(),
+                    "stock_minimo": 0
+                }).execute()
+                
+                # Opcional: Podríamos marcar el detalle como 'Recibido' si tuviéramos esa columna en detalle_pedido.
+                # Por ahora, simplemente confirmamos la recepción.
+                
             except Exception as e:
-                return jsonify({"success": False, "msg": f"Error al actualizar inventario: {e}"}), 500
+                return jsonify({"success": False, "msg": f"Error al gestionar inventario: {e}"}), 500
 
-            return jsonify({"success": True, "msg": "Producto confirmado correctamente."})
+            return jsonify({"success": True, "msg": "Producto recibido y sumado al inventario con éxito."})
 
         pedidos = supabase.table("pedido")\
             .select("id_pedido, estado, fecha_pedido")\

@@ -19,7 +19,7 @@
       <span class="user-role">{{ session.get('role', '') }}</span>
       {% if session.get('role') == 'Empleado' %}
       <div class="branch-badge">
-        <span class="branch-icon">📍</span>
+        <span class="branch-icon"></span>
         <span class="branch-name">{{ session.get('branch_name', 'Sin local') }}</span>
       </div>
       {% endif %}
@@ -30,19 +30,22 @@
         <img src="{{ url_for('static', filename='image/casita.png') }}"> Inicio
       </button>
       <button onclick="window.location.href='{{ url_for('Em_Consumo') }}'" class="menu-button">
-        <img src="{{ url_for('static', filename='image/ramen.png') }}"> Consumo
+        <img src="{{ url_for('static', filename='image/consumer.png') }}" alt="Informes"> Consumo
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Inventario') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Inventario"> Inventario
       </button>
       <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button">
-        <img src="{{ url_for('static', filename='image/caja.png') }}"> Recibir pedidos
+        <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Pedidos"> Pedidos
       </button>
       <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button">
-        <img src="{{ url_for('static', filename='image/carrito_super.png') }}"> Realizar pedidos
+        <img src="{{ url_for('static', filename='image/online-sale.png') }}" alt="Realizar pedidos"> Realizar pedidos
       </button>
       <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button active">
         <img src="{{ url_for('static', filename='image/reloj.png') }}"> Historial pedidos
       </button>
       <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
-        <img src="{{ url_for('static', filename='image/corazon.png') }}"> Usuario
+        <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Usuario"> Usuario
       </button>
     </nav>
     <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
@@ -57,7 +60,7 @@
 
     <!-- TODO: todo el contenido principal se agrupa dentro de .order-box (caja negra) -->
     <div class="order-box">
-      <!-- 🔍 Barra de búsqueda simplificada -->
+      <!-- Barra de búsqueda simplificada -->
       <form class="search-box" id="formBuscar" method="GET" action="{{ url_for('Em_Hordenes') }}">
         <input type="number" name="id_pedido" id="buscarId" class="ninja-input" placeholder="ID del pedido"
           value="{{ request.args.get('id_pedido', '') }}">
@@ -97,7 +100,7 @@
         {% endfor %}
         {% else %}
         <div class="no-orders">
-          <p>No hay pedidos confirmados 💤</p>
+          <p>No hay pedidos confirmados</p>
         </div>
         {% endif %}
       </div>

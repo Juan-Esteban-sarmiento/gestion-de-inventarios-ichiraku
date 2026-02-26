@@ -35,27 +35,32 @@ async function buscarProductos(termino = null) {
         if (data.success && data.productos && data.productos.length > 0) {
             data.productos.forEach(prod => {
                 const card = document.createElement("div");
-                card.classList.add("card");
+                card.classList.add("producto-card");
 
                 card.innerHTML = `
-                    <img src="${prod.foto || '/static/image/default.png'}" alt="${prod.nombre}" onerror="this.src='/static/image/default.png'">
-                    <h3>${prod.nombre}</h3>
-                    <p>Categoria: ${prod.categoria}</p>
-                    <p>Unidad: ${prod.unidad}</p>
-                    <input type="number" min="1" max="1000" value="1" id="cantidad-${prod.id_producto}" title="Cantidad máxima: 1000 ${prod.unidad}">
-                    <button onclick="agregarCarrito(${prod.id_producto}, '${prod.nombre.replace(/'/g, "\\'")}', '${prod.categoria.replace(/'/g, "\\'")}', '${prod.unidad.replace(/'/g, "\\'")}')">Agregar al Carrito</button>
+                    <div class="producto-card-img">
+                        <img src="${prod.foto || '/static/image/default.png'}" alt="${prod.nombre}" onerror="this.src='/static/image/default.png'">
+                    </div>
+                    <div class="producto-card-info">
+                        <h4>${prod.nombre}</h4>
+                        <span class="producto-categoria">${prod.categoria}</span>
+                        <span class="producto-unidad">${prod.unidad}</span>
+                    </div>
+                    <div class="consumo-item-controls">
+                        <input type="number" min="1" max="500" value="1" id="cantidad-${prod.id_producto}" class="qty-input">
+                        <button class="add-btn" onclick="agregarCarrito(${prod.id_producto}, '${prod.nombre.replace(/'/g, "\\'")}', '${prod.categoria.replace(/'/g, "\\'")}', '${prod.unidad.replace(/'/g, "\\'")}')">+</button>
+                    </div>
                 `;
                 container.appendChild(card);
             });
             console.log(`Cargados ${data.productos.length} productos.`);
         } else {
-            container.innerHTML = "<p style='text-align:center; color:#ccc;'>No se encontraron productos.</p>";
-            showMessage("No hay productos disponibles.", "error");
+            container.innerHTML = "<p style='text-align:center; color:#ccc; padding: 40px;'>No se encontraron productos.</p>";
+            if (termino !== "") showMessage("No hay productos disponibles.", "error");
         }
     } catch (error) {
         console.error("Error al buscar productos:", error);
-        container.innerHTML = "<p style='text-align:center; color:red;'>Error al cargar productos. Revisa la consola.</p>";
-        showMessage("Error de conexion. Intentalo de nuevo.", "error");
+        container.innerHTML = "<p style='text-align:center; color:red; padding: 40px;'>Error de conexión.</p>";
     }
 }
 
@@ -64,27 +69,19 @@ function agregarCarrito(id, nombre, categoria, unidad) {
     const cantidad = parseInt(cantidadInput.value) || 1;
 
     if (cantidad <= 0) {
-        showMessage("Cantidad debe ser mayor que 0.", "error");
-        cantidadInput.value = 1;
+        showMessage("Cantidad mínima: 1", "error");
         return;
     }
-
-    if (cantidad > 1000) {
-        showMessage("La cantidad máxima permitida es 1000 " + unidad + ".", "error");
-        cantidadInput.value = 1000;
+    if (cantidad > 500) {
+        alertaNinja("warning", "CANTIDAD EXCESIVA", "El límite por producto es de 500 unidades para evitar pedidos exorbitantes.");
         return;
     }
 
     const existingItemIndex = carrito.findIndex(item => item.Id_Producto === id);
 
     if (existingItemIndex > -1) {
-        const nuevaCantidad = carrito[existingItemIndex].Cantidad + cantidad;
-        if (nuevaCantidad > 1000) {
-            showMessage(`La cantidad total de ${nombre} no puede exceder 1000 ${unidad}. Cantidad actual: ${carrito[existingItemIndex].Cantidad}`, "error");
-            return;
-        }
-        carrito[existingItemIndex].Cantidad = nuevaCantidad;
-        showMessage(`Cantidad de ${nombre} actualizada: ${carrito[existingItemIndex].Cantidad}`, "success");
+        carrito[existingItemIndex].Cantidad += cantidad;
+        showMessage(`+${cantidad} ${nombre}`, "success");
     } else {
         carrito.push({
             Id_Producto: id,
@@ -93,7 +90,7 @@ function agregarCarrito(id, nombre, categoria, unidad) {
             Unidad: unidad,
             Cantidad: cantidad
         });
-        showMessage(`${nombre} (x${cantidad}) agregado al carrito.`, "success");
+        showMessage(`Agregado: ${nombre}`, "success");
     }
 
     renderCarrito();
@@ -102,10 +99,12 @@ function agregarCarrito(id, nombre, categoria, unidad) {
 
 function renderCarrito() {
     const lista = document.getElementById("pedido-lista");
+    const countBadge = document.getElementById("cart-count");
     lista.innerHTML = "";
 
     if (carrito.length === 0) {
-        lista.innerHTML = "<li style='text-align:center; color:#ccc; padding: 20px;'>El carrito esta vacio. Agrega productos.</li>";
+        lista.innerHTML = "<div class='empty-cart'><span class='empty-icon'>🛒</span><p>El carrito está vacío</p></div>";
+        countBadge.innerText = "0";
         return;
     }
 
@@ -113,18 +112,18 @@ function renderCarrito() {
     carrito.forEach((prod, index) => {
         totalItems += prod.Cantidad;
         const li = document.createElement("li");
+        li.classList.add("consumo-item");
         li.innerHTML = `
-            <span>${prod.Nombre} (${prod.Unidad}) - Cantidad: ${prod.Cantidad}</span>
-            <button onclick="eliminarDelCarrito(${index})" title="Eliminar">❌</button>
+            <div class="consumo-item-info">
+                <span class="consumo-item-name">${prod.Nombre}</span>
+                <span class="consumo-item-unidad">${prod.Cantidad} ${prod.Unidad} | ${prod.Categoria}</span>
+            </div>
+            <button class="remove-btn" onclick="eliminarDelCarrito(${index})" title="Eliminar">&times;</button>
         `;
         lista.appendChild(li);
     });
 
-    const totalLi = document.createElement("li");
-    totalLi.innerHTML = `<strong>Total: ${totalItems} items</strong>`;
-    totalLi.style.borderTop = "2px solid red";
-    totalLi.style.paddingTop = "10px";
-    lista.appendChild(totalLi);
+    countBadge.innerText = `${carrito.length}`;
 }
 
 function eliminarDelCarrito(index) {
@@ -189,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderCarrito();
 });
 
-document.getElementById("searchTerm").addEventListener("keypress", function(event) {
+document.getElementById("searchTerm").addEventListener("keypress", function (event) {
     if (event.key === "Enter") {
         event.preventDefault();
         buscarProductos();

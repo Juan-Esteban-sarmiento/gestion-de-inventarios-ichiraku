@@ -30,6 +30,12 @@
             <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
                 <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
             </button>
+            <button onclick="window.location.href='{{ url_for('Ad_Recetarios') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/ramen.png') }}" alt="Recetas"> Recetarios
+            </button>
+            <button onclick="window.location.href='{{ url_for('Ad_Inventario') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Inventario"> Inventario
+            </button>
             <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button">
                 <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reportes
             </button>
@@ -48,7 +54,7 @@
 
     <!-- Contenido principal -->
     <main class="main-content">
-        <div class="welcome-box">
+        <div class="box-welcome">
             <h1 class="welcome-title">Panel de administracion</h1>
         </div>
 

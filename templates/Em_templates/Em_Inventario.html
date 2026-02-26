@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Inventario - Ichiraku Ramen</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Inventario.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="user-profile">
+            <img src="{{ session.get('foto') or url_for('static', filename='image/default.png') }}" alt="Foto"
+                class="user-avatar"
+                onerror="this.onerror=null; this.src='{{ url_for('static', filename='image/default.png') }}';">
+            <span class="user-name">{{ session.get('nombre', 'Usuario') }}</span>
+            <span class="user-role">{{ session.get('role', '') }}</span>
+            {% if session.get('role') == 'Empleado' %}
+            <div class="branch-badge">
+                <span class="branch-icon"></span>
+                <span class="branch-name">{{ session.get('branch_name', 'Sin local') }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <nav class="menu">
+            <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
+            </button>
+
+            <button onclick="window.location.href='{{ url_for('Em_Consumo') }}' " class="menu-button">
+                <img src="{{ url_for('static', filename='image/consumer.png') }}" alt="Consumo"> Consumo
+            </button>
+            <button onclick="window.location.href='{{ url_for('Em_Inventario') }}'" class="menu-button active">
+                <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Inventario"> Inventario
+            </button>
+            <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Pedidos"> Pedidos
+            </button>
+            <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/online-sale.png') }}" alt="Realizar pedidos"> Realizar
+                pedidos
+            </button>
+            <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Historial pedidos"> Historial
+                pedidos
+            </button>
+            <button onclick="window.location.href='{{ url_for('Em_Ceditar') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Usuario"> Usuario
+            </button>
+        </nav>
+        <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
+    </div>
+
+    <main class="content">
+        <div class="box-welcome">
+            <h1 class="welcome-title">Control de Existencias</h1>
+        </div>
+
+        <div class="inventory-controls">
+            <input type="text" id="search-inv" placeholder="Buscar ingrediente..." onkeyup="filtrarTabla()">
+        </div>
+
+        <div class="table-container glass">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ingrediente</th>
+                        <th>Cantidad Disponible</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="inventory-tbody">
+                    <!-- Dinámico -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', cargarInventario);
+
+        async function cargarInventario() {
+            const tbody = document.getElementById('inventory-tbody');
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center">Cargando existencias...</td></tr>';
+
+            try {
+                const res = await fetch('/get_inventario_data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({}) // El servidor usa el local de la sesión
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    tbody.innerHTML = data.inventario.map(item => {
+                        const lowStock = item.stock < 10;
+                        return `
+                            <tr>
+                                <td>${item.nombre}</td>
+                                <td class="${lowStock ? 'low-stock' : ''}">${item.stock} ${item.unidad}</td>
+                                <td>
+                                    <span class="status-badge ${lowStock ? 'warning' : 'ok'}">
+                                        ${lowStock ? 'Por Agotarse' : 'Disponible'}
+                                    </span>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="3" class="text-center">${data.msg}</td></tr>`;
+                }
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center">Error de conexión</td></tr>';
+            }
+        }
+
+        function filtrarTabla() {
+            const term = document.getElementById('search-inv').value.toLowerCase();
+            const rows = document.querySelectorAll('#inventory-tbody tr');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(term) ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+
+</html>

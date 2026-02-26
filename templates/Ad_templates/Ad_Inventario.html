@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Inventario Administrador - Ichiraku Ramen</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Inventario.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="user-profile">
+            <img src="{{ session.get('foto') or url_for('static', filename='image/default.png') }}" alt="Foto"
+                class="user-avatar">
+            <span class="user-name">{{ session.get('nombre', 'Admin') }}</span>
+            <span class="user-role">Administrador</span>
+        </div>
+        <nav class="menu">
+            <button onclick="window.location.href='{{ url_for('Ad_Inicio') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
+            </button>
+            <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
+            </button>
+            <button onclick="window.location.href='{{ url_for('Ad_Recetarios') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/ramen.png') }}" alt="Recetas"> Recetarios
+            </button>
+            <button onclick="window.location.href='{{ url_for('Ad_Inventario') }}'" class="menu-button active">
+                <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Inventario"> Inventario
+            </button>
+            <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reportes
+            </button>
+            <button onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> Locales
+            </button>
+            <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/user.png') }}" alt="Empleados"> Empleados
+            </button>
+            <button onclick="window.location.href='/logout'" class="logout-btn">Cerrar Sesión</button>
+        </nav>
+    </div>
+
+    <main class="content">
+        <div class="box-welcome">
+            <h1 class="welcome-title">Control de Inventario Global</h1>
+            <p class="welcome-subtitle">Supervisa el stock en tiempo real de todos los locales.</p>
+        </div>
+
+        <div class="inventory-controls">
+            <div class="control-group">
+                <label>Seleccionar Local:</label>
+                <select id="local-selector" onchange="cargarInventario()">
+                    {% for local in locales %}
+                    <option value="{{ local.id_local }}">{{ local.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="control-group">
+                <input type="text" id="search-inv" placeholder="Buscar producto..." onkeyup="filtrarTabla()">
+            </div>
+        </div>
+
+        <div class="table-container glass">
+            <table id="inventory-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Categoría</th>
+                        <th>Unidad</th>
+                        <th>Stock Actual</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="inventory-tbody">
+                    <!-- Dinámico -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', cargarInventario);
+
+        async function cargarInventario() {
+            const localId = document.getElementById('local-selector').value;
+            const tbody = document.getElementById('inventory-tbody');
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center">Cargando...</td></tr>';
+
+            try {
+                const res = await fetch('/get_inventario_data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id_local: localId })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    tbody.innerHTML = data.inventario.map(item => {
+                        const lowStock = item.stock < item.minimo;
+                        return `
+                            <tr>
+                                <td>${item.nombre}</td>
+                                <td>${item.categoria || 'N/A'}</td>
+                                <td>${item.unidad}</td>
+                                <td class="${lowStock ? 'low-stock' : ''}">${item.stock} / ${item.minimo}</td>
+                                <td>
+                                    <span class="status-badge ${lowStock ? 'warning' : 'ok'}">
+                                        ${lowStock ? 'Stock Bajo' : 'Normal'}
+                                    </span>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center">${data.msg}</td></tr>`;
+                }
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center">Error de conexión</td></tr>';
+            }
+        }
+
+        function filtrarTabla() {
+            const term = document.getElementById('search-inv').value.toLowerCase();
+            const rows = document.querySelectorAll('#inventory-tbody tr');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(term) ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+
+</html>

@@ -65,8 +65,33 @@ function alertaNinjaFire(options) {
   return Swal.fire(opts);
 }
 
+function confirmarNinja(title, text, confirmText = 'SÍ, CONFIRMAR', cancelText = 'Cancelar') {
+  return Swal.fire({
+    title: `<span style="font-family: inherit;">${title}</span>`,
+    html: `<div style="color:#aaa;">${text}</div>`,
+    icon: 'question',
+    background: 'rgba(10, 10, 10, 0.98)',
+    color: '#dddddd',
+    iconColor: '#ff3333',
+    showCancelButton: true,
+    confirmButtonText: confirmText,
+    cancelButtonText: cancelText,
+    buttonsStyling: false,
+    customClass: {
+      popup: 'ninja-swal-popup',
+      title: 'ninja-swal-title',
+      htmlContainer: 'ninja-swal-text',
+      confirmButton: 'ninja-swal-confirm',
+      cancelButton: 'ninja-swal-cancel'
+    },
+    showClass: { popup: 'ninja-animate-in' },
+    hideClass: { popup: 'ninja-animate-out' }
+  });
+}
+
 window.alertaNinja = alertaNinja;
 window.alertaNinjaFire = alertaNinjaFire;
+window.confirmarNinja = confirmarNinja;
 
 /* --- ESTILOS INYECTADOS PARA SWEETALERT2 --- */
 const ninjaAlertStyle = document.createElement('style');

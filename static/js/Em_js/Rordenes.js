@@ -153,19 +153,12 @@ function confirmarPedidoCompleto(idPedido) {
         return;
     }
 
-    Swal.fire({
-        title: '<span style="font-family:njnaruto; color:#fff;">¿Confirmar pedido completo?</span>',
-        text: 'El pedido sera marcado como recibido.',
-        icon: 'question',
-        background: '#000',
-        color: '#fff',
-        showCancelButton: true,
-        confirmButtonText: '<span style="font-family:njnaruto;">Si, confirmar</span>',
-        cancelButtonText: '<span style="font-family:njnaruto;">Cancelar</span>',
-        confirmButtonColor: '#00ff7f',
-        cancelButtonColor: '#6c757d',
-        iconColor: '#00ff7f'
-    }).then(async (result) => {
+    confirmarNinja(
+        '¿Confirmar pedido completo?',
+        'El pedido será marcado como recibido y se actualizará el inventario.',
+        'SÍ, CONFIRMAR',
+        'Cancelar'
+    ).then(async (result) => {
         if (!result.isConfirmed) return;
 
         try {
@@ -186,13 +179,13 @@ function confirmarPedidoCompleto(idPedido) {
 
                 eliminarConfirmacionesDePedido(idPedido);
 
-                alertaNinja('success', 'Pedido confirmado', 'Todos los productos fueron recibidos.');
+                alertaNinja('success', 'Pedido confirmado', 'Todos los productos fueron recibidos correctamente.');
             } else {
-                alertaNinja('error', 'Error', data.msg || 'No se pudo actualizar el estado.');
+                alertaNinja('error', 'Error', data.msg || 'No se pudo actualizar el estado del pedido.');
             }
         } catch (err) {
             console.error("Error al actualizar pedido:", err);
-            alertaNinja('error', 'Error', 'No se pudo conectar con el servidor.');
+            alertaNinja('error', 'Error de Conexión', 'No se pudo comunicar con el servidor.');
         }
     });
 }

@@ -17,22 +17,23 @@
     <div class="layout">
         <div class="sidebar">
             <div class="user-profile">
-                <img src="{{ session.get('foto') or url_for('static', filename='image/default.png') }}" alt="Foto"
-                    class="user-avatar"
-                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='image/default.png') }}';">
-                <span class="user-name">{{ session.get('nombre', 'Usuario') }}</span>
-                <span class="user-role">{{ session.get('role', '') }}</span>
+                <img src="{{ session.get('foto') or url_for('static', filename='image/default.png') }}"
+                    alt="Foto de perfil" class="user-avatar">
+                <span class="user-name">{{ session.get('nombre') or 'Admin' }}</span>
+                <span class="user-role">Administrador</span>
             </div>
-
             <nav class="menu">
                 <button onclick="window.location.href='{{ url_for('Ad_Inicio') }}'" class="menu-button">
                     <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
                 </button>
-                <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
-                    <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Personal"> Personal
-                </button>
                 <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
                     <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
+                </button>
+                <button onclick="window.location.href='{{ url_for('Ad_Recetarios') }}'" class="menu-button">
+                    <img src="{{ url_for('static', filename='image/ramen.png') }}" alt="Recetas"> Recetarios
+                </button>
+                <button onclick="window.location.href='{{ url_for('Ad_Inventario') }}'" class="menu-button">
+                    <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Inventario"> Inventario
                 </button>
                 <button onclick="window.location.href='{{ url_for('Ad_Dinformes') }}'" class="menu-button active">
                     <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Reportes"> Reportes
@@ -40,18 +41,13 @@
                 <button onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'" class="menu-button">
                     <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> Locales
                 </button>
-                <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
-                    <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Avisos"> Avisos
-                </button>
-                <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
-                    <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Usuario"> Usuario
-                </button>
+                <button onclick="window.location.href='/logout'" class="logout-btn">Cerrar Sesión</button>
             </nav>
             <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
         </div>
 
         <main class="main-content">
-            <div class="welcome-box">
+            <div class="box-welcome">
                 <h1 class="welcome-title">Panel de administracion</h1>
             </div>
 
@@ -69,6 +65,12 @@
                 <div class="download-container">
                     <div class="informe-card">
                         <p><span>ID Informe:</span> {{ ultimo_informe.id_informe }}</p>
+                        <select name="id_local" required>
+                            <option value="">Seleccione un local...</option>
+                            {% for local in locales %}
+                            <option value="{{ local.id_local }}">{{ local.nombre }}</option>
+                            {% endfor %}
+                        </select>
                         <p><span>ID Pedido:</span> {{ ultimo_informe.id_inf_pedido }}</p>
                         <p><span>Fecha de creacion:</span> {{ ultimo_informe.fecha_creacion }}</p>
                         <button class="download-button" onclick="descargarInforme({{ ultimo_informe.id_informe }})">
@@ -79,6 +81,32 @@
                 {% else %}
                 <p>No hay informes generados aun.</p>
                 {% endif %}
+            </div>
+
+            <!-- 📊 Generador de reportes personalizados -->
+            <div class="search-box" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+                <h3 style="color: #666; margin-bottom: 15px;">Generar Reporte Detallado</h3>
+                <form action="{{ url_for('generar_reporte_personalizado') }}" method="POST"
+                    style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <select name="id_local" required style="padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                        <option value="">Seleccione Local...</option>
+                        {% for local in locales %}
+                        <option value="{{ local.id_local }}">{{ local.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                    <select name="periodo" style="padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                        <option value="diario">Diario</option>
+                        <option value="semanal">Semanal</option>
+                        <option value="mensual">Mensual</option>
+                        <option value="anual">Anual</option>
+                    </select>
+                    <input type="date" name="fecha" value="{{ hoy }}"
+                        style="padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                    <button type="submit"
+                        style="background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                        Generar PDF
+                    </button>
+                </form>
             </div>
 
             <!-- 🔥 Botones de acción -->
