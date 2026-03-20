@@ -1,2 +1,14 @@
 .env
 gestion de inventarios ichiraku.pem
+.gitgnore
+test_supabase.py
+test_endpoints.py
+test_negative.py
+verify_import.py
+Procfile
+Historias_de_usuario_ichiraku.docx
+debug_inventory.py
+audit_results.txt
+check_negative.py
+consumo_dump.json
+

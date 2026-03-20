@@ -239,18 +239,31 @@ function eliminarDelCarrito(idx) {
     renderizarConsumo();
 }
 
+let isProcessingConsumo = false;
+
 // 4. REGISTRO FINAL
 async function confirmarConsumo() {
+    if (isProcessingConsumo) return; // Bloqueo estricto inicial
+
     if (carritoConsumo.length === 0) {
         return alertaNinja("info", "CARRITO VACÍO", "Selecciona platos para registrar la venta.");
     }
+
+    isProcessingConsumo = true; // Iniciamos bloqueo
 
     const { isConfirmed } = await confirmarNinja(
         '¿CONFIRMAR VENTA?',
         `Se procesará el descuento de inventario para ${carritoConsumo.length} tipos de platos.`
     );
 
-    if (isConfirmed) {
+    if (!isConfirmed) {
+        isProcessingConsumo = false;
+        return;
+    }
+
+    const btn = document.querySelector('.register-btn');
+    if (btn) btn.disabled = true;
+
         Swal.fire({
             title: 'Procesando...',
             allowOutsideClick: false,
@@ -270,7 +283,7 @@ async function confirmarConsumo() {
                     })
                 });
                 const data = await res.json();
-                if (!data.success) throw new Error(data.msg); // El backend ya trae el mensaje detallado
+                if (!data.success) throw new Error(data.msg);
             }
 
             Swal.fire({
@@ -285,12 +298,13 @@ async function confirmarConsumo() {
 
             carritoConsumo = [];
             renderizarConsumo();
-            cargarHistorialHoy();
-            initComparativa();
+            await Promise.all([cargarHistorialHoy(), initComparativa()]);
         } catch (err) {
             alertaNinja("error", "ERROR DE INVENTARIO", err.message);
+        } finally {
+            if (btn) btn.disabled = false;
+            isProcessingConsumo = false; // Liberamos bloqueo
         }
-    }
 }
 
 // 5. HISTORIAL

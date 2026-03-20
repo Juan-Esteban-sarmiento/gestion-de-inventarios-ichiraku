@@ -62,9 +62,9 @@
             <h1 class="welcome-title">Registrar Venta de Platos</h1>
         </div>
 
-        <!-- Panel principal -->
+        <!-- Panel principal (Estructura Refinada de 2 Columnas) -->
         <div class="order-panel">
-            <!-- Sección 1: Búsqueda de Platos (Recetas) -->
+            <!-- Columna Izquierda: Búsqueda y Selección -->
             <div class="product-selection-section">
                 <div class="order-header">
                     <span>Buscar Platos</span>
@@ -72,6 +72,9 @@
                 <div class="search-controls">
                     <input type="text" id="searchTerm" placeholder="Nombre del plato...">
                     <button class="confirm-btn search-btn" onclick="buscarProductos()">Buscar</button>
+                    <button class="merma-btn-main" onclick="abrirModalMerma()">
+                        <span></span> Registrar Merma/Error
+                    </button>
                 </div>
 
                 <!-- Grid de platos -->
@@ -80,38 +83,41 @@
                 </div>
             </div>
 
-            <!-- Sección 2: Carrito de Consumo con Desglose -->
-            <div class="pedido-box">
-                <div class="pedido-header">
-                    <h2>Platos Seleccionados</h2>
-                    <span class="consumo-badge" id="consumo-count">0</span>
+            <!-- Columna Derecha: Acción y Análisis -->
+            <div class="side-execution-column" style="flex: 1; display: flex; flex-direction: column; gap: 30px;">
+                <!-- Carrito de Consumo -->
+                <div class="pedido-box" style="flex: 1; min-height: 350px;">
+                    <div class="pedido-header">
+                        <h2>Platos Seleccionados</h2>
+                        <span class="consumo-badge" id="consumo-count">0</span>
+                    </div>
+                    <ul id="consumo-lista">
+                        <li class="empty-cart">
+                            <p>Agrega platos para registrar consumo</p>
+                        </li>
+                    </ul>
+                    <button class="confirm-btn register-btn" onclick="confirmarConsumo()">Registrar Venta</button>
                 </div>
-                <ul id="consumo-lista">
-                    <li class="empty-cart">
-                        <p>Agrega platos para registrar consumo</p>
-                    </li>
-                </ul>
-                <button class="confirm-btn register-btn" onclick="confirmarConsumo()">Registrar Venta</button>
-            </div>
 
-            <!-- Sección 3: Comparativa de Inventario -->
-            <div class="comparativa-box">
-                <div class="pedido-header">
-                    <h2>Análisis Comparativo</h2>
-                </div>
-                <div class="comparativa-content">
-                    <table class="comparativa-table">
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th>Consumo Hoy</th>
-                                <th>Stock Actual</th>
-                            </tr>
-                        </thead>
-                        <tbody id="comparativa-tbody">
-                            <!-- Cargado vía JS -->
-                        </tbody>
-                    </table>
+                <!-- Análisis Comparativo -->
+                <div class="comparativa-box" style="flex: 1; min-height: 300px;">
+                    <div class="pedido-header">
+                        <h2>Analisis de Stock</h2>
+                    </div>
+                    <div class="comparativa-content">
+                        <table class="comparativa-table">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Hoy</th>
+                                    <th>Stock</th>
+                                </tr>
+                            </thead>
+                            <tbody id="comparativa-tbody">
+                                <!-- Cargado vía JS -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -153,6 +159,55 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ url_for('static', filename='js/Global_js/alertaNinja.js') }}"></script>
     <script src="{{ url_for('static', filename='js/Em_js/Consumo.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/Em_js/Merma.js') }}"></script>
+
+    <!-- Modal para Registrar Merma (Diseño Refinado) -->
+    <div id="mermaModal" class="modal-merma">
+        <div class="modal-content-merma">
+            <div class="modal-header-merma">
+                <h2> Registrar Merma</h2>
+                <span class="modal-close" onclick="cerrarModalMerma()">&times;</span>
+            </div>
+
+            <div class="merma-form-group">
+                <label>1. Buscar Insumo/Producto</label>
+                <div class="merma-input-search">
+                    <input type="text" id="mermaSearch" placeholder="Nombre del producto...">
+                    <button class="confirm-btn" onclick="buscarProductosMerma()">🔍</button>
+                </div>
+                <div id="mermaResults" class="merma-results-box" style="display: none;">
+                    <!-- Resultados -->
+                </div>
+                <div id="productoSeleccionadoMerma" class="merma-selected-badge" style="display: none;">
+                    <span id="mermaProdName"></span>
+                    <input type="hidden" id="mermaProdId">
+                </div>
+            </div>
+
+            <div class="merma-form-row">
+                <div class="merma-form-group">
+                    <label>2. Cantidad</label>
+                    <input type="number" id="mermaCantidad" step="0.01" min="0.01" placeholder="Ej: 0.5">
+                </div>
+                <div class="merma-form-group">
+                    <label>3. Unidad</label>
+                    <input type="text" id="mermaUnidad" readonly placeholder="Unidad"
+                        style="opacity: 0.6; cursor: not-allowed;">
+                </div>
+            </div>
+
+            <div class="merma-form-group">
+                <label>4. Motivo del Error</label>
+                <textarea id="mermaMotivo" placeholder="Describa brevemente qué sucedió..."></textarea>
+            </div>
+
+            <div class="modal-footer-merma">
+                <button onclick="cerrarModalMerma()" class="confirm-btn merma-btn-cancel">Cancelar</button>
+                <button onclick="guardarMerma()" id="btnGuardarMerma" class="confirm-btn merma-btn-save">Confirmar
+                    Registro</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

@@ -126,21 +126,26 @@ def generar_notificaciones_caducidad():
         import traceback
         traceback.print_exc()
 
-def generar_notificaciones_stock_bajo():
+def generar_notificaciones_stock_bajo(target_local_id=None):
     try:
-        # 1. Obtener todos los productos habilitados que tengan un stock mínimo definido
-        # Nota: Si falla por columna inexistente, capturamos el error
+        # 1. Obtener todos los productos habilitados
         try:
             productos_res = supabase.table("productos").select("id_producto, nombre, unidad").eq("habilitado", True).execute()
             productos = productos_res.data or []
         except Exception as e:
-            print("Error al consultar tabla productos (posible falta columna stock_minimo):", e)
+            print("Error al consultar tabla productos:", e)
             return
 
         if not productos:
             return
 
-        locales = supabase.table("locales").select("id_local, nombre").execute().data or []
+        # 2. Filtrar locales: solo el objetivo o todos
+        if target_local_id:
+            locales_res = supabase.table("locales").select("id_local, nombre").eq("id_local", target_local_id).execute()
+        else:
+            locales_res = supabase.table("locales").select("id_local, nombre").execute()
+        
+        locales = locales_res.data or []
         
         for local in locales:
             id_l = local["id_local"]
@@ -163,27 +168,36 @@ def generar_notificaciones_stock_bajo():
                 unidad_p = p["unidad"]
                 actual = stock_actual_map.get(pid, 0)
                 if actual <= 50:
-                    mensaje = f"⚠️ STOCK BAJO: '{nombre_p}' en {nombre_l}. ACTUAL: {actual} {unidad_p} (Límite: 50)"
+                    if actual == 0:
+                        mensaje = f"🛑 AGOTADO: '{nombre_p}' en {nombre_l}. No queda stock disponible."
+                        tipo_noti = "stock_agotado"
+                    else:
+                        mensaje = f"⚠️ STOCK BAJO: '{nombre_p}' en {nombre_l}. ACTUAL: {actual} {unidad_p} (Límite: 50)"
+                        tipo_noti = "stock_bajo"
                     
-                    # Evitar duplicados
+                    # Evitar duplicados del mismo tipo para el mismo producto en el mismo local
                     existente = supabase.table("notificaciones")\
                         .select("id_notificaciones")\
-                        .eq("tipo", "stock_bajo")\
+                        .eq("tipo", tipo_noti)\
                         .ilike("mensaje", f"%{nombre_p}%{nombre_l}%")\
                         .execute()
                     
                     if not existente.data:
+                        # Si existía la otra (ej: pasó de bajo a agotado), borrar la vieja
+                        otra_tipo = "stock_bajo" if tipo_noti == "stock_agotado" else "stock_agotado"
+                        supabase.table("notificaciones").delete().eq("tipo", otra_tipo).ilike("mensaje", f"%{nombre_p}%{nombre_l}%").execute()
+
                         supabase.table("notificaciones").insert({
                             "mensaje": mensaje,
-                            "tipo": "stock_bajo",
+                            "tipo": tipo_noti,
                             "leido": False,
                             "fecha": datetime.now().isoformat()
                         }).execute()
                 else:
-                    # Limpiar notificación si el stock se recuperó
+                    # Limpiar notificaciones si el stock se recuperó
                     supabase.table("notificaciones")\
                         .delete()\
-                        .eq("tipo", "stock_bajo")\
+                        .in_("tipo", ["stock_bajo", "stock_agotado"])\
                         .ilike("mensaje", f"%{nombre_p}%{nombre_l}%")\
                         .execute()
 
@@ -359,36 +373,37 @@ def registrar_consumo():
         if not inventario.data:
             return jsonify({"success": False, "msg": "No hay stock disponible."}), 400
         
-        restante = cantidad_val
+        def to_num(val):
+            if isinstance(val, (int, float)):
+                return int(val) if float(val).is_integer() else float(val)
+            return val
+
+        # Validacion atómica antes de hacer descuentos
+        disponible_total = sum(float(l['cantidad']) for l in inventario.data)
+        if disponible_total < float(cantidad_val):
+             return jsonify({"success": False, "msg": f"Stock insuficiente. Solo hay {to_num(disponible_total)} {producto_info.data[0].get('unidad', '')}."}), 400
+
+        restante = float(cantidad_val)
         detalles_afectados = []
         
         for lote in inventario.data:
-            cant_lote = lote['cantidad']
+            cant_lote = float(lote['cantidad'])
             id_inv = lote['id_inventario']
             
             if cant_lote >= restante:
-                nueva_cant = cant_lote - restante
-                # No borrar, solo poner en 0 para mantener integridad referencial
-                if nueva_cant <= 0:
-                    supabase.table("inventario").update({"cantidad": 0}).eq("id_inventario", id_inv).execute()
-                else:
-                    supabase.table("inventario").update({"cantidad": nueva_cant}).eq("id_inventario", id_inv).execute()
-                
                 detalles_afectados.append({
                     "id_producto": int(id_producto),
                     "id_inventario": id_inv,
-                    "cantidad_consumida": restante,
+                    "cantidad_consumida": to_num(restante),
                     "fecha": datetime.now().isoformat()
                 })
                 restante = 0
                 break
             else:
-                # Poner en 0 en lugar de borrar
-                supabase.table("inventario").update({"cantidad": 0}).eq("id_inventario", id_inv).execute()
                 detalles_afectados.append({
                     "id_producto": int(id_producto),
                     "id_inventario": id_inv,
-                    "cantidad_consumida": cant_lote,
+                    "cantidad_consumida": to_num(cant_lote),
                     "fecha": datetime.now().isoformat()
                 })
                 restante -= cant_lote
@@ -408,8 +423,93 @@ def registrar_consumo():
                     supabase.table("consumo_detalle").insert(det).execute()
         except: pass
 
+        # Generar alertas inmediatas (optimizado por local)
+        generar_notificaciones_stock_bajo(session.get('branch'))
+
         return jsonify({"success": True, "msg": "Consumo registrado correctamente."})
     except Exception as e:
+        return jsonify({"success": False, "msg": str(e)})
+
+@app.route('/registrar_merma', methods=['POST'])
+@login_requerido(rol='Empleado')
+def registrar_merma():
+    try:
+        data = request.get_json()
+        id_producto = data.get('id_producto')
+        cantidad_val = data.get('cantidad')
+        motivo = data.get('motivo', 'No especificado')
+        id_l = session.get('branch')
+
+        if not id_producto or not cantidad_val:
+            return jsonify({"success": False, "msg": "Datos incompletos."}), 400
+
+        # Obtener info básica del producto
+        producto_info = supabase.table("productos").select("nombre, unidad").eq("id_producto", id_producto).execute()
+        if not producto_info.data:
+            return jsonify({"success": False, "msg": "Producto no encontrado."}), 404
+        
+        nombre_producto = producto_info.data[0]['nombre']
+
+        # Validar stock (FIFO)
+        inventario = supabase.table("inventario").select("*").eq("id_producto", id_producto).eq("id_local", id_l).gt("cantidad", 0).order("fecha_caducidad").execute()
+        
+        if not inventario.data:
+             return jsonify({"success": False, "msg": f"Stock insuficiente para '{nombre_producto}'. No hay existencias."}), 400
+
+        disponible_total = sum(float(l['cantidad']) for l in inventario.data)
+        if disponible_total < float(cantidad_val):
+             return jsonify({"success": False, "msg": f"Stock insuficiente. Solo hay {to_num(disponible_total)} {producto_info.data[0].get('unidad', '')}."}), 400
+
+        restante = float(cantidad_val)
+        detalles_afectados = []
+        
+        for lote in inventario.data:
+            cant_lote = float(lote['cantidad'])
+            id_inv = lote['id_inventario']
+            
+            if cant_lote >= restante:
+                detalles_afectados.append({
+                    "id_producto": int(id_producto),
+                    "id_inventario": id_inv,
+                    "cantidad_consumida": to_num(restante),
+                    "fecha": datetime.now().isoformat()
+                })
+                restante = 0
+                break
+            else:
+                detalles_afectados.append({
+                    "id_producto": int(id_producto),
+                    "id_inventario": id_inv,
+                    "cantidad_consumida": to_num(cant_lote),
+                    "fecha": datetime.now().isoformat()
+                })
+                restante -= cant_lote
+
+        # Registrar historial bajo categoría MERMA
+        try:
+            cons_res = supabase.table("consumo").insert({
+                "fecha": datetime.now().isoformat(),
+                "cantidad_platos": 0, # No es un plato vendido
+                "id_local": id_l,
+                "observacion": f"[MERMA] {motivo} | Prod: {nombre_producto} (Cant: {cantidad_val})"
+            }).execute()
+            
+            if cons_res.data:
+                id_c = cons_res.data[0]["id_consumo"]
+                for det in detalles_afectados:
+                    det["id_consumo"] = id_c
+                    # La inserción activa el Trigger de DB para descontar
+                    supabase.table("consumo_detalle").insert(det).execute()
+        except Exception as e:
+            print("Error en insert merma:", e)
+            return jsonify({"success": False, "msg": "Error al registrar merma en base de datos."}), 500
+
+        # Generar alertas inmediatas
+        generar_notificaciones_stock_bajo(id_l)
+
+        return jsonify({"success": True, "msg": "Merma registrada correctamente."})
+    except Exception as e:
+        print("Error en /registrar_merma:", e)
         return jsonify({"success": False, "msg": str(e)})
 
 @app.route('/get_recetas_empleado', methods=['POST'])
@@ -426,46 +526,10 @@ def get_recetas_empleado():
     except Exception as e:
         return jsonify({"success": False, "msg": str(e)})
 
-def descontar_stock_fifo(id_producto, cantidad_total, id_local):
-    """Auxiliar para descontar ingredientes"""
-    try:
-        # Filtrar solo lotes con stock disponible
-        lotes = supabase.table("inventario").select("*")\
-            .eq("id_producto", id_producto)\
-            .eq("id_local", id_local)\
-            .gt("cantidad", 0)\
-            .order("fecha_caducidad")\
-            .execute()
-        
-        if not lotes.data: return False, "Sin stock", []
-        
-        disponible = sum(l['cantidad'] for l in lotes.data)
-        if disponible < cantidad_total: return False, f"Solo hay {disponible}", []
-        
-        restante = float(cantidad_total)
-        afectados = []
-        for lote in lotes.data:
-            id_inv = lote['id_inventario']
-            cant_lote = float(lote['cantidad'])
-            
-            if cant_lote >= restante:
-                nueva = cant_lote - restante
-                # No borrar, solo poner en 0
-                if nueva <= 0:
-                    supabase.table("inventario").update({"cantidad": 0}).eq("id_inventario", id_inv).execute()
-                else:
-                    supabase.table("inventario").update({"cantidad": nueva}).eq("id_inventario", id_inv).execute()
-                
-                afectados.append({"id_prod": id_producto, "id_inv": id_inv, "cant": restante})
-                restante = 0
-                break
-            else:
-                # No borrar, solo poner en 0
-                supabase.table("inventario").update({"cantidad": 0}).eq("id_inventario", id_inv).execute()
-                afectados.append({"id_prod": id_producto, "id_inv": id_inv, "cant": cant_lote})
-                restante -= cant_lote
-        return True, "OK", afectados
-    except Exception as e: return False, str(e), []
+def to_num(val):
+    if isinstance(val, (int, float)):
+        return int(val) if float(val).is_integer() else float(val)
+    return val
 
 @app.route('/registrar_consumo_receta', methods=['POST'])
 @login_requerido(rol='Empleado')
@@ -477,42 +541,91 @@ def registrar_consumo_receta():
         id_l = session.get('branch')
         
         receta = supabase.table("recetarios").select("nombre").eq("id_receta", id_r).execute()
-        if not receta.data: return jsonify({"success": False, "msg": "Receta no existe"}), 404
-        
+        if not receta.data:
+            return jsonify({"success": False, "msg": "Receta no existe"}), 404
+            
         detalles = supabase.table("receta_detalle").select("*, productos(nombre, unidad)").eq("id_receta", id_r).execute()
-        if not detalles.data: return jsonify({"success": False, "msg": "Receta vacía"}), 400
-        
-        afectados_total = []
+        if not detalles.data:
+            return jsonify({"success": False, "msg": "La receta no tiene ingredientes."}), 400
+
+        # FASE 0: Agregar ingredientes por ID de producto (evita doble descuento si hay duplicados en la receta)
+        ingredientes_agregados = {}
         for ing in detalles.data:
+            pid = ing["id_producto"]
+            cant_ing = float(ing["cantidad"])
+            if pid not in ingredientes_agregados:
+                ingredientes_agregados[pid] = {
+                    "id_producto": pid,
+                    "cantidad": 0,
+                    "productos": ing.get("productos")
+                }
+            ingredientes_agregados[pid]["cantidad"] += cant_ing
+
+        # FASE 1: Validar stock de todos los ingredientes
+        inventario_necesario = []
+        for ing in ingredientes_agregados.values():
             p_name = ing['productos']['nombre'] if ing.get('productos') else ing['id_producto']
             p_unit = ing['productos']['unidad'] if ing.get('productos') else ""
-            requerido = float(ing["cantidad"]) * cant_p
+            requerido = round(float(ing["cantidad"]) * cant_p, 4)
             
-            res, msg, aff = descontar_stock_fifo(ing["id_producto"], requerido, id_l)
-            if not res: 
-                # msg ya trae "Sin stock" o "Solo hay X"
-                full_msg = f"Stock insuficiente para '{p_name}'. {msg} {p_unit} (Requerido: {requerido} {p_unit})"
-                return jsonify({"success": False, "msg": full_msg}), 400
-            afectados_total.extend(aff)
+            lotes = supabase.table("inventario").select("*").eq("id_producto", ing["id_producto"]).eq("id_local", id_l).gt("cantidad", 0).order("fecha_caducidad").execute()
             
+            if not lotes.data:
+                return jsonify({"success": False, "msg": f"Stock insuficiente para '{p_name}'. Sin stock (Requerido: {to_num(requerido)} {p_unit})"}), 400
+                
+            disponible = round(sum(float(l['cantidad']) for l in lotes.data), 4)
+            if disponible < requerido:
+                return jsonify({"success": False, "msg": f"Stock insuficiente para '{p_name}'. Solo hay {to_num(disponible)} {p_unit} (Requerido: {to_num(requerido)} {p_unit})"}), 400
+                
+            inventario_necesario.append({
+                "id_producto": ing["id_producto"],
+                "requerido": requerido,
+                "lotes": lotes.data
+            })
+
+        # FASE 2: Descontar stock (sin transacciones, pero con validacion previa exitosa)
+        afectados_total = []
+        for item in inventario_necesario:
+            restante = float(item["requerido"])
+            for lote in item["lotes"]:
+                if restante <= 0: break
+                id_inv = lote['id_inventario']
+                cant_lote = float(lote['cantidad'])
+                
+                if cant_lote >= restante:
+                    afectados_total.append({"id_prod": item["id_producto"], "id_inv": id_inv, "cant": to_num(restante)})
+                    restante = 0
+                else:
+                    afectados_total.append({"id_prod": item["id_producto"], "id_inv": id_inv, "cant": to_num(cant_lote)})
+                    restante -= cant_lote
+
+        # Registrar consumo e historial
         c_res = supabase.table("consumo").insert({
-            "fecha": datetime.now().isoformat(), "cantidad_platos": cant_p,
-            "id_receta": id_r, "id_local": id_l, "observacion": f"Venta: {cant_p} {receta.data[0]['nombre']}"
+            "fecha": datetime.now().isoformat(),
+            "cantidad_platos": cant_p,
+            "id_receta": id_r,
+            "id_local": id_l,
+            "observacion": f"Venta: {cant_p} platos de {receta.data[0]['nombre']}"
         }).execute()
         
         if c_res.data:
             idc = c_res.data[0]["id_consumo"]
             for a in afectados_total:
                 supabase.table("consumo_detalle").insert({
-                    "id_consumo": idc, "id_producto": a["id_prod"], "id_inventario": a["id_inv"],
-                    "cantidad_consumida": a["cant"], "fecha": datetime.now().isoformat()
+                    "id_consumo": idc,
+                    "id_producto": a["id_prod"],
+                    "id_inventario": a["id_inv"],
+                    "cantidad_consumida": a["cant"],
+                    "fecha": datetime.now().isoformat()
                 }).execute()
-        return jsonify({"success": True, "msg": "¡Venta registrada!"})
-    except Exception as e: return jsonify({"success": False, "msg": str(e)})
-
+                
+        # Generar alertas inmediatas (optimizado por local)
+        generar_notificaciones_stock_bajo(id_l)
+        
+        return jsonify({"success": True, "msg": "¡Venta registrada exitosamente!"})
     except Exception as e:
-        print("Error en registrar_consumo:", e)
-        return jsonify({"success": False, "msg": "Error del servidor."}), 500
+        print("Error en registrar_consumo_receta:", e)
+        return jsonify({"success": False, "msg": "Verifique que todos los productos esten en el inventario. Error: "+str(e)}), 400
 
 
 @app.route('/historial_consumo_hoy', methods=['GET'])
@@ -550,7 +663,8 @@ def historial_consumo_hoy():
 
     except Exception as e:
         print("Error en historial_consumo_hoy:", e)
-        return jsonify({"success": False, "msg": "Error al obtener historial."}), 500
+        import traceback
+        return jsonify({"success": False, "msg": f"Error al obtener historial: {str(e)}\n{traceback.format_exc()}"}), 500
 
 @app.route('/get_receta_breakdown', methods=['POST'])
 @login_requerido(rol='Empleado')
@@ -647,13 +761,14 @@ def get_consumo_comparative():
                 "nombre": nombre,
                 "unidad": unidad,
                 "consumido": agregado_consumo.get(pid, {}).get("total_consumido", 0),
-                "stock": stock_actual.get(pid, 0)
+                "stock": max(0, stock_actual.get(pid, 0))
             })
 
         return jsonify({"success": True, "comparativa": comparativa})
     except Exception as e:
         print("Error en get_consumo_comparative:", e)
-        return jsonify({"success": False, "msg": str(e)}), 500
+        import traceback
+        return jsonify({"success": False, "msg": f"Error: {str(e)}\n{traceback.format_exc()}"}), 500
 
 
 @app.route('/stock_producto_sucursal', methods=['POST'])
@@ -1400,59 +1515,109 @@ def generar_reporte_personalizado():
         
         f_ini, f_fin = obtener_rango_fecha(periodo, fecha_base)
         
-        # 1. Datos de Inventario actual del local
-        inv = supabase.table("inventario").select("cantidad, productos(nombre, unidad, categoria)")\
-            .eq("id_local", id_l).execute().data or []
-        
-        # 2. Datos de Consumo del periodo
-        cons = supabase.table("consumo").select("*, consumo_detalle(*, productos(nombre, unidad))")\
-            .eq("id_local", id_l).gte("fecha", f_ini).lte("fecha", f_fin).execute().data or []
-            
+        # 1. Obtener datos del local
         local_info = supabase.table("locales").select("nombre").eq("id_local", id_l).execute()
         nombre_local = local_info.data[0]["nombre"] if local_info.data else "Desconocido"
 
-        # Generar PDF (Simplificado aquí para brevedad, usando estructura similar a consolidado)
+        # 2. Obtener Consumo del periodo con detalles
+        cons_res = supabase.table("consumo").select("*, consumo_detalle(*, productos(nombre, unidad))")\
+            .eq("id_local", id_l).gte("fecha", f_ini).lte("fecha", f_fin).execute()
+        consumos = cons_res.data or []
+
+        # 3. Procesar y categorizar: Ventas vs Merma
+        resumen_productos = {} # {id_prod: {nombre, unidad, venta: 0, merma: 0}}
+        total_ventas_count = 0
+        total_merma_items = 0
+
+        for c in consumos:
+            is_merma = "[MERMA]" in (c.get("observacion") or "")
+            if is_merma:
+                total_merma_items += 1
+            else:
+                total_ventas_count += c.get("cantidad_platos", 0)
+
+            for det in c.get("consumo_detalle", []):
+                p = det.get("productos")
+                if not p: continue
+                pid = det["id_producto"]
+                if pid not in resumen_productos:
+                    resumen_productos[pid] = {
+                        "nombre": p["nombre"],
+                        "unidad": p["unidad"],
+                        "venta": 0,
+                        "merma": 0
+                    }
+                
+                cant = float(det["cantidad_consumida"])
+                if is_merma:
+                    resumen_productos[pid]["merma"] += cant
+                else:
+                    resumen_productos[pid]["venta"] += cant
+
+        # Generar PDF con ReportLab
         buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=40)
         styles = getSampleStyleSheet()
         elements = []
         
-        elements.append(Paragraph(f"REPORTE DE INVENTARIO Y CONSUMO - {nombre_local.upper()}", styles['Title']))
-        elements.append(Paragraph(f"Periodo: {periodo.capitalize()} ({f_ini[:10]} a {f_fin[:10]})", styles['Normal']))
-        elements.append(Spacer(1, 12))
-        
-        # Sección Inventario
-        elements.append(Paragraph("<b>Resumen de Inventario Actual</b>", styles['Heading2']))
-        data_inv = [["Producto", "Categoría", "Unidad", "Stock"]]
-        for i in inv:
-            p = i["productos"]
-            data_inv.append([p["nombre"], p.get("categoria",""), p["unidad"], i["cantidad"]])
-        
-        t_inv = Table(data_inv, colWidths=[200, 100, 80, 70])
-        t_inv.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0),colors.grey),('TEXTCOLOR',(0,0),(-1,0),colors.whitesmoke)]))
-        elements.append(t_inv)
+        # Título y Encabezado
+        elements.append(Paragraph(f"<b>INFORME TÉCNICO DE INVENTARIO</b>", styles['Title']))
+        elements.append(Paragraph(f"<b>Sede:</b> {nombre_local.upper()} | <b>Periodo:</b> {periodo.upper()}", styles['Normal']))
+        elements.append(Paragraph(f"<b>Desde:</b> {f_ini[:10]} | <b>Hasta:</b> {f_fin[:10]}", styles['Normal']))
         elements.append(Spacer(1, 20))
+
+        # Resumen Ejecutivo
+        elements.append(Paragraph("<b>1. Resumen Ejecutivo</b>", styles['Heading2']))
+        resumen_data = [
+            ["Métrica", "Valor"],
+            ["Total Platos Vendidos", total_ventas_count],
+            ["Registros de Merma/Error", total_merma_items],
+            ["Fecha Reporte", datetime.now().strftime("%d/%m/%Y %H:%M")]
+        ]
+        t_res = Table(resumen_data, colWidths=[200, 100])
+        t_res.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('GRID', (0,0), (-1,-1), 0.5, colors.grey)
+        ]))
+        elements.append(t_res)
+        elements.append(Spacer(1, 20))
+
+        # Detalle por Producto
+        elements.append(Paragraph("<b>2. Consumo Detallado por Insumo (Ventas vs Merma)</b>", styles['Heading2']))
+        data_prod = [["Insumo", "Unidad", "Ventas", "Merma/Error", "Total"]]
         
-        # Sección Consumo
-        elements.append(Paragraph("<b>Detalle de Consumos / Ventas en el Periodo</b>", styles['Heading2']))
-        if not cons:
-            elements.append(Paragraph("No se registraron consumos en este rango de fechas.", styles['Normal']))
-        else:
-            data_cons = [["Fecha", "Descripción", "Cantidad"]]
-            for c in cons:
-                fecha_str = str(c.get("fecha", ""))
-                data_cons.append([fecha_str[:16], c.get("observacion", ""), c.get("cantidad_platos", 0)])
-            
-            t_cons = Table(data_cons, colWidths=[120, 260, 70])
-            t_cons.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0),colors.red),('TEXTCOLOR',(0,0),(-1,0),colors.whitesmoke)]))
-            elements.append(t_cons)
+        sorted_products = sorted(resumen_productos.values(), key=lambda x: x['nombre'])
+        for p in sorted_products:
+            total = p['venta'] + p['merma']
+            data_prod.append([
+                p['nombre'], 
+                p['unidad'], 
+                to_num(p['venta']), 
+                to_num(p['merma']), 
+                to_num(total)
+            ])
+
+        t_prod = Table(data_prod, colWidths=[200, 70, 70, 80, 70])
+        t_prod.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#e74c3c")),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (2, 0), (-1, -1), 'CENTER'),
+            ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold')
+        ]))
+        elements.append(t_prod)
+        
+        elements.append(Spacer(1, 30))
+        elements.append(Paragraph("<i>Nota: El informe refleja el stock restado del inventario físico en el periodo seleccionado.</i>", styles['Italic']))
 
         doc.build(elements)
         buffer.seek(0)
         
+        filename = f"Informe_{nombre_local}_{fecha_base}_{periodo}.pdf"
         response = make_response(buffer.getvalue())
         response.headers['Content-Type'] = 'application/pdf'
-        response.headers['Content-Disposition'] = f'attachment; filename=Reporte_{nombre_local}_{periodo}.pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename={filename}'
         return response
         
     except Exception as e:

@@ -18,13 +18,17 @@
         <div class="sidebar">
             <div class="user-profile">
                 <img src="{{ session.get('foto') or url_for('static', filename='image/default.png') }}"
-                    alt="Foto de perfil" class="user-avatar">
-                <span class="user-name">{{ session.get('nombre') or 'Admin' }}</span>
-                <span class="user-role">Administrador</span>
+                    alt="Foto de perfil" class="user-avatar"
+                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='image/default.png') }}';">
+                <span class="user-name">{{ session.get('nombre', 'Usuario') }}</span>
+                <span class="user-role">{{ session.get('role', '') }}</span>
             </div>
             <nav class="menu">
                 <button onclick="window.location.href='{{ url_for('Ad_Inicio') }}'" class="menu-button">
                     <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
+                </button>
+                <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
+                    <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Personal"> Personal
                 </button>
                 <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
                     <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
@@ -41,96 +45,122 @@
                 <button onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'" class="menu-button">
                     <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> Locales
                 </button>
-                <button onclick="window.location.href='/logout'" class="logout-btn">Cerrar Sesión</button>
+                <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
+                    <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Avisos"> Avisos
+                </button>
+                <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
+                    <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Usuario"> Usuario
+                </button>
             </nav>
             <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
         </div>
-
         <main class="main-content">
-            <div class="box-welcome">
-                <h1 class="welcome-title">Panel de administracion</h1>
-            </div>
+            <div class="reporting-hub">
+                <div class="hub-header">
+                    <h1 class="welcome-title">Centro de Reportes</h1>
+                    <p class="welcome-subtitle">Gestión y auditoría de inventarios Ichiraku</p>
+                </div>
 
-            <!-- Caja de busqueda -->
-            <div class="search-box">
-                <form id="searchForm">
-                    <input type="text" id="id_informe" placeholder="ID Informe ...">
-                    <input type="text" id="datePicker" placeholder="Seleccionar fecha..." readonly>
-                    <button type="submit">Buscar</button>
-                </form>
-            </div>
-
-            <div id="resultEmpleado" class="result-box">
-                {% if ultimo_informe %}
-                <div class="download-container">
-                    <div class="informe-card">
-                        <p><span>ID Informe:</span> {{ ultimo_informe.id_informe }}</p>
-                        <select name="id_local" required>
-                            <option value="">Seleccione un local...</option>
-                            {% for local in locales %}
-                            <option value="{{ local.id_local }}">{{ local.nombre }}</option>
-                            {% endfor %}
-                        </select>
-                        <p><span>ID Pedido:</span> {{ ultimo_informe.id_inf_pedido }}</p>
-                        <p><span>Fecha de creacion:</span> {{ ultimo_informe.fecha_creacion }}</p>
-                        <button class="download-button" onclick="descargarInforme({{ ultimo_informe.id_informe }})">
-                            Descargar PDF
-                        </button>
+                <!-- 🔍 Sección de Búsqueda de Informes -->
+                <div class="search-section">
+                    <div class="search-box">
+                        <form id="searchForm">
+                            <input type="text" id="id_informe" placeholder="ID de Informe...">
+                            <input type="text" id="datePicker" placeholder="Filtrar por fecha..." readonly>
+                            <button type="submit">Buscar Informe</button>
+                        </form>
                     </div>
                 </div>
-                {% else %}
-                <p>No hay informes generados aun.</p>
-                {% endif %}
-            </div>
 
-            <!-- 📊 Generador de reportes personalizados -->
-            <div class="search-box" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
-                <h3 style="color: #666; margin-bottom: 15px;">Generar Reporte Detallado</h3>
-                <form action="{{ url_for('generar_reporte_personalizado') }}" method="POST"
-                    style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <select name="id_local" required style="padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-                        <option value="">Seleccione Local...</option>
-                        {% for local in locales %}
-                        <option value="{{ local.id_local }}">{{ local.nombre }}</option>
-                        {% endfor %}
-                    </select>
-                    <select name="periodo" style="padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-                        <option value="diario">Diario</option>
-                        <option value="semanal">Semanal</option>
-                        <option value="mensual">Mensual</option>
-                        <option value="anual">Anual</option>
-                    </select>
-                    <input type="date" name="fecha" value="{{ hoy }}"
-                        style="padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-                    <button type="submit"
-                        style="background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
-                        Generar PDF
+                <!-- 📦 Visualizador de Resultados (Glass Container) -->
+                <div class="reports-display-area">
+                    <div id="resultEmpleado" class="result-box">
+                        {% if ultimo_informe %}
+                        <div class="informe-card-wrapper">
+                            <div class="informe-card">
+                                <div class="card-header">
+                                    <span class="report-id-badge">ID #{{ ultimo_informe.id_informe }}</span>
+                                    <span class="report-type-badge">{{ ultimo_informe.tipo or 'Consolidado' }}</span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="info-row">
+                                        <label>Fecha de creacion:</label>
+                                        <span>{{ ultimo_informe.fecha_creacion }}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <label>Local origen:</label>
+                                        <span>Ichiraku Principal</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <label>ID Pedido ref:</label>
+                                        <span>{{ ultimo_informe.id_inf_pedido }}</span>
+                                    </div>
+                                </div>
+                                <button class="download-button main-download" onclick="descargarInforme({{ ultimo_informe.id_informe }})">
+                                    <img src="{{ url_for('static', filename='image/descargar.png') }}" alt="PDF"> Descargar Informe PDF
+                                </button>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="empty-reports">
+                            <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="No hay datos" style="opacity: 0.2; width: 60px;">
+                            <p>No se encontraron informes para mostrar.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- ⚙️ Generador de Reportes Personalizados -->
+                <div class="report-generator-box">
+                    <h3>Generar Reporte Detallado</h3>
+                    <form action="{{ url_for('generar_reporte_personalizado') }}" method="POST" class="generator-form">
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label>Seleccionar Local</label>
+                                <select name="id_local" required>
+                                    <option value="">-- Eliga un local --</option>
+                                    {% for local in locales %}
+                                    <option value="{{ local.id_local }}">{{ local.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Período</label>
+                                <select name="periodo">
+                                    <option value="diario">Diario</option>
+                                    <option value="semanal">Semanal</option>
+                                    <option value="mensual">Mensual</option>
+                                    <option value="anual">Anual</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Fecha Base</label>
+                                <input type="date" name="fecha" value="{{ hoy }}">
+                            </div>
+                            <div class="input-group submit-group">
+                                <label style="opacity: 0;">Acción</label>
+                                <button type="submit" class="btn-generate">Generar Reporte Premium</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- ⚡ Accesos Rápidos (Footer Actions) -->
+                <div class="quick-actions-bar">
+                    <button class="action-btn" id="genDayBtn">
+                         Día
                     </button>
-                </form>
+                    <button class="action-btn" id="downloadSemBtn">
+                         Semana
+                    </button>
+                    <button class="action-btn" id="downloadMesBtn">
+                         Mes
+                    </button>
+                    <button class="action-btn" id="downloadAnioBtn">
+                         Año
+                    </button>
+                </div>
             </div>
-
-            <!-- 🔥 Botones de acción -->
-            <div class="download-container">
-                <button class="download-button" id="genDayBtn">
-                    <img src="{{ url_for('static', filename='image/grafica.png') }}" alt="Generar"> Generar informe
-                    diario
-                </button>
-
-                <button class="download-button" id="downloadSemBtn">
-                    <img src="{{ url_for('static', filename='image/descargar.png') }}" alt="Descargar"> Descargar
-                    semanal
-                </button>
-
-                <button class="download-button" id="downloadMesBtn">
-                    <img src="{{ url_for('static', filename='image/descargar.png') }}" alt="Descargar"> Descargar
-                    mensual
-                </button>
-
-                <button class="download-button" id="downloadAnioBtn">
-                    <img src="{{ url_for('static', filename='image/descargar.png') }}" alt="Descargar"> Descargar anual
-                </button>
-            </div>
-
         </main>
     </div>
 

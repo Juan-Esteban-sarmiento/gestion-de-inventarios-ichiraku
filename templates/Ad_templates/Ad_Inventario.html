@@ -12,13 +12,18 @@
     <div class="sidebar">
         <div class="user-profile">
             <img src="{{ session.get('foto') or url_for('static', filename='image/default.png') }}" alt="Foto"
-                class="user-avatar">
-            <span class="user-name">{{ session.get('nombre', 'Admin') }}</span>
-            <span class="user-role">Administrador</span>
+                class="user-avatar"
+                onerror="this.onerror=null; this.src='{{ url_for('static', filename='image/default.png') }}';">
+            <span class="user-name">{{ session.get('nombre', 'Usuario') }}</span>
+            <span class="user-role">{{ session.get('role', '') }}</span>
         </div>
+
         <nav class="menu">
             <button onclick="window.location.href='{{ url_for('Ad_Inicio') }}'" class="menu-button">
                 <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
+            </button>
+            <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/folder.png') }}" alt="Personal"> Personal
             </button>
             <button onclick="window.location.href='{{ url_for('Ad_Rproductos') }}'" class="menu-button">
                 <img src="{{ url_for('static', filename='image/base.png') }}" alt="Productos"> Productos
@@ -35,14 +40,18 @@
             <button onclick="window.location.href='{{ url_for('Ad_Rlocales') }}'" class="menu-button">
                 <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> Locales
             </button>
-            <button onclick="window.location.href='{{ url_for('Ad_Rempleados') }}'" class="menu-button">
-                <img src="{{ url_for('static', filename='image/user.png') }}" alt="Empleados"> Empleados
+            <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Avisos"> Avisos
             </button>
-            <button onclick="window.location.href='/logout'" class="logout-btn">Cerrar Sesión</button>
+            <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
+                <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Usuario"> Usuario
+            </button>
         </nav>
+
+        <button class="logout-btn" onclick="window.location.href='/logout'">Cerrar sesion</button>
     </div>
 
-    <main class="content">
+    <main class="main-content">
         <div class="box-welcome">
             <h1 class="welcome-title">Control de Inventario Global</h1>
             <p class="welcome-subtitle">Supervisa el stock en tiempo real de todos los locales.</p>
@@ -105,7 +114,7 @@
                                 <td>${item.nombre}</td>
                                 <td>${item.categoria || 'N/A'}</td>
                                 <td>${item.unidad}</td>
-                                <td class="${lowStock ? 'low-stock' : ''}">${item.stock} / ${item.minimo}</td>
+                                <td class="${lowStock ? 'low-stock' : ''}">${item.stock}</td>
                                 <td>
                                     <span class="status-badge ${lowStock ? 'warning' : 'ok'}">
                                         ${lowStock ? 'Stock Bajo' : 'Normal'}

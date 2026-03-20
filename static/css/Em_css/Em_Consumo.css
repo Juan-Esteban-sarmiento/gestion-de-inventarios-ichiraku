@@ -45,8 +45,8 @@
 }
 
 .product-selection-section {
-    flex: 1.5;
-    max-height: 80vh;
+    flex: 2;
+    max-height: 85vh;
     overflow-y: auto;
 }
 
@@ -59,11 +59,18 @@
 }
 
 .comparativa-box {
-    flex: 1.3;
+    flex: 1;
     max-height: 80vh;
     display: flex;
     flex-direction: column;
-    min-width: 380px;
+}
+
+.side-execution-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    min-width: 400px;
 }
 
 /* ─── Subtitles ─── */
@@ -139,6 +146,32 @@
 
 .search-btn {
     min-width: 100px;
+}
+
+.merma-btn-main {
+    background: rgba(179, 0, 0, 0.05);
+    color: var(--red-brand);
+    border: 1px solid rgba(179, 0, 0, 0.4);
+    padding: 12px 22px;
+    border-radius: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.merma-btn-main:hover {
+    background: var(--red-brand);
+    color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(179, 0, 0, 0.4);
+    border-color: transparent;
 }
 
 /* ─── Product Grid ─── */
@@ -713,6 +746,150 @@
 .stock-critico {
     background: rgba(239, 68, 68, 0.1);
     color: #ef4444;
+}
+
+/* ─── Modal Glassmorphism (Final Refined) ─── */
+.modal-merma {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-content-merma {
+    background: linear-gradient(145deg, rgba(30, 30, 30, 0.95), rgba(10, 10, 10, 0.98));
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 35px;
+    border-radius: 24px;
+    width: 100%;
+    max-width: 550px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8), 0 0 20px rgba(179, 0, 0, 0.1);
+    position: relative;
+    color: var(--text-main);
+    animation: modalPopOut 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+@keyframes modalPopOut {
+    from { transform: translateY(30px) scale(0.95); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.modal-header-merma {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--red-brand);
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+}
+
+.modal-header-merma h2 {
+    font-family: var(--font-primary);
+    color: var(--text-bright);
+    font-size: 1.4rem;
+    margin: 0;
+    letter-spacing: 1px;
+}
+
+.modal-close {
+    font-size: 30px;
+    cursor: pointer;
+    color: #666;
+    transition: 0.2s;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    color: var(--red-brand);
+    transform: rotate(90deg);
+}
+
+.merma-form-group {
+    margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+}
+
+.merma-form-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 700;
+    font-size: 11px;
+    color: var(--red-brand);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.merma-input-search {
+    display: flex;
+    gap: 12px;
+}
+
+.merma-input-search input,
+.merma-form-group input[type="number"],
+.merma-form-group textarea {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 14px 18px;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 14px;
+    width: 100%;
+    transition: 0.3s;
+}
+
+.merma-form-group textarea {
+    height: 100px;
+    resize: none;
+}
+
+.merma-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.modal-footer-merma {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.modal-footer-merma button {
+    flex: 1;
+}
+
+/* ─── Results Box Refined ─── */
+.merma-results-box {
+    max-height: 180px;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    margin-top: 10px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.merma-selected-badge {
+    margin-top: 12px;
+    padding: 12px 18px;
+    background: rgba(179, 0, 0, 0.1);
+    border: 1px solid rgba(179, 0, 0, 0.3);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 /* ─── Animations ─── */

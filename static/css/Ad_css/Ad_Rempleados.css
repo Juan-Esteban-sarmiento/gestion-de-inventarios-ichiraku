@@ -104,8 +104,8 @@ label {
 
 input {
     width: 100%;
-    background: rgba(0, 0, 0, 0.4) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
     color: #eee !important;
     padding: 12px 16px !important;
     border-radius: 12px !important;
@@ -114,9 +114,9 @@ input {
 }
 
 input:focus {
-    border-color: rgba(255, 0, 0, 0.8) !important;
-    background: rgba(255, 0, 0, 0.05) !important;
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.2);
+    border-color: var(--red-brand) !important;
+    background: rgba(255, 0, 0, 0.03) !important;
+    box-shadow: 0 0 15px rgba(179, 0, 0, 0.15);
 }
 
 /* --- Botones (Montserrat) --- */

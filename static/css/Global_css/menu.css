@@ -22,6 +22,10 @@
 /* ============================================
    BASE GLOBAL
    ============================================ */
+:root {
+    color-scheme: dark; /* 🔥 Forzar elementos nativos (dropdowns, etc) a modo oscuro */
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -359,6 +363,20 @@ textarea {
     padding: 12px;
     border-radius: 8px;
     outline: none;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+select option {
+    background-color: #111 !important;
+    color: #fff !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--red-brand);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 15px rgba(179, 0, 0, 0.1);
 }
 
 /* ============================================

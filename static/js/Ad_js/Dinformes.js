@@ -19,14 +19,25 @@ document.getElementById('searchForm').addEventListener('submit', async (e) => {
 
         if (data.success && data.informes && data.informes.length > 0) {
             resultBox.innerHTML = `
-                <div class="download-container">
+                <div class="informe-card-wrapper" style="max-width: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; width: 100%;">
                 ${data.informes.map(inf => `
                     <div class="informe-card">
-                        <p><span>ID Informe</span> ${inf.id_informe}</p>
-                        <p><span>ID Pedido</span> ${inf.id_inf_pedido || 'Consolidado'}</p>
-                        <p><span>Fecha</span> ${new Date(inf.fecha_creacion).toLocaleString('es-CO')}</p>
-                        <button class="download-button" onclick="descargarInforme(${inf.id_informe})">
-                            Descargar PDF
+                        <div class="card-header">
+                            <span class="report-id-badge">ID #${inf.id_informe}</span>
+                            <span class="report-type-badge">${inf.id_inf_pedido ? 'Pedido' : 'Consolidado'}</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="info-row">
+                                <label>Fecha de creación:</label>
+                                <span>${new Date(inf.fecha_creacion).toLocaleString('es-CO')}</span>
+                            </div>
+                            <div class="info-row">
+                                <label>Referencia:</label>
+                                <span>${inf.id_inf_pedido ? 'Pedido #' + inf.id_inf_pedido : 'Cierre Diario'}</span>
+                            </div>
+                        </div>
+                        <button class="download-button main-download" onclick="descargarInforme(${inf.id_informe})">
+                             Descargar PDF
                         </button>
                     </div>
                 `).join('')}
@@ -196,13 +207,23 @@ async function buscarPorFecha(fecha) {
         });
         const data = await res.json();
         if (data.success && data.informes?.length) {
-            resultBox.innerHTML = `<div class="download-container">${data.informes.map(inf => `
-                <div class="informe-card">
-                    <p><span>ID Informe</span> ${inf.id_informe}</p>
-                    <p><span>Fecha</span> ${new Date(inf.fecha_creacion).toLocaleString('es-CO')}</p>
-                    <button class="download-button" onclick="descargarInforme(${inf.id_informe})">Bajar PDF</button>
-                </div>`).join('')}</div>`;
-        } else { resultBox.innerHTML = `<p style="text-align:center; color:#666;">No hay reportes esta fecha.</p>`; }
+            resultBox.innerHTML = `
+                <div class="informe-card-wrapper" style="max-width: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; width: 100%;">
+                ${data.informes.map(inf => `
+                    <div class="informe-card">
+                        <div class="card-header">
+                            <span class="report-id-badge">ID #${inf.id_informe}</span>
+                            <span class="report-type-badge">Individual</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="info-row">
+                                <label>Fecha:</label>
+                                <span>${new Date(inf.fecha_creacion).toLocaleString('es-CO')}</span>
+                            </div>
+                        </div>
+                        <button class="download-button main-download" onclick="descargarInforme(${inf.id_informe})">Descargar PDF</button>
+                    </div>`).join('')}</div>`;
+        } else { resultBox.innerHTML = `<div class="empty-reports"><p>No hay reportes para esta fecha.</p></div>`; }
     } catch (e) { alertaNinja('error', 'Error', 'Fallo en búsqueda.'); }
 }
 
@@ -214,15 +235,22 @@ async function cargarUltimoInforme() {
         if (data.success && data.informe) {
             const inf = data.informe;
             box.innerHTML = `
-                <div class="download-container">
+                <div class="informe-card-wrapper">
                     <div class="informe-card">
-                        <p><span>ID Informe:</span> ${inf.id_informe}</p>
-                        <p><span>Fecha:</span> ${new Date(inf.fecha_creacion).toLocaleString('es-CO')}</p>
-                        <p><span>Tipo:</span> ${inf.tipo === 'diario_consolidado' ? 'Consolidado' : 'Individual'}</p>
-                        <button class="download-button" onclick="descargarInforme(${inf.id_informe})">DESCARGAR PDF</button>
+                        <div class="card-header">
+                            <span class="report-id-badge">ID #${inf.id_informe}</span>
+                            <span class="report-type-badge">${inf.tipo === 'diario_consolidado' ? 'Consolidado' : 'Individual'}</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="info-row">
+                                <label>Último reporte generado:</label>
+                                <span>${new Date(inf.fecha_creacion).toLocaleString('es-CO')}</span>
+                            </div>
+                        </div>
+                        <button class="download-button main-download" onclick="descargarInforme(${inf.id_informe})">DESCARGAR ULTIMO PDF</button>
                     </div>
                 </div>`;
-        } else { box.innerHTML = '<p style="text-align:center; color:#666;">No hay reportes generados.</p>'; }
+        } else { box.innerHTML = '<div class="empty-reports"><p>No hay reportes generados recientemente.</p></div>'; }
     } catch (e) { console.error(e); }
 }
 
