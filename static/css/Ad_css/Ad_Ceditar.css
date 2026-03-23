@@ -8,8 +8,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center; /* Enforce vertical centering */
+    min-height: 100vh;
     width: calc(100% - 240px);
 }
+
 
 /* --- CONTENEDOR MAESTRO --- */
 .form-container {
@@ -82,30 +85,12 @@
 .edit-form input:focus {
     border-color: rgba(255, 0, 0, 0.6) !important;
     background: rgba(255, 0, 0, 0.03) !important;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.1);
 }
 
-/* Boton de accion del formulario */
-.profile-btn-c {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1.5px solid rgba(255, 0, 0, 0.3);
-    color: #fff;
-    padding: 14px;
-    border-radius: 12px;
-    font-family: var(--font-secondary) !important;
-    font-weight: 600;
-    font-size: 13px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: 0.3s;
-    margin-top: 10px;
-}
 
-.profile-btn-c:hover {
-    background: var(--red-brand);
-    border-color: var(--red-brand);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(179, 0, 0, 0.4);
-}
+/* Boton de accion del formulario retirado (usando global .btn) */
+
 
 /* --- SECCION DERECHA: FOTO DE PERFIL --- */
 .profile-section {
@@ -137,38 +122,32 @@
     box-shadow: 0 0 45px rgba(179, 0, 0, 0.5);
 }
 
-.profile-btn {
+.profile-section .btn {
     width: 100%;
-    padding: 12px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.05);
-    color: #ddd;
-    font-family: var(--font-secondary) !important;
-    font-size: 11px;
-    text-transform: uppercase;
-    font-weight: 700;
-    cursor: pointer;
-    transition: 0.3s;
+    max-width: 220px;
+    height: 44px !important;
+    font-size: 11px !important;
 }
 
-.profile-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+.profile-section .btn.delete {
+    background: rgba(255, 50, 50, 0.1) !important;
+    border-color: rgba(255, 50, 50, 0.3) !important;
+    color: #ff6b6b !important;
 }
 
-.profile-btn.delete {
-    background: transparent;
-    border: none;
-    color: #666;
-    text-decoration: underline;
-    font-size: 10px;
-    margin-top: -10px;
+.profile-section .btn.delete:hover {
+    background: #ff3232 !important;
+    color: #fff !important;
 }
 
-.profile-btn.delete:hover {
-    color: #ff4d4d;
+
+.profile-btn-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
+
 
 /* Modal Styles */
 .modal {

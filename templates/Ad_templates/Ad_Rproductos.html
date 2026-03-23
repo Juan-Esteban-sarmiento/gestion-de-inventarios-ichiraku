@@ -4,8 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Ichiraku Ramen - Administración productos</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Rproductos.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Rproductos.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/components.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}?v=2.0">
+
+
     <script src="{{ url_for('static', filename='js/Global_js/session_timeout.js') }}"></script>
 </head>
 
@@ -64,29 +67,37 @@
             <section class="register-box">
                 <h2>Registrar producto</h2>
                 <form id="registerProductForm" novalidate>
-                    <label for="nombreProducto">Nombre producto</label>
-                    <input type="text" id="nombreProducto" placeholder="Nombre producto" required>
+                    <div class="input-group">
+                        <label for="nombreProducto">Nombre producto</label>
+                        <input type="text" id="nombreProducto" placeholder="Ej: Ramen de Cerdo" required>
+                    </div>
 
-                    <!-- 🔹 Categoria como SELECT -->
-                    <label for="categoriaProducto">Categoria producto</label>
-                    <select id="categoriaProducto" required>
-                        <option value="">Seleccione una categoria</option>
-                    </select>
+                    <div class="input-group">
+                        <label for="categoriaProducto">Categoria producto</label>
+                        <select id="categoriaProducto" required>
+                            <option value="">Seleccione una categoria</option>
+                        </select>
+                    </div>
 
-                    <label for="unidadProducto">Unidad</label>
-                    <select id="unidadProducto" required disabled>
-                        <option value="">Seleccione una categoria primero</option>
-                    </select>
+                    <div class="input-group">
+                        <label for="unidadProducto">Unidad de Medida</label>
+                        <select id="unidadProducto" required disabled>
+                            <option value="">Seleccione una categoria primero</option>
+                        </select>
+                    </div>
 
-                    <label for="serialProducto">Serial producto</label>
-                    <input type="text" id="serialProducto" placeholder="Serial" readonly>
-                    <small class="form-text text-muted">El serial se coloca automaticamente</small>
+                    <div class="input-group">
+                        <label for="serialProducto">Serial (Automático)</label>
+                        <input type="text" id="serialProducto" placeholder="Serial" readonly>
+                    </div>
+
 
                     <div class="form-actions">
                         <button type="submit" class="btn">
                             <img class="icon" src="{{ url_for('static', filename='image/mas.png') }}" alt="mas" />
                             Registrar
                         </button>
+
 
                         <input type="file" id="fotoProducto" accept="image/*" style="display:none;">
                         <img id="previewFotoProducto" src="" alt="Vista previa"

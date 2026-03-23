@@ -4,8 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Ichiraku Ramen - Administrador de avisos</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Pnotificaciones.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Pnotificaciones.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/components.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}?v=2.0">
+
+
     <script src="{{ url_for('static', filename='js/Global_js/session_timeout.js') }}"></script>
 
 </head>
@@ -65,7 +68,7 @@
             <section class="search-box">
                 <h2>Lista de avisos</h2>
 
-                <div class="notifications-list">
+                <div class="notifications-list" id="notifications-list">
                     {% for noti in notificaciones %}
                     <div class="notification-item {% if noti.tipo == 'prioritaria' %}prioritaria{% endif %}"
                         data-id="{{ noti.id_notificaciones }}">
@@ -82,6 +85,14 @@
                     <p style="text-align:center; color:white;">No hay avisos disponibles</p>
                     {% endfor %}
                 </div>
+
+                <!-- Botón Cargar Más -->
+                <div id="load-more-container" style="text-align: center; margin-top: 20px; {% if notificaciones|length < 20 %}display:none;{% endif %}">
+                    <button id="btn-load-more" class="btn">
+                        Cargar más avisos
+                    </button>
+                </div>
+
 
             </section>
         </div>

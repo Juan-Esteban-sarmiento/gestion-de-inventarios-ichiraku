@@ -2,8 +2,10 @@
 <html lang="es">
 
 <head>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Dinformes.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Dinformes.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/components.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}?v=2.0">
+
     <script src="{{ url_for('static', filename='js/Global_js/session_timeout.js') }}"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -62,15 +64,18 @@
                 </div>
 
                 <!-- 🔍 Sección de Búsqueda de Informes -->
-                <div class="search-section">
-                    <div class="search-box">
+                    <div class="search-capsule">
                         <form id="searchForm">
-                            <input type="text" id="id_informe" placeholder="ID de Informe...">
-                            <input type="text" id="datePicker" placeholder="Filtrar por fecha..." readonly>
-                            <button type="submit">Buscar Informe</button>
+                            <div class="input-group">
+                                <input type="text" id="id_informe" placeholder="ID de Informe...">
+                            </div>
+                            <div class="input-group">
+                                <input type="text" id="datePicker" placeholder="Filtrar por fecha..." readonly>
+                            </div>
+                            <button type="submit" class="btn-search">Buscar Informe</button>
                         </form>
                     </div>
-                </div>
+
 
                 <!-- 📦 Visualizador de Resultados (Glass Container) -->
                 <div class="reports-display-area">
@@ -137,10 +142,10 @@
                                 <label>Fecha Base</label>
                                 <input type="date" name="fecha" value="{{ hoy }}">
                             </div>
-                            <div class="input-group submit-group">
-                                <label style="opacity: 0;">Acción</label>
-                                <button type="submit" class="btn-generate">Generar Reporte Premium</button>
+                            <div class="submit-group">
+                                <button type="submit" class="btn">Generar Reporte Premium</button>
                             </div>
+
                         </div>
                     </form>
                 </div>

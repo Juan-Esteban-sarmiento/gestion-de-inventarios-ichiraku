@@ -2,8 +2,11 @@
 <html lang="es">
 
 <head>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Consumo.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Consumo.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/components.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}?v=2.0">
+
+
     <script src="{{ url_for('static', filename='js/Global_js/session_timeout.js') }}"></script>
     <meta charset="UTF-8">
     <title>Ichiraku Ramen - Registrar Consumo</title>
@@ -70,12 +73,16 @@
                     <span>Buscar Platos</span>
                 </div>
                 <div class="search-controls">
-                    <input type="text" id="searchTerm" placeholder="Nombre del plato...">
-                    <button class="confirm-btn search-btn" onclick="buscarProductos()">Buscar</button>
-                    <button class="merma-btn-main" onclick="abrirModalMerma()">
-                        <span></span> Registrar Merma/Error
+                    <div class="input-group">
+                        <label for="searchTerm">Nombre del plato</label>
+                        <input type="text" id="searchTerm" placeholder="Ej: Ramen Tonkotsu...">
+                    </div>
+                    <button class="btn search-btn" onclick="buscarProductos()">Buscar</button>
+                    <button class="btn secondary merma-btn-main" onclick="abrirModalMerma()">
+                        Registrar Merma
                     </button>
                 </div>
+
 
                 <!-- Grid de platos -->
                 <div id="productos-container" class="productos-grid">
@@ -96,7 +103,8 @@
                             <p>Agrega platos para registrar consumo</p>
                         </li>
                     </ul>
-                    <button class="confirm-btn register-btn" onclick="confirmarConsumo()">Registrar Venta</button>
+                    <button class="btn register-btn" onclick="confirmarConsumo()">Registrar Venta</button>
+
                 </div>
 
                 <!-- Análisis Comparativo -->
@@ -169,12 +177,14 @@
                 <span class="modal-close" onclick="cerrarModalMerma()">&times;</span>
             </div>
 
-            <div class="merma-form-group">
-                <label>1. Buscar Insumo/Producto</label>
-                <div class="merma-input-search">
-                    <input type="text" id="mermaSearch" placeholder="Nombre del producto...">
-                    <button class="confirm-btn" onclick="buscarProductosMerma()">🔍</button>
+                <div class="input-group">
+                    <label>1. Buscar Insumo/Producto</label>
+                    <div class="merma-input-search">
+                        <input type="text" id="mermaSearch" placeholder="Nombre del producto...">
+                        <button class="btn secondary" onclick="buscarProductosMerma()">🔍</button>
+                    </div>
                 </div>
+
                 <div id="mermaResults" class="merma-results-box" style="display: none;">
                     <!-- Resultados -->
                 </div>
@@ -185,27 +195,29 @@
             </div>
 
             <div class="merma-form-row">
-                <div class="merma-form-group">
+                <div class="input-group">
                     <label>2. Cantidad</label>
                     <input type="number" id="mermaCantidad" step="0.01" min="0.01" placeholder="Ej: 0.5">
                 </div>
-                <div class="merma-form-group">
+                <div class="input-group">
                     <label>3. Unidad</label>
                     <input type="text" id="mermaUnidad" readonly placeholder="Unidad"
-                        style="opacity: 0.6; cursor: not-allowed;">
+                        style="background: rgba(34,34,34,0.5); cursor: not-allowed;">
                 </div>
             </div>
 
-            <div class="merma-form-group">
+
+            <div class="input-group">
                 <label>4. Motivo del Error</label>
-                <textarea id="mermaMotivo" placeholder="Describa brevemente qué sucedió..."></textarea>
+                <textarea id="mermaMotivo" placeholder="Describa brevemente qué sucedió..." style="height: 80px;"></textarea>
             </div>
 
+
             <div class="modal-footer-merma">
-                <button onclick="cerrarModalMerma()" class="confirm-btn merma-btn-cancel">Cancelar</button>
-                <button onclick="guardarMerma()" id="btnGuardarMerma" class="confirm-btn merma-btn-save">Confirmar
-                    Registro</button>
+                <button onclick="cerrarModalMerma()" class="btn secondary">Cancelar</button>
+                <button onclick="guardarMerma()" id="btnGuardarMerma" class="btn">Confirmar Registro</button>
             </div>
+
         </div>
     </div>
 </body>

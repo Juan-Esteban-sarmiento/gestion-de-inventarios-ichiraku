@@ -4,8 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Mi Inventario - Ichiraku Ramen</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Inventario.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Inventario.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/components.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}?v=2.0">
+
+
 </head>
 
 <body>
@@ -54,13 +57,20 @@
     </div>
 
     <main class="content">
-        <div class="box-welcome">
-            <h1 class="welcome-title">Control de Existencias</h1>
+        <div class="header-container">
+            <div class="box-welcome">
+                <h1 class="welcome-title">Control de Existencias</h1>
+            </div>
+
+            <div class="inventory-controls">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="search-inv" placeholder="Buscar por nombre (Arroz, Noris...)" onkeyup="filtrarTabla()">
+                </div>
+            </div>
         </div>
 
-        <div class="inventory-controls">
-            <input type="text" id="search-inv" placeholder="Buscar ingrediente..." onkeyup="filtrarTabla()">
-        </div>
+
 
         <div class="table-container glass">
             <table>

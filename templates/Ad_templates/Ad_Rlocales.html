@@ -2,8 +2,11 @@
 <html lang="es">
 
 <head>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Rlocales.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Rlocales.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/components.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}?v=2.0">
+
+
     <script src="{{ url_for('static', filename='js/Global_js/session_timeout.js') }}"></script>
     <meta charset="UTF-8">
     <title>Ichiraku Ramen - Administracion de locales de venta</title>
@@ -64,15 +67,22 @@
             <section class="register-box">
                 <h2>Registrar local de venta</h2>
                 <form id="registerForm" novalidate>
-                    <label>Nombre local</label>
-                    <input type="text" id="nombre_local" placeholder="Nombre ..." required>
+                    <div class="input-group">
+                        <label>Nombre del Local</label>
+                        <input type="text" id="nombre_local" placeholder="Ej: Ichiraku Chía" required>
+                    </div>
 
-                    <label>Ubicacion</label>
-                    <input type="text" id="ubicacion" placeholder="Ubicacion ..." required>
+                    <div class="input-group">
+                        <label>Ubicación / Dirección</label>
+                        <input type="text" id="ubicacion" placeholder="Ej: Calle 1 # 2-3" required>
+                    </div>
 
-                    <label>ID local</label>
-                    <input type="number" id="id_local" name="id_local" readonly
-                        style="background-color: #222; color: #fff;">
+                    <div class="input-group">
+                        <label>ID del Local (Automático)</label>
+                        <input type="number" id="id_local" name="id_local" readonly
+                            style="background-color: rgba(34, 34, 34, 0.5); color: #fff;">
+                    </div>
+
 
 
                     <div class="form-actions">
@@ -80,6 +90,7 @@
                             <img class="icon" src="{{ url_for('static', filename='image/mas.png') }}" alt="Guardar">
                             Registrar
                         </button>
+
 
                         <input type="file" id="foto_local" name="foto" accept="image/*" style="display: none;">
                         <img id="previewFotoLocal" src="#" alt="Vista previa de la foto"

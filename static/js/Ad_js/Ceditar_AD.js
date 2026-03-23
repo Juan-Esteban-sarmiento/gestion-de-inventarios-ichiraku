@@ -98,8 +98,8 @@ async function recuperarContrasena() {
   const { value: nombre } = await alertaNinjaFire({
     title: 'Seguridad',
     input: 'text',
-    inputLabel: 'Nombre de usuario Administrador',
-    inputPlaceholder: 'Ingresa tu usuario...',
+    inputLabel: 'Nombre completo o Cédula del Administrador',
+    inputPlaceholder: 'Ingresa tu usuario o ID...',
     showCancelButton: true,
     confirmButtonText: 'CONTINUAR',
     cancelButtonText: 'CANCELAR'

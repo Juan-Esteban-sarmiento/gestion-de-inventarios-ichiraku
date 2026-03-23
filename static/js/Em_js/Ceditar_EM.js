@@ -164,8 +164,8 @@ window.recuperarContrasena = async function () {
     const { value: nombre } = await alertaNinjaFire({
       title: 'RECUPERAR CLAVE',
       input: 'text',
-      inputLabel: 'Nombre de usuario',
-      inputPlaceholder: 'Ingresa tu ID o usuario...',
+      inputLabel: 'Nombre completo o Cédula del Empleado',
+      inputPlaceholder: 'Ingresa tu usuario o ID...',
       showCancelButton: true,
       confirmButtonText: 'SIGUIENTE',
       preConfirm: (value) => {

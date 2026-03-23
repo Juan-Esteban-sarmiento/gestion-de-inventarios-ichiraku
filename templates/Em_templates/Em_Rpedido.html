@@ -2,8 +2,11 @@
 <html lang="es">
 
 <head>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Rpedido.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Rpedido.css') }}?v=2.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/components.css') }}?v=2.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}?v=2.0">
+
+
   <script src="{{ url_for('static', filename='js/Global_js/session_timeout.js') }}"></script>
   <meta charset="UTF-8">
   <title>Ichiraku Ramen - Realizar Pedido</title>
@@ -63,9 +66,13 @@
           <span>Buscar Productos</span>
         </div>
         <div class="search-controls">
-          <input type="text" id="searchTerm" placeholder="Nombre del producto o suministro...">
-          <button class="confirm-btn search-btn" onclick="buscarProductos()">Buscar</button>
+          <div class="input-group">
+            <label for="searchTerm">Nombre del producto</label>
+            <input type="text" id="searchTerm" placeholder="Ej: Arroz, Noris, Alga...">
+          </div>
+          <button class="btn search-btn" onclick="buscarProductos()">Buscar</button>
         </div>
+
 
         <!-- Grid de Productos -->
         <div id="productos-container" class="productos-grid">
@@ -84,9 +91,10 @@
           <!-- Items del carrito -->
         </ul>
 
-        <button class="confirm-btn register-btn" onclick="enviarPedido()">
+        <button class="btn register-btn" style="width: 100%; margin-top: 20px;" onclick="enviarPedido()">
           Confirmar Pedido
         </button>
+
       </div>
     </div>
     </aside>

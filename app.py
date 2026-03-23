@@ -1,3 +1,6 @@
+# ==============================================================================
+# 1. CONFIGURACIÓN E IMPORTACIONES
+# ==============================================================================
 import os
 import io
 import locale
@@ -51,10 +54,24 @@ def add_header(response):
         response.headers["Expires"] = "0"
     return response
 
+# ==============================================================================
+# 2. AYUDANTES, FILTROS Y DECORADORES
+# ==============================================================================
+def to_num(val):
+    """Centralized utility to format numbers for display (Removes unnecessary decimals)."""
+    if isinstance(val, (int, float)):
+        return int(val) if float(val).is_integer() else float(val)
+    return val
+
 def is_valid_image(file):
     if not file:
         return False
-    return file.mimetype in ('image/jpeg', 'image/png')
+    return file.mimetype in ('image/jpeg', 'image/png', 'image/webp')
+
+
+# ==============================================================================
+# 2. UTILIDADES Y FILTROS
+# ==============================================================================
 
 @app.template_filter('format_fecha')
 def format_fecha(value):
@@ -77,6 +94,9 @@ def login_requerido(rol=None):
         return decorado
     return decorador
 
+# ==============================================================================
+# 3. SISTEMA DE NOTIFICACIONES (LÓGICA)
+# ==============================================================================
 def generar_notificaciones_caducidad():
     try:
         hoy = datetime.now().date()
@@ -104,7 +124,6 @@ def generar_notificaciones_caducidad():
             nombre_producto = producto.data["nombre"] if producto.data else "Nombre no encontrado"
 
             noti_existente = supabase.table("notificaciones") \
-                .select("id_notificaciones") \
                 .eq("id_inventario", item["id_inventario"]) \
                 .eq("tipo", "caducidad") \
                 .execute()
@@ -204,9 +223,6 @@ def generar_notificaciones_stock_bajo(target_local_id=None):
     except Exception as e:
         print("Error al generar notificaciones de stock bajo:", e)
 
-    except Exception as e:
-        print("Error al generar notificaciones de stock bajo:", e)
-
 def eliminar_notificaciones_caducadas():
     try:
         hoy = datetime.now().date()
@@ -230,6 +246,24 @@ def eliminar_notificaciones_caducadas():
     except Exception as e:
         print("Error al eliminar notificaciones o productos caducados:", e)
 
+@app.route('/Ad_Pnotificaciones', methods=['GET'])
+@login_requerido(rol='Administrador')
+def Ad_Pnotificaciones():
+    generar_notificaciones_caducidad()
+    eliminar_notificaciones_caducadas()
+    notificaciones = supabase.table("notificaciones") \
+        .select("*") \
+        .order("fecha", desc=True) \
+        .execute()
+    return render_template("Ad_templates/Ad_Pnotificaciones.html", notificaciones=notificaciones.data)
+
+@app.route('/marcar_prioritaria/<int:id>', methods=['POST'])
+@login_requerido(rol='Administrador')
+def marcar_prioritaria(id):
+    supabase.table("notificaciones").update({"tipo": "prioritaria"}).eq("id_notificaciones", id).execute()
+    return jsonify({"success": True})
+
+
 def insertar_informe(id_pedido):
     existente = supabase.table("informe").select("id_inf_pedido").eq("id_inf_pedido", id_pedido).execute().data
     if not existente:
@@ -244,6 +278,9 @@ def insertar_informe(id_pedido):
 def index():
     return redirect(url_for('login'))
 
+# ==============================================================================
+# 4. AUTENTICACIÓN Y PERFIL DE USUARIO
+# ==============================================================================
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -337,540 +374,488 @@ def logout():
     response.headers['Expires'] = '0'
     return response
 
-@app.route('/registrar_consumo', methods=['POST'])
-@login_requerido(rol='Empleado')
-def registrar_consumo():
+@app.route("/Ad_Ceditar", methods=["GET", "POST"])
+@login_requerido(rol='Administrador')
+def Ad_Ceditar():
+    cedula = session.get("cedula")
     try:
-        data = request.get_json()
-        id_producto = data.get('id_producto')
-        cantidad = data.get('cantidad')
-        
-        if not (id_producto and cantidad):
-            return jsonify({"success": False, "msg": "Datos incompletos."}), 400
-            
-        try:
-            cantidad_val = float(cantidad)
-            if cantidad_val <= 0:
-                raise ValueError
-        except:
-            return jsonify({"success": False, "msg": "Cantidad inválida."}), 400
+        response = supabase.table("administrador").select("*").eq("id", cedula).execute()
+        admin = response.data[0] if response.data else None
+        if not admin:
+            return jsonify({"success": False, "msg": "Administrador no encontrado."}), 404
 
-        id_sucursal = session.get('branch')
-        if not id_sucursal:
-            return jsonify({"success": False, "msg": "Error de sesión: Sucursal no definida."}), 403
-
-        producto_info = supabase.table("productos").select("nombre, unidad").eq("id_producto", id_producto).execute()
-        nombre_producto = producto_info.data[0].get("nombre", "Desconocido") if producto_info.data else "Desconocido"
-
-        # Filtrar solo lotes con stock disponible
-        inventario = supabase.table("inventario").select("*")\
-            .eq("id_producto", id_producto)\
-            .eq("id_local", id_sucursal)\
-            .gt("cantidad", 0)\
-            .order("fecha_caducidad")\
-            .execute()
-        
-        if not inventario.data:
-            return jsonify({"success": False, "msg": "No hay stock disponible."}), 400
-        
-        def to_num(val):
-            if isinstance(val, (int, float)):
-                return int(val) if float(val).is_integer() else float(val)
-            return val
-
-        # Validacion atómica antes de hacer descuentos
-        disponible_total = sum(float(l['cantidad']) for l in inventario.data)
-        if disponible_total < float(cantidad_val):
-             return jsonify({"success": False, "msg": f"Stock insuficiente. Solo hay {to_num(disponible_total)} {producto_info.data[0].get('unidad', '')}."}), 400
-
-        restante = float(cantidad_val)
-        detalles_afectados = []
-        
-        for lote in inventario.data:
-            cant_lote = float(lote['cantidad'])
-            id_inv = lote['id_inventario']
-            
-            if cant_lote >= restante:
-                detalles_afectados.append({
-                    "id_producto": int(id_producto),
-                    "id_inventario": id_inv,
-                    "cantidad_consumida": to_num(restante),
-                    "fecha": datetime.now().isoformat()
-                })
-                restante = 0
-                break
-            else:
-                detalles_afectados.append({
-                    "id_producto": int(id_producto),
-                    "id_inventario": id_inv,
-                    "cantidad_consumida": to_num(cant_lote),
-                    "fecha": datetime.now().isoformat()
-                })
-                restante -= cant_lote
-
-        # Historial
-        try:
-            cons_res = supabase.table("consumo").insert({
-                "fecha": datetime.now().isoformat(),
-                "cantidad_platos": 1,
-                "observacion": f"Consumo manual: {nombre_producto} (Cant: {cantidad_val})"
-            }).execute()
-            
-            if cons_res.data:
-                id_c = cons_res.data[0]["id_consumo"]
-                for det in detalles_afectados:
-                    det["id_consumo"] = id_c
-                    supabase.table("consumo_detalle").insert(det).execute()
-        except: pass
-
-        # Generar alertas inmediatas (optimizado por local)
-        generar_notificaciones_stock_bajo(session.get('branch'))
-
-        return jsonify({"success": True, "msg": "Consumo registrado correctamente."})
-    except Exception as e:
-        return jsonify({"success": False, "msg": str(e)})
-
-@app.route('/registrar_merma', methods=['POST'])
-@login_requerido(rol='Empleado')
-def registrar_merma():
-    try:
-        data = request.get_json()
-        id_producto = data.get('id_producto')
-        cantidad_val = data.get('cantidad')
-        motivo = data.get('motivo', 'No especificado')
-        id_l = session.get('branch')
-
-        if not id_producto or not cantidad_val:
-            return jsonify({"success": False, "msg": "Datos incompletos."}), 400
-
-        # Obtener info básica del producto
-        producto_info = supabase.table("productos").select("nombre, unidad").eq("id_producto", id_producto).execute()
-        if not producto_info.data:
-            return jsonify({"success": False, "msg": "Producto no encontrado."}), 404
-        
-        nombre_producto = producto_info.data[0]['nombre']
-
-        # Validar stock (FIFO)
-        inventario = supabase.table("inventario").select("*").eq("id_producto", id_producto).eq("id_local", id_l).gt("cantidad", 0).order("fecha_caducidad").execute()
-        
-        if not inventario.data:
-             return jsonify({"success": False, "msg": f"Stock insuficiente para '{nombre_producto}'. No hay existencias."}), 400
-
-        disponible_total = sum(float(l['cantidad']) for l in inventario.data)
-        if disponible_total < float(cantidad_val):
-             return jsonify({"success": False, "msg": f"Stock insuficiente. Solo hay {to_num(disponible_total)} {producto_info.data[0].get('unidad', '')}."}), 400
-
-        restante = float(cantidad_val)
-        detalles_afectados = []
-        
-        for lote in inventario.data:
-            cant_lote = float(lote['cantidad'])
-            id_inv = lote['id_inventario']
-            
-            if cant_lote >= restante:
-                detalles_afectados.append({
-                    "id_producto": int(id_producto),
-                    "id_inventario": id_inv,
-                    "cantidad_consumida": to_num(restante),
-                    "fecha": datetime.now().isoformat()
-                })
-                restante = 0
-                break
-            else:
-                detalles_afectados.append({
-                    "id_producto": int(id_producto),
-                    "id_inventario": id_inv,
-                    "cantidad_consumida": to_num(cant_lote),
-                    "fecha": datetime.now().isoformat()
-                })
-                restante -= cant_lote
-
-        # Registrar historial bajo categoría MERMA
-        try:
-            cons_res = supabase.table("consumo").insert({
-                "fecha": datetime.now().isoformat(),
-                "cantidad_platos": 0, # No es un plato vendido
-                "id_local": id_l,
-                "observacion": f"[MERMA] {motivo} | Prod: {nombre_producto} (Cant: {cantidad_val})"
-            }).execute()
-            
-            if cons_res.data:
-                id_c = cons_res.data[0]["id_consumo"]
-                for det in detalles_afectados:
-                    det["id_consumo"] = id_c
-                    # La inserción activa el Trigger de DB para descontar
-                    supabase.table("consumo_detalle").insert(det).execute()
-        except Exception as e:
-            print("Error en insert merma:", e)
-            return jsonify({"success": False, "msg": "Error al registrar merma en base de datos."}), 500
-
-        # Generar alertas inmediatas
-        generar_notificaciones_stock_bajo(id_l)
-
-        return jsonify({"success": True, "msg": "Merma registrada correctamente."})
-    except Exception as e:
-        print("Error en /registrar_merma:", e)
-        return jsonify({"success": False, "msg": str(e)})
-
-@app.route('/get_recetas_empleado', methods=['POST'])
-@login_requerido(rol='Empleado')
-def get_recetas_empleado():
-    try:
-        data = request.get_json() or {}
-        termino = data.get("termino", "").strip()
-        query = supabase.table("recetarios").select("*").eq("habilitado", True)
-        if termino:
-            query = query.ilike("nombre", f"%{termino}%")
-        res = query.order("nombre").execute()
-        return jsonify({"success": True, "recetas": res.data or []})
-    except Exception as e:
-        return jsonify({"success": False, "msg": str(e)})
-
-def to_num(val):
-    if isinstance(val, (int, float)):
-        return int(val) if float(val).is_integer() else float(val)
-    return val
-
-@app.route('/registrar_consumo_receta', methods=['POST'])
-@login_requerido(rol='Empleado')
-def registrar_consumo_receta():
-    try:
-        data = request.get_json()
-        id_r = data.get('id_receta')
-        cant_p = int(data.get('cantidad', 1))
-        id_l = session.get('branch')
-        
-        receta = supabase.table("recetarios").select("nombre").eq("id_receta", id_r).execute()
-        if not receta.data:
-            return jsonify({"success": False, "msg": "Receta no existe"}), 404
-            
-        detalles = supabase.table("receta_detalle").select("*, productos(nombre, unidad)").eq("id_receta", id_r).execute()
-        if not detalles.data:
-            return jsonify({"success": False, "msg": "La receta no tiene ingredientes."}), 400
-
-        # FASE 0: Agregar ingredientes por ID de producto (evita doble descuento si hay duplicados en la receta)
-        ingredientes_agregados = {}
-        for ing in detalles.data:
-            pid = ing["id_producto"]
-            cant_ing = float(ing["cantidad"])
-            if pid not in ingredientes_agregados:
-                ingredientes_agregados[pid] = {
-                    "id_producto": pid,
-                    "cantidad": 0,
-                    "productos": ing.get("productos")
+        if request.method == "GET":
+            photo_url = admin.get("foto") if admin.get("foto") else url_for("static", filename="image/default.png")
+            return render_template(
+                "Ad_templates/Ad_Ceditar.html",
+                user={
+                    "Cedula": admin.get("id", ""),
+                    "Nombre": admin.get("nombre", ""),
+                    "photo_url": photo_url
                 }
-            ingredientes_agregados[pid]["cantidad"] += cant_ing
+            )
 
-        # FASE 1: Validar stock de todos los ingredientes
-        inventario_necesario = []
-        for ing in ingredientes_agregados.values():
-            p_name = ing['productos']['nombre'] if ing.get('productos') else ing['id_producto']
-            p_unit = ing['productos']['unidad'] if ing.get('productos') else ""
-            requerido = round(float(ing["cantidad"]) * cant_p, 4)
-            
-            lotes = supabase.table("inventario").select("*").eq("id_producto", ing["id_producto"]).eq("id_local", id_l).gt("cantidad", 0).order("fecha_caducidad").execute()
-            
-            if not lotes.data:
-                return jsonify({"success": False, "msg": f"Stock insuficiente para '{p_name}'. Sin stock (Requerido: {to_num(requerido)} {p_unit})"}), 400
-                
-            disponible = round(sum(float(l['cantidad']) for l in lotes.data), 4)
-            if disponible < requerido:
-                return jsonify({"success": False, "msg": f"Stock insuficiente para '{p_name}'. Solo hay {to_num(disponible)} {p_unit} (Requerido: {to_num(requerido)} {p_unit})"}), 400
-                
-            inventario_necesario.append({
-                "id_producto": ing["id_producto"],
-                "requerido": requerido,
-                "lotes": lotes.data
-            })
-
-        # FASE 2: Descontar stock (sin transacciones, pero con validacion previa exitosa)
-        afectados_total = []
-        for item in inventario_necesario:
-            restante = float(item["requerido"])
-            for lote in item["lotes"]:
-                if restante <= 0: break
-                id_inv = lote['id_inventario']
-                cant_lote = float(lote['cantidad'])
-                
-                if cant_lote >= restante:
-                    afectados_total.append({"id_prod": item["id_producto"], "id_inv": id_inv, "cant": to_num(restante)})
-                    restante = 0
-                else:
-                    afectados_total.append({"id_prod": item["id_producto"], "id_inv": id_inv, "cant": to_num(cant_lote)})
-                    restante -= cant_lote
-
-        # Registrar consumo e historial
-        c_res = supabase.table("consumo").insert({
-            "fecha": datetime.now().isoformat(),
-            "cantidad_platos": cant_p,
-            "id_receta": id_r,
-            "id_local": id_l,
-            "observacion": f"Venta: {cant_p} platos de {receta.data[0]['nombre']}"
-        }).execute()
-        
-        if c_res.data:
-            idc = c_res.data[0]["id_consumo"]
-            for a in afectados_total:
-                supabase.table("consumo_detalle").insert({
-                    "id_consumo": idc,
-                    "id_producto": a["id_prod"],
-                    "id_inventario": a["id_inv"],
-                    "cantidad_consumida": a["cant"],
-                    "fecha": datetime.now().isoformat()
-                }).execute()
-                
-        # Generar alertas inmediatas (optimizado por local)
-        generar_notificaciones_stock_bajo(id_l)
-        
-        return jsonify({"success": True, "msg": "¡Venta registrada exitosamente!"})
+        if request.method == "POST" and request.is_json:
+            data = request.get_json()
+            nombre = data.get("Nombre")
+            if not nombre:
+                return jsonify({"success": False, "msg": "Todos los campos son obligatorios."}), 400
+            update_response = supabase.table("administrador").update({"nombre" : nombre}).eq("id", cedula).execute()
+            if update_response.data:
+                return jsonify({"success": True, "msg": "Usuario actualizado correctamente"}), 200
+            else:
+                return jsonify({"success": False, "msg": "No se pudo actualizar el usuario."}), 500
     except Exception as e:
-        print("Error en registrar_consumo_receta:", e)
-        return jsonify({"success": False, "msg": "Verifique que todos los productos esten en el inventario. Error: "+str(e)}), 400
+        print("Error en Ad_Ceditar:", e)
+        return jsonify({"success": False, "msg": "Error en el servidor"}), 500
 
-
-@app.route('/historial_consumo_hoy', methods=['GET'])
-@login_requerido(rol='Empleado')
-def historial_consumo_hoy():
+@app.route('/Ad_Ceditar_foto', methods=['POST', 'DELETE'])
+@login_requerido(rol='Administrador')
+def Ad_Ceditar_foto():
+    cedula = session.get('cedula')
     try:
-        id_sucursal = session.get('branch')
-        if not id_sucursal:
-            return jsonify({"success": False, "msg": "Sucursal no definida."}), 403
+        if request.method == 'POST':
+            foto = request.files.get('foto')
+            if not foto:
+                return jsonify({"success": False, "msg": "No se envió ninguna foto"}), 400
+            if not is_valid_image(foto):
+                return jsonify({"success": False, "msg": "Formato de imagen no permitido."}), 400
+            file_name = f"admin_{cedula}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
+            file_bytes = foto.read()
+            upload_response = supabase.storage.from_("fotos_admin").upload(file_name, file_bytes)
+            if hasattr(upload_response, "error") and upload_response.error:
+                return jsonify({"success": False, "msg": "Error al subir la foto a Supabase"}), 500
+            photo_url = supabase.storage.from_("fotos_admin").get_public_url(file_name)
+            update_response = supabase.table("administrador").update({"foto": photo_url}).eq("id", cedula).execute()
+            if update_response.data:
+                return jsonify({"success": True, "photo_url": photo_url}), 200
+            else:
+                return jsonify({"success": False, "msg": "No se pudo guardar la foto"}), 500
 
-        hoy = datetime.now().strftime("%Y-%m-%d")
-
-        # Query joins: consumo_detalle -> consumo and consumo_detalle -> productos
-        # the Supabase python client supports joining via select strings
-        consumos = supabase.table("consumo_detalle") \
-            .select("*, productos(nombre, unidad), consumo(*), inventario(id_local)") \
-            .gte("fecha", f"{hoy}T00:00:00") \
-            .lte("fecha", f"{hoy}T23:59:59") \
-            .execute()
-
-        registros = []
-        if consumos.data:
-            for item in consumos.data:
-                # Filtrar por sucursal si el inventario está disponible
-                if item.get("inventario") and item["inventario"].get("id_local") == id_sucursal:
-                    registros.append({
-                        "id_producto": item["id_producto"],
-                        "nombre_producto": item["productos"]["nombre"] if item.get("productos") else "Desconocido",
-                        "cantidad": item["cantidad_consumida"],
-                        "unidad": item["productos"]["unidad"] if item.get("productos") else "",
-                        "fecha": item["fecha"]
-                    })
-
-        return jsonify({"success": True, "consumos": registros})
-
+        elif request.method == 'DELETE':
+            response = supabase.table("administrador").select("foto").eq("id", cedula).execute()
+            if response.data and response.data[0].get("foto"):
+                foto_url = response.data[0]["foto"]
+                file_name = foto_url.split("/")[-1]
+                supabase.storage.from_("fotos_admin").remove([file_name])
+            supabase.table("administrador").update({"foto": None}).eq("id", cedula).execute()
+            default_url = url_for("static", filename="image/default.png")
+            return jsonify({"success": True, "photo_url": default_url}), 200
     except Exception as e:
-        print("Error en historial_consumo_hoy:", e)
-        import traceback
-        return jsonify({"success": False, "msg": f"Error al obtener historial: {str(e)}\n{traceback.format_exc()}"}), 500
-
-@app.route('/get_receta_breakdown', methods=['POST'])
-@login_requerido(rol='Empleado')
-def get_receta_breakdown():
-    try:
-        data = request.get_json()
-        id_receta = data.get('id_receta')
-        
-        if not id_receta:
-            return jsonify({"success": False, "msg": "ID de receta no proporcionado."}), 400
-            
-        detalles = supabase.table("receta_detalle") \
-            .select("*, productos(nombre, unidad)") \
-            .eq("id_receta", id_receta) \
-            .execute()
-            
-        if not detalles.data:
-            return jsonify({"success": True, "breakdown": []})
-            
-        breakdown = []
-        for d in detalles.data:
-            breakdown.append({
-                "nombre": d['productos']['nombre'] if d.get('productos') else "Desconocido",
-                "cantidad": d['cantidad'],
-                "unidad": d['productos']['unidad'] if d.get('productos') else ""
-            })
-            
-        return jsonify({"success": True, "breakdown": breakdown})
-    except Exception as e:
+        print("Error en Ad_Ceditar_foto:", e)
         return jsonify({"success": False, "msg": str(e)}), 500
 
-@app.route('/get_consumo_comparative', methods=['GET'])
-@login_requerido(rol='Empleado')
-def get_consumo_comparative():
-    try:
-        id_local = session.get('branch')
-        if not id_local:
-            return jsonify({"success": False, "msg": "Sucursal no definida."}), 403
-
-        hoy = datetime.now().strftime("%Y-%m-%d")
-        
-        # 1. Obtener consumos de hoy para el local
-        consumos_hoy = supabase.table("consumo_detalle") \
-            .select("id_producto, cantidad_consumida, productos(nombre, unidad), inventario(id_local)") \
-            .gte("fecha", f"{hoy}T00:00:00") \
-            .lte("fecha", f"{hoy}T23:59:59") \
-            .execute()
-
-        agregado_consumo = {}
-        if consumos_hoy.data:
-            for c in consumos_hoy.data:
-                # Filtrar por local
-                if c.get('inventario') and c['inventario'].get('id_local') == id_local:
-                    pid = c['id_producto']
-                    if pid not in agregado_consumo:
-                        agregado_consumo[pid] = {
-                            "nombre": c['productos']['nombre'],
-                            "unidad": c['productos']['unidad'],
-                            "total_consumido": 0
-                        }
-                    agregado_consumo[pid]["total_consumido"] += c['cantidad_consumida']
-
-        # 2. Obtener stock actual para el local
-        inventario = supabase.table("inventario") \
-            .select("id_producto, cantidad") \
-            .eq("id_local", id_local) \
-            .execute()
-            
-        stock_actual = {}
-        if inventario.data:
-            for inv in inventario.data:
-                pid = inv['id_producto']
-                stock_actual[pid] = stock_actual.get(pid, 0) + inv['cantidad']
-
-        # 3. Combinar datos
-        comparativa = []
-        # Asegurar incluir productos que tengan stock pero no consumo hoy, o viceversa
-        todos_pids = set(agregado_consumo.keys()) | set(stock_actual.keys())
-        
-        # Necesitamos nombres para los que solo tienen stock
-        if stock_actual:
-            productos_info = supabase.table("productos").select("id_producto, nombre, unidad").in_("id_producto", list(todos_pids)).execute()
-            p_map = {p['id_producto']: p for p in productos_info.data}
-        else:
-            p_map = {}
-
-        for pid in todos_pids:
-            consumo_data = agregado_consumo.get(pid, {})
-            nombre = consumo_data.get("nombre") or (p_map.get(pid, {}).get("nombre", "Desconocido"))
-            unidad = consumo_data.get("unidad") or (p_map.get(pid, {}).get("unidad", ""))
-            
-            comparativa.append({
-                "id_producto": pid,
-                "nombre": nombre,
-                "unidad": unidad,
-                "consumido": agregado_consumo.get(pid, {}).get("total_consumido", 0),
-                "stock": max(0, stock_actual.get(pid, 0))
-            })
-
-        return jsonify({"success": True, "comparativa": comparativa})
-    except Exception as e:
-        print("Error en get_consumo_comparative:", e)
-        import traceback
-        return jsonify({"success": False, "msg": f"Error: {str(e)}\n{traceback.format_exc()}"}), 500
-
-
-@app.route('/stock_producto_sucursal', methods=['POST'])
-@login_requerido(rol='Empleado')
-def stock_producto_sucursal():
-    """Retorna el stock disponible de un producto en la sucursal del empleado."""
+@app.route("/enviar_token_recuperacion", methods=["POST"])
+def enviar_token_recuperacion():
     try:
         data = request.get_json()
-        id_producto = data.get('id_producto')
-        id_sucursal = session.get('branch')
+        telefono = data.get("telefono", "").strip()
+        if not telefono:
+            return jsonify({"success": False, "msg": "Debe ingresar un número de teléfono."}), 400
 
-        if not (id_producto and id_sucursal):
-            return jsonify({"success": False, "stock": 0})
+        telefono = telefono.replace(" ", "")
+        if telefono.startswith("+57"):
+            telefono = telefono[3:]
+        elif telefono.startswith("57"):
+            telefono = telefono[2:]
 
-        inv = supabase.table("inventario") \
-            .select("cantidad") \
-            .eq("id_producto", id_producto) \
-            .eq("id_local", id_sucursal) \
-            .execute()
+        if not telefono.isdigit() or len(telefono) != 10:
+            return jsonify({"success": False, "msg": "El número de teléfono no es válido (debe tener 10 dígitos)."}), 400
 
-        total = sum(lote.get("cantidad", 0) for lote in (inv.data or []))
-        return jsonify({"success": True, "stock": total})
-
+        client = TwilioClient(TWILIO_SID, TWILIO_AUTH)
+        try:
+            verification = client.verify.v2.services(VERIFY_SID).verifications.create(
+                to=f"+57{telefono}",
+                channel="sms"
+            )
+            logger.info("Token enviado a +57%s - SID: %s", telefono, getattr(verification, 'sid', ''))
+            return jsonify({"success": True, "msg": "Código enviado correctamente."})
+        except TwilioRestException as tre:
+            msg = str(tre).lower()
+            if "unverified" in msg or "not verified" in msg or "cannot send messages to unverified numbers" in msg:
+                return jsonify({"success": False, "msg": "El número no está verificado o no está permitido por Twilio."}), 400
+            return jsonify({"success": False, "msg": "No se pudo enviar el SMS. Verifica el número e inténtalo más tarde."}), 500
     except Exception as e:
-        print("Error en stock_producto_sucursal:", e)
-        return jsonify({"success": False, "stock": 0})
+        logger.exception("Error en enviar_token_recuperacion: %s", e)
+        return jsonify({"success": False, "msg": "Error interno al procesar la solicitud."}), 500
 
-@app.route('/Ad_Inicio', methods=['GET', 'POST'])
-@login_requerido(rol='Administrador')
-def Ad_Inicio():
+@app.route("/validar_token", methods=["POST"])
+def validar_token():
     try:
-        generar_notificaciones_caducidad()
-        generar_notificaciones_stock_bajo()
-        eliminar_notificaciones_caducadas()
-        
+        data = request.get_json()
+        nombre = data.get("nombre")
+        telefono = data.get("telefono", "").strip()
+        token = data.get("token")
+        nueva_contrasena = data.get("nueva_clave")
+
+        if not (telefono and token and nueva_contrasena):
+            return jsonify({"success": False, "msg": "Todos los campos son obligatorios."}), 400
+
+        telefono = telefono.replace(" ", "")
+        if telefono.startswith("+57"):
+            telefono = telefono[3:]
+        elif telefono.startswith("57"):
+            telefono = telefono[2:]
+
+        client = TwilioClient(TWILIO_SID, TWILIO_AUTH)
         try:
-            todas_response = supabase.table("notificaciones").select("*").order("fecha", desc=True).execute()
-            todas = todas_response.data if todas_response.data else []
-        except Exception as db_error:
-            print(f"Error al consultar notificaciones: {db_error}")
-            todas = []
+            verfification_check = client.verify.v2.services(VERIFY_SID).verification_checks.create(
+                to=f"+57{telefono}",
+                code=token
+            )
+        except TwilioRestException as tre:
+            logger.debug("TwilioRestException en verificación de código: %s", tre)
+            msg = str(tre).lower()
+            if "unverified" in msg or "not verified" in msg:
+                return jsonify({"success": False, "msg": "El número no está verificado en Twilio o no está permitido por la cuenta de Twilio."}), 400
+            return jsonify({"success": False, "msg": "No se pudo validar el código por un error del servicio de mensajería."}), 500
 
-        todas_filtradas = []
-        for n in todas:
-            mensaje = n.get("mensaje", "")
-            if mensaje is not None and str(mensaje).strip() != "":
-                todas_filtradas.append(n)
-
-        if not todas_filtradas:
-            notificacion_prueba = {
-                "mensaje": "NOTIFICACIÓN DE PRUEBA - Sistema funcionando",
-                "fecha_formateada": datetime.now().strftime("%d de %B de %Y, %I:%M %p"),
-                "leido": False
-            }
-            todas_filtradas.append(notificacion_prueba)
-
-        try:
-            locale.setlocale(locale.LC_TIME, "es_ES.utf8")
-        except:
-            try:
-                locale.setlocale(locale.LC_TIME, "es_CO.utf8")
-            except:
-                pass
-
-        for noti in todas_filtradas:
-            if noti.get("fecha") and not noti.get("fecha_formateada"):
-                try:
-                    fecha_str = noti["fecha"]
-                    if 'T' in fecha_str:
-                        fecha_obj = datetime.fromisoformat(fecha_str.replace('Z', '+00:00'))
-                    else:
-                        fecha_obj = datetime.strptime(fecha_str, "%Y-%m-%d %H:%M:%S")
-                    
-                    noti["fecha_formateada"] = fecha_obj.strftime("%d de %B de %Y, %I:%M %p").capitalize()
-                except Exception as date_error:
-                    print(f"Error al formatear fecha {noti['fecha']}: {date_error}")
-                    noti["fecha_formateada"] = noti["fecha"]
-
-        notificaciones = todas_filtradas[:3]
-        total_notificaciones = len(todas_filtradas)
-        restantes = max(0, total_notificaciones - 3)
-
-        http_response = make_response(render_template(
-            "Ad_templates/Ad_Inicio.html",
-            notificaciones=notificaciones,
-            restantes=restantes,
-            total_notificaciones=total_notificaciones
-        ))
-        http_response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
-        http_response.headers['Pragma'] = 'no-cache'
-        http_response.headers['Expires'] = '-1'
-        return http_response
+        if verfification_check.status != "approved":
+            return jsonify({"success": False, "msg": "Código inválido o expirado."}), 400
         
+        # 3. Identificar al administrador por teléfono
+        admin_resp = supabase.table("administrador").select("*").eq("telefono", telefono).execute()
+        
+        if not admin_resp.data:
+            return jsonify({"success": False, "msg": "Administrador no encontrado para este número."}), 404
+
+        # 4. Verificar identidad (Nombre o ID)
+        admin_data = None
+        for adm in admin_resp.data:
+            # Comparamos con 'id' (cédula) o 'nombre'
+            if str(adm.get("id")) == nombre or adm.get("nombre", "").lower() == nombre.lower():
+                admin_data = adm
+                break
+        
+        if not admin_data:
+            return jsonify({"success": False, "msg": "La identidad no coincide con el número registrado."}), 404
+
+        # 5. Actualizar contraseña
+        hashed_password = generate_password_hash(nueva_contrasena)
+        update_resp = supabase.table("administrador").update(
+            {"contrasena": hashed_password}
+        ).eq("id", admin_data["id"]).execute()
+
+        if not update_resp.data:
+            return jsonify({"success": False, "msg": "No se pudo actualizar la contraseña."}), 500
+
+        return jsonify({"success": True, "msg": "Contraseña actualizada correctamente."})
+
     except Exception as e:
-        print(f"Error crítico al cargar página de inicio: {e}")
-        import traceback
-        traceback.print_exc()
-        return render_template("Ad_templates/Ad_Inicio.html", 
-                             notificaciones=[], 
-                             restantes=0, 
-                             total_notificaciones=0), 500
+        logger.exception("Error en validar_token: %s", e)
+        return jsonify({"success": False, "msg": "Error interno al validar el token."}), 500
 
+@app.route("/Em_Ceditar", methods=["GET", "POST"])
+@login_requerido(rol='Empleado')
+def Em_Ceditar():
+    cedula = session.get("cedula")
+    try:
+        response = supabase.table("empleados").select("*").eq("cedula", cedula).execute()
+        empleado = response.data[0] if response.data else None
+        if not empleado:
+            return jsonify({"success": False, "msg": "Empleado no encontrado."}), 404
+
+        if request.method == "GET":
+            photo_url = empleado.get("foto") if empleado.get("foto") else url_for("static", filename="image/default.png")
+            return render_template(
+                "Em_templates/Em_Ceditar.html",
+                user={
+                    "Cedula": empleado.get("cedula", ""),
+                    "Nombre": empleado.get("nombre", ""),
+                    "photo_url": photo_url
+                }
+            )
+
+        if request.method == "POST" and request.is_json:
+            data = request.get_json()
+            nombre = data.get("Nombre")
+            if not nombre:
+                return jsonify({"success": False, "msg": "El nombre es obligatorio."}), 400
+            update_response = supabase.table("empleados").update({"nombre": nombre}).eq("cedula", cedula).execute()
+            if update_response.data:
+                return jsonify({"success": True, "msg": "Perfil actualizado correctamente"}), 200
+            else:
+                return jsonify({"success": False, "msg": "No se pudo actualizar el perfil."}), 500
+    except Exception as e:
+        print("Error en Em_Ceditar:", e)
+        return jsonify({"success": False, "msg": "Error en el servidor"}), 500
+
+@app.route('/Em_Ceditar_foto', methods=['POST', 'DELETE'])
+@login_requerido(rol='Empleado')
+def Em_Ceditar_foto():
+    cedula = session.get('cedula')
+    try:
+        if request.method == 'POST':
+            foto = request.files.get('foto')
+            if not foto:
+                return jsonify({"success": False, "msg": "No se envió ninguna foto"}), 400
+            if not is_valid_image(foto):
+                return jsonify({"success": False, "msg": "Formato de imagen no permitido."}), 400
+            file_name = f"empleado_{cedula}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
+            file_bytes = foto.read()
+            upload_response = supabase.storage.from_("Fotos").upload(file_name, file_bytes)
+            if hasattr(upload_response, "error") and upload_response.error:
+                return jsonify({"success": False, "msg": "Error al subir la foto a Supabase"}), 500
+            photo_url = supabase.storage.from_("Fotos").get_public_url(file_name)
+            update_response = supabase.table("empleados").update({"foto": photo_url}).eq("cedula", cedula).execute()
+            if update_response.data:
+                return jsonify({"success": True, "photo_url": photo_url}), 200
+            else:
+                return jsonify({"success": False, "msg": "No se pudo guardar la foto"}), 500
+
+        elif request.method == 'DELETE':
+            response = supabase.table("empleados").select("foto").eq("cedula", cedula).execute()
+            if response.data and response.data[0].get("foto"):
+                foto_url = response.data[0]["foto"]
+                file_name = foto_url.split("/")[-1]
+                supabase.storage.from_("Fotos").remove([file_name])
+            supabase.table("empleados").update({"foto": None}).eq("cedula", cedula).execute()
+            default_url = url_for("static", filename="image/default.png")
+            return jsonify({"success": True, "photo_url": default_url}), 200
+    except Exception as e:
+        print("Error en Em_Ceditar_foto:", e)
+        return jsonify({"success": False, "msg": str(e)}), 500
+
+@app.route("/Em_enviar_token_recuperacion", methods=["POST"])
+def Em_enviar_token_recuperacion():
+    try:
+        data = request.get_json()
+        telefono = data.get("telefono", "").strip()
+        if not telefono:
+            return jsonify({"success": False, "msg": "Debe ingresar un número de teléfono."}), 400
+
+        telefono = telefono.replace(" ", "")
+        if telefono.startswith("+57"):
+            telefono = telefono[3:]
+        elif telefono.startswith("57"):
+            telefono = telefono[2:]
+
+        if not telefono.isdigit() or len(telefono) != 10:
+            return jsonify({"success": False, "msg": "Número de teléfono no válido."}), 400
+
+        client = TwilioClient(TWILIO_SID, TWILIO_AUTH)
+        client.verify.v2.services(VERIFY_SID).verifications.create(to=f"+57{telefono}", channel="sms")
+        return jsonify({"success": True, "msg": "Código enviado correctamente."})
+    except Exception as e:
+        print(f"Error en Em_enviar_token_recuperacion: {e}")
+        return jsonify({"success": False, "msg": str(e)}), 500
+
+@app.route("/Em_validar_token", methods=["POST"])
+def Em_validar_token():
+    try:
+        data = request.get_json()
+        nombre = data.get("nombre", "").strip()
+        telefono = data.get("telefono", "").strip()
+        token = data.get("token", "").strip()
+        nueva_contrasena = data.get("nueva_clave", "").strip()
+
+        if not (nombre and telefono and token and nueva_contrasena):
+            return jsonify({"success": False, "msg": "Todos los campos son obligatorios."}), 400
+
+        if telefono.startswith("+57"):
+            telefono = telefono[3:]
+        elif telefono.startswith("57"):
+            telefono = telefono[2:]
+
+        client = TwilioClient(TWILIO_SID, TWILIO_AUTH)
+        verification_check = client.verify.v2.services(VERIFY_SID).verification_checks.create(
+            to=f"+57{telefono}",
+            code=token
+        )
+
+        if verification_check.status != "approved":
+            return jsonify({"success": False, "msg": "Código inválido o expirado."}), 400
+        # 3. Identificar al empleado por teléfono (ya verificado)
+        empleado_resp = supabase.table("empleados").select("*").eq("telefono", telefono).execute()
+        
+        if not empleado_resp.data:
+            return jsonify({"success": False, "msg": "Empleado no encontrado para este número."}), 404
+
+        # 4. Verificar identidad flexible (Nombre o Cédula)
+        empleado_data = None
+        for emp in empleado_resp.data:
+            if str(emp.get("cedula")) == nombre or emp.get("nombre", "").lower() == nombre.lower():
+                empleado_data = emp
+                break
+        
+        if not empleado_data:
+            return jsonify({"success": False, "msg": "La identidad no coincide con el número registrado."}), 404
+
+        # 5. Actualizar contraseña
+        cedula = empleado_data["cedula"]
+        hashed_password = generate_password_hash(nueva_contrasena)
+        update_resp = supabase.table("empleados").update(
+            {"contrasena": hashed_password}
+        ).match({"cedula": cedula}).execute()
+
+        if not update_resp.data:
+            return jsonify({"success": False, "msg": "No se actualizó ninguna fila. Verifique el filtro."}), 400
+
+        return jsonify({"success": True, "msg": "Contraseña actualizada correctamente."})
+    except Exception as e:
+        print(f"Error en Em_validar_token: {e}")
+        return jsonify({"success": False, "msg": str(e)}), 500
+
+# ==============================================================================
+# 5. ADMINISTRACIÓN - GESTIÓN DE PRODUCTOS, EMPLEADOS E INVENTARIO
+# ==============================================================================
+
+# --- Gestión de Locales ---
+@app.route('/Ad_Rlocales', methods=['GET', 'POST'])
+@login_requerido(rol='Administrador')
+def Ad_Rlocales():
+    return render_template("Ad_templates/Ad_Rlocales.html")
+
+@app.route('/registrar_local', methods=['POST'])
+@login_requerido(rol='Administrador')
+def registrar_local():
+    nombre = request.form.get('nombre')
+    direccion = request.form.get('direccion')
+    id_local = request.form.get('id_local')
+    foto = request.files.get('foto')
+
+    if not (nombre and direccion and id_local):
+        return jsonify({"success": False, "msg": "Todos los campos son obligatorios."})
+
+    nombre_limpio = nombre.strip()
+    if len(nombre_limpio) < 2 or len(nombre_limpio) > 100:
+        return jsonify({"success": False, "msg": "El nombre del local debe tener entre 2 y 100 caracteres."})
+
+    direccion_limpia = direccion.strip()
+    if len(direccion_limpia) < 5 or len(direccion_limpia) > 200:
+        return jsonify({"success": False, "msg": "La dirección debe tener entre 5 y 200 caracteres."})
+
+    try:
+        id_local_int = int(id_local)
+        if id_local_int < 1:
+            return jsonify({"success": False, "msg": "El ID del local debe ser un número positivo."})
+    except ValueError:
+        return jsonify({"success": False, "msg": "El ID del local debe ser un número válido."})
+
+    try:
+        existing = supabase.table("locales").select("*").eq("id_local", id_local).execute()
+        if existing.data:
+            return jsonify({"success": False, "msg": "Ya existe un local con ese ID."})
+    except Exception as e:
+        print("Error al verificar local:", e)
+        return jsonify({"success": False, "msg": "Error al verificar duplicados."})
+
+    foto_url = None
+    if foto:
+        if not is_valid_image(foto):
+            return jsonify({"success": False, "msg": "Formato de imagen no permitido."}), 400
+        try:
+            filename = f"locales/{id_local}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
+            upload_response = supabase.storage.from_("Fotos").upload(filename, foto.read())
+            if hasattr(upload_response, "error") and upload_response.error:
+                print("Error al subir imagen:", upload_response.error)
+                return jsonify({"success": False, "msg": "Error al subir imagen."})
+            foto_url = f"{SUPABASE_URL}/storage/v1/object/public/Fotos/{filename}"
+        except Exception as e:
+            print("Error al subir foto:", e)
+            return jsonify({"success": False, "msg": "Error al procesar la foto."})
+
+    try:
+        data = {
+            "id_local": id_local,
+            "nombre": nombre,
+            "direccion": direccion,
+            "foto": foto_url
+        }
+        response = supabase.table("locales").insert(data).execute()
+        if response.data:
+            return jsonify({"success": True, "msg": "Local registrado correctamente."})
+        else:
+            return jsonify({"success": False, "msg": "Error al registrar local."})
+    except Exception as e:
+        print("Error inesperado al registrar local:", e)
+        return jsonify({"success": False, "msg": "Error en el servidor."})
+
+@app.route('/obtener_siguiente_id_local', methods=['GET'])
+@login_requerido(rol='Administrador')
+def obtener_siguiente_id_local():
+    try:
+        response = supabase.table("locales").select("id_local").order("id_local", desc=True).limit(1).execute()
+        if response.data:
+            ultimo_id = int(response.data[0]["id_local"])
+            siguiente_id = ultimo_id + 1
+        else:
+            siguiente_id = 1
+        return jsonify({"success": True, "siguiente_id": siguiente_id})
+    except Exception as e:
+        print("Error al obtener siguiente ID:", e)
+        return jsonify({"success": False, "msg": "Error al calcular el ID."})
+
+@app.route("/buscar_local", methods=["POST"])
+@login_requerido(rol='Administrador')
+def buscar_local():
+    data = request.get_json()
+    termino = data.get("termino", "").strip()
+    try:
+        query = supabase.table("locales").select("id_local, nombre, direccion, foto, habilitado")
+        if termino.isdigit():
+            query = query.eq("id_local", int(termino))
+        else:
+            query = query.or_(f"nombre.ilike.%{termino}%,direccion.ilike.%{termino}%")
+        response = query.execute()
+        locales = response.data or []
+        if locales:
+            return jsonify({"success": True, "locales": locales})
+        else:
+            return jsonify({"success": False, "msg": "No se encontraron locales."})
+    except Exception as e:
+        print("Error en búsqueda de local:", e)
+        return jsonify({"success": False, "msg": "Error en el servidor"})
+
+@app.route("/editar_local/<int:id_local>", methods=["PUT"])
+@login_requerido(rol='Administrador')
+def editar_local(id_local):
+    try:
+        data = request.get_json()
+        nombre = data.get("nombre")
+        direccion = data.get("direccion")
+        if not (nombre and direccion):
+            return jsonify({"success": False, "msg": "Todos los campos son obligatorios."}), 400
+
+        nombre_limpio = nombre.strip()
+        if len(nombre_limpio) < 2 or len(nombre_limpio) > 100:
+            return jsonify({"success": False, "msg": "El nombre del local debe tener entre 2 y 100 caracteres."}), 400
+
+        direccion_limpia = direccion.strip()
+        if len(direccion_limpia) < 5 or len(direccion_limpia) > 200:
+            return jsonify({"success": False, "msg": "La dirección debe tener entre 5 y 200 caracteres."}), 400
+
+        response = supabase.table("locales").update({
+            "nombre": nombre_limpio,
+            "direccion": direccion_limpia
+        }).eq("id_local", id_local).execute()
+        if response.data:
+            return jsonify({"success": True, "msg": "Local actualizado correctamente."})
+        else:
+            return jsonify({"success": False, "msg": "No se pudo actualizar el local."})
+    except Exception as e:
+        print("Error al editar local:", e)
+        return jsonify({"success": False, "msg": "Error en el servidor"})
+
+@app.route("/cambiar_estado_local/<int:id_local>", methods=["POST"])
+@login_requerido(rol='Administrador')
+def cambiar_estado_local(id_local):
+    try:
+        data = request.get_json()
+        habilitado = data.get("habilitado")
+        if habilitado is None:
+            return jsonify({"success": False, "msg": "Estado no especificado."}), 400
+        response = supabase.table("locales").update({"habilitado": habilitado}).eq("id_local", id_local).execute()
+        if hasattr(response, "data") and response.data:
+            estado = "habilitado" if habilitado else "deshabilitado"
+            return jsonify({"success": True, "msg": f"Local {estado} correctamente."})
+        else:
+            return jsonify({"success": False, "msg": "No se encontró el Local."}), 404
+    except Exception as e:
+        print("Error al cambiar estado del Local:", e)
+        return jsonify({"success": False, "msg": f"Error en servidor: {e}"}), 500
+
+# --- Gestión de Empleados ---
 @app.route('/Ad_Rempleados', methods=['GET', 'POST'])
 @login_requerido(rol='Administrador')
 def Ad_Rempleados():
@@ -886,20 +871,8 @@ def registrar_empleado():
         telefono = request.form.get('contacto')
         foto = request.files.get('foto')
 
-        print(f"📝 Datos recibidos: nombre={nombre}, cedula={cedula}, telefono={telefono}")
-
         if not (nombre and cedula and contrasena and telefono):
             return jsonify({"success": False, "msg": "Todos los campos son obligatorios."})
-
-        nombre_limpio = nombre.strip()
-        if len(nombre_limpio) < 2 or len(nombre_limpio) > 100:
-            return jsonify({"success": False, "msg": "El nombre debe tener entre 2 y 100 caracteres."})
-        
-        if not re.fullmatch(r"^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$", nombre_limpio):
-            return jsonify({"success": False, "msg": "El nombre solo puede contener letras y espacios."})
-        
-        if not re.search(r"[AEIOUÁÉÍÓÚaeiouáéíóú]", nombre_limpio):
-            return jsonify({"success": False, "msg": "El nombre debe contener vocales."})
 
         # Validar cédula
         cedula_str = cedula.strip()
@@ -925,48 +898,21 @@ def registrar_empleado():
         nombre_normalizado = re.sub(r"\s+", " ", nombre_limpio).strip().title()
         telefono_str = str(telefono).strip()
 
-        print(f"🔍 Validando duplicados: nombre='{nombre_normalizado}', cedula={cedula_int}, telefono={telefono_str}")
-
-        # VERIFICAR DUPLICADOS - MÁS ROBUSTO
-        # 1. Verificar cédula
-        print("🔍 Verificando cédula...")
+        # VERIFICAR DUPLICADOS
         existente_cedula = supabase.table("empleados").select("cedula, nombre").eq("cedula", cedula_int).execute()
-        print(f"📋 Resultado cédula: {existente_cedula.data}")
-        
         if existente_cedula.data:
             empleado_existente = existente_cedula.data[0]
-            return jsonify({
-                "success": False, 
-                "msg": f"El ID {cedula} ya está registrado a nombre de: {empleado_existente.get('nombre', 'N/A')}"
-            })
+            return jsonify({"success": False, "msg": f"El ID {cedula} ya está registrado a nombre de: {empleado_existente.get('nombre', 'N/A')}"})
 
-        # 2. Verificar nombre (case-insensitive)
-        print("🔍 Verificando nombre...")
-        # Primero buscar exactamente igual
         existente_nombre_exacto = supabase.table("empleados").select("cedula, nombre").ilike("nombre", nombre_normalizado).execute()
-        print(f"📋 Resultado nombre exacto: {existente_nombre_exacto.data}")
-        
         if existente_nombre_exacto.data:
             empleado_existente = existente_nombre_exacto.data[0]
-            return jsonify({
-                "success": False, 
-                "msg": f"El nombre '{nombre_normalizado}' ya está registrado con el ID: {empleado_existente.get('cedula', 'N/A')}"
-            })
+            return jsonify({"success": False, "msg": f"El nombre '{nombre_normalizado}' ya está registrado con el ID: {empleado_existente.get('cedula', 'N/A')}"})
 
-        # 3. Verificar teléfono
-        print("🔍 Verificando teléfono...")
         existente_telefono = supabase.table("empleados").select("cedula, nombre, telefono").eq("telefono", telefono_str).execute()
-        print(f"📋 Resultado teléfono: {existente_telefono.data}")
-        
         if existente_telefono.data:
             empleado_existente = existente_telefono.data[0]
-            return jsonify({
-                "success": False, 
-                "msg": f"El teléfono {telefono_str} ya está registrado a nombre de: {empleado_existente.get('nombre', 'N/A')} (ID: {empleado_existente.get('cedula', 'N/A')})"
-            })
-
-        # Si pasó todas las validaciones, proceder con el registro
-        print("✅ Todas las validaciones pasadas, procediendo con registro...")
+            return jsonify({"success": False, "msg": f"El teléfono {telefono_str} ya está registrado a nombre de: {empleado_existente.get('nombre', 'N/A')} (ID: {empleado_existente.get('cedula', 'N/A')})"})
 
         contrasena_hash = generate_password_hash(contrasena)
         foto_url = None
@@ -979,15 +925,11 @@ def registrar_empleado():
                 file_bytes = foto.read()
                 upload_response = supabase.storage.from_("Fotos").upload(filename, file_bytes)
                 if hasattr(upload_response, "error") and upload_response.error:
-                    print("❌ Error al subir imagen:", upload_response.error)
                     return jsonify({"success": False, "msg": "Error al subir la foto al servidor."})
                 foto_url = f"{SUPABASE_URL}/storage/v1/object/public/Fotos/{filename}"
-                print("✅ Foto subida exitosamente")
             except Exception as e:
-                print("❌ Error durante la subida de la foto:", e)
                 return jsonify({"success": False, "msg": "Error al procesar la imagen."})
 
-        # DATOS PARA INSERTAR
         data = {
             "cedula": cedula_int,
             "nombre": nombre_normalizado,
@@ -997,38 +939,16 @@ def registrar_empleado():
             "habilitado": True
         }
 
-        print(f"💾 Insertando datos: {data}")
-
         response = supabase.table("empleados").insert(data).execute()
-        
-        print(f"📡 Respuesta de Supabase: {response}")
-
         if hasattr(response, "data") and response.data:
-            print("✅ Empleado registrado exitosamente")
             return jsonify({"success": True, "msg": f"Empleado {nombre_normalizado} registrado correctamente."})
         else:
-            print("❌ No se pudo registrar el empleado")
             return jsonify({"success": False, "msg": "No se pudo registrar el empleado. Verifica los datos."})
             
     except Exception as e:
-        print(f"❌ ERROR GENERAL: {str(e)}")
-        print(f"❌ TIPO DE ERROR: {type(e)}")
         import traceback
         traceback.print_exc()
-        
-        # Capturar error de duplicado de Supabase
-        error_str = str(e)
-        if "23505" in error_str or "duplicate" in error_str.lower():
-            if "cedula" in error_str.lower():
-                return jsonify({"success": False, "msg": "El ID ya está registrado en el sistema."})
-            elif "telefono" in error_str.lower():
-                return jsonify({"success": False, "msg": "El teléfono ya está registrado en el sistema."})
-            elif "nombre" in error_str.lower():
-                return jsonify({"success": False, "msg": "El nombre ya está registrado en el sistema."})
-            else:
-                return jsonify({"success": False, "msg": "El registro ya existe en el sistema."})
-        else:
-            return jsonify({"success": False, "msg": "Error inesperado al registrar empleado."})
+        return jsonify({"success": False, "msg": "Error inesperado al registrar empleado."})
 
 @app.route("/buscar_empleado", methods=["POST"])
 @login_requerido(rol='Administrador')
@@ -1042,11 +962,7 @@ def buscar_empleado():
                 response = supabase.table("empleados").select("*").ilike("cedula", f"%{termino}%").execute()
         else:
             response = supabase.table("empleados").select("*").execute()
-        empleados = response.data or []
-        if empleados:
-            return jsonify({"success": True, "empleados": empleados})
-        else:
-            return jsonify({"success": True, "empleados": []})
+        return jsonify({"success": True, "empleados": response.data or []})
     except Exception as e:
         print("Error en búsqueda de empleado:", e)
         return jsonify({"success": False, "msg": "Error en el servidor"})
@@ -1075,11 +991,6 @@ def editar_empleado(cedula):
                 return jsonify({"success": False, "msg": "El teléfono debe tener entre 7 y 15 dígitos."}), 400
         except ValueError:
             return jsonify({"success": False, "msg": "El teléfono debe contener solo números."}), 400
-        
-        empleado_existente = supabase.table("empleados").select("*").eq("cedula", cedula).execute()
-        
-        if not empleado_existente.data:
-            return jsonify({"success": False, "msg": "Empleado no encontrado."}), 404
         
         response = supabase.table("empleados").update({
             "nombre": nombre,
@@ -1110,8 +1021,9 @@ def cambiar_estado_empleado(cedula):
         else:
             return jsonify({"success": False, "msg": "No se encontró el empleado."}), 404
     except Exception as e:
-        print("Error al cambiar estado del producto:", e)
+        print("Error al cambiar estado del empleado:", e)
         return jsonify({"success": False, "msg": f"Error en servidor: {e}"}), 500
+
 
 @app.route('/Ad_Rproductos', methods=['GET', 'POST'])
 @login_requerido(rol='Administrador')
@@ -1476,6 +1388,89 @@ def get_inventario_data():
         return jsonify({"success": True, "inventario": list(inventario_agrupado.values())})
     except Exception as e:
         return jsonify({"success": False, "msg": str(e)})
+
+
+
+
+# ==============================================================================
+# 6. ADMINISTRACIÓN - DASHBOARD E INFORMES
+# ==============================================================================
+
+@app.route('/Ad_Inicio', methods=['GET', 'POST'])
+@login_requerido(rol='Administrador')
+def Ad_Inicio():
+    try:
+        generar_notificaciones_caducidad()
+        generar_notificaciones_stock_bajo()
+        eliminar_notificaciones_caducadas()
+        
+        try:
+            todas_response = supabase.table("notificaciones").select("*").order("fecha", desc=True).execute()
+            todas = todas_response.data if todas_response.data else []
+        except Exception as db_error:
+            print(f"Error al consultar notificaciones: {db_error}")
+            todas = []
+
+        todas_filtradas = []
+        for n in todas:
+            mensaje = n.get("mensaje", "")
+            if mensaje is not None and str(mensaje).strip() != "":
+                todas_filtradas.append(n)
+
+        if not todas_filtradas:
+            notificacion_prueba = {
+                "mensaje": "NOTIFICACIÓN DE PRUEBA - Sistema funcionando",
+                "fecha_formateada": datetime.now().strftime("%d de %B de %Y, %I:%M %p"),
+                "leido": False
+            }
+            todas_filtradas.append(notificacion_prueba)
+
+        try:
+            locale.setlocale(locale.LC_TIME, "es_ES.utf8")
+        except:
+            try:
+                locale.setlocale(locale.LC_TIME, "es_CO.utf8")
+            except:
+                pass
+
+        for noti in todas_filtradas:
+            if noti.get("fecha") and not noti.get("fecha_formateada"):
+                try:
+                    fecha_str = noti["fecha"]
+                    if 'T' in fecha_str:
+                        fecha_obj = datetime.fromisoformat(fecha_str.replace('Z', '+00:00'))
+                    else:
+                        fecha_obj = datetime.strptime(fecha_str, "%Y-%m-%d %H:%M:%S")
+                    
+                    noti["fecha_formateada"] = fecha_obj.strftime("%d de %B de %Y, %I:%M %p").capitalize()
+                except Exception as date_error:
+                    print(f"Error al formatear fecha {noti['fecha']}: {date_error}")
+                    noti["fecha_formateada"] = noti["fecha"]
+
+        notificaciones = todas_filtradas[:3]
+        total_notificaciones = len(todas_filtradas)
+        restantes = max(0, total_notificaciones - 3)
+
+        http_response = make_response(render_template(
+            "Ad_templates/Ad_Inicio.html",
+            notificaciones=notificaciones,
+            restantes=restantes,
+            total_notificaciones=total_notificaciones
+        ))
+        http_response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+        http_response.headers['Pragma'] = 'no-cache'
+        http_response.headers['Expires'] = '-1'
+        return http_response
+        
+    except Exception as e:
+        print(f"Error crítico al cargar página de inicio: {e}")
+        import traceback
+        traceback.print_exc()
+        return render_template("Ad_templates/Ad_Inicio.html", 
+                             notificaciones=[], 
+                             restantes=0, 
+                             total_notificaciones=0), 500
+
 
 def obtener_rango_fecha(periodo, fecha_str):
     try:
@@ -2831,331 +2826,469 @@ def descargar_informes_rango():
         return response
         
     except Exception as e:
-        print(f"Error al generar informe unificado {tipo}: {e}")
-        import traceback
-        traceback.print_exc()
-        return jsonify({"success": False, "msg": f"Error: {e}"})
+        print(f"Error al generar informe: {e}")
+        return jsonify({"success": False, "msg": str(e)})
 
 
-@app.route('/Ad_Pnotificaciones', methods=['GET'])
-@login_requerido(rol='Administrador')
-def Ad_Pnotificaciones():
-    generar_notificaciones_caducidad()
-    eliminar_notificaciones_caducadas()
-    notificaciones = supabase.table("notificaciones") \
-        .select("*") \
-        .order("fecha", desc=True) \
-        .execute()
-    return render_template("Ad_templates/Ad_Pnotificaciones.html", notificaciones=notificaciones.data)
 
-@app.route('/marcar_prioritaria/<int:id>', methods=['POST'])
-@login_requerido(rol='Administrador')
-def marcar_prioritaria(id):
-    supabase.table("notificaciones").update({"tipo": "prioritaria"}).eq("id_notificaciones", id).execute()
-    return jsonify({"success": True})
 
-@app.route('/Ad_Rlocales', methods=['GET', 'POST'])
-@login_requerido(rol='Administrador')
-def Ad_Rlocales():
-    return render_template("Ad_templates/Ad_Rlocales.html")
+# ==============================================================================
+# 7. OPERACIONES DE EMPLEADOS
+# ==============================================================================
 
-@app.route('/registrar_local', methods=['POST'])
-@login_requerido(rol='Administrador')
-def registrar_local():
-    nombre = request.form.get('nombre')
-    direccion = request.form.get('direccion')
-    id_local = request.form.get('id_local')
-    foto = request.files.get('foto')
 
-    if not (nombre and direccion and id_local):
-        return jsonify({"success": False, "msg": "Todos los campos son obligatorios."})
+# ==============================================================================
+# 7. OPERACIONES DE EMPLEADOS
+# ==============================================================================
 
-    nombre_limpio = nombre.strip()
-    if len(nombre_limpio) < 2 or len(nombre_limpio) > 100:
-        return jsonify({"success": False, "msg": "El nombre del local debe tener entre 2 y 100 caracteres."})
-
-    direccion_limpia = direccion.strip()
-    if len(direccion_limpia) < 5 or len(direccion_limpia) > 200:
-        return jsonify({"success": False, "msg": "La dirección debe tener entre 5 y 200 caracteres."})
-
+@app.route('/registrar_consumo', methods=['POST'])
+@login_requerido(rol='Empleado')
+def registrar_consumo():
     try:
-        id_local_int = int(id_local)
-        if id_local_int < 1:
-            return jsonify({"success": False, "msg": "El ID del local debe ser un número positivo."})
-    except ValueError:
-        return jsonify({"success": False, "msg": "El ID del local debe ser un número válido."})
-
-    try:
-        existing = supabase.table("locales").select("*").eq("id_local", id_local).execute()
-        if existing.data:
-            return jsonify({"success": False, "msg": "Ya existe un local con ese ID."})
-    except Exception as e:
-        print("Error al verificar local:", e)
-        return jsonify({"success": False, "msg": "Error al verificar duplicados."})
-
-    foto_url = None
-    if foto:
-        if not is_valid_image(foto):
-            return jsonify({"success": False, "msg": "Formato de imagen no permitido."}), 400
+        data = request.get_json()
+        id_producto = data.get('id_producto')
+        cantidad = data.get('cantidad')
+        
+        if not (id_producto and cantidad):
+            return jsonify({"success": False, "msg": "Datos incompletos."}), 400
+            
         try:
-            filename = f"locales/{id_local}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
-            upload_response = supabase.storage.from_("Fotos").upload(filename, foto.read())
-            if hasattr(upload_response, "error") and upload_response.error:
-                print("Error al subir imagen:", upload_response.error)
-                return jsonify({"success": False, "msg": "Error al subir imagen."})
-            foto_url = f"{SUPABASE_URL}/storage/v1/object/public/Fotos/{filename}"
+            cantidad_val = float(cantidad)
+            if cantidad_val <= 0:
+                raise ValueError
+        except:
+            return jsonify({"success": False, "msg": "Cantidad inválida."}), 400
+
+        id_sucursal = session.get('branch')
+        if not id_sucursal:
+            return jsonify({"success": False, "msg": "Error de sesión: Sucursal no definida."}), 403
+
+        producto_info = supabase.table("productos").select("nombre, unidad").eq("id_producto", id_producto).execute()
+        nombre_producto = producto_info.data[0].get("nombre", "Desconocido") if producto_info.data else "Desconocido"
+
+        # Filtrar solo lotes con stock disponible
+        inventario = supabase.table("inventario").select("*")\
+            .eq("id_producto", id_producto)\
+            .eq("id_local", id_sucursal)\
+            .gt("cantidad", 0)\
+            .order("fecha_caducidad")\
+            .execute()
+        
+        if not inventario.data:
+            return jsonify({"success": False, "msg": "No hay stock disponible."}), 400
+        
+        # Validacion atómica antes de hacer descuentos
+        disponible_total = sum(float(l['cantidad']) for l in inventario.data)
+        if disponible_total < float(cantidad_val):
+             return jsonify({"success": False, "msg": f"Stock insuficiente. Solo hay {to_num(disponible_total)} {producto_info.data[0].get('unidad', '')}."}), 400
+
+        restante = float(cantidad_val)
+        detalles_afectados = []
+        
+        for lote in inventario.data:
+            cant_lote = float(lote['cantidad'])
+            id_inv = lote['id_inventario']
+            
+            if cant_lote >= restante:
+                detalles_afectados.append({
+                    "id_producto": int(id_producto),
+                    "id_inventario": id_inv,
+                    "cantidad_consumida": to_num(restante),
+                    "fecha": datetime.now().isoformat()
+                })
+                restante = 0
+                break
+            else:
+                detalles_afectados.append({
+                    "id_producto": int(id_producto),
+                    "id_inventario": id_inv,
+                    "cantidad_consumida": to_num(cant_lote),
+                    "fecha": datetime.now().isoformat()
+                })
+                restante -= cant_lote
+
+        # Historial
+        try:
+            cons_res = supabase.table("consumo").insert({
+                "fecha": datetime.now().isoformat(),
+                "cantidad_platos": 1,
+                "observacion": f"Consumo manual: {nombre_producto} (Cant: {cantidad_val})"
+            }).execute()
+            
+            if cons_res.data:
+                id_c = cons_res.data[0]["id_consumo"]
+                for det in detalles_afectados:
+                    det["id_consumo"] = id_c
+                    supabase.table("consumo_detalle").insert(det).execute()
+        except: pass
+
+        # Generar alertas inmediatas (optimizado por local)
+        generar_notificaciones_stock_bajo(session.get('branch'))
+
+        return jsonify({"success": True, "msg": "Consumo registrado correctamente."})
+    except Exception as e:
+        return jsonify({"success": False, "msg": str(e)})
+
+@app.route('/registrar_merma', methods=['POST'])
+@login_requerido(rol='Empleado')
+def registrar_merma():
+    try:
+        data = request.get_json()
+        id_producto = data.get('id_producto')
+        cantidad_val = data.get('cantidad')
+        motivo = data.get('motivo', 'No especificado')
+        id_l = session.get('branch')
+
+        if not id_producto or not cantidad_val:
+            return jsonify({"success": False, "msg": "Datos incompletos."}), 400
+
+        # Obtener info básica del producto
+        producto_info = supabase.table("productos").select("nombre, unidad").eq("id_producto", id_producto).execute()
+        if not producto_info.data:
+            return jsonify({"success": False, "msg": "Producto no encontrado."}), 404
+        
+        nombre_producto = producto_info.data[0]['nombre']
+
+        # Validar stock (FIFO)
+        inventario = supabase.table("inventario").select("*").eq("id_producto", id_producto).eq("id_local", id_l).gt("cantidad", 0).order("fecha_caducidad").execute()
+        
+        if not inventario.data:
+             return jsonify({"success": False, "msg": f"Stock insuficiente para '{nombre_producto}'. No hay existencias."}), 400
+
+        disponible_total = sum(float(l['cantidad']) for l in inventario.data)
+        if disponible_total < float(cantidad_val):
+             return jsonify({"success": False, "msg": f"Stock insuficiente. Solo hay {to_num(disponible_total)} {producto_info.data[0].get('unidad', '')}."}), 400
+
+        restante = float(cantidad_val)
+        detalles_afectados = []
+        
+        for lote in inventario.data:
+            cant_lote = float(lote['cantidad'])
+            id_inv = lote['id_inventario']
+            
+            if cant_lote >= restante:
+                detalles_afectados.append({
+                    "id_producto": int(id_producto),
+                    "id_inventario": id_inv,
+                    "cantidad_consumida": to_num(restante),
+                    "fecha": datetime.now().isoformat()
+                })
+                restante = 0
+                break
+            else:
+                detalles_afectados.append({
+                    "id_producto": int(id_producto),
+                    "id_inventario": id_inv,
+                    "cantidad_consumida": to_num(cant_lote),
+                    "fecha": datetime.now().isoformat()
+                })
+                restante -= cant_lote
+
+        # Registrar historial bajo categoría MERMA
+        try:
+            cons_res = supabase.table("consumo").insert({
+                "fecha": datetime.now().isoformat(),
+                "cantidad_platos": 0, # No es un plato vendido
+                "id_local": id_l,
+                "observacion": f"[MERMA] {motivo} | Prod: {nombre_producto} (Cant: {cantidad_val})"
+            }).execute()
+            
+            if cons_res.data:
+                id_c = cons_res.data[0]["id_consumo"]
+                for det in detalles_afectados:
+                    det["id_consumo"] = id_c
+                    # La inserción activa el Trigger de DB para descontar
+                    supabase.table("consumo_detalle").insert(det).execute()
         except Exception as e:
-            print("Error al subir foto:", e)
-            return jsonify({"success": False, "msg": "Error al procesar la foto."})
+            print("Error en insert merma:", e)
+            return jsonify({"success": False, "msg": "Error al registrar merma en base de datos."}), 500
 
-    try:
-        data = {
-            "id_local": id_local,
-            "nombre": nombre,
-            "direccion": direccion,
-            "foto": foto_url
-        }
-        response = supabase.table("locales").insert(data).execute()
-        if response.data:
-            return jsonify({"success": True, "msg": "Local registrado correctamente."})
-        else:
-            return jsonify({"success": False, "msg": "Error al registrar local."})
+        # Generar alertas inmediatas
+        generar_notificaciones_stock_bajo(id_l)
+
+        return jsonify({"success": True, "msg": "Merma registrada correctamente."})
     except Exception as e:
-        print("Error inesperado al registrar local:", e)
-        return jsonify({"success": False, "msg": "Error en el servidor."})
+        print("Error en /registrar_merma:", e)
+        return jsonify({"success": False, "msg": str(e)})
 
-@app.route('/obtener_siguiente_id_local', methods=['GET'])
-@login_requerido(rol='Administrador')
-def obtener_siguiente_id_local():
+@app.route('/get_recetas_empleado', methods=['POST'])
+@login_requerido(rol='Empleado')
+def get_recetas_empleado():
     try:
-        response = supabase.table("locales").select("id_local").order("id_local", desc=True).limit(1).execute()
-        if response.data:
-            ultimo_id = int(response.data[0]["id_local"])
-            siguiente_id = ultimo_id + 1
-        else:
-            siguiente_id = 1
-        return jsonify({"success": True, "siguiente_id": siguiente_id})
+        data = request.get_json() or {}
+        termino = data.get("termino", "").strip()
+        query = supabase.table("recetarios").select("*").eq("habilitado", True)
+        if termino:
+            query = query.ilike("nombre", f"%{termino}%")
+        res = query.order("nombre").execute()
+        return jsonify({"success": True, "recetas": res.data or []})
     except Exception as e:
-        print("Error al obtener siguiente ID:", e)
-        return jsonify({"success": False, "msg": "Error al calcular el ID."})
+        return jsonify({"success": False, "msg": str(e)})
 
-@app.route("/buscar_local", methods=["POST"])
-@login_requerido(rol='Administrador')
-def buscar_local():
-    data = request.get_json()
-    termino = data.get("termino", "").strip()
-    try:
-        query = supabase.table("locales").select("id_local, nombre, direccion, foto, habilitado")
-        if termino.isdigit():
-            query = query.eq("id_local", int(termino))
-        else:
-            query = query.or_(f"nombre.ilike.%{termino}%,direccion.ilike.%{termino}%")
-        response = query.execute()
-        locales = response.data or []
-        if locales:
-            return jsonify({"success": True, "locales": locales})
-        else:
-            return jsonify({"success": False, "msg": "No se encontraron locales."})
-    except Exception as e:
-        print("Error en búsqueda de local:", e)
-        return jsonify({"success": False, "msg": "Error en el servidor"})
-
-@app.route("/editar_local/<int:id_local>", methods=["PUT"])
-@login_requerido(rol='Administrador')
-def editar_local(id_local):
+@app.route('/registrar_consumo_receta', methods=['POST'])
+@login_requerido(rol='Empleado')
+def registrar_consumo_receta():
     try:
         data = request.get_json()
-        nombre = data.get("nombre")
-        direccion = data.get("direccion")
-        if not (nombre and direccion):
-            return jsonify({"success": False, "msg": "Todos los campos son obligatorios."}), 400
+        id_r = data.get('id_receta')
+        cant_p = int(data.get('cantidad', 1))
+        id_l = session.get('branch')
+        
+        receta = supabase.table("recetarios").select("nombre").eq("id_receta", id_r).execute()
+        if not receta.data:
+            return jsonify({"success": False, "msg": "Receta no existe"}), 404
+            
+        detalles = supabase.table("receta_detalle").select("*, productos(nombre, unidad)").eq("id_receta", id_r).execute()
+        if not detalles.data:
+            return jsonify({"success": False, "msg": "La receta no tiene ingredientes."}), 400
 
-        nombre_limpio = nombre.strip()
-        if len(nombre_limpio) < 2 or len(nombre_limpio) > 100:
-            return jsonify({"success": False, "msg": "El nombre del local debe tener entre 2 y 100 caracteres."}), 400
-
-        direccion_limpia = direccion.strip()
-        if len(direccion_limpia) < 5 or len(direccion_limpia) > 200:
-            return jsonify({"success": False, "msg": "La dirección debe tener entre 5 y 200 caracteres."}), 400
-
-        response = supabase.table("locales").update({
-            "nombre": nombre_limpio,
-            "direccion": direccion_limpia
-        }).eq("id_local", id_local).execute()
-        if response.data:
-            return jsonify({"success": True, "msg": "Local actualizado correctamente."})
-        else:
-            return jsonify({"success": False, "msg": "No se pudo actualizar el local."})
-    except Exception as e:
-        print("Error al editar local:", e)
-        return jsonify({"success": False, "msg": "Error en el servidor"})
-
-@app.route("/cambiar_estado_local/<int:id_local>", methods=["POST"])
-@login_requerido(rol='Administrador')
-def cambiar_estado_local(id_local):
-    try:
-        data = request.get_json()
-        habilitado = data.get("habilitado")
-        if habilitado is None:
-            return jsonify({"success": False, "msg": "Estado no especificado."}), 400
-        response = supabase.table("locales").update({"habilitado": habilitado}).eq("id_local", id_local).execute()
-        if hasattr(response, "data") and response.data:
-            estado = "habilitado" if habilitado else "deshabilitado"
-            return jsonify({"success": True, "msg": f"Local {estado} correctamente."})
-        else:
-            return jsonify({"success": False, "msg": "No se encontró el Local."}), 404
-    except Exception as e:
-        print("Error al cambiar estado del Local:", e)
-        return jsonify({"success": False, "msg": f"Error en servidor: {e}"}), 500
-
-@app.route("/Ad_Ceditar", methods=["GET", "POST"])
-@login_requerido(rol='Administrador')
-def Ad_Ceditar():
-    cedula = session.get("cedula")
-    try:
-        response = supabase.table("administrador").select("*").eq("id", cedula).execute()
-        admin = response.data[0] if response.data else None
-        if not admin:
-            return jsonify({"success": False, "msg": "Administrador no encontrado."}), 404
-
-        if request.method == "GET":
-            photo_url = admin.get("foto") if admin.get("foto") else url_for("static", filename="image/default.png")
-            return render_template(
-                "Ad_templates/Ad_Ceditar.html",
-                user={
-                    "Cedula": admin.get("id", ""),
-                    "Nombre": admin.get("nombre", ""),
-                    "photo_url": photo_url
+        # FASE 0: Agregar ingredientes por ID de producto (evita doble descuento si hay duplicados en la receta)
+        ingredientes_agregados = {}
+        for ing in detalles.data:
+            pid = ing["id_producto"]
+            cant_ing = float(ing["cantidad"])
+            if pid not in ingredientes_agregados:
+                ingredientes_agregados[pid] = {
+                    "id_producto": pid,
+                    "cantidad": 0,
+                    "productos": ing.get("productos")
                 }
-            )
+            ingredientes_agregados[pid]["cantidad"] += cant_ing
 
-        if request.method == "POST" and request.is_json:
-            data = request.get_json()
-            nombre = data.get("Nombre")
-            if not nombre:
-                return jsonify({"success": False, "msg": "Todos los campos son obligatorios."}), 400
-            update_response = supabase.table("administrador").update({"nombre" : nombre}).eq("id", cedula).execute()
-            if update_response.data:
-                return jsonify({"success": True, "msg": "Usuario actualizado correctamente"}), 200
-            else:
-                return jsonify({"success": False, "msg": "No se pudo actualizar el usuario."}), 500
+        # FASE 1: Validar stock de todos los ingredientes
+        inventario_necesario = []
+        for ing in ingredientes_agregados.values():
+            p_name = ing['productos']['nombre'] if ing.get('productos') else ing['id_producto']
+            p_unit = ing['productos']['unidad'] if ing.get('productos') else ""
+            requerido = round(float(ing["cantidad"]) * cant_p, 4)
+            
+            lotes = supabase.table("inventario").select("*").eq("id_producto", ing["id_producto"]).eq("id_local", id_l).gt("cantidad", 0).order("fecha_caducidad").execute()
+            
+            if not lotes.data:
+                return jsonify({"success": False, "msg": f"Stock insuficiente para '{p_name}'. Sin stock (Requerido: {to_num(requerido)} {p_unit})"}), 400
+                
+            disponible = round(sum(float(l['cantidad']) for l in lotes.data), 4)
+            if disponible < requerido:
+                return jsonify({"success": False, "msg": f"Stock insuficiente para '{p_name}'. Solo hay {to_num(disponible)} {p_unit} (Requerido: {to_num(requerido)} {p_unit})"}), 400
+                
+            inventario_necesario.append({
+                "id_producto": ing["id_producto"],
+                "requerido": requerido,
+                "lotes": lotes.data
+            })
+
+        # FASE 2: Descontar stock (sin transacciones, pero con validacion previa exitosa)
+        afectados_total = []
+        for item in inventario_necesario:
+            restante = float(item["requerido"])
+            for lote in item["lotes"]:
+                if restante <= 0: break
+                id_inv = lote['id_inventario']
+                cant_lote = float(lote['cantidad'])
+                
+                if cant_lote >= restante:
+                    afectados_total.append({"id_prod": item["id_producto"], "id_inv": id_inv, "cant": to_num(restante)})
+                    restante = 0
+                else:
+                    afectados_total.append({"id_prod": item["id_producto"], "id_inv": id_inv, "cant": to_num(cant_lote)})
+                    restante -= cant_lote
+
+        # Registrar consumo e historial
+        c_res = supabase.table("consumo").insert({
+            "fecha": datetime.now().isoformat(),
+            "cantidad_platos": cant_p,
+            "id_receta": id_r,
+            "id_local": id_l,
+            "observacion": f"Venta: {cant_p} platos de {receta.data[0]['nombre']}"
+        }).execute()
+        
+        if c_res.data:
+            idc = c_res.data[0]["id_consumo"]
+            for a in afectados_total:
+                supabase.table("consumo_detalle").insert({
+                    "id_consumo": idc,
+                    "id_producto": a["id_prod"],
+                    "id_inventario": a["id_inv"],
+                    "cantidad_consumida": a["cant"],
+                    "fecha": datetime.now().isoformat()
+                }).execute()
+                
+        # Generar alertas inmediatas (optimizado por local)
+        generar_notificaciones_stock_bajo(id_l)
+        
+        return jsonify({"success": True, "msg": "¡Venta registrada exitosamente!"})
     except Exception as e:
-        print("Error en Ad_Ceditar:", e)
-        return jsonify({"success": False, "msg": "Error en el servidor"}), 500
+        print("Error en registrar_consumo_receta:", e)
+        return jsonify({"success": False, "msg": "Verifique que todos los productos esten en el inventario. Error: "+str(e)}), 400
 
-@app.route('/Ad_Ceditar_foto', methods=['POST', 'DELETE'])
-@login_requerido(rol='Administrador')
-def Ad_Ceditar_foto():
-    cedula = session.get('cedula')
+
+@app.route('/historial_consumo_hoy', methods=['GET'])
+@login_requerido(rol='Empleado')
+def historial_consumo_hoy():
     try:
-        if request.method == 'POST':
-            foto = request.files.get('foto')
-            if not foto:
-                return jsonify({"success": False, "msg": "No se envió ninguna foto"}), 400
-            if not is_valid_image(foto):
-                return jsonify({"success": False, "msg": "Formato de imagen no permitido."}), 400
-            file_name = f"admin_{cedula}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
-            file_bytes = foto.read()
-            upload_response = supabase.storage.from_("fotos_admin").upload(file_name, file_bytes)
-            if hasattr(upload_response, "error") and upload_response.error:
-                return jsonify({"success": False, "msg": "Error al subir la foto a Supabase"}), 500
-            photo_url = supabase.storage.from_("fotos_admin").get_public_url(file_name)
-            update_response = supabase.table("administrador").update({"foto": photo_url}).eq("id", cedula).execute()
-            if update_response.data:
-                return jsonify({"success": True, "photo_url": photo_url}), 200
-            else:
-                return jsonify({"success": False, "msg": "No se pudo guardar la foto"}), 500
+        id_sucursal = session.get('branch')
+        if not id_sucursal:
+            return jsonify({"success": False, "msg": "Sucursal no definida."}), 403
 
-        elif request.method == 'DELETE':
-            response = supabase.table("administrador").select("foto").eq("id", cedula).execute()
-            if response.data and response.data[0].get("foto"):
-                foto_url = response.data[0]["foto"]
-                file_name = foto_url.split("/")[-1]
-                supabase.storage.from_("fotos_admin").remove([file_name])
-            supabase.table("administrador").update({"foto": None}).eq("id", cedula).execute()
-            default_url = url_for("static", filename="image/default.png")
-            return jsonify({"success": True, "photo_url": default_url}), 200
+        hoy = datetime.now().strftime("%Y-%m-%d")
+
+        # Query joins: consumo_detalle -> consumo and consumo_detalle -> productos
+        # the Supabase python client supports joining via select strings
+        consumos = supabase.table("consumo_detalle") \
+            .select("*, productos(nombre, unidad), consumo(*), inventario(id_local)") \
+            .gte("fecha", f"{hoy}T00:00:00") \
+            .lte("fecha", f"{hoy}T23:59:59") \
+            .execute()
+
+        registros = []
+        if consumos.data:
+            for item in consumos.data:
+                # Filtrar por sucursal si el inventario está disponible
+                if item.get("inventario") and item["inventario"].get("id_local") == id_sucursal:
+                    registros.append({
+                        "id_producto": item["id_producto"],
+                        "nombre_producto": item["productos"]["nombre"] if item.get("productos") else "Desconocido",
+                        "cantidad": item["cantidad_consumida"],
+                        "unidad": item["productos"]["unidad"] if item.get("productos") else "",
+                        "fecha": item["fecha"]
+                    })
+
+        return jsonify({"success": True, "consumos": registros})
+
     except Exception as e:
-        print("Error en Ad_Ceditar_foto:", e)
+        print("Error en historial_consumo_hoy:", e)
+        import traceback
+        return jsonify({"success": False, "msg": f"Error al obtener historial: {str(e)}\n{traceback.format_exc()}"}), 500
+
+@app.route('/get_receta_breakdown', methods=['POST'])
+@login_requerido(rol='Empleado')
+def get_receta_breakdown():
+    try:
+        data = request.get_json()
+        id_receta = data.get('id_receta')
+        
+        if not id_receta:
+            return jsonify({"success": False, "msg": "ID de receta no proporcionado."}), 400
+            
+        detalles = supabase.table("receta_detalle") \
+            .select("*, productos(nombre, unidad)") \
+            .eq("id_receta", id_receta) \
+            .execute()
+            
+        if not detalles.data:
+            return jsonify({"success": True, "breakdown": []})
+            
+        breakdown = []
+        for d in detalles.data:
+            breakdown.append({
+                "nombre": d['productos']['nombre'] if d.get('productos') else "Desconocido",
+                "cantidad": d['cantidad'],
+                "unidad": d['productos']['unidad'] if d.get('productos') else ""
+            })
+            
+        return jsonify({"success": True, "breakdown": breakdown})
+    except Exception as e:
         return jsonify({"success": False, "msg": str(e)}), 500
 
-@app.route("/enviar_token_recuperacion", methods=["POST"])
-def enviar_token_recuperacion():
+@app.route('/get_consumo_comparative', methods=['GET'])
+@login_requerido(rol='Empleado')
+def get_consumo_comparative():
     try:
-        data = request.get_json()
-        telefono = data.get("telefono", "").strip()
-        if not telefono:
-            return jsonify({"success": False, "msg": "Debe ingresar un número de teléfono."}), 400
+        id_local = session.get('branch')
+        if not id_local:
+            return jsonify({"success": False, "msg": "Sucursal no definida."}), 403
 
-        telefono = telefono.replace(" ", "")
-        if telefono.startswith("+57"):
-            telefono = telefono[3:]
-        elif telefono.startswith("57"):
-            telefono = telefono[2:]
-
-        if not telefono.isdigit() or len(telefono) != 10:
-            return jsonify({"success": False, "msg": "El número de teléfono no es válido (debe tener 10 dígitos)."}), 400
-
-        client = TwilioClient(TWILIO_SID, TWILIO_AUTH)
-        try:
-            verification = client.verify.v2.services(VERIFY_SID).verifications.create(
-                to=f"+57{telefono}",
-                channel="sms"
-            )
-            logger.info("Token enviado a +57%s - SID: %s", telefono, getattr(verification, 'sid', ''))
-            return jsonify({"success": True, "msg": "Código enviado correctamente."})
-        except TwilioRestException as tre:
-            msg = str(tre).lower()
-            if "unverified" in msg or "not verified" in msg or "cannot send messages to unverified numbers" in msg:
-                return jsonify({"success": False, "msg": "El número no está verificado o no está permitido por Twilio."}), 400
-            return jsonify({"success": False, "msg": "No se pudo enviar el SMS. Verifica el número e inténtalo más tarde."}), 500
-    except Exception as e:
-        logger.exception("Error en enviar_token_recuperacion: %s", e)
-        return jsonify({"success": False, "msg": "Error interno al procesar la solicitud."}), 500
-
-@app.route("/validar_token", methods=["POST"])
-def validar_token():
-    try:
-        data = request.get_json()
-        nombre = data.get("nombre")
-        telefono = data.get("telefono", "").strip()
-        token = data.get("token")
-        nueva_contrasena = data.get("nueva_clave")
-
-        if not (telefono and token and nueva_contrasena):
-            return jsonify({"success": False, "msg": "Todos los campos son obligatorios."}), 400
-
-        telefono = telefono.replace(" ", "")
-        if telefono.startswith("+57"):
-            telefono = telefono[3:]
-        elif telefono.startswith("57"):
-            telefono = telefono[2:]
-
-        client = TwilioClient(TWILIO_SID, TWILIO_AUTH)
-        try:
-            verfification_check = client.verify.v2.services(VERIFY_SID).verification_checks.create(
-                to=f"+57{telefono}",
-                code=token
-            )
-        except TwilioRestException as tre:
-            logger.debug("TwilioRestException en verificación de código: %s", tre)
-            msg = str(tre).lower()
-            if "unverified" in msg or "not verified" in msg:
-                return jsonify({"success": False, "msg": "El número no está verificado en Twilio o no está permitido por la cuenta de Twilio."}), 400
-            return jsonify({"success": False, "msg": "No se pudo validar el código por un error del servicio de mensajería."}), 500
-
-        if verfification_check.status != "approved":
-            return jsonify({"success": False, "msg": "Código inválido o expirado."}), 400
+        hoy = datetime.now().strftime("%Y-%m-%d")
         
-        hashed_password = generate_password_hash(nueva_contrasena)
-        supabase.table("administrador").update(
-            {"contrasena": hashed_password}
-        ).eq("nombre", nombre).execute()
+        # 1. Obtener consumos de hoy para el local
+        consumos_hoy = supabase.table("consumo_detalle") \
+            .select("id_producto, cantidad_consumida, productos(nombre, unidad), inventario(id_local)") \
+            .gte("fecha", f"{hoy}T00:00:00") \
+            .lte("fecha", f"{hoy}T23:59:59") \
+            .execute()
 
-        return jsonify({"success": True, "msg": "Contraseña actualizada correctamente."})
+        agregado_consumo = {}
+        if consumos_hoy.data:
+            for c in consumos_hoy.data:
+                # Filtrar por local
+                if c.get('inventario') and c['inventario'].get('id_local') == id_local:
+                    pid = c['id_producto']
+                    if pid not in agregado_consumo:
+                        agregado_consumo[pid] = {
+                            "nombre": c['productos']['nombre'],
+                            "unidad": c['productos']['unidad'],
+                            "total_consumido": 0
+                        }
+                    agregado_consumo[pid]["total_consumido"] += c['cantidad_consumida']
+
+        # 2. Obtener stock actual para el local
+        inventario = supabase.table("inventario") \
+            .select("id_producto, cantidad") \
+            .eq("id_local", id_local) \
+            .execute()
+            
+        stock_actual = {}
+        if inventario.data:
+            for inv in inventario.data:
+                pid = inv['id_producto']
+                stock_actual[pid] = stock_actual.get(pid, 0) + inv['cantidad']
+
+        # 3. Combinar datos
+        comparativa = []
+        # Asegurar incluir productos que tengan stock pero no consumo hoy, o viceversa
+        todos_pids = set(agregado_consumo.keys()) | set(stock_actual.keys())
+        
+        # Necesitamos nombres para los que solo tienen stock
+        if stock_actual:
+            productos_info = supabase.table("productos").select("id_producto, nombre, unidad").in_("id_producto", list(todos_pids)).execute()
+            p_map = {p['id_producto']: p for p in productos_info.data}
+        else:
+            p_map = {}
+
+        for pid in todos_pids:
+            consumo_data = agregado_consumo.get(pid, {})
+            nombre = consumo_data.get("nombre") or (p_map.get(pid, {}).get("nombre", "Desconocido"))
+            unidad = consumo_data.get("unidad") or (p_map.get(pid, {}).get("unidad", ""))
+            
+            comparativa.append({
+                "id_producto": pid,
+                "nombre": nombre,
+                "unidad": unidad,
+                "consumido": agregado_consumo.get(pid, {}).get("total_consumido", 0),
+                "stock": max(0, stock_actual.get(pid, 0))
+            })
+
+        return jsonify({"success": True, "comparativa": comparativa})
     except Exception as e:
-        logger.exception("Error en validar_token: %s", e)
-        return jsonify({"success": False, "msg": "Error interno al validar el token."}), 500
+        print("Error en get_consumo_comparative:", e)
+        import traceback
+        return jsonify({"success": False, "msg": f"Error: {str(e)}\n{traceback.format_exc()}"}), 500
+
+
+@app.route('/stock_producto_sucursal', methods=['POST'])
+@login_requerido(rol='Empleado')
+def stock_producto_sucursal():
+    """Retorna el stock disponible de un producto en la sucursal del empleado."""
+    try:
+        data = request.get_json()
+        id_producto = data.get('id_producto')
+        id_sucursal = session.get('branch')
+
+        if not (id_producto and id_sucursal):
+            return jsonify({"success": False, "stock": 0})
+
+        inv = supabase.table("inventario") \
+            .select("cantidad") \
+            .eq("id_producto", id_producto) \
+            .eq("id_local", id_sucursal) \
+            .execute()
+
+        total = sum(lote.get("cantidad", 0) for lote in (inv.data or []))
+        return jsonify({"success": True, "stock": total})
+
+    except Exception as e:
+        print("Error en stock_producto_sucursal:", e)
+        return jsonify({"success": False, "stock": 0})
 
 @app.route('/Em_Inicio', methods=['GET', 'POST'])
 @login_requerido(rol='Empleado')
@@ -3459,148 +3592,6 @@ def Em_Hordenes():
         print("Error al cargar historial de órdenes:", e)
         return render_template("Em_templates/Em_Hordenes.html", pedidos=[])
 
-@app.route("/Em_Ceditar", methods=["GET", "POST"])
-@login_requerido(rol='Empleado')
-def Em_Ceditar():
-    cedula = session.get("cedula")
-    try:
-        response = supabase.table("empleados").select("*").eq("cedula", cedula).execute()
-        empleado = response.data[0] if response.data else None
-        if not empleado:
-            return jsonify({"success": False, "msg": "Empleado no encontrado."}), 404
-
-        if request.method == "GET":
-            photo_url = empleado.get("foto") if empleado.get("foto") else url_for("static", filename="image/default.png")
-            return render_template(
-                "Em_templates/Em_Ceditar.html",
-                user={
-                    "Cedula": empleado.get("cedula", ""),
-                    "Nombre": empleado.get("nombre", ""),
-                    "photo_url": photo_url
-                }
-            )
-
-        if request.method == "POST" and request.is_json:
-            data = request.get_json()
-            nombre = data.get("Nombre")
-            if not nombre:
-                return jsonify({"success": False, "msg": "El nombre es obligatorio."}), 400
-            update_response = supabase.table("empleados").update({"nombre": nombre}).eq("cedula", cedula).execute()
-            if update_response.data:
-                return jsonify({"success": True, "msg": "Perfil actualizado correctamente"}), 200
-            else:
-                return jsonify({"success": False, "msg": "No se pudo actualizar el perfil."}), 500
-    except Exception as e:
-        print("Error en Em_Ceditar:", e)
-        return jsonify({"success": False, "msg": "Error en el servidor"}), 500
-
-@app.route('/Em_Ceditar_foto', methods=['POST', 'DELETE'])
-@login_requerido(rol='Empleado')
-def Em_Ceditar_foto():
-    cedula = session.get('cedula')
-    try:
-        if request.method == 'POST':
-            foto = request.files.get('foto')
-            if not foto:
-                return jsonify({"success": False, "msg": "No se envió ninguna foto"}), 400
-            if not is_valid_image(foto):
-                return jsonify({"success": False, "msg": "Formato de imagen no permitido."}), 400
-            file_name = f"empleado_{cedula}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
-            file_bytes = foto.read()
-            upload_response = supabase.storage.from_("Fotos").upload(file_name, file_bytes)
-            if hasattr(upload_response, "error") and upload_response.error:
-                return jsonify({"success": False, "msg": "Error al subir la foto a Supabase"}), 500
-            photo_url = supabase.storage.from_("Fotos").get_public_url(file_name)
-            update_response = supabase.table("empleados").update({"foto": photo_url}).eq("cedula", cedula).execute()
-            if update_response.data:
-                return jsonify({"success": True, "photo_url": photo_url}), 200
-            else:
-                return jsonify({"success": False, "msg": "No se pudo guardar la foto"}), 500
-
-        elif request.method == 'DELETE':
-            response = supabase.table("empleados").select("foto").eq("cedula", cedula).execute()
-            if response.data and response.data[0].get("foto"):
-                foto_url = response.data[0]["foto"]
-                file_name = foto_url.split("/")[-1]
-                supabase.storage.from_("Fotos").remove([file_name])
-            supabase.table("empleados").update({"foto": None}).eq("cedula", cedula).execute()
-            default_url = url_for("static", filename="image/default.png")
-            return jsonify({"success": True, "photo_url": default_url}), 200
-    except Exception as e:
-        print("Error en Em_Ceditar_foto:", e)
-        return jsonify({"success": False, "msg": str(e)}), 500
-
-@app.route("/Em_enviar_token_recuperacion", methods=["POST"])
-def Em_enviar_token_recuperacion():
-    try:
-        data = request.get_json()
-        telefono = data.get("telefono", "").strip()
-        if not telefono:
-            return jsonify({"success": False, "msg": "Debe ingresar un número de teléfono."}), 400
-
-        telefono = telefono.replace(" ", "")
-        if telefono.startswith("+57"):
-            telefono = telefono[3:]
-        elif telefono.startswith("57"):
-            telefono = telefono[2:]
-
-        if not telefono.isdigit() or len(telefono) != 10:
-            return jsonify({"success": False, "msg": "Número de teléfono no válido."}), 400
-
-        client = TwilioClient(TWILIO_SID, TWILIO_AUTH)
-        client.verify.v2.services(VERIFY_SID).verifications.create(to=f"+57{telefono}", channel="sms")
-        return jsonify({"success": True, "msg": "Código enviado correctamente."})
-    except Exception as e:
-        print(f"Error en Em_enviar_token_recuperacion: {e}")
-        return jsonify({"success": False, "msg": str(e)}), 500
-
-@app.route("/Em_validar_token", methods=["POST"])
-def Em_validar_token():
-    try:
-        data = request.get_json()
-        nombre = data.get("nombre", "").strip()
-        telefono = data.get("telefono", "").strip()
-        token = data.get("token", "").strip()
-        nueva_contrasena = data.get("nueva_clave", "").strip()
-
-        if not (nombre and telefono and token and nueva_contrasena):
-            return jsonify({"success": False, "msg": "Todos los campos son obligatorios."}), 400
-
-        if telefono.startswith("+57"):
-            telefono = telefono[3:]
-        elif telefono.startswith("57"):
-            telefono = telefono[2:]
-
-        client = TwilioClient(TWILIO_SID, TWILIO_AUTH)
-        verification_check = client.verify.v2.services(VERIFY_SID).verification_checks.create(
-            to=f"+57{telefono}",
-            code=token
-        )
-
-        if verification_check.status != "approved":
-            return jsonify({"success": False, "msg": "Código inválido o expirado."}), 400
-
-        empleado_resp = supabase.table("empleados").select("*")\
-            .eq("nombre", nombre)\
-            .eq("telefono", telefono)\
-            .execute()
-
-        if not empleado_resp.data:
-            return jsonify({"success": False, "msg": "Empleado no encontrado."}), 404
-
-        cedula = empleado_resp.data[0]["cedula"]
-        hashed_password = generate_password_hash(nueva_contrasena)
-        update_resp = supabase.table("empleados").update(
-            {"contrasena": hashed_password}
-        ).match({"cedula": cedula}).execute()
-
-        if not update_resp.data:
-            return jsonify({"success": False, "msg": "No se actualizó ninguna fila. Verifique el filtro."}), 400
-
-        return jsonify({"success": True, "msg": "Contraseña actualizada correctamente."})
-    except Exception as e:
-        print(f"Error en Em_validar_token: {e}")
-        return jsonify({"success": False, "msg": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(

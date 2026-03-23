@@ -4,8 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <title>Ichiraku Ramen - Editar Perfil</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Ceditar.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Ceditar.css') }}?v=2.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/components.css') }}?v=2.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}?v=2.0">
+
+
   <script src="{{ url_for('static', filename='js/Global_js/session_timeout.js') }}"></script>
   <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
@@ -60,14 +63,19 @@
     <div class="form-container">
       <!-- Formulario editable -->
       <form class="edit-form" id="editarForm">
-        <label for="cedula">ID:</label>
-        <input type="text" id="cedula" name="cedula" value="{{ user.Cedula }}" readonly class="readonly-input">
+        <div class="input-group">
+          <label for="cedula">Cédula</label>
+          <input type="text" id="cedula" name="cedula" value="{{ user.Cedula }}" readonly class="readonly-input">
+        </div>
 
-        <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" name="Nombre" value="{{ user.Nombre }}" required>
+        <div class="input-group">
+          <label for="nombre">Nombre completo</label>
+          <input type="text" id="nombre" name="Nombre" value="{{ user.Nombre }}" required>
+        </div>
 
-        <button type="button" class="profile-btn-c" onclick="recuperarContrasena()">Cambiar clave</button>
+        <button type="button" class="btn secondary" style="width: 100%; margin-top: 10px;" onclick="recuperarContrasena()">Cambiar contraseña</button>
       </form>
+
 
       <!-- Foto -->
       <div class="profile-section">
@@ -75,18 +83,18 @@
           alt="Foto de usuario"
           onerror="this.onerror=null; this.src='{{ url_for('static', filename='image/default-user.png') }}';">
 
-        <button class="profile-btn">Subir/Cambiar foto</button>
-        <button class="profile-btn delete">Eliminar foto</button>
+        <button type="button" class="btn profile-btn">Subir/Cambiar foto</button>
+        <button type="button" class="btn profile-btn delete">Eliminar foto</button>
       </div>
     </div>
-    </div>
+
 
     <!-- Logo circular respiratorio -->
     <div class="logo-main">
       <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Ramen">
     </div>
   </main>
-  </div>
+
 
   <!-- Modal -->
   <div id="modal" class="modal">

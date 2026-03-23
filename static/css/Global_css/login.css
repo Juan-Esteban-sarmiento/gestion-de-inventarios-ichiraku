@@ -218,8 +218,8 @@ select:focus {
     width: 100%;
     margin-top: 10px;
     padding: clamp(12px, 2vh, 18px);
-    background: linear-gradient(90deg, #8b0000 0%, #ff0000 50%, #8b0000 100%);
-    background-size: 200% auto;
+    background: #b30000 !important;
+
     color: #fff;
     border: none;
     border-radius: 14px;

@@ -141,10 +141,13 @@
     background: var(--red-brand);
 }
 
-/* Sin botones como se solicitó */
-.btn-prioritaria {
-    display: none !important;
+/* --- BOTÓN CARGAR MÁS --- */
+/* Heredado de components.css */
+#btn-load-more {
+    max-width: 250px;
+    margin: 0 auto;
 }
+
 
 @media (max-width: 768px) {
     .search-box {

@@ -2,8 +2,11 @@
 <html lang="es">
 
 <head>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Ceditar.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Ceditar.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/components.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}?v=2.0">
+
+
     <script src="{{ url_for('static', filename='js/Global_js/session_timeout.js') }}"></script>
     <meta charset="UTF-8">
     <title>Ichiraku Ramen - Administrador de usuario</title>
@@ -67,7 +70,8 @@
                     <label for="Nombre">Nombre:</label>
                     <input type="text" id="Nombre" name="Nombre" value="{{ user.Nombre }}" required>
 
-                    <button type="button" class="profile-btn-c" onclick="recuperarContrasena()">Cambiar clave</button>
+                    <button type="button" class="btn" onclick="recuperarContrasena()">Cambiar clave</button>
+
 
                 </form>
 
@@ -77,31 +81,25 @@
                         alt="Foto de usuario"
                         onerror="this.onerror=null; this.src='{{ url_for('static', filename='image/default-user.png') }}';">
 
-                    <button class="profile-btn">Subir/Cambiar foto</button>
-                    <button class="profile-btn delete">Eliminar foto</button>
+                    <button type="button" class="btn profile-btn">Subir/Cambiar foto</button>
+                    <button type="button" class="btn profile-btn delete">Eliminar foto</button>
                 </div>
+
             </div>
         </main>
     </div>
 
 
-    <!-- Modal -->
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <p id="modal-text"></p>
-            <button onclick="cerrarModal()">Aceptar</button>
-        </div>
-    </div>
-
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
     <script>
-        window.onload = () => {
-            mostrarModal("{{ messages[0][1] }}", "{{ messages[0][0] }}");
-        };
+        document.addEventListener('DOMContentLoaded', () => {
+            alertaNinja("{{ 'error' if messages[0][0] == 'error' else 'info' }}", "Aviso", "{{ messages[0][1] }}");
+        });
     </script>
     {% endif %}
     {% endwith %}
+
 
 </body>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

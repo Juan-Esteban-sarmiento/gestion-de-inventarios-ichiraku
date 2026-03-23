@@ -1,86 +1,235 @@
-/* Mismos estilos que el administrador para consistencia, pero simplificados para empleado */
+/* ============================================
+   EM_INVENTARIO - SHINOBI PREMIUM DASHBOARD
+   ============================================ */
+
+/* ─── Global Shinobi Sync ─── */
+@font-face {
+    font-family: 'njnaruto';
+    src: url('../../fonts/njnaruto.ttf') format('truetype');
+}
+
 :root {
-    --primary-red: #e60000;
-    --dark-bg: #0d0d1a;
-    --glass-bg: rgba(26, 26, 46, 0.8);
-    --text-white: #ffffff;
-    --border-red: rgba(230, 0, 0, 0.3);
+    --text-muted: #888;
+    --red-glow: rgba(179, 0, 0, 0.4);
+    --green-glow: rgba(34, 197, 94, 0.3);
 }
 
 body {
-    background-color: var(--dark-bg);
-    color: var(--text-white);
+    background-color: #050505;
+    /* Blacker background for more depth */
+    background-image: radial-gradient(circle at 50% 50%, rgba(20, 0, 0, 0.5) 0%, transparent 80%);
+    color: #fff;
     margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
 }
 
 .content {
-    padding: 2rem;
-    margin-left: 260px;
+    padding: 3rem 4rem;
+    margin-left: 280px;
 }
 
+/* ─── Header & Search Elevation ─── */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3.5rem;
+    gap: 30px;
+}
 
+.box-welcome {
+    flex-shrink: 0;
+}
+
+.welcome-title {
+    font-family: 'njnaruto', sans-serif;
+    color: #fff;
+    font-size: 2.2rem;
+    letter-spacing: 2px;
+    margin: 0;
+    text-shadow: 0 0 15px rgba(179, 0, 0, 0.61);
+    background: linear-gradient(90deg, #fff, #b30000);
+    -webkit-background-clip: text;
+}
+
+/* 🔍 Custom Search Box */
 .inventory-controls {
-    margin-bottom: 2rem;
+    flex: 1;
+    max-width: 450px;
 }
 
-input {
-    background: var(--glass-bg);
-    border: 1px solid var(--border-red);
-    color: white;
-    padding: 10px 15px;
-    border-radius: 8px;
-    outline: none;
-    width: 300px;
+.search-box {
+    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 2px 5px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
 }
 
-input:focus {
-    border-color: var(--primary-red);
+.search-box:focus-within {
+    background: rgba(179, 0, 0, 0.05);
+    border-color: var(--red-brand);
+    box-shadow: 0 0 25px rgba(179, 0, 0, 0.2);
+    transform: translateY(-2px);
 }
 
+.search-icon {
+    padding: 0 15px;
+    font-size: 1.1rem;
+    opacity: 0.5;
+}
+
+.search-box input {
+    background: transparent !important;
+    border: none !important;
+    height: 48px !important;
+    padding: 0 !important;
+    color: #fff !important;
+    font-size: 14px !important;
+    width: 100%;
+}
+
+.search-box input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* ─── Immersive Glass Table ─── */
 .table-container {
-    background: var(--glass-bg);
-    border-radius: 15px;
-    border: 1px solid var(--border-red);
-    overflow: hidden;
-    backdrop-filter: blur(10px);
+    background: rgba(10, 10, 10, 0.5);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 0, 0, 0.15);
+    border-radius: 28px;
+    padding: 10px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
+    animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 table {
     width: 100%;
-    border-collapse: collapse;
-    text-align: left;
+    border-spacing: 0 10px;
 }
 
 th {
-    background: rgba(230, 0, 0, 0.1);
-    color: var(--primary-red);
-    padding: 15px;
+    font-family: 'Poppins', sans-serif;
+    color: #ff4d4d;
+    text-transform: uppercase;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 20px 25px;
+    text-align: left;
+    border-bottom: 2px solid rgba(179, 0, 0, 0.2);
 }
 
 td {
-    padding: 15px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 22px 25px;
+    background: rgba(255, 255, 255, 0.02);
+    color: #ddd;
+    font-size: 15px;
+    transition: 0.3s;
 }
 
+tr td:first-child {
+    border-radius: 16px 0 0 16px;
+    font-weight: 600;
+    color: #fff;
+}
+
+tr td:last-child {
+    border-radius: 0 16px 16px 0;
+}
+
+tr:hover td {
+    background: rgba(179, 0, 0, 0.06);
+    color: #fff;
+    transform: scale(1.005);
+}
+
+/* ─── Premium Semantic Badges ─── */
 .status-badge {
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 16px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: 0.3s;
 }
 
 .status-badge.ok {
-    background: rgba(0, 255, 0, 0.1);
-    color: #00ff00;
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.1);
 }
 
 .status-badge.warning {
-    background: rgba(255, 165, 0, 0.1);
-    color: #ffa500;
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    animation: statusPulse 2s infinite ease-in-out;
+}
+
+@keyframes statusPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 10px rgba(245, 158, 11, 0.1);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+    }
 }
 
 .low-stock {
-    color: #ffa500;
-    font-weight: bold;
+    color: #f59e0b;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+}
+
+/* Scrollbar Modernization */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(179, 0, 0, 0.3);
+    border-radius: 10px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .content {
+        padding: 2rem;
+    }
+
+    .inventory-controls {
+        max-width: 100%;
+        width: 100%;
+    }
 }

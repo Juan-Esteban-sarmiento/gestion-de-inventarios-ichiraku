@@ -4,8 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <title>Historial de Pedidos - Ichiraku</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Hordenes.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Hordenes.css') }}?v=2.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/components.css') }}?v=2.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}?v=2.0">
+
+
   <script src="{{ url_for('static', filename='js/Global_js/session_timeout.js') }}"></script>
 </head>
 
@@ -62,12 +65,19 @@
     <div class="order-box">
       <!-- Barra de búsqueda simplificada -->
       <form class="search-box" id="formBuscar" method="GET" action="{{ url_for('Em_Hordenes') }}">
-        <input type="number" name="id_pedido" id="buscarId" class="ninja-input" placeholder="ID del pedido"
-          value="{{ request.args.get('id_pedido', '') }}">
-        <input type="date" name="fecha" id="buscarFecha" class="ninja-input"
-          value="{{ request.args.get('fecha', '') }}">
-        <button type="submit" class="ninja-btn">Buscar</button>
+        <div class="input-group">
+          <label for="buscarId">ID Pedido</label>
+          <input type="number" name="id_pedido" id="buscarId" placeholder="Ej: 123"
+            value="{{ request.args.get('id_pedido', '') }}">
+        </div>
+        <div class="input-group">
+          <label for="buscarFecha">Fecha</label>
+          <input type="date" name="fecha" id="buscarFecha"
+            value="{{ request.args.get('fecha', '') }}">
+        </div>
+        <button type="submit" class="btn">Buscar</button>
       </form>
+
 
       <!-- BOX que envuelve todas las órdenes -->
       <div class="order-container">
@@ -82,9 +92,10 @@
             <div>
               <span>Estado: {{ pedido.estado }}</span>
             </div>
-            <button class="toggle-btn" onclick="toggleDetallePedido('{{ pedido.id_pedido }}')">
+            <button class="btn secondary" onclick="toggleDetallePedido('{{ pedido.id_pedido }}')">
               Ver detalles
             </button>
+
           </div>
           <div class="order-card-body" id="detalle-{{ pedido.id_pedido }}">
             {% for detalle in pedido.detalle_pedido %}

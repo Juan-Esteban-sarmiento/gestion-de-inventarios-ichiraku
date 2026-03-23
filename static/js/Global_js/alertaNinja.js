@@ -33,14 +33,11 @@ function alertaNinja(icon, title, text) {
       confirmButton: 'ninja-swal-confirm',
       cancelButton: 'ninja-swal-cancel'
     },
-    showClass: {
-      popup: 'ninja-animate-in'
-    },
-    hideClass: {
-      popup: 'ninja-animate-out'
-    }
+    showDenyButton: false,
+    showCloseButton: false
   });
 }
+
 
 /**
  * Alerta personalizada para modales con inputs (ej. Editar)
@@ -58,9 +55,11 @@ function alertaNinjaFire(options) {
       cancelButton: 'ninja-swal-cancel',
       input: 'ninja-swal-input'
     },
-    showClass: { popup: 'ninja-animate-in' },
-    hideClass: { popup: 'ninja-animate-out' }
+    hideClass: { popup: 'ninja-animate-out' },
+    showDenyButton: false,
+    showCloseButton: false
   };
+
   const opts = Object.assign({}, defaults, options);
   return Swal.fire(opts);
 }
@@ -84,10 +83,12 @@ function confirmarNinja(title, text, confirmText = 'SÍ, CONFIRMAR', cancelText 
       confirmButton: 'ninja-swal-confirm',
       cancelButton: 'ninja-swal-cancel'
     },
-    showClass: { popup: 'ninja-animate-in' },
-    hideClass: { popup: 'ninja-animate-out' }
+    hideClass: { popup: 'ninja-animate-out' },
+    showDenyButton: false,
+    showCloseButton: false
   });
 }
+
 
 window.alertaNinja = alertaNinja;
 window.alertaNinjaFire = alertaNinjaFire;

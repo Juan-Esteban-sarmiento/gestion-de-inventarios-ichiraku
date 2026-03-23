@@ -2,8 +2,11 @@
 <html lang="es">
 
 <head>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Rempleados.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Rempleados.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/components.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}?v=2.0">
+
+
     <script src="{{ url_for('static', filename='js/Global_js/session_timeout.js') }}"></script>
 
     <meta charset="UTF-8">
@@ -62,23 +65,33 @@
             <section class="register-box">
                 <h2>Registrar personal</h2>
                 <form id="registerForm">
-                    <label>Nombre</label>
-                    <input type="text" id="nombre" placeholder="Nombre">
+                    <div class="input-group">
+                        <label>Nombre Completo</label>
+                        <input type="text" id="nombre" placeholder="Ej: Kakashi Hatake">
+                    </div>
 
-                    <label>ID</label>
-                    <input type="text" id="cedula" placeholder="ID">
+                    <div class="input-group">
+                        <label>Cédula / ID</label>
+                        <input type="text" id="cedula" placeholder="ID único">
+                    </div>
 
-                    <label>Clave</label>
-                    <input type="password" id="contrasena" placeholder="Clave">
+                    <div class="input-group">
+                        <label>Clave de Acceso</label>
+                        <input type="password" id="contrasena" placeholder="********">
+                    </div>
 
-                    <label>Numero de contacto</label>
-                    <input type="text" id="contacto" placeholder="Numero de contacto">
+                    <div class="input-group">
+                        <label>Número de contacto</label>
+                        <input type="text" id="contacto" placeholder="Ej: 300 123 4567">
+                    </div>
+
 
                     <div class="form-actions">
                         <button type="submit" class="btn">
                             <img class="icon" src="{{ url_for('static', filename='image/mas.png') }}" alt="Agregar" />
                             Registrar
                         </button>
+
 
                         <input type="file" id="foto" accept="image/*" style="display:none;">
                         <img id="previewFoto" src="" alt="Vista previa"

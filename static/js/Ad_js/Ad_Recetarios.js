@@ -59,15 +59,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         row.innerHTML = `
-            <select class="product-select" required>
+            <select class="product-select compact-input" required>
                 ${productOptions}
             </select>
-            <input type="number" class="qty-input" placeholder="Cant" min="0" step="0.01" required>
-            <select class="unit-select" required disabled>
+            <input type="number" class="qty-input compact-input" placeholder="Cant" min="0" step="0.01" required>
+            <select class="unit-select compact-input" required disabled>
                 <option value="">--</option>
             </select>
             <button type="button" class="btn-remove">&times;</button>
         `;
+
 
         const productSelect = row.querySelector('.product-select');
         const unitSelect = row.querySelector('.unit-select');

@@ -4,8 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Inventario Administrador - Ichiraku Ramen</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Inventario.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Inventario.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/components.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}?v=2.0">
+
+
 </head>
 
 <body>
@@ -58,7 +61,7 @@
         </div>
 
         <div class="inventory-controls">
-            <div class="control-group">
+            <div class="input-group inline">
                 <label>Seleccionar Local:</label>
                 <select id="local-selector" onchange="cargarInventario()">
                     {% for local in locales %}
@@ -66,10 +69,13 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="control-group">
-                <input type="text" id="search-inv" placeholder="Buscar producto..." onkeyup="filtrarTabla()">
+            <div class="input-group inline">
+                <label>Buscar Producto:</label>
+                <input type="text" id="search-inv" placeholder="Escribe para filtrar..." onkeyup="filtrarTabla()">
             </div>
         </div>
+
+
 
         <div class="table-container glass">
             <table id="inventory-table">

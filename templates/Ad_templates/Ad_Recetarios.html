@@ -4,8 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Ichiraku Ramen - Recetarios</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Recetarios.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Recetarios.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/components.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}?v=2.0">
+
+
     <script src="{{ url_for('static', filename='js/Global_js/session_timeout.js') }}"></script>
 </head>
 
@@ -64,11 +67,16 @@
             <section class="register-box">
                 <h2>Registrar Receta</h2>
                 <form id="registerRecipeForm" novalidate>
-                    <label for="nombreReceta">Nombre del Plato</label>
-                    <input type="text" id="nombreReceta" placeholder="Ej: Ramen Tonkotsu" required>
+                    <div class="input-group">
+                        <label for="nombreReceta">Nombre del Plato</label>
+                        <input type="text" id="nombreReceta" placeholder="Ej: Ramen Tonkotsu" required>
+                    </div>
 
-                    <label for="descripcionReceta">Descripción</label>
-                    <textarea id="descripcionReceta" placeholder="Breve descripción del plato..."></textarea>
+                    <div class="input-group">
+                        <label for="descripcionReceta">Descripción resumida</label>
+                        <textarea id="descripcionReceta" placeholder="Breve descripción del plato..."></textarea>
+                    </div>
+
 
                     <div class="ingredients-header">
                         <h3>Ingredientes</h3>

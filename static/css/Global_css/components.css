@@ -1,0 +1,244 @@
+/* ============================================
+   SHINOBI GLOBAL COMPONENTS
+   ============================================ */
+
+/* 🧪 Variables Globales Re-aseguradas */
+:root {
+    --glass-bg: rgba(15, 15, 15, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --input-bg: rgba(255, 255, 255, 0.04);
+    --red-brand: #b30000;
+    --red-glow: rgba(179, 0, 0, 0.3);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 🧊 Glass Container Standard */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6);
+}
+
+/* 🖋️ Inputs & Selects Standard */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.input-group.inline {
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+}
+
+.input-group label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-left: 5px;
+    white-space: nowrap;
+}
+
+.input-group.inline label {
+    margin-bottom: 0;
+    margin-left: 0;
+}
+
+
+input,
+select,
+textarea {
+    width: 100%;
+    height: 44px;
+    /* Slightly reduced to avoid cramped layouts */
+    background: var(--input-bg) !important;
+    border: 1.5px solid var(--glass-border) !important;
+    color: #fff !important;
+    padding: 0 16px !important;
+    border-radius: 10px !important;
+    font-family: var(--font-secondary);
+    font-size: 14px;
+    outline: none;
+    transition: var(--transition-smooth);
+}
+
+/* 🧪 Estilo Minimalista: Quitar flechas de inputs numéricos */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+
+
+/* Fix para select que no respeta padding-right por flecha nativa */
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23b30000' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: calc(100% - 15px) center;
+    padding-right: 40px !important;
+    cursor: pointer;
+}
+
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--red-brand) !important;
+    background: rgba(179, 0, 0, 0.05) !important;
+    box-shadow: 0 0 15px rgba(179, 0, 0, 0.15);
+}
+
+
+/* Compact Inputs for dense lists */
+.compact-input {
+    height: 38px !important;
+    padding: 0 12px !important;
+    font-size: 13px !important;
+    border-radius: 8px !important;
+}
+
+
+/* 🔘 Premium Buttons - RESTAURACIÓN ROJO SÓLIDO (BRAND STANDARD) */
+.btn,
+button:not(.menu-button):not(.logout-btn):not(.btn-remove):not(.empleado-actions button):not(.producto-actions button):not(.local-actions button) {
+    height: 48px !important;
+    padding: 0 30px !important;
+    background: var(--red-brand) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 12px !important;
+    cursor: pointer !important;
+    font-family: var(--font-secondary) !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1.2px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    transition: all 0.2s ease !important;
+    user-select: none !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+    white-space: nowrap !important;
+}
+
+.btn:hover,
+button:not(.menu-button):not(.logout-btn):hover {
+    transform: translateY(-2px) !important;
+    background: #d00000 !important;
+    /* Un rojo más brillante al pasar */
+    box-shadow: 0 6px 20px rgba(179, 0, 0, 0.4) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.btn:active,
+button:not(.menu-button):not(.logout-btn):active {
+    transform: translateY(0) scale(0.98) !important;
+}
+
+.btn.secondary {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #eee !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+.btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+
+
+/* 📋 Table Component Standard */
+.table-wrapper {
+    width: 100%;
+    border-radius: 20px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+}
+
+table {
+    width: 100%;
+    table-layout: fixed;
+    /* Forzado para alineación exacta */
+}
+
+th,
+td {
+    box-sizing: border-box;
+}
+
+th {
+    background: rgba(179, 0, 0, 0.08);
+    color: var(--red-brand);
+    padding: 18px 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-align: left;
+    border-bottom: 1.5px solid rgba(179, 0, 0, 0.2);
+}
+
+td {
+    padding: 16px 20px;
+    color: #ccc;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+    color: #fff;
+}
+
+/* 🎨 Premium Global Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--red-brand);
+    border-radius: 10px;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #d00000;
+}
+
+/* 🎭 Global Modal Fix (Prevents disrupting layouts) */
+.modal {
+    display: none !important;
+}
