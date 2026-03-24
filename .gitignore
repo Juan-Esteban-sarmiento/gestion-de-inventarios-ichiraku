@@ -12,3 +12,4 @@ audit_results.txt
 check_negative.py
 consumo_dump.json
 app_backup.py
+verify_import.py
