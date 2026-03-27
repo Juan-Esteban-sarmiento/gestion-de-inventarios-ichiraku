@@ -114,7 +114,7 @@ textarea:focus {
 
 /* 🔘 Premium Buttons - RESTAURACIÓN ROJO SÓLIDO (BRAND STANDARD) */
 .btn,
-button:not(.menu-button):not(.logout-btn):not(.btn-remove):not(.empleado-actions button):not(.producto-actions button):not(.local-actions button) {
+button:not(.menu-button):not(.logout-btn):not(.btn-remove):not(.empleado-actions button):not(.producto-actions button):not(.local-actions button):not([class*="swal2"]):not([class*="ninja"]) {
     height: 48px !important;
     padding: 0 30px !important;
     background: var(--red-brand) !important;
@@ -139,7 +139,7 @@ button:not(.menu-button):not(.logout-btn):not(.btn-remove):not(.empleado-actions
 }
 
 .btn:hover,
-button:not(.menu-button):not(.logout-btn):hover {
+button:not(.menu-button):not(.logout-btn):not([class*="swal2"]):not([class*="ninja"]):hover {
     transform: translateY(-2px) !important;
     background: #d00000 !important;
     /* Un rojo más brillante al pasar */
@@ -148,7 +148,7 @@ button:not(.menu-button):not(.logout-btn):hover {
 }
 
 .btn:active,
-button:not(.menu-button):not(.logout-btn):active {
+button:not(.menu-button):not(.logout-btn):not([class*="swal2"]):not([class*="ninja"]):active {
     transform: translateY(0) scale(0.98) !important;
 }
 

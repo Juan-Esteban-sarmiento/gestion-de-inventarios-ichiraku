@@ -58,8 +58,8 @@
         </div>
         <main class="main-content">
             <div class="reporting-hub">
-                <div class="hub-header">
-                    <h1 class="welcome-title">Centro de Reportes</h1>
+                <div class="box-welcome">
+                    <h1 class="welcome-title">CENTRO DE REPORTES</h1>
                     <p class="welcome-subtitle">Gestión y auditoría de inventarios Ichiraku</p>
                 </div>
 
@@ -115,11 +115,14 @@
                     </div>
                 </div>
 
-                <!-- ⚙️ Generador de Reportes Personalizados -->
-                <div class="report-generator-box">
-                    <h3>Generar Reporte Detallado</h3>
-                    <form action="{{ url_for('generar_reporte_personalizado') }}" method="POST" class="generator-form">
-                        <div class="form-grid">
+                <!-- ⚙️ Contenedores de Generadores de Reportes -->
+                <div class="generators-container">
+                    
+                    <!-- 1. Reporte de Inventario (Ventas vs Merma) -->
+                    <div class="report-generator-card">
+                        <h3>INVENTARIO (VENDIDO VS MERMA)</h3>
+                        <p class="generator-desc">Genera un reporte detallado del consumo de insumos y mermas por local.</p>
+                        <form action="{{ url_for('generar_reporte_personalizado') }}" method="POST" class="generator-form">
                             <div class="input-group">
                                 <label>Seleccionar Local</label>
                                 <select name="id_local" required>
@@ -143,27 +146,36 @@
                                 <input type="date" name="fecha" value="{{ hoy }}">
                             </div>
                             <div class="submit-group">
-                                <button type="submit" class="btn">Generar Reporte Premium</button>
+                                <button type="submit" class="btn-primary">Generar Reporte Premium</button>
                             </div>
+                        </form>
+                    </div>
 
+                    <!-- 2. Reporte Consolidado (Pedidos) -->
+                    <div class="report-generator-card">
+                        <h3>CONSOLIDADO (PEDIDOS)</h3>
+                        <p class="generator-desc">Genera reportes consolidados mostrando el registro contable y pedidos realizados.</p>
+                        
+                        <div class="consolidado-actions">
+                            <button class="action-btn cons-btn" id="genDayBtn">
+                                <img src="{{ url_for('static', filename='image/descargar.png') }}" alt="" class="btn-icon">
+                                Diario (Hoy)
+                            </button>
+                            <button class="action-btn cons-btn" id="downloadSemBtn">
+                                <img src="{{ url_for('static', filename='image/descargar.png') }}" alt="" class="btn-icon">
+                                Semanal
+                            </button>
+                            <button class="action-btn cons-btn" id="downloadMesBtn">
+                                <img src="{{ url_for('static', filename='image/descargar.png') }}" alt="" class="btn-icon">
+                                Mensual
+                            </button>
+                            <button class="action-btn cons-btn" id="downloadAnioBtn">
+                                <img src="{{ url_for('static', filename='image/descargar.png') }}" alt="" class="btn-icon">
+                                Anual
+                            </button>
                         </div>
-                    </form>
-                </div>
+                    </div>
 
-                <!-- ⚡ Accesos Rápidos (Footer Actions) -->
-                <div class="quick-actions-bar">
-                    <button class="action-btn" id="genDayBtn">
-                         Día
-                    </button>
-                    <button class="action-btn" id="downloadSemBtn">
-                         Semana
-                    </button>
-                    <button class="action-btn" id="downloadMesBtn">
-                         Mes
-                    </button>
-                    <button class="action-btn" id="downloadAnioBtn">
-                         Año
-                    </button>
                 </div>
             </div>
         </main>

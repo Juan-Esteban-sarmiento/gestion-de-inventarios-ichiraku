@@ -26,10 +26,7 @@
 }
 
 /* ─── Header ─── */
-.hub-header {
-    text-align: center;
-    margin-bottom: 10px;
-}
+/* (Header now uses .box-welcome from global css) */
 
 .welcome-subtitle {
     color: #888;
@@ -219,86 +216,159 @@
     font-weight: 700 !important;
 }
 
-/* ─── Report Generator Box ─── */
-.report-generator-box {
+/* ─── Report Generators Container ─── */
+.generators-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.report-generator-card {
     background: rgba(15, 15, 15, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 24px;
     padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    transition: transform 0.3s;
 }
 
-.report-generator-box h3 {
+.report-generator-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(179, 0, 0, 0.3);
+}
+
+.report-generator-card h3 {
     color: #eee;
     font-size: 1.1rem;
-    margin-bottom: 25px;
-    text-align: center;
     text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.generator-desc {
+    color: #aaa;
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.generator-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.generator-form .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.generator-form label {
+    font-size: 10px;
+    color: #ccc;
+    text-transform: uppercase;
+    font-weight: 700;
     letter-spacing: 1px;
 }
 
-.generator-form .form-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    align-items: flex-end;
-}
-
-.submit-group {
-    display: flex;
-    justify-content: center;
-}
-
-.submit-group .btn {
-    width: 100%;
-    padding: 12px 20px;
-}
-
-
-/* ─── Quick Actions Bar ─── */
-.quick-actions-bar {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    padding-top: 10px;
-}
-
-.action-btn {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    color: #888;
-    padding: 10px 25px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    cursor: pointer;
+.generator-form select,
+.generator-form input {
+    background: rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #fff !important;
+    padding: 10px 15px !important;
+    border-radius: 8px !important;
+    outline: none !important;
+    font-size: 13px;
     transition: 0.3s;
 }
 
-.action-btn::before {
-    content: 'Descargar ';
-    opacity: 0.5;
+.generator-form select:focus,
+.generator-form input:focus {
+    border-color: var(--red-brand) !important;
 }
 
-.action-btn:hover {
-    background: rgba(179, 0, 0, 0.1);
+.submit-group {
+    margin-top: 5px;
+}
+
+.submit-group .btn-primary {
+    background: var(--red-brand) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 12px !important;
+    font-weight: bold !important;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+    width: 100%;
+}
+
+.submit-group .btn-primary:hover {
+    background: #ff0000 !important;
+    transform: scale(1.02);
+}
+
+/* ─── Consolidated Actions ─── */
+.consolidado-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: auto; /* Pushes to bottom */
+    padding-top: 20px;
+}
+
+.cons-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 0, 0, 0.4);
+    color: #eee;
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.cons-btn .btn-icon {
+    width: 18px;
+    filter: invert(1);
+    opacity: 0.8;
+}
+
+.cons-btn:hover {
+    background: var(--red-brand);
     border-color: var(--red-brand);
     color: #fff;
     transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(179, 0, 0, 0.2);
+}
+.cons-btn:hover .btn-icon {
+    opacity: 1;
 }
 
 /* ─── Responsive ─── */
 @media (max-width: 900px) {
-    .generator-form .form-grid {
-        grid-template-columns: 1fr 1fr;
+    .generators-container {
+        grid-template-columns: 1fr;
     }
 }
 
 @media (max-width: 600px) {
-    .generator-form .form-grid {
+    .consolidado-actions {
         grid-template-columns: 1fr;
-    }
-    .quick-actions-bar {
-        flex-wrap: wrap;
     }
 }
