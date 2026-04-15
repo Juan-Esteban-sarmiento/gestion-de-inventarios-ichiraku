@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('ingredientes', JSON.stringify(ingredientes));
 
         try {
-            Swal.fire({
+            alertaNinjaFire({
                 title: 'Guardando receta...',
                 allowOutsideClick: false,
                 didOpen: () => { Swal.showLoading(); }

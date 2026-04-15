@@ -45,28 +45,19 @@ async function login(event) {
 
     const id = document.getElementById("id").value.trim();
     const password = document.getElementById("password").value.trim();
-    const role = document.getElementById("role").value;
-    let branch = "";
+    const branch = document.getElementById("branch").value;
 
     // Validaciones
-    if (!id || !password || !role) {
-        alertaLoginNotif("warning", "DATOS INCOMPLETOS", "Por favor completa todos los campos.");
+    if (!id || !password) {
+        alertaLoginNotif("warning", "DATOS INCOMPLETOS", "Por favor ingresa tu ID y contraseña.");
         return false;
-    }
-
-    if (role === "Empleado") {
-        branch = document.getElementById("branch").value;
-        if (!branch) {
-            alertaLoginNotif("warning", "LOCAL REQUERIDO", "Por favor selecciona una sucursal.");
-            return false;
-        }
     }
 
     try {
         const res = await fetch("/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, password, role, branch })
+            body: JSON.stringify({ id, password, branch })
         });
 
         const data = await res.json();
@@ -94,16 +85,7 @@ function logout() {
         .catch(err => console.error('Error al cerrar sesión:', err));
 }
 
-// Mostrar select solo si rol = Empleado
-function toggleBranch() {
-    const role = document.getElementById("role").value;
-    const branchGroup = document.getElementById("branch-group");
-    branchGroup.style.display = (role === "Empleado") ? "block" : "none";
-
-    if (role === "Empleado") {
-        cargarLocales();
-    }
-}
+// La pestaña de "rol" fue eliminada; cargarLocales se llama automáticamente.
 
 
 // Cargar locales desde backend
@@ -146,8 +128,12 @@ function checkSessionTimeout() {
 }
 
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', checkSessionTimeout);
+    document.addEventListener('DOMContentLoaded', () => {
+        checkSessionTimeout();
+        cargarLocales();
+    });
 } else {
     checkSessionTimeout();
+    cargarLocales();
 }
 

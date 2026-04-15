@@ -113,16 +113,16 @@ function editarEmpleado(cedula, nombre, telefono) {
     title: 'Editar Personal',
     html: `
       <input id="editNombre" class="swal2-input ninja-swal-input" placeholder="Nombre" value="${nombre}">
-      <input id="editContacto" class="swal2-input ninja-swal-input" placeholder="Teléfono" value="${telefono}">
+      <p style="color:#aaa; font-size:13px; margin-top:15px; font-family:'Montserrat', sans-serif;">El teléfono (${telefono}) no se puede modificar.</p>
     `,
     showCancelButton: true,
     confirmButtonText: 'GUARDAR CAMBIOS',
     cancelButtonText: 'CANCELAR',
     preConfirm: () => {
       const n = document.getElementById("editNombre").value.trim();
-      const t = document.getElementById("editContacto").value.trim();
-      if (!n || !t) { Swal.showValidationMessage('Todos los campos son obligatorios'); return false; }
-      return { nombre: n, telefono: t };
+      if (!n) { Swal.showValidationMessage('El nombre es obligatorio'); return false; }
+      if (/\d/.test(n)) { Swal.showValidationMessage('El nombre no puede contener números'); return false; }
+      return { nombre: n };
     }
   }).then(async (result) => {
     if (result.isConfirmed) {

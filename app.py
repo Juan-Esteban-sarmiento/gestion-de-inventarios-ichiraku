@@ -45,6 +45,79 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=timedelta(minutes=30)  # ⏳ Sesion expira en 30 minutos
 )
 
+import uuid
+import json
+
+ACTIVE_SESSIONS_FILE = 'active_sessions.json'
+
+def load_sessions():
+    if os.path.exists(ACTIVE_SESSIONS_FILE):
+        try:
+            with open(ACTIVE_SESSIONS_FILE, 'r') as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+def save_sessions(sessions):
+    with open(ACTIVE_SESSIONS_FILE, 'w') as f:
+        json.dump(sessions, f)
+
+def assign_session_token(user_id):
+    sessions = load_sessions()
+    token = str(uuid.uuid4())
+    sessions[str(user_id)] = token
+    save_sessions(sessions)
+    return token
+
+def revoke_session_token(user_id):
+    sessions = load_sessions()
+    str_id = str(user_id)
+    if str_id in sessions:
+        del sessions[str_id]
+        save_sessions(sessions)
+
+def is_valid_session(user_id, token):
+    if not token: return False
+    sessions = load_sessions()
+    return sessions.get(str(user_id)) == token
+
+@app.before_request
+def check_single_session_and_status():
+    if not session.get('logged_in'):
+        return
+
+    # Evitamos bloquear los assets/estáticos o logout/login
+    if request.path.startswith('/static/') or request.path in ['/login', '/logout', '/get_locales']:
+        return
+        
+    user_id = session.get('cedula')
+    session_token = session.get('session_token')
+    role = session.get('role')
+    
+    if not user_id or not session_token:
+        return
+        
+    if not is_valid_session(user_id, session_token):
+        return cerrar_sesion_forzada("Sesión iniciada en otro dispositivo.")
+
+    if role == 'Empleado':
+        query_emp = supabase.table("empleados").select("habilitado").eq("cedula", int(user_id)).execute()
+        if hasattr(query_emp, 'data') and query_emp.data:
+            if not query_emp.data[0].get('habilitado', True):
+                revoke_session_token(user_id)
+                return cerrar_sesion_forzada("Tu cuenta ha sido deshabilitada.")
+        else:
+            revoke_session_token(user_id)
+            return cerrar_sesion_forzada("Cuenta no encontrada.")
+
+def cerrar_sesion_forzada(msg):
+    session.clear()
+    if request.headers.get('Content-Type') == 'application/json':
+        return jsonify({"success": False, "msg": msg, "redirect": url_for('login', timeout=1)}), 401
+    else:
+        return redirect(url_for('login', timeout=1))
+
 @app.after_request
 def add_header(response):
     # Prevenir cache en rutas protegidas para evitar retroceso despues de logout
@@ -287,68 +360,81 @@ def login():
         data = request.get_json()
         usuario = data.get('id')
         password = data.get('password')
-        role = data.get('role')
         branch = data.get('branch')
 
-        if not usuario or not password or not role:
-            return jsonify({"success": False, "msg": "Por favor completa todos los campos."})
+        if not usuario or not password:
+            return jsonify({"success": False, "msg": "Por favor completa todos los campos (ID y contraseña)."}), 400
+
+        if not str(usuario).isdigit():
+            return jsonify({"success": False, "msg": "El ID debe ser numérico."}), 400
 
         try:
-            if role == "Administrador":
-                if not usuario.isdigit():
-                    return jsonify({"success": False, "msg": "El ID de administrador debe ser numérico."})
-                query = supabase.table("administrador").select("*").eq("id", int(usuario)).execute()
-                if not query.data:
-                    return jsonify({"success": False, "msg": "Administrador no encontrado."}),404
-                admin_user = query.data[0]
+            # 1. Buscar primero en la tabla de administrador
+            query_admin = supabase.table("administrador").select("*").eq("id", int(usuario)).execute()
+            
+            if hasattr(query_admin, 'data') and query_admin.data:
+                admin_user = query_admin.data[0]
+                
                 if not check_password_hash(admin_user['contrasena'], password):
-                    return jsonify({"success": False, "msg": "Contraseña incorrecta."}),401
+                    return jsonify({"success": False, "msg": "Contraseña incorrecta."}), 401
+                
                 session.permanent = True
                 session['logged_in'] = True
+                # Aseguramos el rol por la tabla
                 session['role'] = 'Administrador'
                 session['cedula'] = admin_user.get('id', usuario)
                 session['nombre'] = admin_user.get('nombre', '')
                 session['foto'] = admin_user.get('foto', '')
+                session['session_token'] = assign_session_token(session['cedula'])
+                
                 return jsonify({"success": True, "msg": f"Bienvenido, {admin_user.get('nombre', '')}", "redirect": url_for('Ad_Inicio')})
-
-            elif role == "Empleado":
-                if not branch:
-                    return jsonify({"success": False, "msg": "Por favor selecciona una sucursal."})
-                if not usuario.isdigit():
-                    return jsonify({"success": False, "msg": "El ID de empleado debe ser numérico."})
-                if len(usuario) < 5 or len(usuario) > 10:
-                    return jsonify({"success": False, "msg": "El ID de empleado debe tener entre 5 y 10 dígitos."})
-                query = supabase.table("empleados").select("*").eq("cedula", int(usuario)).execute()
-                if not query.data:
-                    return jsonify({"success": False, "msg": "Empleado no encontrado."}),404
-                empleado = query.data[0]
+            
+            # 2. Si no está en administrador, buscamos en empleados
+            query_emp = supabase.table("empleados").select("*").eq("cedula", int(usuario)).execute()
+            
+            if hasattr(query_emp, 'data') and query_emp.data:
+                empleado = query_emp.data[0]
+                
                 if not empleado.get('habilitado', True):
-                    return jsonify({"success": False, "msg": "Empleado deshabilitado. Contacta al administrador."}),403
+                    return jsonify({"success": False, "msg": "Empleado deshabilitado. Contacta al administrador."}), 403
+                
                 if not check_password_hash(empleado['contrasena'], password):
-                    return jsonify({"success": False, "msg": "Contraseña incorrecta."}),401
-                session.permanent = True  # ⏳ Activar expiración
+                    return jsonify({"success": False, "msg": "Contraseña incorrecta."}), 401
+                
+                # Sabiendo que es empleado, verificamos si mandó sucursal
+                if not branch:
+                    return jsonify({"success": False, "msg": "Por favor selecciona una sucursal."}), 400
+                
+                session.permanent = True
                 session['logged_in'] = True
+                # Aseguramos el rol por la tabla
                 session['role'] = 'Empleado'
                 session['cedula'] = empleado.get('cedula', usuario)
                 session['nombre'] = empleado.get('nombre', '')
                 session['foto'] = empleado.get('foto', '')
                 session['branch'] = int(branch)
+                session['session_token'] = assign_session_token(session['cedula'])
 
-                # 🏦 Obtener nombre de la sucursal
+                # Obtener nombre de la sucursal
                 try:
                     sucursal_query = supabase.table("locales").select("nombre").eq("id_local", int(branch)).single().execute()
-                    if sucursal_query.data:
+                    if hasattr(sucursal_query, 'data') and sucursal_query.data:
                         session['branch_name'] = sucursal_query.data['nombre']
+                    else:
+                        session['branch_name'] = "Sucursal Indefinida"
                 except Exception as e:
                     print("Error obteniendo nombre sucursal:", e)
                     session['branch_name'] = "Sucursal Indefinida"
 
                 return jsonify({"success": True, "msg": f"Bienvenido, {empleado.get('nombre', '')}", "redirect": url_for('Em_Inicio')})
-            else:
-                return jsonify({"success": False, "msg": "Rol no válido."}),400
+
+            # 3. Si no se encontró en ninguna tabla
+            return jsonify({"success": False, "msg": "Usuario no encontrado."}), 404
+
         except Exception as e:
             print("Error durante el login:", e)
-            return jsonify({"success": False, "msg": "Error en el servidor."}),500
+            return jsonify({"success": False, "msg": "Error en el servidor."}), 500
+            
     return render_template("login.html")
 
 @app.route("/get_locales", methods=["GET"])
@@ -363,6 +449,9 @@ def get_locales():
 
 @app.route('/logout')
 def logout():
+    user_id = session.get('cedula')
+    if user_id:
+        revoke_session_token(user_id)
     session.clear()
     timeout = request.args.get('timeout')
     target = url_for('login')
@@ -894,8 +983,11 @@ def registrar_empleado():
         if not re.fullmatch(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,64}$", contrasena):
             return jsonify({"success": False, "msg": "La contraseña debe tener al menos 8 caracteres, incluir una minúscula, una mayúscula, un número y un símbolo."})
 
-        # NORMALIZAR DATOS
-        nombre_normalizado = re.sub(r"\s+", " ", nombre_limpio).strip().title()
+        # VALIDAR Y NORMALIZAR DATOS
+        if any(char.isdigit() for char in nombre):
+            return jsonify({"success": False, "msg": "El nombre no puede contener números."})
+
+        nombre_normalizado = re.sub(r"\s+", " ", nombre).strip().lower()
         telefono_str = str(telefono).strip()
 
         # VERIFICAR DUPLICADOS
@@ -973,28 +1065,19 @@ def editar_empleado(cedula):
     try:
         data = request.get_json()
         nombre = data.get("nombre")
-        telefono = data.get("telefono")
         
         if not nombre:
             return jsonify({"success": False, "msg": "El nombre es obligatorio."}), 400
 
-        nombre_limpio = nombre.strip()
+        if any(char.isdigit() for char in nombre):
+            return jsonify({"success": False, "msg": "El nombre no puede contener números."}), 400
+
+        nombre_limpio = re.sub(r"\s+", " ", nombre).strip().lower()
         if len(nombre_limpio) < 2 or len(nombre_limpio) > 100:
             return jsonify({"success": False, "msg": "El nombre debe tener entre 2 y 100 caracteres."}), 400
         
-        if not telefono:
-            return jsonify({"success": False, "msg": "El número de contacto es obligatorio."}), 400
-
-        try:
-            telefono_int = int(telefono)
-            if telefono_int < 1000000 or telefono_int > 999999999999999:
-                return jsonify({"success": False, "msg": "El teléfono debe tener entre 7 y 15 dígitos."}), 400
-        except ValueError:
-            return jsonify({"success": False, "msg": "El teléfono debe contener solo números."}), 400
-        
         response = supabase.table("empleados").update({
-            "nombre": nombre,
-            "telefono": telefono
+            "nombre": nombre_limpio
         }).eq("cedula", cedula).execute()
         
         if response.data:
@@ -1051,9 +1134,7 @@ def registrar_producto():
     if not re.fullmatch(r"^[A-Za-zÁÉÍÓÚáéíóúÑñ ()\-'/&.,%+]+$", nombre_limpio):
         return jsonify({"success": False, "msg": "El nombre contiene caracteres no permitidos."})
     nombre_colapsado = re.sub(r"\s+", " ", nombre_limpio).strip()
-    small_words = {"de","del","la","el","y","o","en","con","para","por","a","al","un","una","los","las","sus"}
-    palabras = nombre_colapsado.split(" ")
-    nombre_normalizado = " ".join([(w.lower() if (w.lower() in small_words and i>0 and i<len(palabras)-1) else w.capitalize()) for i,w in enumerate(palabras)])
+    nombre_normalizado = nombre_colapsado.lower()
 
     categoria_limpia = categoria.strip()
     if len(categoria_limpia) < 1 or len(categoria_limpia) > 50:
@@ -1165,8 +1246,11 @@ def editar_producto(id_producto):
         if len(nombre_limpio) < 2 or len(nombre_limpio) > 100:
             return jsonify({"success": False, "msg": "El nombre del producto debe tener entre 2 y 100 caracteres."}), 400
         
+        if re.search(r"\d", nombre_limpio):
+            return jsonify({"success": False, "msg": "El nombre no debe contener números."}), 400
+        
         # Validaciones extra igual que en registro...
-        nombre_normalizado = re.sub(r"\s+", " ", nombre_limpio).strip() # Simplificado para brevedad
+        nombre_normalizado = re.sub(r"\s+", " ", nombre_limpio).strip().lower()
 
         data_update = {
             "nombre": nombre_normalizado,

@@ -209,6 +209,24 @@ ninjaAlertStyle.innerHTML = `
     box-shadow: 0 0 10px rgba(255, 0, 0, 0.3) !important;
   }
 
+  /* 🔥 Estilo Premium para Mensajes de Validación 🔥 */
+  .swal2-validation-message {
+    background: rgba(139, 0, 0, 0.15) !important;
+    color: #ffb3b3 !important;
+    border: 1px solid rgba(255, 0, 0, 0.3) !important;
+    border-radius: 10px !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 13px !important;
+    margin-top: 15px !important;
+    padding: 12px !important;
+  }
+  
+  .swal2-validation-message::before {
+    background-color: #ff3333 !important;
+    color: white !important;
+    border-radius: 50% !important;
+  }
+
   /* Animaciones */
   .ninja-animate-in { animation: ninjaPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
   .ninja-animate-out { animation: ninjaPopOut 0.3s ease-in forwards; }

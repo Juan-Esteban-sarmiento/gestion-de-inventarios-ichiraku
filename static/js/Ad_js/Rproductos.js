@@ -29,7 +29,7 @@ document.getElementById('registerProductForm').addEventListener('submit', async 
     alertaNinja('warning', 'NOMBRE INVALIDO', 'Contiene caracteres no permitidos');
     return;
   }
-  const nombreNormalizado = nombre.replace(/\s+/g, ' ').trim().split(' ').map((w, i, arr) => { const lw = w.toLowerCase(); const small = ['de', 'del', 'la', 'el', 'y', 'o', 'en', 'con', 'para', 'por', 'a', 'al', 'un', 'una', 'los', 'las', 'sus']; return (small.includes(lw) && i > 0 && i < arr.length - 1) ? lw : lw.charAt(0).toUpperCase() + lw.slice(1) }).join(' ');
+  const nombreNormalizado = nombre.replace(/\s+/g, ' ').trim().toLowerCase();
 
   const formData = new FormData();
   formData.append("nombre", nombreNormalizado);
@@ -157,6 +157,7 @@ function editarProducto(id_producto, nombre, categoria, unidad) {
       const f = document.getElementById("editFoto").files[0];
 
       if (!n || !c || !u) { Swal.showValidationMessage('Todos los campos son obligatorios'); return false; }
+      if (/\d/.test(n)) { Swal.showValidationMessage('El nombre no puede contener números'); return false; }
       return { nombre: n, categoria: c, unidad: u, foto: f };
     }
   }).then(async (result) => {
