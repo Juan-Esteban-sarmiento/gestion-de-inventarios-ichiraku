@@ -36,7 +36,7 @@
   padding-right: 30px;
 }
 
-/* --- SECCIÓN DE FOTO --- */
+/* --- SECCION DE FOTO --- */
 .profile-section {
   flex: 1;
   display: flex;
@@ -137,5 +137,5 @@
     order: -1;
   }
 
-  /* Foto arriba en móvil */
+  /* Foto arriba en movil */
 }

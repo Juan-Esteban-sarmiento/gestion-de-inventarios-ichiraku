@@ -154,9 +154,9 @@ function confirmarPedidoCompleto(idPedido) {
     }
 
     confirmarNinja(
-        '¿Confirmar pedido completo?',
-        'El pedido será marcado como recibido y se actualizará el inventario.',
-        'SÍ, CONFIRMAR',
+        'Confirmar pedido completo?',
+        'El pedido sera marcado como recibido y se actualizara el inventario.',
+        'SI, CONFIRMAR',
         'Cancelar'
     ).then(async (result) => {
         if (!result.isConfirmed) return;
@@ -185,7 +185,7 @@ function confirmarPedidoCompleto(idPedido) {
             }
         } catch (err) {
             console.error("Error al actualizar pedido:", err);
-            alertaNinja('error', 'Error de Conexión', 'No se pudo comunicar con el servidor.');
+            alertaNinja('error', 'Error de Conexion', 'No se pudo comunicar con el servidor.');
         }
     });
 }

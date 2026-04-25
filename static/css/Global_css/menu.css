@@ -52,7 +52,7 @@ body::before {
     z-index: -1;
 }
 
-/* 🖋️ Títulos Grandes (Fuente de Naruto) */
+/* 🖋️ Titulos Grandes (Fuente de Naruto) */
 h1,
 .welcome-title {
     font-family: var(--font-primary) !important;
@@ -318,7 +318,7 @@ h1,
     object-fit: contain;
 }
 
-/* Imágenes en listados (Personal, Locales, etc) */
+/* Imagenes en listados (Personal, Locales, etc) */
 .empleado-card img,
 .local-card img,
 .producto-card img,
@@ -335,7 +335,7 @@ h1,
     background: #000;
 }
 
-/* Imágenes de Producto (Formato Cuadrado) */
+/* Imagenes de Producto (Formato Cuadrado) */
 .producto-card img {
     border-radius: 10px !important;
 }

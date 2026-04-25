@@ -31,13 +31,13 @@ document.getElementById('registerForm').addEventListener('submit', async functio
       alertaNinja('success', 'EXITO', 'Punto de venta registrado correctamente.');
       document.getElementById('registerForm').reset();
       document.getElementById('previewFotoLocal').style.display = 'none';
-      await cargarLocales(""); // Recarga dinámica suave
-      await obtenerSiguienteId(); // Refrescar ID para el próximo registro
+      await cargarLocales(""); // Recarga dinamica suave
+      await obtenerSiguienteId(); // Refrescar ID para el proximo registro
     } else {
       alertaNinja('error', 'Error en registro', data.msg);
     }
   } catch (error) {
-    alertaNinja('error', 'Error de conexión', 'Ocurrió un problema de red.');
+    alertaNinja('error', 'Error de conexion', 'Ocurrio un problema de red.');
   }
 });
 
@@ -95,7 +95,7 @@ function editarLocal(id_local, nombre, direccion) {
     title: 'Editar Local',
     html: `
       <input id="editNombre" class="swal2-input ninja-swal-input" placeholder="Nombre" value="${nombre}">
-      <input id="editDireccion" class="swal2-input ninja-swal-input" placeholder="Ubicación" value="${direccion}">
+      <input id="editDireccion" class="swal2-input ninja-swal-input" placeholder="Ubicacion" value="${direccion}">
     `,
     showCancelButton: true,
     confirmButtonText: 'GUARDAR CAMBIOS',
@@ -127,7 +127,7 @@ async function deshabilitarLocal(id_local) {
   const confirm = await alertaNinjaFire({
     icon: 'warning',
     title: 'DESACTIVAR',
-    text: 'Este punto de venta ya no podrá registrar pedidos.',
+    text: 'Este punto de venta ya no podra registrar pedidos.',
     showCancelButton: true,
     confirmButtonText: 'DESACTIVAR',
     cancelButtonText: 'CANCELAR'
@@ -152,7 +152,7 @@ async function habilitarLocal(id_local) {
   const confirm = await alertaNinjaFire({
     icon: 'question',
     title: 'ACTIVAR',
-    text: 'Habilitarás de nuevo este punto de venta.',
+    text: 'Habilitaras de nuevo este punto de venta.',
     showCancelButton: true,
     confirmButtonText: 'ACTIVAR',
     cancelButtonText: 'CANCELAR'

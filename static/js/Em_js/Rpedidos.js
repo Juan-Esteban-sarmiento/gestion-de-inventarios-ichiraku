@@ -60,7 +60,7 @@ async function buscarProductos(termino = null) {
         }
     } catch (error) {
         console.error("Error al buscar productos:", error);
-        container.innerHTML = "<p style='text-align:center; color:red; padding: 40px;'>Error de conexión.</p>";
+        container.innerHTML = "<p style='text-align:center; color:red; padding: 40px;'>Error de conexion.</p>";
     }
 }
 
@@ -69,11 +69,11 @@ function agregarCarrito(id, nombre, categoria, unidad) {
     const cantidad = parseInt(cantidadInput.value) || 1;
 
     if (cantidad <= 0) {
-        showMessage("Cantidad mínima: 1", "error");
+        showMessage("Cantidad minima: 1", "error");
         return;
     }
     if (cantidad > 500) {
-        alertaNinja("warning", "CANTIDAD EXCESIVA", "El límite por producto es de 500 unidades para evitar pedidos exorbitantes.");
+        alertaNinja("warning", "CANTIDAD EXCESIVA", "El limite por producto es de 500 unidades para evitar pedidos exorbitantes.");
         return;
     }
 
@@ -103,7 +103,7 @@ function renderCarrito() {
     lista.innerHTML = "";
 
     if (carrito.length === 0) {
-        lista.innerHTML = "<div class='empty-cart'><span class='empty-icon'>🛒</span><p>El carrito está vacío</p></div>";
+        lista.innerHTML = "<div class='empty-cart'><span class='empty-icon'>🛒</span><p>El carrito esta vacio</p></div>";
         countBadge.innerText = "0";
         return;
     }

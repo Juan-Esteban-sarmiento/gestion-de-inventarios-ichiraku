@@ -17,14 +17,14 @@ body {
     background-color: #050505;
     color: #fff;
     min-height: 100vh;
-    /* Evitar el scroll si no es necesario, pero permitirlo en pantallas pequeñas */
+    /* Evitar el scroll si no es necesario, pero permitirlo en pantallas pequenas */
     overflow-x: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-/* Fondo con efecto cinemático */
+/* Fondo con efecto cinematico */
 .background-pattern {
     position: fixed;
     inset: 0;
@@ -67,7 +67,7 @@ body {
 .login-box {
     width: 95%;
     max-width: 420px;
-    /* Ajuste de padding dinámico pero más compacto */
+    /* Ajuste de padding dinamico pero mas compacto */
     padding: clamp(20px, 3vh, 40px) clamp(20px, 4vw, 40px);
     background: rgba(10, 10, 10, 0.75);
     backdrop-filter: blur(25px);
@@ -97,14 +97,14 @@ body {
     }
 }
 
-/* Header & Logo - Más compactos */
+/* Header & Logo - Mas compactos */
 .header-box {
     margin-bottom: clamp(15px, 2vh, 30px);
 }
 
 .logo img {
     width: clamp(60px, 8vh, 90px);
-    /* Tamaño basado en altura para no empujar el box */
+    /* Tamano basado en altura para no empujar el box */
     height: auto;
     aspect-ratio: 1/1;
     border-radius: 50%;
@@ -132,12 +132,12 @@ body {
 .title {
     font-family: 'njnaruto', sans-serif;
     font-size: clamp(1.2rem, 1.8vw, 1.6rem);
-    /* Un poco más pequeño */
+    /* Un poco mas pequeno */
     color: #fff;
     letter-spacing: 1px;
 }
 
-/* Formulario - Reducir márgenes */
+/* Formulario - Reducir margenes */
 .form-group {
     margin-bottom: clamp(12px, 1.5vh, 20px);
     text-align: left;
@@ -192,28 +192,43 @@ select {
     outline: none !important;
 }
 
-select {
-    cursor: pointer;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23ff0000' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 20px center;
-    appearance: none;
+/* 🔑 Recovery Link Styling */
+.recovery-container {
+    text-align: right;
+    margin-top: -5px;
+    margin-bottom: 15px;
 }
 
-select option {
-    background-color: #111;
-    color: #fff;
+.ninja-recover-link {
+    color: rgba(255, 255, 255, 0.4);
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid transparent;
 }
 
-input:focus,
-select:focus {
-    background: rgba(255, 0, 0, 0.05) !important;
-    border-color: #ff0000 !important;
-    box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
-    transform: scale(1.01);
+.ninja-recover-link:hover {
+    color: #ff9800;
+    border-bottom-color: rgba(255, 152, 0, 0.3);
+    transform: translateX(-3px);
 }
 
-/* Botón Conectar - Un poco más compacto */
+.key-icon {
+    font-size: 14px;
+    filter: grayscale(1) opacity(0.4);
+    transition: 0.3s;
+}
+
+.ninja-recover-link:hover .key-icon {
+    filter: grayscale(0) opacity(1);
+    transform: rotate(-15deg);
+}
+
+/* Boton Conectar - Un poco mas compacto */
 .btn {
     width: 100%;
     margin-top: 10px;
@@ -233,16 +248,10 @@ select:focus {
     animation: fadeIn 0.5s ease forwards 0.8s;
 }
 
-.btn:hover {
-    background-position: right center;
-    box-shadow: 0 0 35px rgba(255, 0, 0, 0.5);
-    transform: translateY(-2px);
-}
-
-/* --- NARUTO DINÁMICO (ANCLA CORREGIDA) --- */
+/* --- NARUTO DINAMICO (ANCLA CORREGIDA) --- */
 .naruto {
     position: absolute;
-    /* Anclar a píxeles fijos respecto al box para que no baile al redimensionar */
+    /* Anclar a pixeles fijos respecto al box para que no baile al redimensionar */
     right: -40px;
     bottom: -30px;
     width: clamp(80px, 15vh, 130px);
@@ -264,110 +273,120 @@ select:focus {
     }
 }
 
+/* --- ⛩️ NINJA RECOVERY MODAL (PREMIUM) --- */
+
+.ninja-recovery-popup {
+    background: rgba(10, 10, 10, 0.85) !important;
+    backdrop-filter: blur(25px) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
+    border: 2px solid #b30000 !important;
+    border-radius: 30px !important;
+    box-shadow: 0 0 50px rgba(179, 0, 0, 0.3) !important;
+    padding: 30px !important;
+    animation: ninjaEntrance 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@keyframes ninjaEntrance {
+    0% { opacity: 0; transform: scale(0.9) translateY(40px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.ninja-recovery-title {
+    font-family: 'njnaruto', sans-serif !important;
+    color: #fff !important;
+    font-size: 1.8rem !important;
+    letter-spacing: 2px !important;
+    text-shadow: 0 0 15px rgba(255, 0, 0, 0.6) !important;
+    margin-bottom: 25px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.ninja-fb-group {
+    margin-bottom: 20px !important;
+    text-align: left !important;
+    width: 100%;
+}
+
+.ninja-fb-label {
+    display: block !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1.5px !important;
+    margin-bottom: 8px !important;
+}
+
+.ninja-fb-input {
+    width: 100% !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    padding: 14px 18px !important;
+    color: #fff !important;
+    font-size: 15px !important;
+    font-family: 'Poppins', sans-serif !important;
+    transition: all 0.3s ease !important;
+}
+
+.ninja-fb-input:focus {
+    background: rgba(179, 0, 0, 0.05) !important;
+    border-color: #ff0000 !important;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.2) !important;
+}
+
+.ninja-rec-confirm {
+    background: #b30000 !important;
+    color: #fff !important;
+    border-radius: 12px !important;
+    padding: 15px 30px !important;
+    font-family: 'njnaruto', sans-serif !important;
+    font-size: 1.1rem !important;
+    letter-spacing: 1px !important;
+    border: none !important;
+    box-shadow: 0 5px 20px rgba(179, 0, 0, 0.4) !important;
+    cursor: pointer !important;
+    transition: 0.3s !important;
+}
+
+.ninja-rec-confirm:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 30px rgba(179, 0, 0, 0.6) !important;
+    filter: brightness(1.2) !important;
+}
+
+.ninja-rec-cancel {
+    background: rgba(255,255,255,0.05) !important;
+    color: rgba(255,255,255,0.6) !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    padding: 15px 25px !important;
+}
+
 /* ============================================
-   RESPONSIVE QUERIES - STAGED SCALING
+   RESPONSIVE QUERIES
    ============================================ */
 
-/* Stage 1: Resoluciones menores a 1280x720 (Laptop estándar / Baja Res) */
-@media (max-width: 1280px),
-(max-height: 720px) {
-    .naruto {
-        display: none !important;
-    }
-
-    /* Ocultar Naruto como se solicitó */
-
-    .login-box {
-        max-width: 380px;
-        padding: 30px;
-        border-radius: 24px;
-    }
-
-    .title {
-        font-size: 1.3rem;
-    }
-
-    .logo img {
-        width: 70px;
-        height: 70px;
-    }
-
-    input,
-    select {
-        padding: 12px 15px !important;
-        font-size: 14px !important;
-    }
-
-    .btn {
-        padding: 15px;
-        font-size: 1.1rem;
-    }
+/* Laptop estandar / Baja Res */
+@media (max-width: 1280px), (max-height: 720px) {
+    .naruto { display: none !important; }
+    .login-box { max-width: 380px; padding: 30px; border-radius: 24px; }
+    .title { font-size: 1.3rem; }
+    .logo img { width: 70px; height: 70px; }
+    input, select { padding: 12px 15px !important; font-size: 14px !important; }
+    .btn { padding: 15px; font-size: 1.1rem; }
 }
 
-/* Stage 2: Pantallas tipo Tablet / Móvil */
-@media (max-width: 768px) {
-    .content {
-        padding: 30px 15px;
-    }
-
-    .login-box {
-        max-width: 100%;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-    }
-}
-
-/* Stage 3: Pantallas muy pequeñas o Mobiles Portrait */
+/* Mobiles */
 @media (max-width: 480px) {
-    .login-box {
-        padding: 25px 20px;
-        border-radius: 20px;
-    }
-
-    .header-box {
-        margin-bottom: 20px;
-    }
-
-    .title {
-        font-size: 1.1rem;
-    }
-}
-
-/* Stage 4: Pantalla muy corta (Landscape en móviles) */
-@media (max-height: 600px) {
-    body {
-        overflow-y: auto;
-        align-items: flex-start;
-    }
-
-    .content {
-        min-height: auto;
-        padding: 40px 20px;
-    }
-
-    .header-box {
-        margin-bottom: 15px;
-    }
-
-    .logo img {
-        width: 50px;
-        height: 50px;
-    }
-}
-
-/* Ultra-Wide support */
-@media (min-width: 2000px) {
-    .login-box {
-        max-width: 500px;
-        padding: 60px;
-    }
-
-    .title {
-        font-size: 2rem;
-    }
-
-    .naruto {
-        width: 150px;
-        right: -60px;
-        bottom: -40px;
-    }
+    .login-box { padding: 25px 20px; border-radius: 20px; }
+    .title { font-size: 1.1rem; }
 }

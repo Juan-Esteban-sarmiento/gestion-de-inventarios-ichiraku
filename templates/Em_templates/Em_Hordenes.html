@@ -56,14 +56,14 @@
 
   <main class="content">
 
-    <!-- TÍTULO fuera de la caja principal -->
+    <!-- TITULO fuera de la caja principal -->
     <div class="box-welcome">
       <h1 class="welcome-title">Historial de Pedidos</h1>
     </div>
 
     <!-- TODO: todo el contenido principal se agrupa dentro de .order-box (caja negra) -->
     <div class="order-box">
-      <!-- Barra de búsqueda simplificada -->
+      <!-- Barra de busqueda simplificada -->
       <form class="search-box" id="formBuscar" method="GET" action="{{ url_for('Em_Hordenes') }}">
         <div class="input-group">
           <label for="buscarId">ID Pedido</label>
@@ -79,7 +79,7 @@
       </form>
 
 
-      <!-- BOX que envuelve todas las órdenes -->
+      <!-- BOX que envuelve todas las ordenes -->
       <div class="order-container">
         {% if pedidos %}
         {% for pedido in pedidos %}

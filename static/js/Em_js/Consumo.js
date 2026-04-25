@@ -1,5 +1,5 @@
 /* ============================================
-   CONSUMO.JS - Rediseño Operativo Premium
+   CONSUMO.JS - Rediseno Operativo Premium
    ============================================ */
 
 let carritoConsumo = [];
@@ -74,7 +74,7 @@ async function buscarProductos() {
     const container = document.getElementById("productos-container");
     if (!container) return;
 
-    container.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>Cargando menú...</p></div>';
+    container.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>Cargando menu...</p></div>';
 
     try {
         const response = await fetch("/get_recetas_empleado", {
@@ -150,14 +150,14 @@ function renderizarConsumo() {
         li.style.cssText = "display:flex; flex-direction:column; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05);";
 
         li.innerHTML = `
-            <div class="consumo-item" style="display:flex; justify-content:space-between; align-items:center;">
-                <div class="consumo-item-info">
-                    <span class="consumo-item-name" style="color:#fff; font-weight:600; font-size:13px;">${item.nombre}</span>
-                    <button class="toggle-breakdown" onclick="toggleBreakdown(${idx})" style="display:block;">
+            <div class="consumo-item" style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap: 10px;">
+                <div class="consumo-item-info" style="flex: 1; min-width: 120px;">
+                    <div class="consumo-item-name" style="color:#fff; font-weight:600; font-size:13px; line-height: 1.2;">${item.nombre}</div>
+                    <span class="toggle-breakdown" onclick="toggleBreakdown(${idx})" style="display:inline-block; margin-top:4px; font-size:11px; color:#ff4d4d; cursor:pointer; text-decoration:underline;">
                         ${item.showBreakdown ? 'Ocultar ingredientes' : 'Ver ingredientes'}
-                    </button>
+                    </span>
                 </div>
-                <div class="consumo-item-controls" style="display:flex; align-items:center; gap:8px;">
+                <div class="consumo-item-controls" style="display:flex; align-items:center; gap:6px; flex-shrink: 0;">
                     <button class="qty-btn" onclick="actualizarCantidad(${idx}, -1)">-</button>
                     <input type="number" 
                            class="qty-input" 
@@ -165,9 +165,9 @@ function renderizarConsumo() {
                            min="1" 
                            max="500"
                            onchange="cambioManualCantidad(${idx}, this.value)"
-                           style="width:50px; text-align:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:5px; font-weight:bold; height:30px;">
+                           style="width:45px; text-align:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:5px; font-weight:bold; height:30px;">
                     <button class="qty-btn" onclick="actualizarCantidad(${idx}, 1)">+</button>
-                    <button class="remove-btn" onclick="eliminarDelCarrito(${idx})" style="padding:5px;">×</button>
+                    <button class="remove-btn" onclick="eliminarDelCarrito(${idx})" style="width:24px; height:24px; padding:0;">×</button>
                 </div>
             </div>
             <div id="breakdown-${idx}" class="breakdown-container" style="display: ${item.showBreakdown ? 'block' : 'none'}; margin-top:10px;">
@@ -227,7 +227,7 @@ function cambioManualCantidad(idx, valor) {
     let num = parseInt(valor);
     if (isNaN(num) || num < 1) num = 1;
     if (num > 500) {
-        alertaNinja("warning", "CANTIDAD MÁXIMA", "El límite por registro es de 500 unidades.");
+        alertaNinja("warning", "CANTIDAD MAXIMA", "El limite por registro es de 500 unidades.");
         num = 500;
     }
     carritoConsumo[idx].cantidad = num;
@@ -246,14 +246,14 @@ async function confirmarConsumo() {
     if (isProcessingConsumo) return; // Bloqueo estricto inicial
 
     if (carritoConsumo.length === 0) {
-        return alertaNinja("info", "CARRITO VACÍO", "Selecciona platos para registrar la venta.");
+        return alertaNinja("info", "CARRITO VACIO", "Selecciona platos para registrar la venta.");
     }
 
     isProcessingConsumo = true; // Iniciamos bloqueo
 
     const { isConfirmed } = await confirmarNinja(
-        '¿CONFIRMAR VENTA?',
-        `Se procesará el descuento de inventario para ${carritoConsumo.length} tipos de platos.`
+        'CONFIRMAR VENTA?',
+        `Se procesara el descuento de inventario para ${carritoConsumo.length} tipos de platos.`
     );
 
     if (!isConfirmed) {
@@ -287,7 +287,7 @@ async function confirmarConsumo() {
             }
 
             Swal.fire({
-                title: '¡Venta Registrada!',
+                title: 'Venta Registrada!',
                 text: 'El inventario ha sido actualizado.',
                 icon: 'success',
                 background: 'rgba(10, 10, 10, 0.95)',

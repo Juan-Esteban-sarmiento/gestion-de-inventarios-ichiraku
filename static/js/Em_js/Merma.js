@@ -1,5 +1,5 @@
 /**
- * Merma.js - Lógica para el registro de errores humanos y mermas
+ * Merma.js - Logica para el registro de errores humanos y mermas
  */
 
 function abrirModalMerma() {
@@ -62,7 +62,7 @@ async function buscarProductosMerma() {
         }
     } catch (error) {
         console.error('Error buscando productos merma:', error);
-        resultsDiv.innerHTML = '<p style="padding: 10px; color: #e74c3c;">Error en la búsqueda.</p>';
+        resultsDiv.innerHTML = '<p style="padding: 10px; color: #e74c3c;">Error en la busqueda.</p>';
     }
 }
 
@@ -88,7 +88,7 @@ async function guardarMerma() {
         return;
     }
     if (!cantidad || cantidad <= 0) {
-        alertaNinja("Ingrese una cantidad válida", "warning");
+        alertaNinja("Ingrese una cantidad valida", "warning");
         return;
     }
     if (!motivo) {
@@ -110,7 +110,7 @@ async function guardarMerma() {
         if (data.success) {
             alertaNinja("Registro de merma exitoso", "success");
             cerrarModalMerma();
-            // Refrescar comparativa si existe la función en Consumo.js
+            // Refrescar comparativa si existe la funcion en Consumo.js
             if (typeof initComparativa === 'function') initComparativa();
             if (typeof cargarHistorialHoy === 'function') cargarHistorialHoy();
         } else {
@@ -118,7 +118,7 @@ async function guardarMerma() {
         }
     } catch (error) {
         console.error('Error al guardar merma:', error);
-        alertaNinja("Error de conexión al servidor", "error");
+        alertaNinja("Error de conexion al servidor", "error");
     } finally {
         btn.disabled = false;
         btn.innerText = "Confirmar Registro";

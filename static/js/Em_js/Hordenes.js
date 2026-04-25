@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const filas = document.querySelectorAll('.order-row');
 
-  // 🔹 Filtrado instantáneo
+  // 🔹 Filtrado instantaneo
   Object.values(filtros).forEach(input => {
     input.addEventListener('input', filtrarTabla);
     input.addEventListener('change', filtrarTabla);
@@ -40,11 +40,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 🔹 Búsqueda avanzada (cuando se presiona Enter)
+  // 🔹 Busqueda avanzada (cuando se presiona Enter)
   const form = document.getElementById("formBuscar");
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    form.submit(); // deja que Flask haga la búsqueda avanzada
+    form.submit(); // deja que Flask haga la busqueda avanzada
   });
 });
 function toggleDetallePedido(idPedido) {

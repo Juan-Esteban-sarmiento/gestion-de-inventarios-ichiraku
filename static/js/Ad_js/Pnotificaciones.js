@@ -38,18 +38,18 @@ document.getElementById('btn-load-more')?.addEventListener('click', function() {
                     container.style.display = 'none';
                 } else {
                     btn.disabled = false;
-                    btn.textContent = 'Cargar más avisos';
+                    btn.textContent = 'Cargar mas avisos';
                 }
             } else {
-                Swal.fire('Error', 'No se pudieron cargar más avisos', 'error');
+                Swal.fire('Error', 'No se pudieron cargar mas avisos', 'error');
                 btn.disabled = false;
-                btn.textContent = 'Cargar más avisos';
+                btn.textContent = 'Cargar mas avisos';
             }
         })
         .catch(error => {
             console.error('Error:', error);
             btn.disabled = false;
-            btn.textContent = 'Cargar más avisos';
+            btn.textContent = 'Cargar mas avisos';
         });
 });
 
@@ -59,14 +59,14 @@ document.addEventListener('click', function(e) {
 
     const id = item.getAttribute('data-id');
 
-    // Botón Prioritaria (si se llegara a habilitar en el futuro)
+    // Boton Prioritaria (si se llegara a habilitar en el futuro)
     if (e.target.classList.contains('btn-prioritaria')) {
         fetch(`/marcar_prioritaria/${id}`, { method: 'POST' })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     item.classList.add('prioritaria');
-                    Swal.fire('¡Listo!', 'Notificación marcada como prioritaria', 'success');
+                    Swal.fire('Listo!', 'Notificacion marcada como prioritaria', 'success');
                 }
             });
     }

@@ -60,10 +60,10 @@
             <div class="reporting-hub">
                 <div class="box-welcome">
                     <h1 class="welcome-title">CENTRO DE REPORTES</h1>
-                    <p class="welcome-subtitle">Gestión y auditoría de inventarios Ichiraku</p>
+                    <p class="welcome-subtitle">Gestion y auditoria de inventarios Ichiraku</p>
                 </div>
 
-                <!-- 🔍 Sección de Búsqueda de Informes -->
+                <!-- 🔍 Seccion de Busqueda de Informes -->
                     <div class="search-capsule">
                         <form id="searchForm">
                             <div class="input-group">
@@ -122,7 +122,7 @@
                     <div class="report-generator-card">
                         <h3>INVENTARIO (VENDIDO VS MERMA)</h3>
                         <p class="generator-desc">Genera un reporte detallado del consumo de insumos y mermas por local.</p>
-                        <form action="{{ url_for('generar_reporte_personalizado') }}" method="POST" class="generator-form">
+                        <form id="inventoryReportForm" class="generator-form">
                             <div class="input-group">
                                 <label>Seleccionar Local</label>
                                 <select name="id_local" required>
@@ -133,7 +133,7 @@
                                 </select>
                             </div>
                             <div class="input-group">
-                                <label>Período</label>
+                                <label>Periodo</label>
                                 <select name="periodo">
                                     <option value="diario">Diario</option>
                                     <option value="semanal">Semanal</option>
@@ -146,7 +146,7 @@
                                 <input type="date" name="fecha" value="{{ hoy }}">
                             </div>
                             <div class="submit-group">
-                                <button type="submit" class="btn-primary">Generar Reporte Premium</button>
+                                <button type="button" class="btn-primary" onclick="generarReporteInventario()">Generar Reporte Premium</button>
                             </div>
                         </form>
                     </div>

@@ -10,7 +10,7 @@
     max-width: 1300px;
     margin: 0 auto;
     align-items: flex-start;
-    /* Altura independiente para evitar espacios vacíos */
+    /* Altura independiente para evitar espacios vacios */
 }
 
 /* --- RECUADRO IZQUIERDO: REGISTRO (MAS CORTO) --- */
@@ -78,7 +78,7 @@
     }
 }
 
-/* Títulos de Sección (Naruto) */
+/* Titulos de Seccion (Naruto) */
 .register-box h2,
 .search-box h2 {
     font-family: var(--font-primary) !important;

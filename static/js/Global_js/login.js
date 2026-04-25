@@ -1,4 +1,4 @@
-// 🎴 ALERTA LOGIN TIPO NOTIFICACIÓN (PREMIUM STYLED)
+// 🎴 ALERTA LOGIN TIPO NOTIFICACION (PREMIUM STYLED)
 function alertaLoginNotif(icon, title, message) {
     Swal.fire({
         toast: true,
@@ -39,7 +39,7 @@ styleNotif.innerHTML = `
 `;
 document.head.appendChild(styleNotif);
 
-// 🌟 FUNCIÓN LOGIN CON ALERTA TIPO NOTIFICACIÓN
+// 🌟 FUNCION LOGIN CON ALERTA TIPO NOTIFICACION
 async function login(event) {
     if (event) event.preventDefault();
 
@@ -49,7 +49,7 @@ async function login(event) {
 
     // Validaciones
     if (!id || !password) {
-        alertaLoginNotif("warning", "DATOS INCOMPLETOS", "Por favor ingresa tu ID y contraseña.");
+        alertaLoginNotif("warning", "DATOS INCOMPLETOS", "Por favor ingresa tu ID y contrasena.");
         return false;
     }
 
@@ -63,18 +63,86 @@ async function login(event) {
         const data = await res.json();
 
         if (data.success) {
-            alertaLoginNotif("success", "BIENVENIDO", data.msg || "Inicio de sesión exitoso");
+            alertaLoginNotif("success", "BIENVENIDO", data.msg || "Inicio de sesion exitoso");
             setTimeout(() => {
                 window.location.href = data.redirect || "/";
             }, 1000);
         } else {
-            alertaLoginNotif("error", "ERROR", data.msg || "Usuario o contraseña incorrecta");
+            alertaLoginNotif("error", "ERROR", data.msg || "Usuario o contrasena incorrecta");
         }
 
     } catch (err) {
         console.error(err);
-        alertaLoginNotif("error", "ERROR", "Ocurrió un problema al intentar conectarse.");
+        alertaLoginNotif("error", "ERROR", "Ocurrio un problema al intentar conectarse.");
     }
+}
+
+// 🔑 RECUPERACION CON LLAVE MAESTRA
+function mostrarRecuperacionLlave() {
+    Swal.fire({
+        title: '<div class="ninja-recovery-title">⛩️ RECUPERACION NINJA</div>',
+        html: `
+            <div class="ninja-fb-group">
+                <label class="ninja-fb-label">ID / Cedula</label>
+                <input id="rec-id" class="ninja-fb-input" placeholder="Ingresa tu ID">
+            </div>
+            
+            <div class="ninja-fb-group">
+                <label class="ninja-fb-label">Llave Maestra</label>
+                <input id="rec-key" class="ninja-fb-input" placeholder="Tu clave de 12 caracteres" style="text-transform: uppercase;">
+            </div>
+            
+            <div class="ninja-fb-group">
+                <label class="ninja-fb-label">Nueva Contrasena</label>
+                <input id="rec-pass" type="password" class="ninja-fb-input" placeholder="Minimo 8 caracteres">
+            </div>
+        `,
+        background: 'transparent',
+        showCancelButton: true,
+        confirmButtonText: 'ACTUALIZAR CLAVE',
+        cancelButtonText: 'CANCELAR',
+        customClass: {
+            popup: 'ninja-recovery-popup',
+            confirmButton: 'ninja-rec-confirm',
+            cancelButton: 'ninja-rec-cancel'
+        },
+        buttonsStyling: false,
+        backdrop: `rgba(0,0,0,0.9)`,
+        allowOutsideClick: false,
+        preConfirm: () => {
+            const id = document.getElementById('rec-id').value.trim();
+            const llave = document.getElementById('rec-key').value.trim().toUpperCase();
+            const pass = document.getElementById('rec-pass').value.trim();
+            
+            if (!id || !llave || !pass) {
+                Swal.showValidationMessage('Todos los campos son obligatorios');
+                return false;
+            }
+            if (pass.length < 8) {
+                Swal.showValidationMessage('La nueva clave debe tener al menos 8 caracteres');
+                return false;
+            }
+            return { id, llave, nueva_clave: pass };
+        }
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const res = await fetch('/recuperar_con_llave', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(result.value)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alertaNinja('success', 'LOGRADO!', 'Tu clave ha sido actualizada. Ya puedes iniciar sesion.');
+                } else {
+                    alertaNinja('error', 'FALLO', data.msg);
+                }
+            } catch (e) {
+                alertaNinja('error', 'ERROR', 'Fallo en la conexion.');
+            }
+        }
+    });
 }
 
 function logout() {
@@ -82,10 +150,10 @@ function logout() {
         .then(() => {
             window.location.href = '/login';
         })
-        .catch(err => console.error('Error al cerrar sesión:', err));
+        .catch(err => console.error('Error al cerrar sesion:', err));
 }
 
-// La pestaña de "rol" fue eliminada; cargarLocales se llama automáticamente.
+// La pestana de "rol" fue eliminada; cargarLocales se llama automaticamente.
 
 
 // Cargar locales desde backend
@@ -115,12 +183,30 @@ async function cargarLocales() {
     }
 }
 
-// 🕒 Detectar si la sesión se cerró por inactividad
+// 🕒 Detectar si la sesion se cerro por inactividad o desde otro dispositivo
 function checkSessionTimeout() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('timeout') === '1') {
+        const reason = urlParams.get('reason');
+        let title = 'SESION CERRADA';
+        let message = 'Tu sesion ha expirado por inactividad. Por favor, ingresa de nuevo.';
+        let icon = 'info';
+        
+        if (reason) {
+            message = reason;
+            if (reason.toLowerCase().includes('otro dispositivo')) {
+                title = 'ALERTA DE SEGURIDAD';
+                icon = 'warning';
+                message += ' Por favor, inicia sesion de nuevo si fuiste tu.';
+            } else if (reason.toLowerCase().includes('deshabilitada')) {
+                title = 'CUENTA DESHABILITADA';
+                icon = 'error';
+                message += ' Contacta al administrador.';
+            }
+        }
+
         // Usar la alerta Premium ya estandarizada
-        alertaNinja('info', 'SESION CERRADA', 'Tu sesion ha expirado por inactividad. Por favor, ingresa de nuevo.');
+        alertaNinja(icon, title, message);
 
         // Limpiar la URL para evitar que el mensaje se repita al recargar
         window.history.replaceState({}, document.title, window.location.pathname);

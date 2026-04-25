@@ -22,7 +22,7 @@
     }
 }
 
-/* --- EL TABLÓN DE ANUNCIOS (VENTANA PRINCIPAL) --- */
+/* --- EL TABLON DE ANUNCIOS (VENTANA PRINCIPAL) --- */
 .search-box {
     width: 95%;
     max-width: 1000px;
@@ -92,7 +92,7 @@
     background: linear-gradient(90deg, rgba(255, 0, 0, 0.04) 0%, transparent 100%);
 }
 
-/* Iconos (Garantía de tamaño) */
+/* Iconos (Garantia de tamano) */
 .icon-left {
     width: 26px !important;
     height: 26px !important;
@@ -100,7 +100,7 @@
     filter: drop-shadow(0 0 5px rgba(255, 0, 0, 0.2));
 }
 
-/* Texto de la Notificación */
+/* Texto de la Notificacion */
 .notification-text {
     font-family: var(--font-secondary);
     color: #ddd;
@@ -141,7 +141,7 @@
     background: var(--red-brand);
 }
 
-/* --- BOTÓN CARGAR MÁS --- */
+/* --- BOTON CARGAR MAS --- */
 /* Heredado de components.css */
 #btn-load-more {
     max-width: 250px;

@@ -12,7 +12,7 @@ document.getElementById('registerForm').addEventListener('submit', async functio
   const contrasena = document.getElementById('contrasena').value.trim();
   const contacto = document.getElementById('contacto').value.trim();
 
-  // Mostrar loading en el botón
+  // Mostrar loading en el boton
   const submitBtn = document.querySelector('#registerForm button[type="submit"]');
   const originalText = submitBtn.innerHTML;
   submitBtn.innerHTML = 'REGISTRANDO...';
@@ -51,7 +51,7 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     }
 
   } catch (error) {
-    alertaNinja('error', 'Error de conexión', 'No se pudo conectar con el servidor.');
+    alertaNinja('error', 'Error de conexion', 'No se pudo conectar con el servidor.');
   } finally {
     submitBtn.innerHTML = originalText;
     submitBtn.disabled = false;
@@ -95,9 +95,10 @@ async function cargarEmpleados(termino = "") {
               <h4>${emp.nombre}</h4>
               <p>ID: ${emp.cedula} | Tel: ${emp.telefono}</p>
             </div>
-            <div class="empleado-actions">
+            <div class="empleado-actions" style="gap: 5px;">
               <button onclick="editarEmpleado('${emp.cedula}', '${emp.nombre}', '${emp.telefono}')">Editar</button>
               <button onclick="${emp.habilitado ? `desabilitarEmpleado('${emp.cedula}')` : `habilitarEmpleado('${emp.cedula}')`}">${emp.habilitado ? 'Desactivar' : 'Activar'}</button>
+              <button class="btn-llave" onclick="verLlaveMaestra('${emp.cedula}')" style="background: #333; color: #ff9800; border: 1px solid #ff9800;">🔑 Ver Llave</button>
             </div>
         </div>
       `).join("");
@@ -113,7 +114,7 @@ function editarEmpleado(cedula, nombre, telefono) {
     title: 'Editar Personal',
     html: `
       <input id="editNombre" class="swal2-input ninja-swal-input" placeholder="Nombre" value="${nombre}">
-      <p style="color:#aaa; font-size:13px; margin-top:15px; font-family:'Montserrat', sans-serif;">El teléfono (${telefono}) no se puede modificar.</p>
+      <p style="color:#aaa; font-size:13px; margin-top:15px; font-family:'Montserrat', sans-serif;">El telefono (${telefono}) no se puede modificar.</p>
     `,
     showCancelButton: true,
     confirmButtonText: 'GUARDAR CAMBIOS',
@@ -121,7 +122,7 @@ function editarEmpleado(cedula, nombre, telefono) {
     preConfirm: () => {
       const n = document.getElementById("editNombre").value.trim();
       if (!n) { Swal.showValidationMessage('El nombre es obligatorio'); return false; }
-      if (/\d/.test(n)) { Swal.showValidationMessage('El nombre no puede contener números'); return false; }
+      if (/\d/.test(n)) { Swal.showValidationMessage('El nombre no puede contener numeros'); return false; }
       return { nombre: n };
     }
   }).then(async (result) => {
@@ -137,7 +138,7 @@ function editarEmpleado(cedula, nombre, telefono) {
           alertaNinja('success', 'ACTUALIZADO', 'Los datos han sido guardados.');
           await cargarEmpleados("");
         } else { alertaNinja('error', 'Error', res.msg); }
-      } catch (e) { alertaNinja('error', 'Error', 'Fallo en la conexión.'); }
+      } catch (e) { alertaNinja('error', 'Error', 'Fallo en la conexion.'); }
     }
   });
 }
@@ -189,5 +190,31 @@ async function habilitarEmpleado(cedula) {
       alertaNinja('success', 'ACTIVADO', 'Estado cambiado correctamente.');
       await cargarEmpleados();
     }
+  }
+}
+
+// 🔑 VER LLAVE MAESTRA (PARA EL ADMIN)
+async function verLlaveMaestra(cedula) {
+  try {
+    const response = await fetch(`/admin/get_master_key/${cedula}`);
+    const data = await response.json();
+    if (data.success) {
+      alertaNinjaFire({
+        title: '🔑 LLAVE MAESTRA',
+        html: `
+          <p style="color:#eee;">La llave de recuperacion de este empleado es:</p>
+          <div style="background: #1a1a1a; color: #ff9800; padding: 15px; border-radius: 8px; font-size: 1.5em; letter-spacing: 3px; font-weight: bold; margin: 15px 0; border: 1px solid #ff9800;">
+            ${data.key}
+          </div>
+          <p style="color:#aaa; font-size: 11px;">Usala para ayudar al empleado si olvida su clave.</p>
+        `,
+        confirmButtonText: 'ENTENDIDO',
+        confirmButtonColor: '#ff9800'
+      });
+    } else {
+      alertaNinja('error', 'Error', data.msg);
+    }
+  } catch (e) {
+    alertaNinja('error', 'Error', 'No se pudo conectar con el servidor.');
   }
 }

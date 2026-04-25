@@ -12,7 +12,7 @@ document.getElementById('registerProductForm').addEventListener('submit', async 
     alertaNinja('warning', 'Campos incompletos', 'Debes llenar todos los campos antes de registrar el producto');
     return;
   }
-  const nombreRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ()\-'/&.,%+]+$/;
+  const nombreRegex = /^[A-Za-zAEIOUaeiouNn ()\-'/&.,%+]+$/;
   if (nombre.length < 2 || nombre.length > 100) {
     alertaNinja('warning', 'NOMBRE INVALIDO', 'Debe tener entre 2 y 100 caracteres');
     return;
@@ -22,7 +22,7 @@ document.getElementById('registerProductForm').addEventListener('submit', async 
     return;
   }
   if (/\d/.test(nombre)) {
-    alertaNinja('warning', 'NOMBRE INVALIDO', 'El nombre no debe contener números ni cantidades');
+    alertaNinja('warning', 'NOMBRE INVALIDO', 'El nombre no debe contener numeros ni cantidades');
     return;
   }
   if (!nombreRegex.test(nombre)) {
@@ -50,13 +50,13 @@ document.getElementById('registerProductForm').addEventListener('submit', async 
       alertaNinja('success', 'EXITO', 'Producto registrado correctamente.');
       document.getElementById('registerProductForm').reset();
       document.getElementById('previewFotoProducto').style.display = "none";
-      await cargarProductos(); // Recarga dinámica en lugar de forzar reload tosco
+      await cargarProductos(); // Recarga dinamica en lugar de forzar reload tosco
     } else {
       alertaNinja('error', 'Error en registro', data.msg);
     }
 
   } catch (error) {
-    alertaNinja('error', 'Error de conexión', 'No se pudo conectar con el servidor.');
+    alertaNinja('error', 'Error de conexion', 'No se pudo conectar con el servidor.');
   }
 });
 
@@ -157,7 +157,7 @@ function editarProducto(id_producto, nombre, categoria, unidad) {
       const f = document.getElementById("editFoto").files[0];
 
       if (!n || !c || !u) { Swal.showValidationMessage('Todos los campos son obligatorios'); return false; }
-      if (/\d/.test(n)) { Swal.showValidationMessage('El nombre no puede contener números'); return false; }
+      if (/\d/.test(n)) { Swal.showValidationMessage('El nombre no puede contener numeros'); return false; }
       return { nombre: n, categoria: c, unidad: u, foto: f };
     }
   }).then(async (result) => {

@@ -23,7 +23,9 @@ document.getElementById("editarForm").addEventListener("submit", async function 
 
   const formData = new FormData(this);
   const data = {
-    Nombre: formData.get("Nombre")
+    Nombre: formData.get("Nombre"),
+    telefono: formData.get("telefono"),
+    wa_apikey: formData.get("wa_apikey")
   };
 
   try {
@@ -34,13 +36,13 @@ document.getElementById("editarForm").addEventListener("submit", async function 
     });
     let result = await response.json();
     if (result.success) {
-      alertaNinja("success", "GUARDADO", "Tu información ha sido actualizada.");
+      alertaNinja("success", "GUARDADO", "Tu informacion ha sido actualizada.");
       originalValues["Nombre"] = data.Nombre; // Sincronizar para evitar alertas de cambios falsas
     } else {
       alertaNinja("error", "Error", result.msg || "No se pudo actualizar.");
     }
   } catch (err) {
-    alertaNinja("error", "Fallo de conexión", "No se pudo conectar con el servidor.");
+    alertaNinja("error", "Fallo de conexion", "No se pudo conectar con el servidor.");
   }
 });
 
@@ -60,20 +62,20 @@ fileInput.addEventListener('change', async function () {
     let result = await response.json();
     if (result.success) {
       document.querySelector('.profile-section img').src = result.photo_url;
-      alertaNinja('success', 'Foto actualizada', 'Tu nueva foto de perfil está lista.');
+      alertaNinja('success', 'Foto actualizada', 'Tu nueva foto de perfil esta lista.');
     } else {
       alertaNinja('error', 'Error', 'No se pudo subir la imagen.');
     }
   } catch (e) { alertaNinja('error', 'Error', 'Fallo al cargar la foto.'); }
 });
 
-// 🗑 Eliminar foto con CONFIRMACIÓN solicitado
+// 🗑 Eliminar foto con CONFIRMACION solicitado
 const eliminarBtn = document.querySelector('.profile-btn.delete');
 eliminarBtn.addEventListener('click', async function () {
   const confirmacion = await alertaNinjaFire({
     icon: 'warning',
     title: 'BORRAR FOTO',
-    text: 'Esta acción no se puede deshacer. ¿Estás seguro?',
+    text: 'Esta accion no se puede deshacer. Estas seguro?',
     showCancelButton: true,
     confirmButtonText: 'BORRAR',
     cancelButtonText: 'CANCELAR'
@@ -89,16 +91,16 @@ eliminarBtn.addEventListener('click', async function () {
       } else {
         alertaNinja('error', 'Error', 'No se pudo eliminar la foto.');
       }
-    } catch (e) { alertaNinja('error', 'Fallo', 'Error de conexión.'); }
+    } catch (e) { alertaNinja('error', 'Fallo', 'Error de conexion.'); }
   }
 });
 
-// 🔑 Recuperar/Cambiar contraseña
+// 🔑 Recuperar/Cambiar contrasena
 async function recuperarContrasena() {
   const { value: nombre } = await alertaNinjaFire({
     title: 'Seguridad',
     input: 'text',
-    inputLabel: 'Nombre completo o Cédula del Administrador',
+    inputLabel: 'Nombre completo o Cedula del Administrador',
     inputPlaceholder: 'Ingresa tu usuario o ID...',
     showCancelButton: true,
     confirmButtonText: 'CONTINUAR',
@@ -110,7 +112,7 @@ async function recuperarContrasena() {
   const { value: telefono } = await alertaNinjaFire({
     title: 'RECUPERACION',
     input: 'text',
-    inputLabel: 'Número de teléfono (WhatsApp)',
+    inputLabel: 'Numero de telefono (WhatsApp)',
     inputPlaceholder: 'Ej: 3001234567',
     showCancelButton: true,
     confirmButtonText: 'ENVIAR CODIGO',
@@ -131,12 +133,12 @@ async function recuperarContrasena() {
     const data = await res.json();
     if (!data.success) return alertaNinja('error', 'Error', data.msg);
 
-    alertaNinja('success', 'Código Enviado', 'Revisa tu WhatsApp para ver el código.');
+    alertaNinja('success', 'Codigo Enviado', 'Revisa tu WhatsApp para ver el codigo.');
 
     const { value: token } = await alertaNinjaFire({
       title: 'VERIFICACION',
       input: 'text',
-      inputLabel: 'Código de 6 dígitos',
+      inputLabel: 'Codigo de 6 digitos',
       inputPlaceholder: '123456',
       showCancelButton: true,
       confirmButtonText: 'VALIDAR',
@@ -148,7 +150,7 @@ async function recuperarContrasena() {
     const { value: nuevaContrasena } = await alertaNinjaFire({
       title: 'Nueva Clave',
       input: 'password',
-      inputLabel: 'Nueva contraseña segura',
+      inputLabel: 'Nueva contrasena segura',
       inputPlaceholder: '********',
       showCancelButton: true,
       confirmButtonText: 'ACTUALIZAR',
@@ -164,9 +166,9 @@ async function recuperarContrasena() {
     });
     const resultado = await resp.json();
     if (resultado.success) {
-      alertaNinja('success', 'EXITO', 'Tu contraseña ha sido cambiada.');
+      alertaNinja('success', 'EXITO', 'Tu contrasena ha sido cambiada.');
     } else {
-      alertaNinja('error', 'Código Inválido', resultado.msg);
+      alertaNinja('error', 'Codigo Invalido', resultado.msg);
     }
   } catch (err) { alertaNinja('error', 'Fallo', 'Error al procesar la clave.'); }
 }

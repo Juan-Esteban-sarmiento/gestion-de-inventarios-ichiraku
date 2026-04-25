@@ -80,7 +80,7 @@
     }
 }
 
-/* Títulos con Fuente Principal (Naruto) */
+/* Titulos con Fuente Principal (Naruto) */
 .register-box h2,
 .search-box h2 {
     font-family: var(--font-primary) !important;

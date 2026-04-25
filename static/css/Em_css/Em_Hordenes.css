@@ -44,14 +44,14 @@
 }
 
 
-/* Contenedor de Órdenes */
+/* Contenedor de Ordenes */
 .order-container {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-/* Tarjetas de Órdenes */
+/* Tarjetas de Ordenes */
 .order-card {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--glass-border);
@@ -116,7 +116,7 @@
   font-size: 13px;
 }
 
-/* Botón Toggle */
+/* Boton Toggle */
 /* Heredado de components.css */
 
 

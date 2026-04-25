@@ -3,9 +3,9 @@
    ============================================ */
 
 /**
- * Muestra una alerta con diseño Ninja Premium adaptada al aplicativo.
+ * Muestra una alerta con diseno Ninja Premium adaptada al aplicativo.
  * @param {string} icon - 'success', 'error', 'warning', 'info', 'question'
- * @param {string} title - Título del mensaje
+ * @param {string} title - Titulo del mensaje
  * @param {string} text - Contenido del mensaje
  */
 function alertaNinja(icon, title, text) {
@@ -64,7 +64,7 @@ function alertaNinjaFire(options) {
   return Swal.fire(opts);
 }
 
-function confirmarNinja(title, text, confirmText = 'SÍ, CONFIRMAR', cancelText = 'Cancelar') {
+function confirmarNinja(title, text, confirmText = 'SI, CONFIRMAR', cancelText = 'Cancelar') {
   return Swal.fire({
     title: `<span style="font-family: inherit;">${title}</span>`,
     html: `<div style="color:#aaa;">${text}</div>`,
@@ -106,7 +106,7 @@ ninjaAlertStyle.innerHTML = `
     backdrop-filter: blur(15px) !important;
   }
 
-  /* Títulos (Montserrat para limpieza) */
+  /* Titulos (Montserrat para limpieza) */
   .ninja-swal-title {
     font-family: 'Montserrat', sans-serif !important;
     font-weight: 700 !important;
@@ -125,7 +125,7 @@ ninjaAlertStyle.innerHTML = `
     line-height: 1.6 !important;
   }
 
-  /* Botón Confirmar (Estilo Shinobi) */
+  /* Boton Confirmar (Estilo Shinobi) */
   .ninja-swal-confirm {
     background: linear-gradient(135deg, #8b0000 0%, #b30000 100%) !important;
     color: #fff !important;
@@ -147,7 +147,7 @@ ninjaAlertStyle.innerHTML = `
     background: #d00 !important;
   }
 
-  /* Botón Cancelar */
+  /* Boton Cancelar */
   .ninja-swal-cancel {
     background: rgba(255, 255, 255, 0.05) !important;
     color: #aaa !important;
@@ -209,7 +209,7 @@ ninjaAlertStyle.innerHTML = `
     box-shadow: 0 0 10px rgba(255, 0, 0, 0.3) !important;
   }
 
-  /* 🔥 Estilo Premium para Mensajes de Validación 🔥 */
+  /* 🔥 Estilo Premium para Mensajes de Validacion 🔥 */
   .swal2-validation-message {
     background: rgba(139, 0, 0, 0.15) !important;
     color: #ffb3b3 !important;

@@ -69,7 +69,7 @@ textarea {
     transition: var(--transition-smooth);
 }
 
-/* 🧪 Estilo Minimalista: Quitar flechas de inputs numéricos */
+/* 🧪 Estilo Minimalista: Quitar flechas de inputs numericos */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -112,7 +112,7 @@ textarea:focus {
 }
 
 
-/* 🔘 Premium Buttons - RESTAURACIÓN ROJO SÓLIDO (BRAND STANDARD) */
+/* 🔘 Premium Buttons - RESTAURACION ROJO SOLIDO (BRAND STANDARD) */
 .btn,
 button:not(.menu-button):not(.logout-btn):not(.btn-remove):not(.empleado-actions button):not(.producto-actions button):not(.local-actions button):not([class*="swal2"]):not([class*="ninja"]) {
     height: 48px !important;
@@ -142,7 +142,7 @@ button:not(.menu-button):not(.logout-btn):not(.btn-remove):not(.empleado-actions
 button:not(.menu-button):not(.logout-btn):not([class*="swal2"]):not([class*="ninja"]):hover {
     transform: translateY(-2px) !important;
     background: #d00000 !important;
-    /* Un rojo más brillante al pasar */
+    /* Un rojo mas brillante al pasar */
     box-shadow: 0 6px 20px rgba(179, 0, 0, 0.4) !important;
     border-color: rgba(255, 255, 255, 0.4) !important;
 }
@@ -179,7 +179,7 @@ button:not(.menu-button):not(.logout-btn):not([class*="swal2"]):not([class*="nin
 table {
     width: 100%;
     table-layout: fixed;
-    /* Forzado para alineación exacta */
+    /* Forzado para alineacion exacta */
 }
 
 th,
@@ -241,4 +241,49 @@ tr:hover td {
 /* 🎭 Global Modal Fix (Prevents disrupting layouts) */
 .modal {
     display: none !important;
+}
+
+/* 🔑 Master Key Modal Styling (Shinobi Premium) */
+.ninja-master-key-body {
+    background: #0a0a0a !important;
+}
+
+.ninja-master-key-container {
+    background: #000 !important;
+    border: 1px solid #b30000 !important;
+    border-radius: 12px !important;
+    padding: 2.5rem !important;
+    margin: 1.5rem 0 !important;
+    box-shadow: 0 0 30px rgba(179, 0, 0, 0.2) !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.ninja-master-key-text {
+    font-size: 2.4rem !important;
+    letter-spacing: 10px !important;
+    font-weight: 900 !important;
+    color: #ff9800 !important;
+    text-shadow: 0 0 20px rgba(255, 152, 0, 0.5) !important;
+    font-family: 'Consolas', 'Courier New', monospace !important;
+    margin: 0 !important;
+    padding: 10px !important;
+}
+
+.ninja-swal-title {
+    font-family: 'njnaruto', sans-serif !important;
+    color: #fff !important;
+    font-size: 1.8rem !important;
+    text-shadow: 0 0 15px rgba(255, 0, 0, 0.6) !important;
+    margin-bottom: 20px !important;
+}
+
+.ninja-swal-confirm {
+    background: #b30000 !important;
+    border-radius: 10px !important;
+    padding: 12px 30px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
 }

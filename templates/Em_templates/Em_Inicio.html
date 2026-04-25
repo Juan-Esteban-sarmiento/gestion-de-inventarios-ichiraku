@@ -61,7 +61,7 @@
       <h1 class="welcome-title">Bienvenido</h1>
     </div>
 
-    <!-- ====== SECCIÓN DE NOTIFICACIONES ====== -->
+    <!-- ====== SECCION DE NOTIFICACIONES ====== -->
     <section class="notification-box">
       <div class="notification-header">
         <h2>Avisos recientes</h2>
@@ -94,6 +94,41 @@
       <img src="{{ url_for('static', filename='image/logo.png') }}" alt="Ichiraku Ramen">
     </div>
   </main>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="{{ url_for('static', filename='js/Global_js/alertaNinja.js') }}"></script>
+  
+  {% if session.get('show_master_key') %}
+  <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          Swal.fire({
+              title: '🔑 TU LLAVE MAESTRA NINJA!',
+              html: `
+                  <div class="ninja-master-key-container">
+                      <span class="ninja-master-key-text">{{ session.get('master_key') }}</span>
+                  </div>
+                  <p style="color: #eee; font-size: 1.1em; margin-bottom: 10px;">Esta es tu llave unica de recuperacion. <b>Solo se muestra esta vez.</b></p>
+                  <p style="color: #ff5722; font-weight: bold; font-size: 0.9em;">Guardala en un lugar seguro. Sin ella, no podras recuperar tu acceso de forma autonoma.</p>
+              `,
+              background: '#0a0a0a',
+              color: '#fff',
+              confirmButtonText: 'HE GUARDADO MI LLAVE',
+              confirmButtonColor: '#b30000',
+              customClass: {
+                  popup: 'ninja-master-key-body',
+                  title: 'ninja-swal-title',
+                  confirmButton: 'ninja-swal-confirm'
+              },
+              backdrop: `rgba(0,0,0,0.96)`,
+              allowOutsideClick: false,
+              allowEscapeKey: false
+          }).then((result) => {
+              if (result.isConfirmed) {
+                  fetch('/confirmar_llave_vista', { method: 'POST' });
+              }
+          });
+      });
+  </script>
+  {% endif %}
 </body>
 
 </html>

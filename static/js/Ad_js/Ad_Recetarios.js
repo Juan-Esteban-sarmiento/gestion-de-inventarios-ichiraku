@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             Swal.close();
             console.error("Error submitting recipe:", error);
-            alertaNinja("Error en la conexión con el servidor.", "error");
+            alertaNinja("Error en la conexion con el servidor.", "error");
         }
     });
 

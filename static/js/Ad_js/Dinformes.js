@@ -5,7 +5,7 @@ document.getElementById('searchForm').addEventListener('submit', async (e) => {
     const fecha = document.getElementById('datePicker').value.trim();
 
     if (!id_informe && !fecha)
-        return alertaNinja('warning', 'Campos vacíos', 'Debes ingresar un ID o una fecha para buscar.');
+        return alertaNinja('warning', 'Campos vacios', 'Debes ingresar un ID o una fecha para buscar.');
 
     try {
         const res = await fetch('/buscar_informe', {
@@ -28,7 +28,7 @@ document.getElementById('searchForm').addEventListener('submit', async (e) => {
                         </div>
                         <div class="card-body">
                             <div class="info-row">
-                                <label>Fecha de creación:</label>
+                                <label>Fecha de creacion:</label>
                                 <span>${new Date(inf.fecha_creacion).toLocaleString('es-CO')}</span>
                             </div>
                             <div class="info-row">
@@ -47,13 +47,81 @@ document.getElementById('searchForm').addEventListener('submit', async (e) => {
             resultBox.innerHTML = `<p style="text-align:center; color:#666; padding:20px;">No se hallaron resultados.</p>`;
             alertaNinja('info', 'Sin resultados', 'No hay informes con esos datos.');
         }
-    } catch (err) { alertaNinja('error', 'Error', 'No se pudo realizar la búsqueda.'); }
+    } catch (err) { alertaNinja('error', 'Error', 'No se pudo realizar la busqueda.'); }
 });
 
-// 🧾 Descargar informe
 function descargarInforme(id) {
-    alertaNinja('success', 'Descarga Iniciada', 'Tu archivo PDF se está generando...');
+    alertaNinja('success', 'Descarga Iniciada', 'Tu archivo PDF se esta generando...');
     setTimeout(() => window.open(`/descargar_informe/${id}`, '_blank'), 800);
+}
+
+// 📊 Generar Reporte de Inventario (Vendido vs Merma) con validacion
+async function generarReporteInventario() {
+    const form = document.getElementById('inventoryReportForm');
+    const localSelect = form.querySelector('select[name="id_local"]');
+    const periodoSelect = form.querySelector('select[name="periodo"]');
+    const fechaInput = form.querySelector('input[name="fecha"]');
+
+    // Validaciones con alertas premium
+    if (!localSelect.value) {
+        alertaNinja('warning', 'LOCAL REQUERIDO', 'Debes seleccionar un local para generar el reporte.');
+        localSelect.focus();
+        return;
+    }
+
+    if (!fechaInput.value) {
+        alertaNinja('warning', 'FECHA REQUERIDA', 'Debes seleccionar una fecha base para el reporte.');
+        fechaInput.focus();
+        return;
+    }
+
+    // Confirmacion antes de generar
+    const confirmar = await confirmarNinja(
+        'GENERAR REPORTE?',
+        `Se generara el reporte de inventario (${periodoSelect.value}) para el local seleccionado.`
+    );
+
+    if (!confirmar.isConfirmed) return;
+
+    // Mostrar loading
+    alertaNinjaFire({
+        title: 'Generando Reporte...',
+        text: 'Por favor espera mientras se procesa tu informe.',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
+    try {
+        const formData = new FormData(form);
+        const res = await fetch('/generar_reporte_personalizado', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (res.ok && res.headers.get('content-type')?.includes('application/pdf')) {
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Informe_Inventario_${periodoSelect.value}_${fechaInput.value}.pdf`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            Swal.close();
+            alertaNinja('success', 'REPORTE GENERADO', 'El informe PDF se ha descargado correctamente.');
+        } else {
+            Swal.close();
+            try {
+                const data = await res.json();
+                alertaNinja('warning', 'SIN DATOS', data.msg || 'No se pudo generar el reporte.');
+            } catch {
+                alertaNinja('warning', 'SIN DATOS', 'No se pudo generar el reporte. Verifica los datos ingresados.');
+            }
+        }
+    } catch (err) {
+        Swal.close();
+        console.error('Error generando reporte:', err);
+        alertaNinja('error', 'ERROR', 'No se pudo conectar con el servidor para generar el reporte.');
+    }
 }
 
 // 🕓 Descargar por rango (Usa alertaNinjaFire para mantener el estilo)
@@ -84,7 +152,7 @@ async function descargarPorRango(tipo) {
                 const i = document.getElementById('inicio').value;
                 const f = document.getElementById('fin').value;
                 if (!i || !f) { Swal.showValidationMessage('Ambas fechas son obligatorias'); return false; }
-                if (new Date(i) > new Date(f)) { Swal.showValidationMessage('Fecha inicio inválida'); return false; }
+                if (new Date(i) > new Date(f)) { Swal.showValidationMessage('Fecha inicio invalida'); return false; }
                 return { i, f };
             }
         });
@@ -114,7 +182,7 @@ async function descargarPorRango(tipo) {
 
     } else if (tipo === 'anio') {
         const res = await alertaNinjaFire({
-            title: 'Seleccionar Año',
+            title: 'Seleccionar Ano',
             input: 'number',
             inputAttributes: { min: 2020, max: 2030 },
             inputValue: new Date().getFullYear(),
@@ -157,7 +225,7 @@ $('#genDayBtn').click(async () => {
     const confirm = await alertaNinjaFire({
         icon: 'question',
         title: 'Informe Diario',
-        text: '¿Generar el reporte consolidado de ventas de hoy?',
+        text: 'Generar el reporte consolidado de ventas de hoy?',
         showCancelButton: true,
         confirmButtonText: 'GENERAR',
         cancelButtonText: 'CANCELAR'
@@ -178,7 +246,7 @@ $('#genDayBtn').click(async () => {
                 const retry = await alertaNinjaFire({
                     icon: 'info',
                     title: 'Ya existe',
-                    text: 'Ya hay un informe de hoy. ¿Deseas descargarlo?',
+                    text: 'Ya hay un informe de hoy. Deseas descargarlo?',
                     showCancelButton: true,
                     confirmButtonText: 'DESCARGAR',
                     cancelButtonText: 'CERRAR'
@@ -224,7 +292,7 @@ async function buscarPorFecha(fecha) {
                         <button class="download-button main-download" onclick="descargarInforme(${inf.id_informe})">Descargar PDF</button>
                     </div>`).join('')}</div>`;
         } else { resultBox.innerHTML = `<div class="empty-reports"><p>No hay reportes para esta fecha.</p></div>`; }
-    } catch (e) { alertaNinja('error', 'Error', 'Fallo en búsqueda.'); }
+    } catch (e) { alertaNinja('error', 'Error', 'Fallo en busqueda.'); }
 }
 
 async function cargarUltimoInforme() {
@@ -243,7 +311,7 @@ async function cargarUltimoInforme() {
                         </div>
                         <div class="card-body">
                             <div class="info-row">
-                                <label>Último reporte generado:</label>
+                                <label>Ultimo reporte generado:</label>
                                 <span>${new Date(inf.fecha_creacion).toLocaleString('es-CO')}</span>
                             </div>
                         </div>

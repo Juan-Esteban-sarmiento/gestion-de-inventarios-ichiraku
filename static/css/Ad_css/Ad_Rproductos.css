@@ -10,7 +10,7 @@
     max-width: 1300px;
     margin: 0 auto;
     align-items: flex-start;
-    /* Altura independiente para evitar espacios vacíos */
+    /* Altura independiente para evitar espacios vacios */
 }
 
 /* --- RECUADRO IZQUIERDO: REGISTRO (MAS CORTO) --- */
@@ -78,7 +78,7 @@
     }
 }
 
-/* Títulos de Sección (Naruto) */
+/* Titulos de Seccion (Naruto) */
 .register-box h2,
 .search-box h2 {
     font-family: var(--font-primary) !important;
@@ -141,10 +141,10 @@ label {
     background: rgba(255, 0, 0, 0.03);
 }
 
-/* Estilo para imágenes de productos */
+/* Estilo para imagenes de productos */
 .producto-card img {
     border-radius: 12px !important;
-    /* Más cuadrado para productos */
+    /* Mas cuadrado para productos */
     border: 1.5px solid var(--red-brand);
     padding: 2px;
     background: #000;

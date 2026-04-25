@@ -27,24 +27,25 @@ function validarFormulario() {
 }
 
 // ============================================
-// 📁 ACTUALIZACIÓN DE PERFIL (NOMBRE/DATOS)
+// 📁 ACTUALIZACION DE PERFIL (NOMBRE/DATOS)
 // ============================================
 const editarForm = document.getElementById("editarForm");
 editarForm?.addEventListener("submit", async function (e) {
   e.preventDefault();
 
   if (!validarFormulario()) {
-    alertaNinja("warning", "SIN CAMBIOS", "No has modificado ningún campo.");
+    alertaNinja("warning", "SIN CAMBIOS", "No has modificado ningun campo.");
     return;
   }
 
   const formData = new FormData(this);
   const data = {
-    Nombre: formData.get("Nombre")
+    Nombre: formData.get("Nombre"),
+    wa_apikey: formData.get("wa_apikey")
   };
 
   try {
-    const response = await fetch("/Ad_Ceditar", { // Se asume que el backend gestiona el rol por sesión
+    const response = await fetch("/Ad_Ceditar", { // Se asume que el backend gestiona el rol por sesion
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -56,7 +57,7 @@ editarForm?.addEventListener("submit", async function (e) {
     const result = await response.json();
 
     if (result?.success) {
-      alertaNinja("success", "ÉXITO", "Tu perfil ha sido actualizado correctamente.");
+      alertaNinja("success", "EXITO", "Tu perfil ha sido actualizado correctamente.");
       // Actualizar originales
       document.querySelectorAll("input").forEach(input => {
         if (input.id) originalValues[input.id] = input.value;
@@ -65,13 +66,13 @@ editarForm?.addEventListener("submit", async function (e) {
       alertaNinja("error", "ERROR", result.msg || "No se pudo actualizar el perfil.");
     }
   } catch (err) {
-    console.error("Error en la petición:", err);
-    alertaNinja("error", "ERROR DE CONEXIÓN", "No se pudo contactar con el servidor.");
+    console.error("Error en la peticion:", err);
+    alertaNinja("error", "ERROR DE CONEXION", "No se pudo contactar con el servidor.");
   }
 });
 
 // ============================================
-// 📸 GESTIÓN DE FOTO DE PERFIL
+// 📸 GESTION DE FOTO DE PERFIL
 // ============================================
 const profileImg = document.querySelector(".profile-section img");
 const subirBtn = document.querySelector(".profile-btn:not(.delete)");
@@ -100,7 +101,7 @@ fileInput.addEventListener("change", async () => {
     const response = await fetch("/Em_Ceditar_foto", { method: "POST", body: formData });
 
     if (response.status === 401) {
-      alertaNinja("warning", "SESIÓN EXPIRADA", "Por favor ingresa de nuevo.")
+      alertaNinja("warning", "SESION EXPIRADA", "Por favor ingresa de nuevo.")
         .then(() => window.location.href = '/login');
       return;
     }
@@ -121,8 +122,8 @@ fileInput.addEventListener("change", async () => {
 // Eliminar foto
 eliminarBtn?.addEventListener("click", async () => {
   const confirmacion = await alertaNinjaFire({
-    title: '¿ELIMINAR FOTO?',
-    text: "Tu perfil volverá a la imagen por defecto.",
+    title: 'ELIMINAR FOTO?',
+    text: "Tu perfil volvera a la imagen por defecto.",
     icon: 'question',
     showCancelButton: true,
     confirmButtonText: 'ELIMINAR',
@@ -156,7 +157,7 @@ eliminarBtn?.addEventListener("click", async () => {
 });
 
 // ============================================
-// 🔑 RECUPERACIÓN / CAMBIO DE CLAVE (NINJA FLOW)
+// 🔑 RECUPERACION / CAMBIO DE CLAVE (NINJA FLOW)
 // ============================================
 window.recuperarContrasena = async function () {
   try {
@@ -164,7 +165,7 @@ window.recuperarContrasena = async function () {
     const { value: nombre } = await alertaNinjaFire({
       title: 'RECUPERAR CLAVE',
       input: 'text',
-      inputLabel: 'Nombre completo o Cédula del Empleado',
+      inputLabel: 'Nombre completo o Cedula del Empleado',
       inputPlaceholder: 'Ingresa tu usuario o ID...',
       showCancelButton: true,
       confirmButtonText: 'SIGUIENTE',
@@ -176,16 +177,16 @@ window.recuperarContrasena = async function () {
 
     if (!nombre) return;
 
-    // 2. Teléfono
+    // 2. Telefono
     const { value: telefono } = await alertaNinjaFire({
-      title: 'VERIFICACIÓN',
+      title: 'VERIFICACION',
       input: 'text',
-      inputLabel: 'Número de WhatsApp',
+      inputLabel: 'Numero de WhatsApp',
       inputPlaceholder: 'Ej: 3001234567',
       showCancelButton: true,
-      confirmButtonText: 'ENVIAR CÓDIGO',
+      confirmButtonText: 'ENVIAR CODIGO',
       preConfirm: (value) => {
-        if (!value || value.trim() === '') Swal.showValidationMessage('Número inválido');
+        if (!value || value.trim() === '') Swal.showValidationMessage('Numero invalido');
         return value;
       }
     });
@@ -204,18 +205,18 @@ window.recuperarContrasena = async function () {
     const dataStatus = await res.json();
     if (!dataStatus.success) return alertaNinja("error", "FALLIDO", dataStatus.msg);
 
-    await alertaNinja("success", "CÓDIGO ENVIADO", "Revisa tu WhatsApp.");
+    await alertaNinja("success", "CODIGO ENVIADO", "Revisa tu WhatsApp.");
 
-    // 4. Validar Código
+    // 4. Validar Codigo
     const { value: token } = await alertaNinjaFire({
-      title: 'VALIDAR CÓDIGO',
+      title: 'VALIDAR CODIGO',
       input: 'text',
-      inputLabel: 'Código de 6 dígitos',
+      inputLabel: 'Codigo de 6 digitos',
       inputPlaceholder: '123456',
       showCancelButton: true,
       confirmButtonText: 'VALIDAR',
       preConfirm: (value) => {
-        if (!value || value.trim().length < 4) Swal.showValidationMessage('Código corto');
+        if (!value || value.trim().length < 4) Swal.showValidationMessage('Codigo corto');
         return value;
       }
     });
@@ -226,7 +227,7 @@ window.recuperarContrasena = async function () {
     const { value: nuevaContrasena } = await alertaNinjaFire({
       title: 'NUEVA CLAVE',
       input: 'password',
-      inputLabel: 'Mínimo 6 caracteres',
+      inputLabel: 'Minimo 6 caracteres',
       inputPlaceholder: '********',
       showCancelButton: true,
       confirmButtonText: 'ACTUALIZAR',
@@ -247,13 +248,13 @@ window.recuperarContrasena = async function () {
     const finalResult = await respFinal.json();
 
     if (finalResult.success) {
-      alertaNinja("success", "SHINOBI", "¡Contraseña actualizada con éxito!");
+      alertaNinja("success", "SHINOBI", "Contrasena actualizada con exito!");
     } else {
       alertaNinja("error", "ERROR", finalResult.msg);
     }
 
   } catch (err) {
-    console.error("Error en flujo de recuperación:", err);
-    alertaNinja("error", "CRÍTICO", "No se pudo completar el proceso.");
+    console.error("Error en flujo de recuperacion:", err);
+    alertaNinja("error", "CRITICO", "No se pudo completar el proceso.");
   }
 };

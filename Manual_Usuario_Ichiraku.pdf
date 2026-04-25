@@ -1,0 +1,108 @@
+# 🍜 Manual de Usuario: ¡Tu Aventura en Ichiraku Inventarios! 🍜
+
+![Portada](/c:/Users/User/Documents/gestion-de-inventarios-ichiraku/static/manual_screenshots/ichiraku_manual_cover_1777094001093.png)
+
+¡Hola, pequeño Ninja de la cocina! 🍥 Bienvenido a tu nueva herramienta mágica para cuidar el restaurante. Aquí aprenderás a usar este programa súper especial para que nunca falte el ramen y todos los clientes se vayan con una sonrisa.
+
+---
+
+## 🚪 Parte 1: ¡Entrando a nuestra Cocina Secreta!
+
+Para empezar a trabajar, primero debemos entrar a la aplicación. ¡Es como abrir la puerta del restaurante en la mañana!
+
+### 💻 Cómo llegar
+![Pantalla de Inicio de Sesión](/c:/Users/User/Documents/gestion-de-inventarios-ichiraku/static/manual_screenshots/login_page_1777094241735.png)
+
+1. Abre tu navegador (el redondito de colores se llama Chrome).
+2. Escribe la dirección del sistema.
+3. ¡Pum! Verás esta pantalla tan bonita con un tazón de ramen delicioso.
+
+### 🔑 ¡Hora de identificarse!
+1. Donde dice **ID**, escribe tu número secreto.
+2. Donde dice **CLAVE**, pon tus estrellitas secretas.
+3. Elige si eres **Administrador** o **Empleado**.
+4. ¡Haz clic en **CONECTAR**!
+
+---
+
+## 👑 Parte 2: El Jefe de la Cocina (Administrador)
+
+Si eres el Jefe, tienes superpoderes para ver todo lo que pasa. ¡Mira tu tablero de control!
+
+### 🏠 El Inicio
+![Tablero del Jefe](/c:/Users/User/Documents/gestion-de-inventarios-ichiraku/static/manual_screenshots/ad_inicio_1777095179552.png)
+Aquí verás un saludo y los **Avisos Recientes**. ¡Es lo primero que debes mirar para saber si hay problemas!
+
+---
+
+### 👥 Nuestros Amigos (Gestionar Personal)
+![Lista de Amigos](/c:/Users/User/Documents/gestion-de-inventarios-ichiraku/static/manual_screenshots/ad_rempleados_1777095183108.png)
+¿Llegó un nuevo cocinero? 
+1. Haz clic en **PERSONAL**.
+2. Escribe sus datos y dale a **REGISTRAR**.
+3. ¡Ahora ya puede ayudarnos en la cocina!
+
+---
+
+### 🍥 Los Ingredientes (Productos)
+![Nuestros Ingredientes](/c:/Users/User/Documents/gestion-de-inventarios-ichiraku/static/manual_screenshots/ad_rproductos_1777095186676.png)
+Aquí guardamos la lista de todo lo que necesitamos.
+1. Pon el nombre del ingrediente.
+2. Elige si es carne, verdura o dulce.
+3. ¡No olvides subir una foto para que no nos confundamos!
+
+---
+
+### 📈 ¡Mira cuánto hemos crecido! (Reportes)
+![Libro de Cuentas](/c:/Users/User/Documents/gestion-de-inventarios-ichiraku/static/manual_screenshots/ad_dinformes_1777095206504.png)
+Aquí puedes crear reportes del día, la semana o el mes. ¡Es como ver tus notas de la escuela!
+
+---
+
+### 🏠 Nuestras Tiendas (Locales)
+![Nuestras Casitas](/c:/Users/User/Documents/gestion-de-inventarios-ichiraku/static/manual_screenshots/ad_rlocales_1777095211941.png)
+Si abrimos una tienda nueva en otra aldea, ¡la anotamos aquí!
+
+---
+
+### 🔔 ¡Campana de Alerta! (Avisos)
+![Avisos Ninja](/c:/Users/User/Documents/gestion-de-inventarios-ichiraku/static/manual_screenshots/ad_pnotificaciones_1777095215023.png)
+Si algo se va a dañar, la campana sonará aquí. ¡Corre a usar esos ingredientes antes de que sea tarde!
+
+---
+
+## 👨‍🍳 Parte 3: El Ayudante Estrella (Empleado)
+
+### 🏠 Tu Puesto de Trabajo
+![Inicio del Ayudante](/c:/Users/User/Documents/gestion-de-inventarios-ichiraku/static/manual_screenshots/em_inicio_1777095236623.png)
+Esta es tu pantalla principal. Desde aquí puedes ir a pedir comida o revisar qué ha llegado.
+
+---
+
+### 📦 ¡Pidiendo Fideos! (Realizar Pedidos)
+![Haciendo el Mercado](/c:/Users/User/Documents/gestion-de-inventarios-ichiraku/static/manual_screenshots/em_rordenes_1777095240092.png)
+¿Falta algo? ¡Pídelo así!
+1. Elige el producto.
+2. Pon cuántos quieres.
+3. ¡Dale al botón de agregar y luego confirma el pedido!
+
+---
+
+### 🎁 ¡Llegó el Camioncito! (Recibir Pedidos)
+![Recibiendo Regalos](/c:/Users/User/Documents/gestion-de-inventarios-ichiraku/static/manual_screenshots/em_rpedido_1777095260952.png)
+Cuando llega la comida, revisamos que todo esté bien y anotamos **cuándo se vence**. ¡Es muy importante!
+
+---
+
+### 📜 Tu Historia (Historial de Pedidos)
+![Mi Diario Ninja](/c:/Users/User/Documents/gestion-de-inventarios-ichiraku/static/manual_screenshots/em_hordenes_1777095264634.png)
+Aquí puedes ver todos los pedidos que has hecho antes para que no se te olvide nada.
+
+---
+
+## 👋 ¡Listo para Cocinar!
+
+¡Felicidades! Ya sabes usar todo el sistema Ichiraku. Eres un ninja de los inventarios de verdad. 🍥✨
+
+> [!TIP]
+> Si te pierdes, ¡recuerda mirar los dibujitos a la izquierda! Cada uno es una herramienta útil.

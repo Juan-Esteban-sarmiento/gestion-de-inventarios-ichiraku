@@ -14,7 +14,7 @@
 
 /* --- RECUADRO IZQUIERDO: REGISTRO --- */
 .register-box {
-    flex: 1.4; /* Un poco más de espacio para el formulario */
+    flex: 1.4; /* Un poco mas de espacio para el formulario */
     background: rgba(10, 10, 10, 0.75);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -69,7 +69,7 @@
     }
 }
 
-/* Títulos */
+/* Titulos */
 .register-box h2,
 .list-box h2 {
     font-family: var(--font-primary) !important;
