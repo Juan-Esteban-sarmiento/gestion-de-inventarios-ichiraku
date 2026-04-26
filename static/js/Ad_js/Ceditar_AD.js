@@ -46,7 +46,7 @@ document.getElementById("editarForm").addEventListener("submit", async function 
 });
 
 // 🖼 Subir/Cambiar foto
-const subirBtn = document.querySelector('.profile-btn:not(.delete)');
+const subirBtn = document.getElementById('subirFotoBtn');
 const fileInput = document.createElement('input');
 fileInput.type = 'file'; fileInput.accept = 'image/*'; fileInput.style.display = 'none';
 document.body.appendChild(fileInput);
@@ -69,7 +69,7 @@ fileInput.addEventListener('change', async function () {
 });
 
 // 🗑 Eliminar foto con CONFIRMACION solicitado
-const eliminarBtn = document.querySelector('.profile-btn.delete');
+const eliminarBtn = document.getElementById('eliminarFotoBtn');
 eliminarBtn.addEventListener('click', async function () {
   const confirmacion = await alertaNinjaFire({
     icon: 'warning',
