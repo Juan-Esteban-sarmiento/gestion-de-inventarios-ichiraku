@@ -23,9 +23,7 @@ document.getElementById("editarForm").addEventListener("submit", async function 
 
   const formData = new FormData(this);
   const data = {
-    Nombre: formData.get("Nombre"),
-    telefono: formData.get("telefono"),
-    wa_apikey: formData.get("wa_apikey")
+    Nombre: formData.get("Nombre")
   };
 
   try {
@@ -39,8 +37,6 @@ document.getElementById("editarForm").addEventListener("submit", async function 
       alertaNinja("success", "GUARDADO", "Tu informacion ha sido actualizada.");
       // Sincronizar valores originales para evitar alertas de cambios falsas
       originalValues["Nombre"] = data.Nombre;
-      originalValues["telefono"] = data.telefono;
-      originalValues["wa_apikey"] = data.wa_apikey;
     } else {
       alertaNinja("error", "Error", result.msg || "No se pudo actualizar.");
     }
