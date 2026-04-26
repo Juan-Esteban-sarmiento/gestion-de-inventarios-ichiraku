@@ -165,14 +165,30 @@ ninjaAlertStyle.innerHTML = `
 
   .ninja-swal-cancel:hover { background: rgba(255, 255, 255, 0.1) !important; color: #fff !important; }
 
-  /* Inputs dentro de modales */
-  .swal2-input.ninja-swal-input {
+  /* Inputs y Selects dentro de modales */
+  .swal2-input.ninja-swal-input,
+  .swal2-select.ninja-swal-input {
     background: rgba(0, 0, 0, 0.4) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     color: #fff !important;
     border-radius: 10px !important;
     font-family: 'Montserrat', sans-serif !important;
     font-size: 14px !important;
+    width: 100% !important;
+    height: 48px !important;
+    margin: 8px 0 15px 0 !important;
+    box-sizing: border-box !important;
+    padding: 0 15px !important;
+  }
+
+  .swal2-select.ninja-swal-input {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='red' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 15px center !important;
+    background-size: 15px !important;
+    padding-right: 40px !important;
   }
 
   /* 🔥 MEJORA: Estilo Premium para Seleccionar Archivo 🔥 */
@@ -186,7 +202,6 @@ ninjaAlertStyle.innerHTML = `
     cursor: pointer !important;
     border-radius: 12px !important;
     width: 100% !important;
-    margin-top: 10px !important;
   }
 
   .swal2-file.ninja-swal-input::file-selector-button {

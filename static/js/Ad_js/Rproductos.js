@@ -138,22 +138,63 @@ function mostrarProductos(productos) {
 
 // ✏️ Editar producto (Usa alertaNinjaFire para mantener el estilo Premium)
 function editarProducto(id_producto, nombre, categoria, unidad) {
+  // Generar opciones de categorias
+  const catOptions = Object.keys(categoriasUnidades).map(cat =>
+    `<option value="${cat}" ${cat === categoria ? 'selected' : ''}>${cat}</option>`
+  ).join('');
+
+  // Generar opciones de unidades iniciales
+  const unitOptions = (categoriasUnidades[categoria] || []).map(u =>
+    `<option value="${u}" ${u === unidad ? 'selected' : ''}>${u}</option>`
+  ).join('');
+
   alertaNinjaFire({
     title: 'Editar Producto',
     html: `
-      <input id="editNombre" class="swal2-input ninja-swal-input" placeholder="Nombre" value="${nombre}">
-      <input id="editCategoria" class="swal2-input ninja-swal-input" placeholder="Categoria" value="${categoria}">
-      <input id="editUnidad" class="swal2-input ninja-swal-input" placeholder="Unidad" value="${unidad}">
-      <label style="display:block; margin-top:15px; color:#aaa; font-size:11px; text-transform:uppercase;">Cambiar foto (opcional)</label>
-      <input type="file" id="editFoto" class="swal2-file ninja-swal-input" accept="image/*">
+      <div class="edit-modal-container" style="text-align:left; max-width:380px; margin: 0 auto; padding: 10px 0;">
+        <div class="input-field" style="margin-bottom: 20px;">
+          <label style="color:#ff3333; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; display:block; margin-bottom:5px; opacity:0.8;">Nombre del Producto</label>
+          <input id="editNombre" class="swal2-input ninja-swal-input" placeholder="Nombre" value="${nombre}" style="margin:0 !important;">
+        </div>
+        
+        <div class="input-field" style="margin-bottom: 20px;">
+          <label style="color:#ff3333; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; display:block; margin-bottom:5px; opacity:0.8;">Categoria</label>
+          <select id="editCategoria" class="swal2-select ninja-swal-input" style="margin:0 !important;">
+            ${catOptions}
+          </select>
+        </div>
+
+        <div class="input-field" style="margin-bottom: 20px;">
+          <label style="color:#ff3333; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; display:block; margin-bottom:5px; opacity:0.8;">Unidad de Medida</label>
+          <select id="editUnidad" class="swal2-select ninja-swal-input" style="margin:0 !important;">
+            ${unitOptions}
+          </select>
+        </div>
+
+        <div class="input-field" style="margin-bottom: 10px;">
+          <label style="color:#ff3333; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; display:block; margin-bottom:5px; opacity:0.8;">Cambiar foto (opcional)</label>
+          <input type="file" id="editFoto" class="swal2-file ninja-swal-input" accept="image/*" style="margin:0 !important;">
+        </div>
+      </div>
     `,
     showCancelButton: true,
     confirmButtonText: 'GUARDAR CAMBIOS',
     cancelButtonText: 'VOLVER',
+    didOpen: () => {
+      const catSelect = document.getElementById('editCategoria');
+      const unitSelect = document.getElementById('editUnidad');
+
+      catSelect.addEventListener('change', () => {
+        const selectedCat = catSelect.value;
+        unitSelect.innerHTML = (categoriasUnidades[selectedCat] || []).map(u =>
+          `<option value="${u}">${u}</option>`
+        ).join('');
+      });
+    },
     preConfirm: () => {
       const n = document.getElementById("editNombre").value.trim();
-      const c = document.getElementById("editCategoria").value.trim();
-      const u = document.getElementById("editUnidad").value.trim();
+      const c = document.getElementById("editCategoria").value;
+      const u = document.getElementById("editUnidad").value;
       const f = document.getElementById("editFoto").files[0];
 
       if (!n || !c || !u) { Swal.showValidationMessage('Todos los campos son obligatorios'); return false; }
