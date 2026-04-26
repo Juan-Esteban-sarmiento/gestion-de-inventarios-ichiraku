@@ -64,14 +64,31 @@
             <div class="form-container">
                 <!-- Formulario editable -->
                 <form method="POST" class="edit-form" id="editarForm">
-                    <label for="id">ID:</label>
-                    <input type="text" id="id" name="id" value="{{ user.Cedula }}" disabled>
+                    <div class="input-group">
+                        <label for="id">ID (Cedula):</label>
+                        <input type="text" id="id" name="id" value="{{ user.Cedula }}" disabled>
+                    </div>
 
-                    <label for="Nombre">Nombre:</label>
-                    <input type="text" id="Nombre" name="Nombre" value="{{ user.Nombre }}" required>
+                    <div class="input-group">
+                        <label for="Nombre">Nombre Completo:</label>
+                        <input type="text" id="Nombre" name="Nombre" value="{{ user.Nombre }}" required>
+                    </div>
 
+                    <div class="input-group">
+                        <label for="telefono">Telefono (WhatsApp):</label>
+                        <input type="text" id="telefono" name="telefono" value="{{ user.telefono }}"
+                            placeholder="Ej: 3001234567">
+                    </div>
 
+                    <div class="input-group">
+                        <label for="wa_apikey">WhatsApp API Key:</label>
+                        <input type="text" id="wa_apikey" name="wa_apikey" value="{{ user.wa_apikey }}"
+                            placeholder="Tu API Key de CallMeBot">
+                    </div>
 
+                    <button type="submit" class="btn profile-btn" style="margin-top: 10px; background: var(--red-brand); border: none;">
+                        GUARDAR CAMBIOS
+                    </button>
                 </form>
 
                 <!-- Foto -->

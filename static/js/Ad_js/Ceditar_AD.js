@@ -37,7 +37,10 @@ document.getElementById("editarForm").addEventListener("submit", async function 
     let result = await response.json();
     if (result.success) {
       alertaNinja("success", "GUARDADO", "Tu informacion ha sido actualizada.");
-      originalValues["Nombre"] = data.Nombre; // Sincronizar para evitar alertas de cambios falsas
+      // Sincronizar valores originales para evitar alertas de cambios falsas
+      originalValues["Nombre"] = data.Nombre;
+      originalValues["telefono"] = data.telefono;
+      originalValues["wa_apikey"] = data.wa_apikey;
     } else {
       alertaNinja("error", "Error", result.msg || "No se pudo actualizar.");
     }
