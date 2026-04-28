@@ -1741,6 +1741,25 @@ def generar_reporte_personalizado():
         buffer.seek(0)
         
         filename = f"Informe_{nombre_local}_{fecha_base}_{periodo}.pdf"
+        
+        # 5. Persistencia en la base de datos para el historial
+        try:
+            nuevo_informe = {
+                "fecha_creacion": datetime.now().isoformat(),
+                "tipo": "inventario_premium",
+                "fecha_inicio": f_ini[:10],
+                "fecha_fin": f_fin[:10],
+                "pedidos_ids": {
+                    "id_local": id_l,
+                    "nombre_local": nombre_local,
+                    "periodo": periodo,
+                    "fecha_base": fecha_base
+                }
+            }
+            supabase.table("informe").insert(nuevo_informe).execute()
+        except Exception as db_e:
+            print(f"Error al persistir informe premium: {db_e}")
+
         response = make_response(buffer.getvalue())
         response.headers['Content-Type'] = 'application/pdf'
         response.headers['Content-Disposition'] = f'attachment; filename={filename}'
@@ -2148,13 +2167,7 @@ def generar_informe_diario():
             .eq("tipo", "diario_consolidado") \
             .execute()
         
-        if informe_existente.data:
-            informe_id = informe_existente.data[0]['id_informe']
-            return jsonify({
-                "success": False, 
-                "msg": f"Ya existe un informe para hoy (ID: {informe_id}).",
-                "informe_id": informe_id
-            })
+        # Eliminamos la restriccion de un solo informe por dia para permitir el historial solicitado por el usuario
         
         nuevo_informe = {
             "fecha_creacion": datetime.now().isoformat(),
@@ -2249,6 +2262,101 @@ def descargar_informe_diario_consolidado():
         print("Error al descargar informe diario:", e)
         return jsonify({"success": False, "msg": f"Error: {e}"})
 
+
+def re_generar_reporte_premium(id_l, periodo, fecha_base):
+    # Esta funcion replica la logica de generar_reporte_personalizado sin persistir de nuevo
+    try:
+        f_ini, f_fin = obtener_rango_fecha(periodo, fecha_base)
+        local_info = supabase.table("locales").select("nombre").eq("id_local", id_l).execute()
+        nombre_local = local_info.data[0]["nombre"] if local_info.data else "Desconocido"
+        cons_res = supabase.table("consumo").select("*, consumo_detalle(*, productos(nombre, unidad))")\
+            .eq("id_local", id_l).gte("fecha", f_ini).lte("fecha", f_fin).execute()
+        consumos = cons_res.data or []
+        resumen_productos = {}
+        total_ventas_count = 0
+        total_merma_items = 0
+        for c in consumos:
+            is_merma = "[MERMA]" in (c.get("observacion") or "")
+            if is_merma: total_merma_items += 1
+            else: total_ventas_count += c.get("cantidad_platos", 0)
+            for det in c.get("consumo_detalle", []):
+                p = det.get("productos")
+                if not p: continue
+                pid = det["id_producto"]
+                if pid not in resumen_productos:
+                    resumen_productos[pid] = {"nombre": p["nombre"], "unidad": p["unidad"], "venta": 0, "merma": 0}
+                cant = float(det["cantidad_consumida"])
+                if is_merma: resumen_productos[pid]["merma"] += cant
+                else: resumen_productos[pid]["venta"] += cant
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter, leftMargin=70, topMargin=50, bottomMargin=50)
+        styles = getSampleStyleSheet()
+        style_title = styles['Title']
+        style_title.alignment = 0
+        style_title.fontName = "Helvetica-Bold"
+        style_title.fontSize = 22
+        style_title.textColor = colors.HexColor("#111111")
+        style_h2 = styles['Heading2']
+        style_h2.textColor = colors.HexColor("#E63900")
+        style_h2.fontSize = 14
+        elements = []
+        elements.append(Paragraph(f"INFORME TECNICO DE INVENTARIO", style_title))
+        elements.append(Spacer(1, 5))
+        elements.append(Table([[""]], colWidths=[480], style=[('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#E63900"))]))
+        elements.append(Spacer(1, 15))
+        elements.append(Paragraph(f"<b>Sede:</b> {nombre_local.upper()} | <b>Periodo:</b> {periodo.upper()}", styles['Normal']))
+        elements.append(Paragraph(f"<b>Rango:</b> {f_ini[:10]} - {f_fin[:10]}", styles['Normal']))
+        elements.append(Spacer(1, 25))
+        elements.append(Paragraph("1. Resumen Ejecutivo (Metricas Clave)", style_h2))
+        elements.append(Spacer(1, 10))
+        resumen_data = [["PLANTILLAS VENDIDAS", "MERMA / ERROR", "ESTADO OPERATIVO"], [f"{total_ventas_count}", f"{total_merma_items}", "Auditado (H)"]]
+        t_res = Table(resumen_data, colWidths=[160, 160, 160])
+        t_res.setStyle(TableStyle([('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'), ('FONTSIZE', (0, 0), (-1, 0), 9), ('TEXTCOLOR', (0, 0), (-1, 0), colors.grey), ('ALIGN', (0, 0), (-1, -1), 'CENTER'), ('BOTTOMPADDING', (0, 0), (-1, 0), 10), ('FONTNAME', (0, 1), (-1, 1), 'Helvetica-Bold'), ('FONTSIZE', (0, 1), (-1, 1), 16), ('TEXTCOLOR', (0, 1), (0, 1), colors.black), ('TEXTCOLOR', (1, 1), (1, 1), colors.HexColor("#E63900")), ('VALIGN', (0, 0), (-1, -1), 'MIDDLE')]))
+        elements.append(t_res)
+        elements.append(Spacer(1, 30))
+        elements.append(Paragraph("2. Consumo Detallado por Insumo", style_h2))
+        elements.append(Spacer(1, 12))
+        data_prod = [["INSUMO", "UNIDAD", "VENTAS", "MERMA", "TOTAL"]]
+        sorted_products = sorted(resumen_productos.values(), key=lambda x: x['nombre'])
+        for p in sorted_products:
+            total = p['venta'] + p['merma']
+            data_prod.append([p['nombre'].upper(), p['unidad'], int(p['venta']), int(p['merma']), int(total)])
+        t_prod = Table(data_prod, colWidths=[180, 70, 70, 70, 90])
+        t_prod.setStyle(TableStyle([('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'), ('FONTSIZE', (0, 0), (-1, 0), 9), ('TEXTCOLOR', (0, 0), (-1, 0), colors.black), ('LINEBELOW', (0, 0), (-1, 0), 2, colors.HexColor("#E63900")), ('BOTTOMPADDING', (0, 0), (-1, 0), 8), ('FONTSIZE', (0, 1), (-1, -1), 9), ('TEXTCOLOR', (0, 1), (-1, -1), colors.HexColor("#333333")), ('ALIGN', (2, 0), (-1, -1), 'CENTER'), ('GRID', (0, 1), (-1, -1), 0.25, colors.lightgrey), ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor("#F9F9F9")]), ('TOPPADDING', (0, 1), (-1, -1), 6), ('BOTTOMPADDING', (0, 1), (-1, -1), 6)]))
+        elements.append(t_prod)
+        elements.append(Spacer(1, 40))
+        elements.append(Paragraph(f"<i>Re-generado el {datetime.now().strftime('%d/%m/%Y %H:%M')} - Historial Ichiraku</i>", styles['Italic']))
+        doc.build(elements, onFirstPage=dibujar_sidebar_premium, onLaterPages=dibujar_sidebar_premium)
+        buffer.seek(0)
+        response = make_response(buffer.getvalue())
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=Informe_Historial_{fecha_base}.pdf'
+        return response
+    except Exception as e:
+        return jsonify({"success": False, "msg": f"Error re-generando: {str(e)}"}), 500
+
+def re_generar_reporte_rango(tipo, fecha_inicio, fecha_fin):
+    try:
+        informes = supabase.table("informe").select("*").gte("fecha_creacion", fecha_inicio).lte("fecha_creacion", fecha_fin).order("fecha_creacion", desc=True).execute()
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter, leftMargin=40, rightMargin=40, topMargin=80, bottomMargin=50)
+        styles = getSampleStyleSheet()
+        elements = []
+        titulo = f"INFORME {tipo.upper()} CONSOLIDADO (HISTORIAL)"
+        elements.append(Paragraph(f"<font size=18 color='#000000'><b>{titulo}</b></font>", styles['Normal']))
+        elements.append(Spacer(1, 20))
+        elements.append(Paragraph(f"Periodo: {fecha_inicio} al {fecha_fin}", styles['Normal']))
+        elements.append(Paragraph(f"Total informes base: {len(informes.data)}", styles['Normal']))
+        # Aqui podriamos agregar mas detalle si fuera necesario, similar a descargar_informes_rango
+        doc.build(elements)
+        buffer.seek(0)
+        response = make_response(buffer.getvalue())
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=Informe_Consolidado_H.pdf'
+        return response
+    except Exception as e:
+        return jsonify({"success": False, "msg": f"Error re-generando rango: {str(e)}"}), 500
+
 @app.route('/descargar_informe/<int:id_informe>', methods=['GET'])
 @login_requerido(rol='Administrador')
 def descargar_informe(id_informe):
@@ -2258,12 +2366,35 @@ def descargar_informe(id_informe):
             return jsonify({"success": False, "msg": "Informe no encontrado"}), 404
         
         informe = informe_result.data[0]
+        tipo = informe.get("tipo", "")
         
-        if informe.get("tipo") == "diario_consolidado":
+        if tipo == "diario_consolidado":
             return descargar_informe_consolidado_individual(id_informe)
         
+        if tipo == "inventario_premium":
+            # Extraer parametros del metadata (pedidos_ids)
+            metadata = informe.get("pedidos_ids")
+            if not metadata:
+                return jsonify({"success": False, "msg": "Metadata del informe no encontrada"}), 404
+            
+            # Simulamos un request.form para reutilizar la logica o simplemente llamamos a la logica core
+            # Para mayor seguridad, reconstruimos el reporte con los datos guardados
+            id_l = metadata.get("id_local")
+            periodo = metadata.get("periodo", "diario")
+            fecha_base = metadata.get("fecha_base", datetime.now().strftime("%Y-%m-%d"))
+            
+            # Llamamos a una funcion interna para generar el PDF (debemos extraerla de generar_reporte_personalizado)
+            # O simplemente replicamos la logica aqui brevemente
+            return re_generar_reporte_premium(id_l, periodo, fecha_base)
+
+        if tipo.startswith("consolidado_"):
+            subtipo = tipo.replace("consolidado_", "")
+            f_ini = informe.get("fecha_inicio")
+            f_fin = informe.get("fecha_fin")
+            return re_generar_reporte_rango(subtipo, f_ini, f_fin)
+
         if not informe.get("id_inf_pedido"):
-            return jsonify({"success": False, "msg": "Este informe no esta asociado a un pedido"}), 404
+            return jsonify({"success": False, "msg": "Este informe no tiene un tipo valido asociado"}), 404
         
         pedido_result = supabase.table("pedido").select("*").eq("id_pedido", informe["id_inf_pedido"]).execute()
         if not pedido_result.data:
@@ -2417,6 +2548,20 @@ def descargar_informes_rango():
 
         if not informes.data:
             return jsonify({"success": False, "msg": "No se encontraron informes en el rango especificado."})
+
+        # Persistencia en la base de datos para el historial
+        try:
+            nuevo_rango = {
+                "fecha_creacion": datetime.now().isoformat(),
+                "tipo": f"consolidado_{tipo}",
+                "fecha_inicio": fecha_inicio[:10],
+                "fecha_fin": fecha_fin[:10],
+                "total_pedidos": len(informes.data),
+                "pedidos_ids": {"subtipo": tipo}
+            }
+            supabase.table("informe").insert(nuevo_rango).execute()
+        except Exception as db_e:
+            print(f"Error al persistir informe de rango: {db_e}")
 
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(

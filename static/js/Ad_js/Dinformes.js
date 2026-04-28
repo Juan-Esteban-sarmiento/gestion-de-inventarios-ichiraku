@@ -24,7 +24,7 @@ document.getElementById('searchForm').addEventListener('submit', async (e) => {
                     <div class="informe-card">
                         <div class="card-header">
                             <span class="report-id-badge">ID #${inf.id_informe}</span>
-                            <span class="report-type-badge">${inf.id_inf_pedido ? 'Pedido' : 'Consolidado'}</span>
+                            <span class="report-type-badge">${mapTipoInforme(inf.tipo, !!inf.id_inf_pedido)}</span>
                         </div>
                         <div class="card-body">
                             <div class="info-row">
@@ -281,7 +281,7 @@ async function buscarPorFecha(fecha) {
                     <div class="informe-card">
                         <div class="card-header">
                             <span class="report-id-badge">ID #${inf.id_informe}</span>
-                            <span class="report-type-badge">Individual</span>
+                            <span class="report-type-badge">${mapTipoInforme(inf.tipo, !!inf.id_inf_pedido)}</span>
                         </div>
                         <div class="card-body">
                             <div class="info-row">
@@ -307,7 +307,7 @@ async function cargarUltimoInforme() {
                     <div class="informe-card">
                         <div class="card-header">
                             <span class="report-id-badge">ID #${inf.id_informe}</span>
-                            <span class="report-type-badge">${inf.tipo === 'diario_consolidado' ? 'Consolidado' : 'Individual'}</span>
+                            <span class="report-type-badge">${mapTipoInforme(inf.tipo, !!inf.id_inf_pedido)}</span>
                         </div>
                         <div class="card-body">
                             <div class="info-row">
@@ -320,6 +320,16 @@ async function cargarUltimoInforme() {
                 </div>`;
         } else { box.innerHTML = '<div class="empty-reports"><p>No hay reportes generados recientemente.</p></div>'; }
     } catch (e) { console.error(e); }
+}
+
+function mapTipoInforme(tipo, hasPedido) {
+    if (tipo === 'diario_consolidado') return 'Consolidado Diario';
+    if (tipo === 'inventario_premium') return 'Premium (Inventario)';
+    if (tipo === 'consolidado_semana') return 'Consolidado Semanal';
+    if (tipo === 'consolidado_mes') return 'Consolidado Mensual';
+    if (tipo === 'consolidado_anio') return 'Consolidado Anual';
+    if (hasPedido) return 'Reporte Pedido';
+    return 'Informe Individual';
 }
 
 document.addEventListener('DOMContentLoaded', cargarUltimoInforme);
