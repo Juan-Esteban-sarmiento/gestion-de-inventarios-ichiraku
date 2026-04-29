@@ -3298,7 +3298,7 @@ def historial_consumo_hoy():
         hoy = datetime.now().strftime("%Y-%m-%d")
 
         consumos = supabase.table("consumo") \
-            .select("*, recetarios(nombre)") \
+            .select("*, recetarios(nombre), consumo_detalle(productos(unidad))") \
             .gte("fecha", f"{hoy}T00:00:00") \
             .lte("fecha", f"{hoy}T23:59:59") \
             .eq("id_local", id_sucursal) \
@@ -3328,7 +3328,18 @@ def historial_consumo_hoy():
                         cant = match_merma.group(3).strip()
                         nombre = f"{prod} (Merma: {motivo})"
                         cantidad = cant
-                        unidad = "und/kg"
+                        
+                        unidad_real = ""
+                        if item.get("consumo_detalle") and isinstance(item["consumo_detalle"], list) and len(item["consumo_detalle"]) > 0:
+                            try:
+                                # Safe access to nested dicts
+                                det = item["consumo_detalle"][0]
+                                if "productos" in det and det["productos"]:
+                                    unidad_real = det["productos"].get("unidad", "")
+                            except Exception:
+                                pass
+                        
+                        unidad = unidad_real if unidad_real else "und/kg"
                     else:
                         nombre = obs
                         cantidad = "-"
