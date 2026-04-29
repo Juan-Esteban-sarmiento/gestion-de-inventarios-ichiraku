@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Mi Inventario - Ichiraku Ramen</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Inventario.css') }}?v=2.1">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/components.css') }}?v=2.1">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}?v=2.1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Inventario.css') }}?v=2.2">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/components.css') }}?v=2.2">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}?v=2.2">
 
 
 </head>
@@ -62,15 +62,20 @@
                 <h1 class="welcome-title">Control de Existencias</h1>
             </div>
 
-            <div class="inventory-controls">
-                <div class="search-box">
+            <div class="inventory-controls" style="display: flex; gap: 12px; width: 100%; max-width: 600px;">
+                <select id="filter-status" onchange="filtrarTabla()" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; color: #fff; padding: 0 15px; outline: none; cursor: pointer;">
+                    <option value="" style="background: #050505;">Todos los Estados</option>
+                    <option value="disponible" style="background: #050505;">Disponibles</option>
+                    <option value="por agotarse" style="background: #050505;">Por Agotarse</option>
+                </select>
+                <div class="search-box" style="flex: 1;">
                     <span class="search-icon" style="display: flex; align-items: center; color: #888;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="11" cy="11" r="8"></circle>
                             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         </svg>
                     </span>
-                    <input type="text" id="search-inv" placeholder="Buscar por nombre (Arroz, Pollo...)" onkeyup="if(event.key === 'Enter') filtrarTabla()" style="flex: 1;">
+                    <input type="text" id="search-inv" placeholder="Buscar nombre o cantidad..." onkeyup="if(event.key === 'Enter') filtrarTabla()" style="flex: 1;">
                 </div>
             </div>
         </div>
@@ -134,10 +139,20 @@
 
         function filtrarTabla() {
             const term = document.getElementById('search-inv').value.toLowerCase();
+            const statusFilter = document.getElementById('filter-status').value.toLowerCase();
             const rows = document.querySelectorAll('#inventory-tbody tr');
+            
             rows.forEach(row => {
-                const text = row.innerText.toLowerCase();
-                row.style.display = text.includes(term) ? '' : 'none';
+                if (row.cells.length >= 3) {
+                    const nombre = row.cells[0].innerText.toLowerCase();
+                    const cantidad = row.cells[1].innerText.toLowerCase();
+                    const estado = row.cells[2].innerText.toLowerCase();
+                    
+                    const matchTerm = term === "" || nombre.includes(term) || cantidad.includes(term);
+                    const matchStatus = statusFilter === "" || estado.includes(statusFilter);
+                    
+                    row.style.display = (matchTerm && matchStatus) ? '' : 'none';
+                }
             });
         }
     </script>
