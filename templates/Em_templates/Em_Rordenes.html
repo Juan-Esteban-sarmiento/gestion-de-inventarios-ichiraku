@@ -133,7 +133,7 @@
                     <td>{{ prod.productos.unidad }}</td>
                     <td>
                       <input type="date" id="fecha_caducidad-{{id_pedido}}-{{prod.id_producto}}" style="display:none;">
-                      <button class="btn"
+                      <button class="btn btn-registro"
                         onclick="autocompletarFormulario('{{ id_pedido }}', '{{ prod.id_producto }}', '{{ prod.productos.nombre }}', '{{ prod.productos.categoria }}', '{{ prod.cantidad }}', '{{ prod.productos.unidad }}')">
                         Registrar
                       </button>

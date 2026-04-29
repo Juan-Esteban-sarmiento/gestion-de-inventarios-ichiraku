@@ -84,15 +84,15 @@ async function guardarMerma() {
     const btn = document.getElementById('btnGuardarMerma');
 
     if (!id_producto) {
-        alertaNinja("Por favor seleccione un producto", "warning");
+        alertaNinja("warning", "ATENCION", "Por favor seleccione un producto");
         return;
     }
     if (!cantidad || cantidad <= 0) {
-        alertaNinja("Ingrese una cantidad valida", "warning");
+        alertaNinja("warning", "ATENCION", "Ingrese una cantidad valida");
         return;
     }
     if (!motivo) {
-        alertaNinja("Por favor indique el motivo del error/merma", "warning");
+        alertaNinja("warning", "ATENCION", "Por favor indique el motivo del error/merma");
         return;
     }
 
@@ -108,17 +108,17 @@ async function guardarMerma() {
         const data = await response.json();
 
         if (data.success) {
-            alertaNinja("Registro de merma exitoso", "success");
+            alertaNinja("success", "REGISTRO EXITOSO", "Registro de merma guardado correctamente.");
             cerrarModalMerma();
             // Refrescar comparativa si existe la funcion en Consumo.js
             if (typeof initComparativa === 'function') initComparativa();
             if (typeof cargarHistorialHoy === 'function') cargarHistorialHoy();
         } else {
-            alertaNinja(data.msg || "Error al registrar merma", "error");
+            alertaNinja("error", "ERROR", data.msg || "Error al registrar merma");
         }
     } catch (error) {
         console.error('Error al guardar merma:', error);
-        alertaNinja("Error de conexion al servidor", "error");
+        alertaNinja("error", "ERROR", "Error de conexion al servidor");
     } finally {
         btn.disabled = false;
         btn.innerText = "Confirmar Registro";

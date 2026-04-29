@@ -98,7 +98,7 @@ async function cargarEmpleados(termino = "") {
             <div class="empleado-actions" style="gap: 5px;">
               <button onclick="editarEmpleado('${emp.cedula}', '${emp.nombre}', '${emp.telefono}')">Editar</button>
               <button onclick="${emp.habilitado ? `desabilitarEmpleado('${emp.cedula}')` : `habilitarEmpleado('${emp.cedula}')`}">${emp.habilitado ? 'Desactivar' : 'Activar'}</button>
-              <button class="btn-llave" onclick="verLlaveMaestra('${emp.cedula}')" style="background: #333; color: #ff9800; border: 1px solid #ff9800;">🔑 Ver Llave</button>
+              <button class="btn-llave" onclick="verLlaveMaestra('${emp.cedula}', '${emp.nombre}')" style="background: #333; color: #ff9800; border: 1px solid #ff9800;">🔑 Ver Llave</button>
             </div>
         </div>
       `).join("");
@@ -194,7 +194,7 @@ async function habilitarEmpleado(cedula) {
 }
 
 // 🔑 VER LLAVE MAESTRA (PARA EL ADMIN)
-async function verLlaveMaestra(cedula) {
+async function verLlaveMaestra(cedula, nombre) {
   try {
     const response = await fetch(`/admin/get_master_key/${cedula}`);
     const data = await response.json();
@@ -202,7 +202,7 @@ async function verLlaveMaestra(cedula) {
       alertaNinjaFire({
         title: '🔑 LLAVE MAESTRA',
         html: `
-          <p style="color:#eee;">La llave de recuperacion de este empleado es:</p>
+          <p style="color:#eee;">La llave de recuperacion de <strong style="color:#ff9800; text-transform:uppercase;">${nombre}</strong> es:</p>
           <div style="background: #1a1a1a; color: #ff9800; padding: 15px; border-radius: 8px; font-size: 1.5em; letter-spacing: 3px; font-weight: bold; margin: 15px 0; border: 1px solid #ff9800;">
             ${data.key}
           </div>

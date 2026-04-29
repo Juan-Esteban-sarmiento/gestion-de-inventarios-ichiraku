@@ -2,12 +2,12 @@
 <html lang="es">
 
 <head>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Consumo.css') }}?v=2.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/components.css') }}?v=2.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Em_css/Em_Consumo.css') }}?v=2.1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/components.css') }}?v=2.1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}?v=2.1">
 
 
-    <script src="{{ url_for('static', filename='js/Global_js/session_timeout.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/Global_js/session_timeout.js') }}?v=2.1"></script>
     <meta charset="UTF-8">
     <title>Ichiraku Ramen - Registrar Consumo</title>
 </head>
@@ -165,9 +165,9 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="{{ url_for('static', filename='js/Global_js/alertaNinja.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/Em_js/Consumo.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/Em_js/Merma.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/Global_js/alertaNinja.js') }}?v=2.1"></script>
+    <script src="{{ url_for('static', filename='js/Em_js/Consumo.js') }}?v=2.1"></script>
+    <script src="{{ url_for('static', filename='js/Em_js/Merma.js') }}?v=2.1"></script>
 
     <!-- Modal para Registrar Merma (Diseno Refinado) -->
     <div id="mermaModal" class="modal-merma">
@@ -177,7 +177,7 @@
                 <span class="modal-close" onclick="cerrarModalMerma()">&times;</span>
             </div>
 
-                <div class="input-group">
+                <div class="merma-form-group">
                     <label>1. Buscar Insumo/Producto</label>
                     <div class="merma-input-search">
                         <input type="text" id="mermaSearch" placeholder="Nombre del producto...">
@@ -194,11 +194,11 @@
                 </div>
 
             <div class="merma-form-row">
-                <div class="input-group">
+                <div class="merma-form-group">
                     <label>2. Cantidad</label>
                     <input type="number" id="mermaCantidad" step="0.01" min="0.01" placeholder="Ej: 0.5">
                 </div>
-                <div class="input-group">
+                <div class="merma-form-group">
                     <label>3. Unidad</label>
                     <input type="text" id="mermaUnidad" readonly placeholder="Unidad"
                         style="background: rgba(34,34,34,0.5); cursor: not-allowed;">
@@ -206,7 +206,7 @@
             </div>
 
 
-            <div class="input-group">
+            <div class="merma-form-group">
                 <label>4. Motivo del Error</label>
                 <textarea id="mermaMotivo" placeholder="Describa brevemente que sucedio..." style="height: 80px;"></textarea>
             </div>

@@ -3297,26 +3297,32 @@ def historial_consumo_hoy():
 
         hoy = datetime.now().strftime("%Y-%m-%d")
 
-        # Query joins: consumo_detalle -> consumo and consumo_detalle -> productos
-        # the Supabase python client supports joining via select strings
-        consumos = supabase.table("consumo_detalle") \
-            .select("*, productos(nombre, unidad), consumo(*), inventario(id_local)") \
+        consumos = supabase.table("consumo") \
+            .select("*, recetarios(nombre)") \
             .gte("fecha", f"{hoy}T00:00:00") \
             .lte("fecha", f"{hoy}T23:59:59") \
+            .eq("id_local", id_sucursal) \
             .execute()
 
         registros = []
         if consumos.data:
             for item in consumos.data:
-                # Filtrar por sucursal si el inventario esta disponible
-                if item.get("inventario") and item["inventario"].get("id_local") == id_sucursal:
-                    registros.append({
-                        "id_producto": item["id_producto"],
-                        "nombre_producto": item["productos"]["nombre"] if item.get("productos") else "Desconocido",
-                        "cantidad": item["cantidad_consumida"],
-                        "unidad": item["productos"]["unidad"] if item.get("productos") else "",
-                        "fecha": item["fecha"]
-                    })
+                if item.get("recetarios"):
+                    nombre = item["recetarios"]["nombre"]
+                    cantidad = item.get("cantidad_platos", 0)
+                    unidad = "platos"
+                else:
+                    nombre = item.get("observacion", "Merma")
+                    cantidad = "-"
+                    unidad = "-"
+
+                registros.append({
+                    "id_producto": item.get("id_consumo"),
+                    "nombre_producto": nombre,
+                    "cantidad": cantidad,
+                    "unidad": unidad,
+                    "fecha": item["fecha"]
+                })
 
         return jsonify({"success": True, "consumos": registros})
 
