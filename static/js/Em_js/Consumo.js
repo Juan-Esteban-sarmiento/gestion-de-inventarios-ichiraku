@@ -327,7 +327,7 @@ async function cargarHistorialHoy() {
                         <td>${c.nombre_producto}</td>
                         <td class="text-center">${c.cantidad}</td>
                         <td>${c.unidad}</td>
-                        <td>General</td>
+                        <td>${c.empleado || 'General'}</td>
                     </tr>
                 `;
             }).join("");

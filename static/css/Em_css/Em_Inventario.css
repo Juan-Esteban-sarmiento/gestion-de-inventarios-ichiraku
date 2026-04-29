@@ -32,10 +32,11 @@ body {
 /* ─── Header & Search Elevation ─── */
 .header-container {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
     margin-bottom: 3.5rem;
-    gap: 30px;
+    gap: 20px;
 }
 
 .box-welcome {
@@ -55,8 +56,8 @@ body {
 
 /* 🔍 Custom Search Box */
 .inventory-controls {
-    flex: 1;
-    max-width: 450px;
+    width: 100%;
+    max-width: 500px;
 }
 
 .search-box {
@@ -68,6 +69,7 @@ body {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
+    width: 100%;
 }
 
 .search-box:focus-within {

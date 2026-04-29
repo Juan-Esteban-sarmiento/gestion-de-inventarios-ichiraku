@@ -3155,7 +3155,7 @@ def registrar_merma():
                 "fecha": datetime.now().isoformat(),
                 "cantidad_platos": 0, # No es un plato vendido
                 "id_local": id_l,
-                "observacion": f"[MERMA] {motivo} | Prod: {nombre_producto} (Cant: {cantidad_val})"
+                "observacion": f"[MERMA] {motivo} | Prod: {nombre_producto} (Cant: {cantidad_val}) [Emp: {session.get('nombre', 'Desconocido')}]"
             }).execute()
             
             if cons_res.data:
@@ -3264,7 +3264,7 @@ def registrar_consumo_receta():
             "cantidad_platos": cant_p,
             "id_receta": id_r,
             "id_local": id_l,
-            "observacion": f"Venta: {cant_p} platos de {receta.data[0]['nombre']}"
+            "observacion": f"Venta: {cant_p} platos de {receta.data[0]['nombre']} [Emp: {session.get('nombre', 'Desconocido')}]"
         }).execute()
         
         if c_res.data:
@@ -3304,23 +3304,42 @@ def historial_consumo_hoy():
             .eq("id_local", id_sucursal) \
             .execute()
 
+        import re
         registros = []
         if consumos.data:
             for item in consumos.data:
+                obs = item.get("observacion", "")
+                empleado = "General"
+                
+                match_emp = re.search(r"\[Emp: (.*?)\]", obs)
+                if match_emp:
+                    empleado = match_emp.group(1)
+                    obs = obs.replace(f"[Emp: {empleado}]", "").strip()
+
                 if item.get("recetarios"):
                     nombre = item["recetarios"]["nombre"]
                     cantidad = item.get("cantidad_platos", 0)
                     unidad = "platos"
                 else:
-                    nombre = item.get("observacion", "Merma")
-                    cantidad = "-"
-                    unidad = "-"
+                    match_merma = re.search(r"\[MERMA\] (.*?) \| Prod: (.*?) \(Cant: (.*?)\)", obs)
+                    if match_merma:
+                        motivo = match_merma.group(1).strip()
+                        prod = match_merma.group(2).strip()
+                        cant = match_merma.group(3).strip()
+                        nombre = f"{prod} (Merma: {motivo})"
+                        cantidad = cant
+                        unidad = "und/kg"
+                    else:
+                        nombre = obs
+                        cantidad = "-"
+                        unidad = "-"
 
                 registros.append({
                     "id_producto": item.get("id_consumo"),
                     "nombre_producto": nombre,
                     "cantidad": cantidad,
                     "unidad": unidad,
+                    "empleado": empleado,
                     "fecha": item["fecha"]
                 })
 
