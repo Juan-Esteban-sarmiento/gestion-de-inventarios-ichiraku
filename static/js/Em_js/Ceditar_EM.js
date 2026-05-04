@@ -40,8 +40,7 @@ editarForm?.addEventListener("submit", async function (e) {
 
   const formData = new FormData(this);
   const data = {
-    Nombre: formData.get("Nombre"),
-    wa_apikey: formData.get("wa_apikey")
+    Nombre: formData.get("Nombre")
   };
 
   try {
@@ -156,105 +155,3 @@ eliminarBtn?.addEventListener("click", async () => {
   }
 });
 
-// ============================================
-// 🔑 RECUPERACION / CAMBIO DE CLAVE (NINJA FLOW)
-// ============================================
-window.recuperarContrasena = async function () {
-  try {
-    // 1. Nombre de Usuario
-    const { value: nombre } = await alertaNinjaFire({
-      title: 'RECUPERAR CLAVE',
-      input: 'text',
-      inputLabel: 'Nombre completo o Cedula del Empleado',
-      inputPlaceholder: 'Ingresa tu usuario o ID...',
-      showCancelButton: true,
-      confirmButtonText: 'SIGUIENTE',
-      preConfirm: (value) => {
-        if (!value || value.trim() === '') Swal.showValidationMessage('Campo obligatorio');
-        return value;
-      }
-    });
-
-    if (!nombre) return;
-
-    // 2. Telefono
-    const { value: telefono } = await alertaNinjaFire({
-      title: 'VERIFICACION',
-      input: 'text',
-      inputLabel: 'Numero de WhatsApp',
-      inputPlaceholder: 'Ej: 3001234567',
-      showCancelButton: true,
-      confirmButtonText: 'ENVIAR CODIGO',
-      preConfirm: (value) => {
-        if (!value || value.trim() === '') Swal.showValidationMessage('Numero invalido');
-        return value;
-      }
-    });
-
-    if (!telefono) return;
-
-    let telefonoFormateado = telefono.trim();
-    if (!telefonoFormateado.startsWith("+57")) telefonoFormateado = "+57" + telefonoFormateado;
-
-    // 3. Enviar Token
-    const res = await fetch("/enviar_token_recuperacion", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ telefono: telefonoFormateado })
-    });
-    const dataStatus = await res.json();
-    if (!dataStatus.success) return alertaNinja("error", "FALLIDO", dataStatus.msg);
-
-    await alertaNinja("success", "CODIGO ENVIADO", "Revisa tu WhatsApp.");
-
-    // 4. Validar Codigo
-    const { value: token } = await alertaNinjaFire({
-      title: 'VALIDAR CODIGO',
-      input: 'text',
-      inputLabel: 'Codigo de 6 digitos',
-      inputPlaceholder: '123456',
-      showCancelButton: true,
-      confirmButtonText: 'VALIDAR',
-      preConfirm: (value) => {
-        if (!value || value.trim().length < 4) Swal.showValidationMessage('Codigo corto');
-        return value;
-      }
-    });
-
-    if (!token) return;
-
-    // 5. Nueva Clave
-    const { value: nuevaContrasena } = await alertaNinjaFire({
-      title: 'NUEVA CLAVE',
-      input: 'password',
-      inputLabel: 'Minimo 6 caracteres',
-      inputPlaceholder: '********',
-      showCancelButton: true,
-      confirmButtonText: 'ACTUALIZAR',
-      preConfirm: (value) => {
-        if (!value || value.length < 6) Swal.showValidationMessage('Clave muy corta');
-        return value;
-      }
-    });
-
-    if (!nuevaContrasena) return;
-
-    // 6. Confirmar Final
-    const respFinal = await fetch("/Em_validar_token", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre, telefono, token, nueva_clave: nuevaContrasena })
-    });
-    const finalResult = await respFinal.json();
-
-    if (finalResult.success) {
-      alertaNinja("success", "SHINOBI", "Contrasena actualizada con exito!");
-    } else {
-      alertaNinja("error", "ERROR", finalResult.msg);
-    }
-
-  } catch (err) {
-    console.error("Error en flujo de recuperacion:", err);
-    alertaNinja("error", "CRITICO", "No se pudo completar el proceso.");
-  }
-};

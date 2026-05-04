@@ -1,4 +1,4 @@
-let currentPage = 1;
+﻿let currentPage = 1;
 
 document.getElementById('btn-load-more')?.addEventListener('click', function() {
     currentPage++;
@@ -38,18 +38,18 @@ document.getElementById('btn-load-more')?.addEventListener('click', function() {
                     container.style.display = 'none';
                 } else {
                     btn.disabled = false;
-                    btn.textContent = 'Cargar mas avisos';
+                    btn.textContent = 'Cargar mas notificaciones';
                 }
             } else {
-                Swal.fire('Error', 'No se pudieron cargar mas avisos', 'error');
+                Swal.fire('Error', 'No se pudieron cargar mas notificaciones', 'error');
                 btn.disabled = false;
-                btn.textContent = 'Cargar mas avisos';
+                btn.textContent = 'Cargar mas notificaciones';
             }
         })
         .catch(error => {
             console.error('Error:', error);
             btn.disabled = false;
-            btn.textContent = 'Cargar mas avisos';
+            btn.textContent = 'Cargar mas notificaciones';
         });
 });
 
@@ -71,3 +71,4 @@ document.addEventListener('click', function(e) {
             });
     }
 });
+

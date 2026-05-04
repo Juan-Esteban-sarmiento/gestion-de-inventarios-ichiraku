@@ -1,4 +1,4 @@
-// ⚡ Buscar informes
+﻿// ⚡ Buscar informes
 document.getElementById('searchForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const id_informe = document.getElementById('id_informe').value.trim();
@@ -252,7 +252,7 @@ $('#genDayBtn').click(async () => {
                     cancelButtonText: 'CERRAR'
                 });
                 if (retry.isConfirmed) window.open(`/descargar_informe/${data.informe_id}`, '_blank');
-            } else { alertaNinja('warning', 'Aviso', data.msg); }
+            } else { alertaNinja('warning', 'Notificación', data.msg); }
         } catch (e) { alertaNinja('error', 'Error', 'No se pudo conectar.'); }
     }
 });

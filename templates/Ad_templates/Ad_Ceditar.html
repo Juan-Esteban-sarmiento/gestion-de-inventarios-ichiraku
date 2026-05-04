@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -47,7 +47,7 @@
                     <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> locales
                 </button>
                 <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
-                    <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Avisos"> Avisos
+                    <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notificaciones
                 </button>
                 <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button active">
                     <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Editar"> Usuario
@@ -98,7 +98,7 @@
     {% if messages %}
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            alertaNinja("{{ 'error' if messages[0][0] == 'error' else 'info' }}", "Aviso", "{{ messages[0][1] }}");
+            alertaNinja("{{ 'error' if messages[0][0] == 'error' else 'info' }}", "Notificación", "{{ messages[0][1] }}");
         });
     </script>
     {% endif %}
