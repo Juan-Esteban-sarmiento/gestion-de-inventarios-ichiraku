@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -44,7 +44,7 @@
                 <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> Locales
             </button>
             <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button">
-                <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Avisos"> Avisos
+                <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notificaciones
             </button>
             <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
                 <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Usuario"> Usuario
@@ -61,14 +61,14 @@
 
         <section class="notification-box">
             <div class="notification-header">
-                <h2>Avisos recientes</h2>
+                <h2>Notificaciones recientes</h2>
             </div>
 
             <div class="notification-body">
                 {% if notificaciones %}
                 {% for noti in notificaciones %}
                 <div class="notification-item">
-                    <img src="{{ url_for('static', filename='image/campana.png') }}" class="icon-left" alt="Aviso">
+                    <img src="{{ url_for('static', filename='image/campana.png') }}" class="icon-left" alt="Notificación">
                     <div class="notification-text">
                         <strong>{{ noti['mensaje'] }}</strong><br>
                         <div class="fecha-notificacion">
@@ -80,12 +80,12 @@
 
                 {% if restantes > 0 %}
                 <div class="extra-info">
-                    Hay {{ restantes }} aviso{{ 's' if restantes > 1 else '' }} mas
+                    Hay {{ restantes }} notificación{{ 's' if restantes > 1 else '' }} mas
                     Da clic en <a href="{{ url_for('Ad_Pnotificaciones') }}" class="link-ver">Ver mas</a> para verlos
                 </div>
                 {% endif %}
                 {% else %}
-                <p>No hay avisos recientes</p>
+                <p>No hay notificaciones recientes</p>
                 {% endif %}
             </div>
         </section>

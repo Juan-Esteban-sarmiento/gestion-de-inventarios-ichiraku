@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
     <meta charset="UTF-8">
-    <title>Ichiraku Ramen - Administrador de avisos</title>
+    <title>Ichiraku Ramen - Administrador de notificaciones</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/Ad_css/Ad_Pnotificaciones.css') }}?v=2.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/components.css') }}?v=2.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/Global_css/menu.css') }}?v=2.0">
@@ -48,7 +48,7 @@
                 <img src="{{ url_for('static', filename='image/personas.png') }}" alt="Locales"> Locales
             </button>
             <button onclick="window.location.href='{{ url_for('Ad_Pnotificaciones') }}'" class="menu-button active">
-                <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Avisos"> Avisos
+                <img src="{{ url_for('static', filename='image/campana.png') }}" alt="Notificaciones"> Notificaciones
             </button>
             <button onclick="window.location.href='{{ url_for('Ad_Ceditar') }}'" class="menu-button">
                 <img src="{{ url_for('static', filename='image/corazon.png') }}" alt="Usuario"> Usuario
@@ -63,10 +63,10 @@
             <h1 class="welcome-title">CENTRO DE AVISOS</h1>
         </div>
 
-        <!-- Contenedor de avisos -->
+        <!-- Contenedor de notificaciones -->
         <div class="notification-container">
             <section class="search-box">
-                <h2>Lista de avisos</h2>
+                <h2>Lista de notificaciones</h2>
 
                 <div class="notifications-list" id="notifications-list">
                     {% for noti in notificaciones %}
@@ -82,14 +82,14 @@
                         </span>
                     </div>
                     {% else %}
-                    <p style="text-align:center; color:white;">No hay avisos disponibles</p>
+                    <p style="text-align:center; color:white;">No hay notificaciones disponibles</p>
                     {% endfor %}
                 </div>
 
                 <!-- Boton Cargar Mas -->
                 <div id="load-more-container" style="text-align: center; margin-top: 20px; {% if notificaciones|length < 20 %}display:none;{% endif %}">
                     <button id="btn-load-more" class="btn">
-                        Cargar mas avisos
+                        Cargar mas notificaciones
                     </button>
                 </div>
 

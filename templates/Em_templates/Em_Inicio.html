@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -64,14 +64,14 @@
     <!-- ====== SECCION DE NOTIFICACIONES ====== -->
     <section class="notification-box">
       <div class="notification-header">
-        <h2>Avisos recientes</h2>
+        <h2>Notificaciones recientes</h2>
       </div>
 
       <div class="notification-body">
         {% if notificaciones %}
         {% for noti in notificaciones %}
         <div class="notification-item">
-          <img src="{{ url_for('static', filename='image/campana.png') }}" class="icon-left" alt="Aviso">
+          <img src="{{ url_for('static', filename='image/campana.png') }}" class="icon-left" alt="Notificación">
           <div class="notification-text">
             <strong>{{ noti.mensaje }}</strong><br>
             <div class="fecha-notificacion">
@@ -84,7 +84,7 @@
         {% if restantes > 0 %}
         {% endif %}
         {% else %}
-        <p>No hay avisos recientes</p>
+        <p>No hay notificaciones recientes</p>
         {% endif %}
       </div>
     </section>
