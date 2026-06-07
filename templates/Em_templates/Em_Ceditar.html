@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -30,20 +30,20 @@
     </div>
 
     <nav class="menu">
-      <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button ">
+      <button onclick="window.location.href='{{ url_for('Em_Inicio') }}'" class="menu-button">
         <img src="{{ url_for('static', filename='image/casita.png') }}" alt="Inicio"> Inicio
-      </button>
-      <button onclick="window.location.href='{{ url_for('Em_Consumo') }}' " class="menu-button">
-        <img src="{{ url_for('static', filename='image/consumer.png') }}" alt="Informes"> Consumo
       </button>
       <button onclick="window.location.href='{{ url_for('Em_Inventario') }}'" class="menu-button">
         <img src="{{ url_for('static', filename='image/caja.png') }}" alt="Inventario"> Inventario
       </button>
-      <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button">
-        <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Informes"> Pedidos
-      </button>
       <button onclick="window.location.href='{{ url_for('Em_Rpedido') }}'" class="menu-button">
         <img src="{{ url_for('static', filename='image/online-sale.png') }}" alt="Realizar pedidos"> Realizar pedidos
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Rordenes') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/carrito_super.png') }}" alt="Pedidos"> Pedidos
+      </button>
+      <button onclick="window.location.href='{{ url_for('Em_Consumo') }}'" class="menu-button">
+        <img src="{{ url_for('static', filename='image/consumer.png') }}" alt="Consumo"> Consumo
       </button>
       <button onclick="window.location.href='{{ url_for('Em_Hordenes') }}'" class="menu-button">
         <img src="{{ url_for('static', filename='image/reloj.png') }}" alt="Historial pedidos"> Historial pedidos
