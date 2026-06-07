@@ -122,9 +122,9 @@
                             statusClass = 'danger';
                             statusText = 'Agotado';
                             stockClass = 'out-of-stock';
-                        } else if (item.stock < item.minimo) {
+                        } else if (item.stock <= 10) {
                             statusClass = 'warning';
-                            statusText = 'Stock Bajo';
+                            statusText = 'Por Agotarse';
                             stockClass = 'low-stock';
                         }
 
