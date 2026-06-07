@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -114,16 +114,29 @@
 
                 if (data.success) {
                     tbody.innerHTML = data.inventario.map(item => {
-                        const lowStock = item.stock < item.minimo;
+                        let statusClass = 'ok';
+                        let statusText = 'Normal';
+                        let stockClass = '';
+
+                        if (item.stock <= 0) {
+                            statusClass = 'danger';
+                            statusText = 'Agotado';
+                            stockClass = 'out-of-stock';
+                        } else if (item.stock < item.minimo) {
+                            statusClass = 'warning';
+                            statusText = 'Stock Bajo';
+                            stockClass = 'low-stock';
+                        }
+
                         return `
                             <tr>
                                 <td>${item.nombre}</td>
                                 <td>${item.categoria || 'N/A'}</td>
                                 <td>${item.unidad}</td>
-                                <td class="${lowStock ? 'low-stock' : ''}">${item.stock}</td>
+                                <td class="${stockClass}">${item.stock}</td>
                                 <td>
-                                    <span class="status-badge ${lowStock ? 'warning' : 'ok'}">
-                                        ${lowStock ? 'Stock Bajo' : 'Normal'}
+                                    <span class="status-badge ${statusClass}">
+                                        ${statusText}
                                     </span>
                                 </td>
                             </tr>

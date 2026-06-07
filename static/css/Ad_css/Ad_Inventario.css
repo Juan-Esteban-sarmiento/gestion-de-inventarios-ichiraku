@@ -96,8 +96,19 @@ body {
     animation: badgePulse 2s infinite;
 }
 
+.status-badge.danger {
+    background: rgba(230, 0, 0, 0.1);
+    color: #ff3333;
+    border: 1px solid rgba(230, 0, 0, 0.2);
+}
+
 .low-stock {
     color: #ff4500;
+    font-weight: 800;
+}
+
+.out-of-stock {
+    color: #ff3333;
     font-weight: 800;
 }
 

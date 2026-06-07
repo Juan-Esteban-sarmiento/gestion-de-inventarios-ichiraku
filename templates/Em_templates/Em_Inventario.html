@@ -67,6 +67,7 @@
                     <option value="" style="background: #050505;">Todos los Estados</option>
                     <option value="disponible" style="background: #050505;">Disponibles</option>
                     <option value="por agotarse" style="background: #050505;">Por Agotarse</option>
+                    <option value="agotado" style="background: #050505;">Agotados</option>
                 </select>
                 <div class="search-box" style="flex: 1;">
                     <span class="search-icon" style="display: flex; align-items: center; color: #888;">
@@ -116,14 +117,27 @@
 
                 if (data.success) {
                     tbody.innerHTML = data.inventario.map(item => {
-                        const lowStock = item.stock < 10;
+                        let statusClass = 'ok';
+                        let statusText = 'Disponible';
+                        let stockClass = '';
+
+                        if (item.stock <= 0) {
+                            statusClass = 'danger';
+                            statusText = 'Agotado';
+                            stockClass = 'out-of-stock';
+                        } else if (item.stock <= 10) {
+                            statusClass = 'warning';
+                            statusText = 'Por Agotarse';
+                            stockClass = 'low-stock';
+                        }
+
                         return `
                             <tr>
                                 <td>${item.nombre}</td>
-                                <td class="${lowStock ? 'low-stock' : ''}">${item.stock} ${item.unidad}</td>
+                                <td class="${stockClass}">${item.stock} ${item.unidad}</td>
                                 <td>
-                                    <span class="status-badge ${lowStock ? 'warning' : 'ok'}">
-                                        ${lowStock ? 'Por Agotarse' : 'Disponible'}
+                                    <span class="status-badge ${statusClass}">
+                                        ${statusText}
                                     </span>
                                 </td>
                             </tr>

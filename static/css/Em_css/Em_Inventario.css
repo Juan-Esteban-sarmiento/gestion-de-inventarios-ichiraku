@@ -191,6 +191,13 @@ tr:hover td {
     animation: statusPulse 2s infinite ease-in-out;
 }
 
+.status-badge.danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.15);
+}
+
 @keyframes statusPulse {
 
     0%,
@@ -207,6 +214,12 @@ tr:hover td {
     color: #f59e0b;
     font-weight: 700;
     text-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+}
+
+.out-of-stock {
+    color: #ef4444;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 }
 
 /* Scrollbar Modernization */
