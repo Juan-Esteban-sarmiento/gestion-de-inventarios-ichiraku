@@ -845,10 +845,16 @@ def Em_Hordenes():
         id_pedido = request.args.get("id_pedido", "")
         fecha = request.args.get("fecha", "")
 
+        # Filtrar por cedula del empleado logueado para mostrar solo los pedidos de su local
+        cedula_empleado = session.get("cedula")
+
         query = supabase.table("pedido") \
             .select("id_pedido, estado, fecha_pedido, detalle_pedido(id_producto, cantidad, productos(nombre, categoria, unidad))") \
             .eq("estado", "Recibido") \
             .order("fecha_pedido", desc=True)
+
+        if cedula_empleado:
+            query = query.eq("cedula", str(cedula_empleado))
 
         pedidos = query.execute().data or []
 
