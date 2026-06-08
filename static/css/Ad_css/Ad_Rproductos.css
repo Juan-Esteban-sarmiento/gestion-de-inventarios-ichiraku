@@ -10,7 +10,8 @@
     max-width: 1300px;
     margin: 0 auto;
     align-items: flex-start;
-    /* Altura independiente para evitar espacios vacios */
+    /* Altura fija para que las cajas no crezcan la pagina */
+    height: calc(100vh - 160px);
 }
 
 /* --- RECUADRO IZQUIERDO: REGISTRO (MAS CORTO) --- */
@@ -62,7 +63,8 @@
 
     display: flex;
     flex-direction: column;
-    min-height: 550px;
+    height: 100%;
+    overflow: hidden;
     animation: fadeInSlideLeft 0.6s ease-out;
 }
 
@@ -126,6 +128,23 @@ label {
     overflow-y: auto;
     padding: 15px;
     border: 1px solid rgba(255, 255, 255, 0.03);
+    min-height: 0; /* Permite que flex shrink funcione correctamente */
+}
+
+/* Scrollbar personalizado para lista de productos */
+.result-box::-webkit-scrollbar {
+    width: 6px;
+}
+.result-box::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 3px;
+}
+.result-box::-webkit-scrollbar-thumb {
+    background: rgba(255, 0, 0, 0.4);
+    border-radius: 3px;
+}
+.result-box::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 0, 0, 0.6);
 }
 
 .producto-card {

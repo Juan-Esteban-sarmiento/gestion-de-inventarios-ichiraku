@@ -124,6 +124,9 @@ function mostrarProductos(productos) {
     return;
   }
 
+  // Ordenar siempre por ID para mantener el listado consistente
+  productos.sort((a, b) => a.id_producto - b.id_producto);
+
   resultBox.innerHTML = productos.map(prod => `
     <div class="producto-card" style="${!prod.habilitado ? 'opacity: 0.5;' : ''}">
         <img src="${prod.foto || '/static/image/default.png'}" alt="Foto">

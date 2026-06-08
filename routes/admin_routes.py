@@ -532,7 +532,7 @@ def cambiar_estado_producto(id_producto):
 @login_requerido(rol='Administrador')
 def Ad_Recetarios():
     try:
-        response = supabase.table("recetarios").select("*").order("created_at", desc=True).execute()
+        response = supabase.table("recetarios").select("*").order("id_receta", desc=False).execute()
         recetas = response.data or []
         return render_template("Ad_templates/Ad_Recetarios.html", recetas=recetas)
     except Exception as e:

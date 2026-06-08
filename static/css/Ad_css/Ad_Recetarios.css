@@ -24,6 +24,10 @@
     box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7),
         0 0 20px rgba(255, 0, 0, 0.1);
     animation: fadeInSlideRight 0.6s ease-out;
+    max-height: 85vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 
@@ -54,6 +58,7 @@
     display: flex;
     flex-direction: column;
     min-height: 550px;
+    max-height: 85vh;
     animation: fadeInSlideLeft 0.6s ease-out;
 }
 
@@ -128,6 +133,29 @@ select:focus {
 }
 
 /* Ingredientes Section */
+.ingredients-list {
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 4px;
+    margin-bottom: 10px;
+}
+
+/* Scrollbar personalizado para lista de ingredientes */
+.ingredients-list::-webkit-scrollbar {
+    width: 6px;
+}
+.ingredients-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 3px;
+}
+.ingredients-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 0, 0, 0.4);
+    border-radius: 3px;
+}
+.ingredients-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 0, 0, 0.6);
+}
+
 .ingredients-header {
     display: flex;
     justify-content: space-between;
