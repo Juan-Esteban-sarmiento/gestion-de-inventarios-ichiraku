@@ -46,14 +46,16 @@ document.getElementById('registerProductForm').addEventListener('submit', async 
 
     const data = await response.json();
 
-    if (data.success) {
-      alertaNinja('success', 'EXITO', 'Producto registrado correctamente.');
-      document.getElementById('registerProductForm').reset();
-      document.getElementById('previewFotoProducto').style.display = "none";
-      await cargarProductos(); // Recarga dinamica en lugar de forzar reload tosco
-    } else {
-      alertaNinja('error', 'Error en registro', data.msg);
-    }
+        if (data.success) {
+          alertaNinja('success', 'EXITO', 'Producto registrado correctamente.');
+          document.getElementById('registerProductForm').reset();
+          document.getElementById('previewFotoProducto').style.display = "none";
+          await cargarProductos(); // Recarga dinamica en lugar de forzar reload tosco
+          // Actualizar el serial automáticamente después de registrar
+          await cargarProximoID();
+        } else {
+          alertaNinja('error', 'Error en registro', data.msg);
+        }
 
   } catch (error) {
     alertaNinja('error', 'Error de conexion', 'No se pudo conectar con el servidor.');
