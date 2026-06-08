@@ -57,7 +57,8 @@ CONVERSIONES = {
     'cda': 0.015, 'cucharada': 0.015,
     'cdta': 0.005, 'cucharadita': 0.005,
     # Conteo (Base: und)
-    'und': 1.0, 'unidad': 1.0
+    'und': 1.0, 'unidad': 1.0,
+    'docena': 12.0, 'docenas': 12.0
 }
 
 def convertir_cantidad(cantidad, unidad_origen, unidad_destino):

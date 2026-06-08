@@ -67,9 +67,10 @@ const categoriasUnidades = {
   "Frutas": ["kg", "g"],
   "Cereales": ["kg", "g"],
   "Salsas y condimentos": ["ml", "L"],
-  "Panes y masas": ["unidad", "docena"],
+  "Panes y masas": ["kg", "g"],
   "Mariscos": ["kg", "g"],
   "Lacteos": ["L", "ml"],
+  "Huevos": ["docena", "unidad"],
 };
 
 function cargarCategorias() {
