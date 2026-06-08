@@ -128,10 +128,35 @@
                             stockClass = 'low-stock';
                         }
 
+                        // Formatear dinámicamente si baja de 1 kg o 1 L/lt, o si es docena fraccionaria
+                        let displayStock = item.stock;
+                        let displayUnidad = item.unidad;
+
+                        if (item.stock > 0) {
+                            const uniLower = item.unidad.toLowerCase().trim();
+                            if (item.stock < 1.0) {
+                                if (uniLower === 'kg') {
+                                    displayStock = Math.round(item.stock * 1000);
+                                    displayUnidad = 'g';
+                                } else if (uniLower === 'lt' || uniLower === 'l' || uniLower === 'litro' || uniLower === 'litros') {
+                                    displayStock = Math.round(item.stock * 1000);
+                                    displayUnidad = 'ml';
+                                }
+                            }
+                            
+                            // Conversión de docenas fraccionarias a unidades individuales
+                            if (uniLower === 'docena' || uniLower === 'docenas') {
+                                if (Math.abs(item.stock - Math.round(item.stock)) > 0.0001) {
+                                    displayStock = Math.round(item.stock * 12);
+                                    displayUnidad = displayStock === 1 ? 'unidad' : 'unidades';
+                                }
+                            }
+                        }
+
                         return `
                             <tr>
                                 <td>${item.nombre}</td>
-                                <td class="${stockClass}">${item.stock} ${item.unidad}</td>
+                                <td class="${stockClass}">${displayStock} ${displayUnidad}</td>
                                 <td>
                                     <span class="status-badge ${statusClass}">
                                         ${statusText}

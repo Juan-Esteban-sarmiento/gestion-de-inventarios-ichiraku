@@ -653,15 +653,27 @@ def cambiar_estado_receta(id_receta):
 def Ad_Inventario():
     try:
         locales = supabase.table("locales").select("*").execute().data or []
-        return render_template("Ad_templates/Ad_Inventario.html", locales=locales)
+        http_response = make_response(render_template("Ad_templates/Ad_Inventario.html", locales=locales))
+        http_response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+        http_response.headers['Pragma'] = 'no-cache'
+        http_response.headers['Expires'] = '-1'
+        return http_response
     except Exception as e:
         print("Error en Ad_Inventario:", e)
-        return render_template("Ad_templates/Ad_Inventario.html", locales=[])
+        http_response = make_response(render_template("Ad_templates/Ad_Inventario.html", locales=[]))
+        http_response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+        http_response.headers['Pragma'] = 'no-cache'
+        http_response.headers['Expires'] = '-1'
+        return http_response
 
 @app.route('/Em_Inventario')
 @login_requerido(rol='Empleado')
 def Em_Inventario():
-    return render_template("Em_templates/Em_Inventario.html")
+    http_response = make_response(render_template("Em_templates/Em_Inventario.html"))
+    http_response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    http_response.headers['Pragma'] = 'no-cache'
+    http_response.headers['Expires'] = '-1'
+    return http_response
 
 @app.route('/get_inventario_data', methods=['POST'])
 @login_requerido()

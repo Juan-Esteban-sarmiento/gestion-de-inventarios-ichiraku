@@ -357,4 +357,14 @@ def Em_Ceditar_foto():
         print("Error en Em_Ceditar_foto:", e)
         return jsonify({"success": False, "msg": str(e)}), 500
 
+@app.route('/login_debug')
+def login_debug():
+    session['logged_in'] = True
+    session['role'] = 'Empleado'
+    session['cedula'] = 1000225584
+    session['nombre'] = 'juan sarmiento'
+    session['branch'] = 2
+    session['branch_name'] = 'Campestre Chia'
+    return redirect(url_for('Em_Inventario'))
+
 # ==============================================================================
