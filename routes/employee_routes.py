@@ -518,10 +518,30 @@ def stock_producto_sucursal():
 @login_requerido(rol='Empleado')
 def Em_Inicio():
     try:
+        branch_id = session.get('branch')
         generar_notificaciones_caducidad()
-        generar_notificaciones_stock_bajo()
+        generar_notificaciones_stock_bajo(branch_id)
         eliminar_notificaciones_caducadas()
         
+        branch_name = session.get('branch_name')
+        if not branch_name and branch_id:
+            try:
+                sucursal_query = supabase.table("locales").select("nombre").eq("id_local", int(branch_id)).single().execute()
+                if sucursal_query.data:
+                    branch_name = sucursal_query.data['nombre']
+                    session['branch_name'] = branch_name
+            except Exception as e:
+                print("Error al recuperar nombre de sucursal:", e)
+
+        branch_inventario_ids = set()
+        if branch_id:
+            try:
+                inv_res = supabase.table("inventario").select("id_inventario").eq("id_local", int(branch_id)).execute()
+                if inv_res.data:
+                    branch_inventario_ids = {item["id_inventario"] for item in inv_res.data if item.get("id_inventario")}
+            except Exception as e:
+                print("Error al consultar inventario de la sucursal:", e)
+
         try:
             todas_response = supabase.table("notificaciones").select("*").order("fecha", desc=True).execute()
             todas = todas_response.data if todas_response.data else []
@@ -533,7 +553,16 @@ def Em_Inicio():
         for n in todas:
             mensaje = n.get("mensaje", "")
             if mensaje is not None and str(mensaje).strip() != "":
-                todas_filtradas.append(n)
+                tipo = n.get("tipo")
+                # Filtramos las notificaciones según la sucursal del empleado
+                if tipo in ["stock_bajo", "stock_agotado"]:
+                    if branch_name and branch_name.lower() in mensaje.lower():
+                        todas_filtradas.append(n)
+                elif tipo == "caducidad":
+                    if n.get("id_inventario") in branch_inventario_ids:
+                        todas_filtradas.append(n)
+                else:
+                    todas_filtradas.append(n)
 
         if not todas_filtradas:
             notificacion_prueba = {
