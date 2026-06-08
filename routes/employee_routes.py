@@ -107,14 +107,13 @@ def registrar_merma():
         data = request.get_json()
         id_producto = data.get('id_producto')
         cantidad_val = data.get('cantidad')
+        unidad_sel = data.get('unidad')
         motivo = data.get('motivo', 'No especificado')
         id_l = session.get('branch')
-
-        if not id_producto or not cantidad_val:
-            return jsonify({"success": False, "msg": "Datos incompletos."}), 400
-
         try:
             cantidad_num = float(cantidad_val)
+            # Convert to product's base unit if unit selected differs
+            # base unit will be known after fetching product info
             if cantidad_num <= 0:
                 return jsonify({"success": False, "msg": "La cantidad debe ser mayor a cero."}), 400
         except ValueError:
@@ -124,20 +123,25 @@ def registrar_merma():
         producto_info = supabase.table("productos").select("nombre, unidad").eq("id_producto", id_producto).execute()
         if not producto_info.data:
             return jsonify({"success": False, "msg": "Producto no encontrado."}), 404
+        nombre_producto = producto_info.data[0]['nombre']
+        base_unidad = producto_info.data[0]['unidad']
+        # Convert cantidad a unidad base si es necesario
+        if unidad_sel and unidad_sel != base_unidad:
+            cantidad_num = convertir_cantidad(cantidad_num, unidad_sel, base_unidad)
         
         nombre_producto = producto_info.data[0]['nombre']
 
-        # Validar stock (FIFO)
+        # Validar stock (FIFO) usando cantidad convertida
         inventario = supabase.table("inventario").select("*").eq("id_producto", id_producto).eq("id_local", id_l).gt("cantidad", 0).order("fecha_caducidad").execute()
         
         if not inventario.data:
              return jsonify({"success": False, "msg": f"Stock insuficiente para '{nombre_producto}'. No hay existencias."}), 400
 
         disponible_total = sum(float(l['cantidad']) for l in inventario.data)
-        if disponible_total < float(cantidad_val):
-             return jsonify({"success": False, "msg": f"Stock insuficiente. Solo hay {to_num(disponible_total)} {producto_info.data[0].get('unidad', '')}."}), 400
+        if disponible_total < cantidad_num:
+            return jsonify({"success": False, "msg": f"Stock insuficiente. Solo hay {to_num(disponible_total)} {base_unidad}."}), 400
 
-        restante = float(cantidad_val)
+        restante = cantidad_num
         detalles_afectados = []
         
         for lote in inventario.data:
@@ -164,11 +168,13 @@ def registrar_merma():
 
         # Registrar historial bajo categoria MERMA
         try:
+            # Guardamos la unidad seleccionada en la observacion para mostrarla correctamente en el historial
+            unidad_display = unidad_sel if unidad_sel else base_unidad
             cons_res = supabase.table("consumo").insert({
                 "fecha": datetime.now().isoformat(),
                 "cantidad_platos": 0, # No es un plato vendido
                 "id_local": id_l,
-                "observacion": f"[MERMA] {motivo} | Prod: {nombre_producto} (Cant: {cantidad_val}) [Emp: {session.get('nombre', 'Desconocido')}]"
+                "observacion": f"[MERMA] {motivo} | Prod: {nombre_producto} (Cant: {cantidad_val} {unidad_display}) [Emp: {session.get('nombre', 'Desconocido')}]"
             }).execute()
             
             if cons_res.data:
@@ -344,25 +350,30 @@ def historial_consumo_hoy():
                     cantidad = item.get("cantidad_platos", 0)
                     unidad = "platos"
                 else:
-                    match_merma = re.search(r"\[MERMA\] (.*?) \| Prod: (.*?) \(Cant: (.*?)\)", obs)
+                    # Formato nuevo: (Cant: 60 g) — incluye unidad seleccionada
+                    match_merma = re.search(r"\[MERMA\] (.*?) \| Prod: (.*?) \(Cant: ([\d.]+)\s*(\w*)\)", obs)
                     if match_merma:
                         motivo = match_merma.group(1).strip()
                         prod = match_merma.group(2).strip()
                         cant = match_merma.group(3).strip()
+                        unidad_obs = match_merma.group(4).strip()  # unidad guardada en la observacion
                         nombre = f"{prod} (Merma: {motivo})"
                         cantidad = cant
                         
-                        unidad_real = ""
-                        if item.get("consumo_detalle") and isinstance(item["consumo_detalle"], list) and len(item["consumo_detalle"]) > 0:
-                            try:
-                                # Safe access to nested dicts
-                                det = item["consumo_detalle"][0]
-                                if "productos" in det and det["productos"]:
-                                    unidad_real = det["productos"].get("unidad", "")
-                            except Exception:
-                                pass
-                        
-                        unidad = unidad_real if unidad_real else "und/kg"
+                        # Preferimos la unidad de la observacion (la que eligio el empleado)
+                        if unidad_obs:
+                            unidad = unidad_obs
+                        else:
+                            # Fallback: tomar la unidad base del producto desde consumo_detalle
+                            unidad_real = ""
+                            if item.get("consumo_detalle") and isinstance(item["consumo_detalle"], list) and len(item["consumo_detalle"]) > 0:
+                                try:
+                                    det = item["consumo_detalle"][0]
+                                    if "productos" in det and det["productos"]:
+                                        unidad_real = det["productos"].get("unidad", "")
+                                except Exception:
+                                    pass
+                            unidad = unidad_real if unidad_real else "und"
                     else:
                         nombre = obs
                         cantidad = "-"

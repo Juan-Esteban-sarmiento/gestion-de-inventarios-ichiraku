@@ -67,13 +67,44 @@ async function buscarProductosMerma() {
 }
 
 function seleccionarProductoMerma(producto) {
+    // Show selected product details
+    document.getElementById('mermaProdName').innerText = producto.nombre;
+    document.getElementById('mermaProdId').value = producto.id_producto;
     document.getElementById('mermaResults').style.display = 'none';
     document.getElementById('productoSeleccionadoMerma').style.display = 'block';
     
-    document.getElementById('mermaProdName').innerText = producto.nombre;
-    document.getElementById('mermaProdId').value = producto.id_producto;
-    document.getElementById('mermaUnidad').value = producto.unidad;
-    
+    // Populate unit select based on product's base unit
+    const unidadSelect = document.getElementById('mermaUnidad');
+    unidadSelect.innerHTML = '';
+    const base = producto.unidad;
+    let units = [];
+    switch (base) {
+        case 'kg':
+        case 'kilogramo':
+            units = ['kg', 'g', 'lb', 'onza'];
+            break;
+        case 'lt':
+        case 'litro':
+            units = ['lt', 'ml', 'cda', 'cdta'];
+            break;
+        case 'und':
+        case 'unidad':
+            units = ['und', 'docena'];
+            break;
+        case 'docena':
+        case 'docenas':
+            units = ['und', 'docena'];
+            break;
+        default:
+            units = [base];
+    }
+    units.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u;
+        opt.text = u;
+        if (u === base) opt.selected = true;
+        unidadSelect.appendChild(opt);
+    });
     document.getElementById('mermaCantidad').focus();
 }
 
@@ -103,7 +134,7 @@ async function guardarMerma() {
         const response = await fetch('/registrar_merma', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id_producto, cantidad, motivo })
+            body: JSON.stringify({ id_producto, cantidad, motivo, unidad: document.getElementById('mermaUnidad').value })
         });
         const data = await response.json();
 
