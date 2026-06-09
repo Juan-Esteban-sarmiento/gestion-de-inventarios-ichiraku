@@ -5,10 +5,17 @@ import re
 import math
 import locale
 import io
+import os
 from io import BytesIO
 import csv
 
 from extensions import app, supabase, logger
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+from reportlab.graphics.shapes import Drawing
+from reportlab.graphics.charts.piecharts import Pie
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
 from utils import login_requerido, to_num, generar_notificaciones_caducidad, generar_notificaciones_stock_bajo, eliminar_notificaciones_caducadas, insertar_informe
 # 6. ADMINISTRACION - DASHBOARD E INFORMES
 # ==============================================================================
