@@ -583,64 +583,98 @@ def generar_pdf_consolidado(informe_id, pedidos):
             elements.append(Spacer(1, 30))
 
         # ========================
-        # DETALLE DE PEDIDOS - DISENO LIMPIO
+        # DETALLE DE PEDIDOS - AGRUPADO POR LOCAL
         # ========================
         if productos_detallados:
             elements.append(Paragraph(
-                "<font size=14 color='#000000'><b>DETALLE DE PEDIDOS</b></font>", 
+                "<font size=14 color='#000000'><b>DETALLE DE PEDIDOS</b></font>",
                 styles['Heading2']
             ))
             elements.append(Spacer(1, 15))
 
-            # Agrupar por pedido
+            # Paso 1: agrupar productos por pedido (con local, fecha y hora)
             pedidos_agrupados = {}
             for producto in productos_detallados:
                 if not isinstance(producto, dict):
                     continue
-                    
                 pedido_id = producto.get('pedido_id')
                 if pedido_id is None:
                     continue
-                    
                 if pedido_id not in pedidos_agrupados:
                     pedidos_agrupados[pedido_id] = {
                         'local': producto.get('local', 'No especificado'),
                         'hora': producto.get('hora', 'N/A'),
+                        'fecha': producto.get('fecha', ''),
                         'productos': [],
                         'total_cantidad': 0
                     }
-                
                 pedidos_agrupados[pedido_id]['productos'].append(producto)
                 pedidos_agrupados[pedido_id]['total_cantidad'] += producto.get('cantidad', 0)
 
+            # Paso 2: agrupar pedidos por local
+            locales_agrupados = {}
             for pedido_id, info in sorted(pedidos_agrupados.items()):
-                if not info.get('productos'):
-                    continue
-                
-                # Header del pedido minimalista
-                elements.append(Paragraph(f"<b>PEDIDO #{pedido_id}</b> | {info['local']} [{info['hora']}]", styles['Normal']))
-                elements.append(Spacer(1, 5))
-                
-                # Tabla de productos minimalista
-                table_data = [["PRODUCTO", "CANTIDAD"]]
-                for p in info['productos']:
-                    table_data.append([p['producto'].upper(), f"{p['cantidad']} {p['unidad']}"])
-                
-                pedido_table = Table(table_data, colWidths=[340, 140])
-                pedido_table.setStyle(TableStyle([
-                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                    ('FONTSIZE', (0, 0), (-1, 0), 8),
-                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor("#666666")),
-                    ('LINEBELOW', (0, 0), (-1, 0), 1, colors.lightgrey),
-                    ('FONTSIZE', (0, 1), (-1, -1), 8),
-                    ('GRID', (0, 1), (-1, -1), 0.1, colors.lightgrey),
-                    ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                    ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor("#FDFDFD")]),
-                    ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-                    ('TOPPADDING', (0, 0), (-1, -1), 4),
+                local = info['local']
+                if local not in locales_agrupados:
+                    locales_agrupados[local] = []
+                locales_agrupados[local].append((pedido_id, info))
+
+            # Paso 3: renderizar seccion por local
+            for local_nombre, pedidos_local in sorted(locales_agrupados.items()):
+                num_pedidos = len(pedidos_local)
+
+                # Encabezado del local con fondo rojo
+                local_header_data = [[
+                    Paragraph(
+                        f"<font color='white'><b>LOCAL: {local_nombre.upper()}</b>  —  {num_pedidos} pedido{'s' if num_pedidos != 1 else ''}</font>",
+                        styles['Normal']
+                    )
+                ]]
+                local_header_table = Table(local_header_data, colWidths=[480])
+                local_header_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#E63900")),
+                    ('LEFTPADDING', (0, 0), (-1, -1), 10),
+                    ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+                    ('TOPPADDING', (0, 0), (-1, -1), 7),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 7),
                 ]))
-                elements.append(pedido_table)
-                elements.append(Spacer(1, 15))
+                elements.append(local_header_table)
+                elements.append(Spacer(1, 8))
+
+                for pedido_id, info in pedidos_local:
+                    if not info.get('productos'):
+                        continue
+
+                    # Encabezado del pedido con fecha y hora
+                    fecha_hora = f"{info.get('fecha', '')} {info['hora']}".strip()
+                    elements.append(Paragraph(
+                        f"<b>PEDIDO #{pedido_id}</b>  |  Fecha: {fecha_hora}",
+                        styles['Normal']
+                    ))
+                    elements.append(Spacer(1, 4))
+
+                    # Tabla de productos
+                    table_data = [["PRODUCTO", "CANTIDAD"]]
+                    for p in info['productos']:
+                        table_data.append([p['producto'].upper(), f"{p['cantidad']} {p['unidad']}"])
+
+                    pedido_table = Table(table_data, colWidths=[340, 140])
+                    pedido_table.setStyle(TableStyle([
+                        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                        ('FONTSIZE', (0, 0), (-1, 0), 8),
+                        ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor("#666666")),
+                        ('LINEBELOW', (0, 0), (-1, 0), 1, colors.lightgrey),
+                        ('FONTSIZE', (0, 1), (-1, -1), 8),
+                        ('GRID', (0, 1), (-1, -1), 0.1, colors.lightgrey),
+                        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor("#FDFDFD")]),
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                        ('TOPPADDING', (0, 0), (-1, -1), 4),
+                    ]))
+                    elements.append(pedido_table)
+                    elements.append(Spacer(1, 12))
+
+                elements.append(Spacer(1, 10))
 
         # Pie de pagina footer
         elements.append(Spacer(1, 30))
