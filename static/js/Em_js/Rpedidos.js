@@ -1,4 +1,22 @@
-let carrito = [];
+// --- Persistencia del carrito en sessionStorage ---
+const CARRITO_PEDIDO_KEY = 'carritoPedido';
+
+function cargarCarritoPedido() {
+    try {
+        const stored = sessionStorage.getItem(CARRITO_PEDIDO_KEY);
+        return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function guardarCarritoPedido() {
+    try {
+        sessionStorage.setItem(CARRITO_PEDIDO_KEY, JSON.stringify(carrito));
+    } catch (e) {}
+}
+
+let carrito = cargarCarritoPedido();
 
 function showMessage(message, type = "success") {
     alertaNinja(type, type === "success" ? "Exito" : "Error", message);
@@ -94,6 +112,7 @@ function agregarCarrito(id, nombre, categoria, unidad) {
     }
 
     renderCarrito();
+    guardarCarritoPedido();
     cantidadInput.value = 1;
 }
 
@@ -129,6 +148,7 @@ function renderCarrito() {
 function eliminarDelCarrito(index) {
     const removedItem = carrito.splice(index, 1)[0];
     showMessage(`${removedItem.Nombre} eliminado del carrito.`, "success");
+    guardarCarritoPedido();
     renderCarrito();
 }
 
@@ -169,6 +189,7 @@ async function enviarPedido() {
         if (data.success) {
             showMessage("✅ Pedido registrado con exito.", "success");
             carrito = [];
+            guardarCarritoPedido();
             renderCarrito();
             document.getElementById("searchTerm").value = "";
             buscarProductos();

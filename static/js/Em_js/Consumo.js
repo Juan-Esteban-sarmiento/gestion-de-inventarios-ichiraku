@@ -2,7 +2,25 @@
    CONSUMO.JS - Rediseno Operativo Premium
    ============================================ */
 
-let carritoConsumo = [];
+// --- Persistencia del carrito en sessionStorage ---
+const CARRITO_CONSUMO_KEY = 'carritoConsumo';
+
+function cargarCarritoStorage() {
+    try {
+        const stored = sessionStorage.getItem(CARRITO_CONSUMO_KEY);
+        return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function guardarCarritoStorage() {
+    try {
+        sessionStorage.setItem(CARRITO_CONSUMO_KEY, JSON.stringify(carritoConsumo));
+    } catch (e) {}
+}
+
+let carritoConsumo = cargarCarritoStorage();
 
 document.addEventListener("DOMContentLoaded", () => {
     buscarProductos();
@@ -126,6 +144,7 @@ function agregarAlConsumo(receta) {
             showBreakdown: false
         });
     }
+    guardarCarritoStorage();
     renderizarConsumo();
 }
 
@@ -219,6 +238,7 @@ function actualizarCantidad(idx, delta) {
     } else {
         if (nueva > 500) nueva = 500;
         carritoConsumo[idx].cantidad = nueva;
+        guardarCarritoStorage();
         renderizarConsumo();
     }
 }
@@ -231,11 +251,13 @@ function cambioManualCantidad(idx, valor) {
         num = 500;
     }
     carritoConsumo[idx].cantidad = num;
+    guardarCarritoStorage();
     renderizarConsumo();
 }
 
 function eliminarDelCarrito(idx) {
     carritoConsumo.splice(idx, 1);
+    guardarCarritoStorage();
     renderizarConsumo();
 }
 
@@ -297,6 +319,7 @@ async function confirmarConsumo() {
             });
 
             carritoConsumo = [];
+            guardarCarritoStorage();
             renderizarConsumo();
             await Promise.all([cargarHistorialHoy(), initComparativa()]);
         } catch (err) {
