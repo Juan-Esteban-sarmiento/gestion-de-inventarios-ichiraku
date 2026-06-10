@@ -266,11 +266,11 @@ def generar_reporte_personalizado():
         for p in sorted_products:
             total = p['venta'] + p['merma']
             data_prod.append([
-                p['nombre'].upper(), 
-                p['unidad'], 
-                int(p['venta']), 
-                int(p['merma']), 
-                int(total)
+                p['nombre'].upper(),
+                p['unidad'],
+                round(p['venta'], 2),
+                round(p['merma'], 2),
+                round(total, 2)
             ])
 
         t_prod = Table(data_prod, colWidths=[180, 70, 70, 70, 90])
@@ -496,18 +496,32 @@ def generar_pdf_consolidado(informe_id, pedidos):
                     detalles = []
 
                 # Obtener informacion del local
-                local_id = pedido.get("id_local")
                 local_nombre = "No especificado"
-                
-                if local_id:
-                    try:
-                        local_result = supabase.table("locales").select("nombre")\
-                            .eq("id_local", local_id).execute()
-                        if local_result.data:
-                            local_nombre = local_result.data[0].get('nombre', 'No especificado')
-                            locales_participantes.add(local_nombre)
-                    except Exception as e:
-                        pass
+
+                try:
+                    id_inventario = pedido.get("id_inventario")
+
+                    if id_inventario:
+                        inventario_result = supabase.table("inventario") \
+                            .select("id_local") \
+                            .eq("id_inventario", id_inventario) \
+                            .execute()
+
+                        if inventario_result.data:
+                            id_local = inventario_result.data[0].get("id_local")
+
+                            if id_local:
+                                local_result = supabase.table("locales") \
+                                    .select("nombre") \
+                                    .eq("id_local", id_local) \
+                                    .execute()
+
+                                if local_result.data:
+                                    local_nombre = local_result.data[0].get("nombre", "No especificado")
+                                    locales_participantes.add(local_nombre)
+
+                except Exception as e:
+                    print("Error obteniendo local:", e)
 
                 # Obtener fecha y hora
                 fecha_pedido_raw = pedido.get("fecha_pedido")
@@ -910,7 +924,11 @@ def re_generar_reporte_premium(id_l, periodo, fecha_base):
         total_ventas_count = 0
         total_merma_items = 0
         for c in consumos:
-            is_merma = "[MERMA]" in (c.get("observacion") or "")
+            observacion = (c.get("observacion") or "").lower()
+            is_merma = (
+                "[merma]" in observacion or
+                "merma" in observacion
+            )
             if is_merma: total_merma_items += 1
             else: total_ventas_count += c.get("cantidad_platos", 0)
             for det in c.get("consumo_detalle", []):
