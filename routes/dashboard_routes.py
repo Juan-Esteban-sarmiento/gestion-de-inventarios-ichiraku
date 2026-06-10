@@ -496,22 +496,16 @@ def generar_pdf_consolidado(informe_id, pedidos):
                     detalles = []
 
                 # Obtener informacion del local
-                inventario_id = pedido.get("id_inventario")
+                local_id = pedido.get("id_local")
                 local_nombre = "No especificado"
                 
-                if inventario_id:
+                if local_id:
                     try:
-                        inventario_result = supabase.table("inventario").select("id_local")\
-                            .eq("id_inventario", inventario_id).execute()
-                        
-                        if inventario_result.data:
-                            local_id = inventario_result.data[0].get("id_local")
-                            if local_id:
-                                local_result = supabase.table("locales").select("nombre")\
-                                    .eq("id_local", local_id).execute()
-                                if local_result.data:
-                                    local_nombre = local_result.data[0].get('nombre', 'No especificado')
-                                    locales_participantes.add(local_nombre)
+                        local_result = supabase.table("locales").select("nombre")\
+                            .eq("id_local", local_id).execute()
+                        if local_result.data:
+                            local_nombre = local_result.data[0].get('nombre', 'No especificado')
+                            locales_participantes.add(local_nombre)
                     except Exception as e:
                         pass
 
@@ -1279,20 +1273,16 @@ def descargar_informes_rango():
 
             detalles = supabase.table("detalle_pedido").select("id_producto, cantidad") \
                 .eq("id_pedido", pedido_id).execute().data or []
-
+            
             local_nombre = "No especificado"
-            inventario_id = pedido.get("id_inventario")
-            if inventario_id:
+            local_id = pedido.get("id_local")
+            if local_id:
                 try:
-                    inventario_result = supabase.table("inventario").select("id_local").eq("id_inventario", inventario_id).execute()
-                    if inventario_result.data:
-                        local_id = inventario_result.data[0].get("id_local")
-                        if local_id:
-                            local_result = supabase.table("locales").select("nombre").eq("id_local", local_id).execute()
-                            if local_result.data:
-                                local_nombre = local_result.data[0].get('nombre', 'No especificado')
-                                locales_participantes.add(local_nombre)
-                except:
+                    local_result = supabase.table("locales").select("nombre").eq("id_local", local_id).execute()
+                    if local_result.data:
+                        local_nombre = local_result.data[0].get('nombre', 'No especificado')
+                        locales_participantes.add(local_nombre)
+                except Exception as e:
                     pass
 
             for detalle in detalles:

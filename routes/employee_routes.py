@@ -666,6 +666,7 @@ def registrar_pedido():
         pedido_res = supabase.table("pedido").insert({
             "cedula": session.get("cedula"),
             "estado": "Pendiente",
+            "id_local": id_local,
             "fecha_pedido": datetime.now().isoformat()
         }).execute()
 
@@ -791,6 +792,7 @@ def Em_Rordenes():
         pedidos = supabase.table("pedido")\
             .select("id_pedido, estado, fecha_pedido")\
             .eq("estado", "Pendiente")\
+            .eq("id_local", session.get("branch"))\
             .order("id_pedido", desc=True)\
             .execute().data or []
 
