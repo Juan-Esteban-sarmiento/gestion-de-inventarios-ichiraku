@@ -1293,16 +1293,39 @@ def descargar_informes_rango():
                 .eq("id_pedido", pedido_id).execute().data or []
             
             local_nombre = "No especificado"
-            local_id = pedido.get("id_local")
-            if local_id:
-                try:
-                    local_result = supabase.table("locales").select("nombre").eq("id_local", local_id).execute()
-                    if local_result.data:
-                        local_nombre = local_result.data[0].get('nombre', 'No especificado')
-                        locales_participantes.add(local_nombre)
-                except Exception as e:
-                    pass
+            
+            try:
+                id_inventario = pedido.get("id_inventario")
 
+                if id_inventario:
+
+                    inventario_result = supabase.table("inventario") \
+                        .select("id_local") \
+                        .eq("id_inventario", id_inventario) \
+                        .execute()
+
+                    if inventario_result.data:
+
+                        id_local = inventario_result.data[0].get("id_local")
+
+                        if id_local:
+
+                            local_result = supabase.table("locales") \
+                                .select("nombre") \
+                                .eq("id_local", id_local) \
+                                .execute()
+
+                            if local_result.data:
+                                local_nombre = local_result.data[0].get(
+                                    "nombre",
+                                    "No especificado"
+                                )
+
+                            locales_participantes.add(local_nombre)
+
+            except Exception as e:
+                print("ERROR OBTENIENDO LOCAL:", e)
+                
             for detalle in detalles:
                 if not isinstance(detalle, dict): continue
                 cantidad_detalle = detalle.get('cantidad', 0)
