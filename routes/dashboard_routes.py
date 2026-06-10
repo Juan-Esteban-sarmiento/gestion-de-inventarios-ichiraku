@@ -237,7 +237,7 @@ def generar_reporte_personalizado():
         elements.append(Spacer(1, 10))
         
         resumen_data = [
-            ["PLANTILLAS VENDIDAS", "MERMA / ERROR", "ESTADO OPERATIVO"],
+            ["PLATILLOS VENDIDOS", "MERMA / ERROR", "ESTADO OPERATIVO"],
             [f"{total_ventas_count}", f"{total_merma_items}", "Auditado"]
         ]
         t_res = Table(resumen_data, colWidths=[160, 160, 160])
@@ -292,6 +292,52 @@ def generar_reporte_personalizado():
             ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
         ]))
         elements.append(t_prod)
+        elements.append(Spacer(1, 30))
+
+        # Historial de Transacciones
+        elements.append(Paragraph("3. Historial de Actividad (Operadores)", style_h2))
+        elements.append(Spacer(1, 12))
+        
+        historial_data = [["FECHA/HORA", "TIPO / DESCRIPCION", "EMPLEADO"]]
+        
+        for c in sorted(consumos, key=lambda x: x.get('fecha', ''), reverse=True):
+            obs = c.get("observacion", "")
+            try:
+                fecha_str = datetime.fromisoformat(c["fecha"].replace('Z', '+00:00')).strftime("%d/%m %H:%M")
+            except:
+                fecha_str = "N/A"
+                
+            # Extraer empleado
+            empleado = "Desconocido"
+            import re
+            match_emp = re.search(r"\[Emp: (.*?)\]", obs)
+            if match_emp:
+                empleado = match_emp.group(1)
+                obs = obs.replace(f"[Emp: {empleado}]", "").strip()
+                
+            desc = obs
+            if len(desc) > 60:
+                desc = desc[:57] + "..."
+                
+            historial_data.append([fecha_str, desc, empleado.upper()])
+            
+        t_hist = Table(historial_data, colWidths=[90, 270, 120])
+        t_hist.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 8),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+            ('LINEBELOW', (0, 0), (-1, 0), 1, colors.HexColor("#E63900")),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+            
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.HexColor("#444444")),
+            ('GRID', (0, 1), (-1, -1), 0.2, colors.lightgrey),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor("#F9F9F9")]),
+            ('TOPPADDING', (0, 1), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]))
+        elements.append(t_hist)
         
         elements.append(Spacer(1, 40))
         elements.append(Paragraph(f"<i>Generado el {datetime.now().strftime('%d/%m/%Y %H:%M')} - Sistema Ichiraku</i>", styles['Italic']))
@@ -1158,42 +1204,21 @@ def descargar_informes_rango():
             print(f"Error al persistir informe de rango: {db_e}")
 
         buffer = io.BytesIO()
-        doc = SimpleDocTemplate(
-            buffer, 
-            pagesize=letter,
-            leftMargin=40, 
-            rightMargin=40, 
-            topMargin=80,
-            bottomMargin=50
-        )
+        doc = SimpleDocTemplate(buffer, pagesize=letter, leftMargin=75, rightMargin=40, topMargin=50, bottomMargin=50)
         styles = getSampleStyleSheet()
+        
+        style_title = styles['Title']
+        style_title.alignment = 0 
+        style_title.fontName = "Helvetica-Bold"
+        style_title.fontSize = 20
+        style_title.textColor = colors.HexColor("#111111")
+        
+        style_h2 = styles['Heading2']
+        style_h2.textColor = colors.HexColor("#E63900")
+        style_h2.fontSize = 14
+        
         elements = []
 
-        # ========================
-        # ENCABEZADO CON LOGO Y MARCA
-        # ========================
-        try:
-            logo_path = os.path.join(app.root_path, "static", "image", "logo.png")
-            if not os.path.exists(logo_path):
-                logo_path = os.path.abspath(os.path.join("static", "image", "logo.png"))
-            logo = Image(logo_path, width=80, height=60)
-            logo_table = Table([[logo]], colWidths=[80])
-            logo_table.setStyle(TableStyle([
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ]))
-        except:
-            logo_table = Table([[
-                Paragraph("<font size=16 color='#FF0000'><b>ICHIRAKU</b></font><br/><font size=8 color='#000000'>RAMEN</font>", styles['Normal'])
-            ]], colWidths=[120])
-            logo_table.setStyle(TableStyle([
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                ('BOX', (0, 0), (-1, -1), 1, colors.black),
-                ('PADDING', (0, 0), (-1, -1), 10),
-            ]))
-
-        # Definir titulo segun el tipo
         if tipo == "semana":
             titulo = "INFORME SEMANAL CONSOLIDADO"
         elif tipo == "mes":
@@ -1203,380 +1228,243 @@ def descargar_informes_rango():
         else:
             titulo = "INFORME CONSOLIDADO"
 
-        header_data = [
-            [logo_table, Paragraph(f"<font size=18 color='#000000'><b>{titulo}</b></font>", styles['Normal'])]
-        ]
+        elements.append(Paragraph(titulo, style_title))
+        elements.append(Spacer(1, 5))
         
-        header_table = Table(header_data, colWidths=[140, 360])
-        header_table.setStyle(TableStyle([
-            ('ALIGN', (0, 0), (0, 0), 'CENTER'),
-            ('ALIGN', (1, 0), (1, 0), 'CENTER'),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 20),
-        ]))
-        elements.append(header_table)
+        elements.append(Table([[""]], colWidths=[480], style=[('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#E63900"))]))
+        elements.append(Spacer(1, 15))
         
-        # Informacion del periodo
         fecha_inicio_obj = datetime.fromisoformat(fecha_inicio.replace('T', ' '))
         fecha_fin_obj = datetime.fromisoformat(fecha_fin.replace('T', ' '))
         
-        periodo_header = Table([
-            [Paragraph(f"<font size=11 color='#000000'><b>PERIODO:</b> {fecha_inicio_obj.strftime('%d/%m/%Y')} - {fecha_fin_obj.strftime('%d/%m/%Y')}</font>", styles['Normal']),
-             Paragraph(f"<font size=11 color='#000000'><b>TOTAL INFORMES:</b> {len(informes.data)}</font>", styles['Normal'])]
-        ], colWidths=[250, 250])
-        
-        periodo_header.setStyle(TableStyle([
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        info_data = [
+            [Paragraph(f"<b>PERIODO:</b> {fecha_inicio_obj.strftime('%d/%m/%Y')} - {fecha_fin_obj.strftime('%d/%m/%Y')}", styles['Normal']),
+             Paragraph(f"<b>FECHA GENERACION:</b> {datetime.now().strftime('%d de %B, %Y')}", styles['Normal'])]
+        ]
+        info_table = Table(info_data, colWidths=[240, 240])
+        info_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 15),
         ]))
-        elements.append(periodo_header)
-        
-        # Linea divisoria en rojo
-        elements.append(Spacer(1, 10))
-        line_table = Table([[""]], colWidths=[500])
-        line_table.setStyle(TableStyle([
-            ('LINEABOVE', (0, 0), (-1, 0), 3, colors.HexColor("#FF0000")),
-        ]))
-        elements.append(line_table)
-        elements.append(Spacer(1, 25))
+        elements.append(info_table)
+        elements.append(Spacer(1, 20))
 
-        # ========================
-        # PROCESAR DATOS
-        # ========================
-        total_pedidos = 0
+        # Fetch data based on the exact date range using the pedido table
+        fecha_inicio_str = fecha_inicio_obj.strftime('%Y-%m-%d 00:00:00')
+        fecha_fin_str = fecha_fin_obj.strftime('%Y-%m-%d 23:59:59')
+        
+        pedidos_rango = supabase.table("pedido").select("*") \
+            .gte("fecha_pedido", fecha_inicio_str) \
+            .lte("fecha_pedido", fecha_fin_str).execute().data or []
+
+        total_pedidos = len(pedidos_rango)
         total_productos = 0
         categorias_totales = {}
         locales_participantes = set()
-        todos_productos_detallados = []
+        productos_detallados = []
         fechas_pedidos = set()
 
-        for inf in informes.data:
+        for pedido in pedidos_rango:
+            pedido_id = pedido.get('id_pedido')
+            if not pedido_id: continue
+            
             try:
-                if inf.get("tipo") == "diario_consolidado":
-                    fecha_inf = datetime.fromisoformat(inf["fecha_creacion"]).date()
-                    fechas_pedidos.add(fecha_inf)
-                    
-                    pedidos_dia = supabase.table("pedido").select("*").execute().data
-                    pedidos_dia = [p for p in pedidos_dia if datetime.fromisoformat(p["fecha_pedido"]).date() == fecha_inf]
-                    
-                    total_pedidos += len(pedidos_dia)
-                    
-                    for pedido in pedidos_dia:
-                        detalles = supabase.table("detalle_pedido").select("id_producto, cantidad")\
-                            .eq("id_pedido", pedido["id_pedido"]).execute().data or []
-                        
-                        inventario_result = supabase.table("inventario").select("id_local")\
-                            .eq("id_inventario", pedido["id_inventario"]).execute()
-                        
-                        local_nombre = "No especificado"
-                        if inventario_result.data:
-                            local_id = inventario_result.data[0].get("id_local")
-                            if local_id:
-                                local_result = supabase.table("locales").select("nombre")\
-                                    .eq("id_local", local_id).execute()
-                                if local_result.data:
-                                    local_nombre = local_result.data[0].get('nombre', 'No especificado')
-                                    locales_participantes.add(local_nombre)
-                        
-                        for detalle in detalles:
-                            if not isinstance(detalle, dict):
-                                continue
-                                
-                            cantidad_detalle = detalle.get('cantidad', 0)
-                            id_producto = detalle.get('id_producto')
-                            
-                            if not id_producto:
-                                continue
+                fecha_pedido_obj = datetime.fromisoformat(pedido.get("fecha_pedido", datetime.now().isoformat()))
+                fechas_pedidos.add(fecha_pedido_obj.date())
+                fecha_str = fecha_pedido_obj.strftime("%d/%m/%Y")
+                hora_str = fecha_pedido_obj.strftime("%H:%M")
+            except:
+                fecha_str = "N/A"
+                hora_str = "N/A"
 
-                            total_productos += int(cantidad_detalle)
-                            
-                            producto_result = supabase.table("productos").select("nombre, categoria, unidad")\
-                                .eq("id_producto", id_producto).execute()
-                            
-                            if producto_result.data:
-                                producto = producto_result.data[0]
-                                cat = producto.get('categoria', 'Sin categoria')
-                                categorias_totales[cat] = categorias_totales.get(cat, 0) + cantidad_detalle
-                                
-                                todos_productos_detallados.append({
-                                    'fecha': fecha_inf.strftime("%d/%m/%Y"),
-                                    'informe_id': inf['id_informe'],
-                                    'pedido_id': pedido['id_pedido'],
-                                    'local': local_nombre,
-                                    'producto': producto.get('nombre', 'Desconocido'),
-                                    'categoria': cat,
-                                    'cantidad': cantidad_detalle,
-                                    'unidad': producto.get('unidad', 'und'),
-                                    'hora': datetime.fromisoformat(pedido["fecha_pedido"]).strftime("%H:%M")
-                                })
+            detalles = supabase.table("detalle_pedido").select("id_producto, cantidad") \
+                .eq("id_pedido", pedido_id).execute().data or []
+
+            local_nombre = "No especificado"
+            inventario_id = pedido.get("id_inventario")
+            if inventario_id:
+                try:
+                    inventario_result = supabase.table("inventario").select("id_local").eq("id_inventario", inventario_id).execute()
+                    if inventario_result.data:
+                        local_id = inventario_result.data[0].get("id_local")
+                        if local_id:
+                            local_result = supabase.table("locales").select("nombre").eq("id_local", local_id).execute()
+                            if local_result.data:
+                                local_nombre = local_result.data[0].get('nombre', 'No especificado')
+                                locales_participantes.add(local_nombre)
+                except:
+                    pass
+
+            for detalle in detalles:
+                if not isinstance(detalle, dict): continue
+                cantidad_detalle = detalle.get('cantidad', 0)
+                id_producto = detalle.get('id_producto')
+                if not id_producto: continue
+
+                total_productos += int(cantidad_detalle)
                 
-                elif inf.get("id_inf_pedido"):
-                    total_pedidos += 1
-                    fecha_inf = datetime.fromisoformat(inf["fecha_creacion"]).date()
-                    fechas_pedidos.add(fecha_inf)
+                try:
+                    producto_result = supabase.table("productos").select("nombre, categoria, unidad") \
+                        .eq("id_producto", id_producto).execute()
                     
-                    pedido_result = supabase.table("pedido").select("*").eq("id_pedido", inf["id_inf_pedido"]).execute()
-                    if pedido_result.data:
-                        pedido = pedido_result.data[0]
+                    if producto_result.data:
+                        producto_info = producto_result.data[0]
+                        cat = producto_info.get('categoria', 'Sin categoria')
+                        categorias_totales[cat] = categorias_totales.get(cat, 0) + cantidad_detalle
                         
-                        detalles = supabase.table("detalle_pedido").select("id_producto, cantidad")\
-                            .eq("id_pedido", pedido["id_pedido"]).execute().data or []
-                        
-                        inventario_result = supabase.table("inventario").select("id_local")\
-                            .eq("id_inventario", pedido["id_inventario"]).execute()
-                        
-                        local_nombre = "No especificado"
-                        if inventario_result.data:
-                            local_id = inventario_result.data[0].get("id_local")
-                            if local_id:
-                                local_result = supabase.table("locales").select("nombre")\
-                                    .eq("id_local", local_id).execute()
-                                if local_result.data:
-                                    local_nombre = local_result.data[0].get('nombre', 'No especificado')
-                                    locales_participantes.add(local_nombre)
-                        
-                        for detalle in detalles:
-                            if not isinstance(detalle, dict):
-                                continue
-                                
-                            cantidad_detalle = detalle.get('cantidad', 0)
-                            id_producto = detalle.get('id_producto')
-                            
-                            if not id_producto:
-                                continue
+                        productos_detallados.append({
+                            'pedido_id': int(pedido_id),
+                            'local': str(local_nombre),
+                            'producto': str(producto_info.get('nombre', 'Desconocido')),
+                            'categoria': str(cat),
+                            'cantidad': int(cantidad_detalle),
+                            'unidad': str(producto_info.get('unidad', 'und')),
+                            'fecha': fecha_str,
+                            'hora': hora_str
+                        })
+                except:
+                    continue
 
-                            total_productos += cantidad_detalle
-                            
-                            producto_result = supabase.table("productos").select("nombre, categoria, unidad")\
-                                .eq("id_producto", id_producto).execute()
-                            
-                            if producto_result.data:
-                                producto = producto_result.data[0]
-                                cat = producto.get('categoria', 'Sin categoria')
-                                categorias_totales[cat] = categorias_totales.get(cat, 0) + cantidad_detalle
-                                
-                                todos_productos_detallados.append({
-                                    'fecha': fecha_inf.strftime("%d/%m/%Y"),
-                                    'informe_id': inf['id_informe'],
-                                    'pedido_id': pedido['id_pedido'],
-                                    'local': local_nombre,
-                                    'producto': producto.get('nombre', 'Desconocido'),
-                                    'categoria': cat,
-                                    'cantidad': cantidad_detalle,
-                                    'unidad': producto.get('unidad', 'und'),
-                                    'hora': datetime.fromisoformat(pedido["fecha_pedido"]).strftime("%H:%M")
-                                })
-                                
-            except Exception as e:
-                print(f"Error procesando informe {inf.get('id_informe')}: {e}")
-                continue
-
-        # ========================
-        # RESUMEN EJECUTIVO
-        # ========================
-        elements.append(Paragraph(
-            "<font size=14 color='#000000'><b>RESUMEN EJECUTIVO</b></font>", 
-            styles['Heading2']
-        ))
-        elements.append(Spacer(1, 15))
-
-        resumen_data = [
-            ["PERIODO ANALIZADO", f"{fecha_inicio_obj.strftime('%d/%m/%Y')} - {fecha_fin_obj.strftime('%d/%m/%Y')}"],
-            ["TOTAL DE PEDIDOS", f"{total_pedidos}"],
-            ["TOTAL DE PRODUCTOS", f"{total_productos}"],
-            ["TOTAL DE INFORMES", f"{len(informes.data)}"],
-            ["DIAS CON ACTIVIDAD", f"{len(fechas_pedidos)}"],
-            ["LOCALES ACTIVOS", f"{len(locales_participantes)}"],
+        elements.append(Paragraph("1. Resumen Ejecutivo de Operacion", style_h2))
+        elements.append(Spacer(1, 12))
+        
+        res_data = [
+            ["TOTAL PEDIDOS", "PRODUCTOS", "DIAS ACTIVOS", "LOCALES"],
+            [f"{total_pedidos}", f"{total_productos}", f"{len(fechas_pedidos)}", f"{len(locales_participantes)}"]
         ]
-        
-        resumen_table = Table(resumen_data, colWidths=[300, 200])
-        resumen_table.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#f8f8f8")),
-            ("BACKGROUND", (1, 0), (1, -1), colors.white),
-            ("TEXTCOLOR", (0, 0), (-1, -1), colors.black),
-            ("FONTNAME", (0, 0), (-1, -1), "Helvetica-Bold"),
-            ("FONTSIZE", (0, 0), (-1, -1), 11),
-            ("ALIGN", (0, 0), (0, -1), "LEFT"),
-            ("ALIGN", (1, 0), (1, -1), "CENTER"),
-            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            ("GRID", (0, 0), (-1, -1), 1, colors.black),
-            ("LEFTPADDING", (0, 0), (-1, -1), 12),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 12),
-            ("TOPPADDING", (0, 0), (-1, -1), 10),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+        t_res = Table(res_data, colWidths=[120, 120, 120, 120])
+        t_res.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 9),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.grey),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 1), (-1, 1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 1), (-1, 1), 14),
+            ('TEXTCOLOR', (0, 1), (-1, 1), colors.black),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 5),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ]))
-        elements.append(resumen_table)
+        elements.append(t_res)
+        elements.append(Spacer(1, 25))
         
-        # Locales participantes
         if locales_participantes:
-            elements.append(Spacer(1, 10))
-            locales_text = ", ".join(sorted(locales_participantes))
-            elements.append(Paragraph(
-                f"<font size=10 color='#000000'><b>Locales participantes:</b> {locales_text}</font>",
-                styles['Normal']
-            ))
+            locs = ", ".join(sorted(locales_participantes))
+            elements.append(Paragraph(f"<b>Locales impactados:</b> {locs}", styles['Normal']))
+            elements.append(Spacer(1, 20))
 
         elements.append(Spacer(1, 30))
 
-        # ========================
-        # DISTRIBUCION POR CATEGORIAS
-        # ========================
         if categorias_totales:
-            elements.append(Paragraph(
-                "<font size=14 color='#000000'><b>DISTRIBUCION POR CATEGORIAS</b></font>", 
-                styles['Heading2']
-            ))
+            elements.append(Paragraph("2. Distribucion General por Categorias", style_h2))
             elements.append(Spacer(1, 12))
             
             categorias_data = [["CATEGORIA", "CANTIDAD", "PORCENTAJE"]]
             total_categorias = sum(categorias_totales.values())
             
-            for categoria, cantidad in sorted(categorias_totales.items(), key=lambda x: x[1], reverse=True):
-                porcentaje = (cantidad / total_categorias) * 100 if total_categorias > 0 else 0
-                categorias_data.append([
-                    categoria,
-                    f"{cantidad} unid",
-                    f"{porcentaje:.1f}%"
-                ])
+            for cat, cant in sorted(categorias_totales.items(), key=lambda x: x[1], reverse=True):
+                porc = (cant / total_categorias) * 100 if total_categorias > 0 else 0
+                categorias_data.append([cat.upper(), f"{cant} und", f"{porc:.1f}%"])
             
-            categorias_table = Table(categorias_data, colWidths=[300, 100, 100])
-            categorias_table.setStyle(TableStyle([
-                ("BACKGROUND", (0, 0), (-1, 0), colors.black),
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                ("FONTSIZE", (0, 0), (-1, 0), 10),
-                ("ALIGN", (0, 0), (-1, 0), "CENTER"),
-                
-                ("BACKGROUND", (0, 1), (-1, -1), colors.white),
-                ("TEXTCOLOR", (0, 1), (-1, -1), colors.black),
-                ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
-                ("FONTSIZE", (0, 1), (-1, -1), 9),
-                ("ALIGN", (0, 1), (0, -1), "LEFT"),
-                ("ALIGN", (1, 1), (-1, -1), "CENTER"),
-                ("GRID", (0, 0), (-1, -1), 1, colors.black),
-                ("LEFTPADDING", (0, 0), (-1, -1), 8),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 8),
-                ("TOPPADDING", (0, 0), (-1, -1), 6),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+            t_cat = Table(categorias_data, colWidths=[200, 140, 140])
+            t_cat.setStyle(TableStyle([
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 9),
+                ('LINEBELOW', (0, 0), (-1, 0), 1.5, colors.HexColor("#E63900")),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                ('FONTSIZE', (0, 1), (-1, -1), 9),
+                ('ALIGN', (1, 0), (-1, -1), 'CENTER'),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor("#F9F9F9")]),
+                ('TOPPADDING', (0, 1), (-1, -1), 4),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
             ]))
-            elements.append(categorias_table)
+            elements.append(t_cat)
             elements.append(Spacer(1, 30))
 
-        # ========================
-        # DETALLE POR DIA
-        # ========================
-        if todos_productos_detallados:
+        if productos_detallados:
             elements.append(Paragraph(
-                "<font size=14 color='#000000'><b>DETALLE POR DIA</b></font>", 
+                "<font size=14 color='#000000'><b>DETALLE DE PEDIDOS</b></font>", 
                 styles['Heading2']
             ))
             elements.append(Spacer(1, 15))
 
-            # Agrupar por fecha
-            productos_por_fecha = {}
-            for prod in todos_productos_detallados:
-                fecha = prod['fecha']
-                if fecha not in productos_por_fecha:
-                    productos_por_fecha[fecha] = []
-                productos_por_fecha[fecha].append(prod)
-            
-            # Procesar cada fecha
-            for fecha in sorted(productos_por_fecha.keys(), reverse=True):
-                # Header de fecha
-                elements.append(Paragraph(
-                    f"<font size=11 color='#FF0000'><b>{fecha}</b></font>",
-                    styles['Normal']
-                ))
+            pedidos_agrupados = {}
+            for producto in productos_detallados:
+                pedido_id = producto.get('pedido_id')
+                if pedido_id not in pedidos_agrupados:
+                    pedidos_agrupados[pedido_id] = {
+                        'local': producto.get('local', 'No especificado'),
+                        'hora': producto.get('hora', 'N/A'),
+                        'fecha': producto.get('fecha', ''),
+                        'productos': [],
+                        'total_cantidad': 0
+                    }
+                pedidos_agrupados[pedido_id]['productos'].append(producto)
+                pedidos_agrupados[pedido_id]['total_cantidad'] += producto.get('cantidad', 0)
+
+            locales_agrupados = {}
+            for pedido_id, info in sorted(pedidos_agrupados.items()):
+                local = info['local']
+                if local not in locales_agrupados:
+                    locales_agrupados[local] = []
+                locales_agrupados[local].append((pedido_id, info))
+
+            for local_nombre, pedidos_local in sorted(locales_agrupados.items()):
+                num_pedidos = len(pedidos_local)
+
+                local_header_data = [[
+                    Paragraph(
+                        f"<font color='white'><b>LOCAL: {local_nombre.upper()}</b>  —  {num_pedidos} pedido{'s' if num_pedidos != 1 else ''}</font>",
+                        styles['Normal']
+                    )
+                ]]
+                local_header_table = Table(local_header_data, colWidths=[480])
+                local_header_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#E63900")),
+                    ('LEFTPADDING', (0, 0), (-1, -1), 10),
+                    ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+                    ('TOPPADDING', (0, 0), (-1, -1), 7),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 7),
+                ]))
+                elements.append(local_header_table)
                 elements.append(Spacer(1, 8))
-                
-                # Agrupar por pedido en esta fecha
-                pedidos_fecha = {}
-                for prod in productos_por_fecha[fecha]:
-                    pedido_id = prod['pedido_id']
-                    if pedido_id not in pedidos_fecha:
-                        pedidos_fecha[pedido_id] = {
-                            'local': prod['local'],
-                            'hora': prod['hora'],
-                            'productos': [],
-                            'total_unidades': 0
-                        }
-                    pedidos_fecha[pedido_id]['productos'].append(prod)
-                    pedidos_fecha[pedido_id]['total_unidades'] += prod['cantidad']
-                
-                # Procesar cada pedido de esta fecha
-                for pedido_id, info in pedidos_fecha.items():
-                    # Header del pedido
-                    header_text = f"PEDIDO #{pedido_id} | {info['local']} | {info['hora']} | {info['total_unidades']} UNIDADES"
+
+                for pedido_id, info in pedidos_local:
+                    if not info.get('productos'):
+                        continue
+
+                    fecha_hora = f"{info.get('fecha', '')} {info['hora']}".strip()
                     elements.append(Paragraph(
-                        f"<font size=10 color='#000000'><b>{header_text}</b></font>",
+                        f"<b>PEDIDO #{pedido_id}</b>  |  Fecha: {fecha_hora}",
                         styles['Normal']
                     ))
-                    elements.append(Spacer(1, 5))
-                    
-                    # Tabla de productos del pedido
-                    table_data = [["PRODUCTO", "CATEGORIA", "CANTIDAD"]]
-                    for prod in info['productos']:
-                        table_data.append([
-                            prod['producto'],
-                            prod['categoria'],
-                            f"{prod['cantidad']} {prod['unidad']}"
-                        ])
-                    
-                    if len(table_data) > 1:
-                        pedido_table = Table(table_data, colWidths=[250, 140, 110])
-                        pedido_table.setStyle(TableStyle([
-                            ("BACKGROUND", (0, 0), (-1, 0), colors.black),
-                            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                            ("FONTSIZE", (0, 0), (-1, 0), 9),
-                            ("ALIGN", (0, 0), (-1, 0), "LEFT"),
-                            
-                            ("BACKGROUND", (0, 1), (-1, -1), colors.white),
-                            ("TEXTCOLOR", (0, 1), (-1, -1), colors.black),
-                            ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
-                            ("FONTSIZE", (0, 1), (-1, -1), 8),
-                            ("ALIGN", (0, 1), (1, -1), "LEFT"),
-                            ("ALIGN", (2, 1), (2, -1), "CENTER"),
-                            ("GRID", (0, 0), (-1, -1), 1, colors.black),
-                            ("LEFTPADDING", (0, 0), (-1, -1), 6),
-                            ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-                            ("TOPPADDING", (0, 0), (-1, -1), 4),
-                            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-                        ]))
-                        elements.append(pedido_table)
-                        elements.append(Spacer(1, 15))
-                
-                elements.append(Spacer(1, 20))
+                    elements.append(Spacer(1, 4))
 
-        # ========================
-        # PIE DE PAGINA
-        # ========================
+                    table_data = [["PRODUCTO", "CANTIDAD"]]
+                    for p in info['productos']:
+                        table_data.append([p['producto'].upper(), f"{p['cantidad']} {p['unidad']}"])
+
+                    pedido_table = Table(table_data, colWidths=[340, 140])
+                    pedido_table.setStyle(TableStyle([
+                        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                        ('FONTSIZE', (0, 0), (-1, 0), 8),
+                        ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor("#666666")),
+                        ('LINEBELOW', (0, 0), (-1, 0), 1, colors.lightgrey),
+                        ('FONTSIZE', (0, 1), (-1, -1), 8),
+                        ('GRID', (0, 1), (-1, -1), 0.1, colors.lightgrey),
+                        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor("#FDFDFD")]),
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                        ('TOPPADDING', (0, 0), (-1, -1), 4),
+                    ]))
+                    elements.append(pedido_table)
+                    elements.append(Spacer(1, 12))
+
+                elements.append(Spacer(1, 10))
+
         elements.append(Spacer(1, 30))
-        
-        # Linea divisoria roja
-        footer_line = Table([[""]], colWidths=[500])
-        footer_line.setStyle(TableStyle([
-            ('LINEABOVE', (0, 0), (-1, 0), 2, colors.HexColor("#FF0000")),
-        ]))
-        elements.append(footer_line)
-        elements.append(Spacer(1, 15))
-        
-        # Informacion del pie de pagina
-        footer_text = f"""
-        <para alignment='center'>
-        <font size=9 color='#000000'>
-        <b>ICHIRAKU RAMEN - SISTEMA DE GESTION</b><br/>
-        {titulo} generado automaticamente el {datetime.now().strftime('%d/%m/%Y a las %H:%M')}<br/>
-        Periodo: {fecha_inicio_obj.strftime('%d/%m/%Y')} - {fecha_fin_obj.strftime('%d/%m/%Y')}<br/>
-        <i>Documento confidencial - Uso interno exclusivo</i>
-        </font>
-        </para>
-        """
-        elements.append(Paragraph(footer_text, styles['Normal']))
+        elements.append(Paragraph(f"<i>Informe Consolidado Ichiraku Ramen - Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}</i>", styles['Italic']))
 
-        # Construir PDF
-        doc.build(elements)
+        doc.build(elements, onFirstPage=dibujar_sidebar_premium, onLaterPages=dibujar_sidebar_premium)
         buffer.seek(0)
 
         response = make_response(buffer.read())

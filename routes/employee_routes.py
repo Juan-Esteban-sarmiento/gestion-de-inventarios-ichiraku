@@ -83,7 +83,8 @@ def registrar_consumo():
             cons_res = supabase.table("consumo").insert({
                 "fecha": datetime.now().isoformat(),
                 "cantidad_platos": 1,
-                "observacion": f"Consumo manual: {nombre_producto} (Cant: {cantidad_val})"
+                "id_local": id_sucursal,
+                "observacion": f"Consumo manual: {nombre_producto} (Cant: {cantidad_val}) [Emp: {session.get('nombre', 'Desconocido')}]"
             }).execute()
             
             if cons_res.data:
